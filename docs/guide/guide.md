@@ -1,5 +1,6 @@
-
-The User Guide provides some end-user information on how to use Scotty3D.
+layout: page
+title: "User Guide"
+permalink: /guide
 
 ## Modes and Actions
 
@@ -34,7 +35,7 @@ You can open the preferences window from the edit option in the menu bar.
 
 As is typical, all operations on scene objects, meshes, etc. are un and re-doable using Control/Command-Z to undo and Control/Command-Y to redo. These actions are also available from the `Edit` option in the menu bar.
 
-## Mode Guides
+## Specific Modes
 
 - [Layout](layout.md)
 - [Model](model.md)
