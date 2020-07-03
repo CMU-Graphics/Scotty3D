@@ -1,8 +1,9 @@
 ---
-layout: page
 title: "Building Scotty3D"
 permalink: /build/
 ---
+
+# Building Scotty3D
 
 ![Ubuntu Build Status](https://github.com/CMU-Graphics/Scotty3D-dev/workflows/Ubuntu/badge.svg) ![MacOS Build Status](https://github.com/CMU-Graphics/Scotty3D-dev/workflows/MacOS/badge.svg) ![Windows Build Status](https://github.com/CMU-Graphics/Scotty3D-dev/workflows/Windows/badge.svg)
 

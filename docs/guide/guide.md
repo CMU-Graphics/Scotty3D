@@ -1,8 +1,9 @@
 ---
-layout: page
 title: "User Guide"
 permalink: /guide/
 ---
+
+# User Guide
 
 ## Modes and Actions
 
@@ -39,11 +40,11 @@ As is typical, all operations on scene objects, meshes, etc. are un and re-doabl
 
 ## Specific Modes
 
-- [Layout](layout.md)
-- [Model](model.md)
-- [Render](render.md)
-- [Rig](rig.md)
-- [Animate](animate.md)
-- [Simulate](simulate.md)
+- [Layout](guide/layout)
+- [Model](guide/model)
+- [Render](guide/render)
+- [Rig](guide/rig)
+- [Animate](guide/animate)
+- [Simulate](guide/simulate)
 
 

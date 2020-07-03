@@ -1,3 +1,7 @@
+---
+title: "Project Philosophy"
+permalink: /philosophy/
+---
 
 # Project Philosophy
 
