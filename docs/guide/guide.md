@@ -41,11 +41,11 @@ As is typical, all operations on scene objects, meshes, etc. are un and re-doabl
 
 ## Specific Modes
 
-- [Layout](guide/layout)
-- [Model](guide/model)
-- [Render](guide/render)
-- [Rig](guide/rig)
-- [Animate](guide/animate)
-- [Simulate](guide/simulate)
+- [Layout](layout)
+- [Model](model)
+- [Render](render)
+- [Rig](rig)
+- [Animate](animate)
+- [Simulate](simulate)
 
 
