@@ -1,6 +1,8 @@
+---
 layout: page
 title: "User Guide"
-permalink: /guide
+permalink: /guide/
+---
 
 ## Modes and Actions
 

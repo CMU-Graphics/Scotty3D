@@ -1,6 +1,8 @@
+---
 layout: page
 title: Scotty3D
 permalink: /
+---
 
 Welcome to Scotty3D! This 3D graphics software implements interactive mesh
 editing, realistic path tracing, and dynamic animation. Implementing the
