@@ -4,6 +4,8 @@ title: "Layout"
 permalink: /guide/layout/
 ---
 
+# Layout
+
 This is the main scene editing mode in Scotty3D, and does not contain tasks for the student to implement. 
 This mode allows you to load full scenes from disk, create or load new objects, export your scene (COLLADA format), and edit transformations that place each object into your scene.
 
@@ -49,4 +51,4 @@ Finally, you may remove the object from the scene by pressing `Delete` or hittin
 
 ## Demo
 
-<video src="/guide/layout.mp4" preload autoplay muted loop style="max-width: 100%; margin: 0 auto;"></video>
+<video src="{{ site.baseurl }}/guide/layout.mp4" preload autoplay muted loop style="max-width: 100%; margin: 0 auto;"></video>
