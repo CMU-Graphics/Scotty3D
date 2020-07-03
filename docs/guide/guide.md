@@ -1,4 +1,5 @@
 ---
+layout: default
 title: "User Guide"
 permalink: /guide/
 ---

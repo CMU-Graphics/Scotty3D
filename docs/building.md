@@ -1,4 +1,5 @@
 ---
+layout: default
 title: "Building Scotty3D"
 permalink: /build/
 ---
