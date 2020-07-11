@@ -26,6 +26,7 @@ Scotty3D supports loading objects from the following file formats:
 - 3ds
 - stl
 - blend
+- ply
 
 Scotty3D only supports exporting scenes to COLLADA.
 
@@ -51,4 +52,4 @@ Finally, you may remove the object from the scene by pressing `Delete` or hittin
 
 ## Demo
 
-<video src="{{ site.baseurl }}/guide/layout.mp4" preload autoplay muted loop style="max-width: 100%; margin: 0 auto;"></video>
+<video src="{{ site.baseurl }}/guide/layout.mp4" preload muted loop style="max-width: 100%; margin: 0 auto;"></video>

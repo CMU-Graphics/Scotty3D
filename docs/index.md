@@ -10,11 +10,9 @@ The [building Scotty3D](build) page describes how to build and run `Scotty3D` on
 
 The [User Guide](guide) describes the intended functionality of the software to an end user.
 
-The components of the Developer Manual are exhaustively listed on the sidebar to the right, and are organized under the three main components of the software:
-
+The components of the Developer Manual (your assignments) are organized under the three main components of the software:
 - [MeshEdit](meshedit)
 - [PathTracer](pathtracer)
 - [Animation](animation)
 
-See the sidebar on the right for access to all material in this wiki. In particular,
-please read through the [Project Philosophy](philosophy) before you begin work.
+Finally, please read through the [Project Philosophy](philosophy) before you begin work.
