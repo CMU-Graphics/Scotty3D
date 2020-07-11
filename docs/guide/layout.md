@@ -52,4 +52,4 @@ Finally, you may remove the object from the scene by pressing `Delete` or hittin
 
 ## Demo
 
-<video src="{{ site.baseurl }}/guide/layout.mp4" preload muted loop style="max-width: 100%; margin: 0 auto;"></video>
+<video src="{{ site.baseurl }}/guide/layout.mp4" controls preload muted loop style="max-width: 100%; margin: 0 auto;"></video>
