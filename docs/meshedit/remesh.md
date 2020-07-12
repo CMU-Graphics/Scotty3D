@@ -23,7 +23,7 @@ Ultimately we want all of our triangles to be about the same size, which means w
 
 #### Edge Flipping
 
-We want to flip an edge any time it reduces the total deviation from regular degree (degree 6). In particular, let _a1_, _a2_ be the degrees of an edge that we're thinking about flipping, and let _b1_, _b2_ be the degrees of the two vertices across from this edge. The total deviation in the initial configuration is `|_a1_-6| + |_a2_-6| + |_b1_-6| + |_b2_-6|`. You should be able to _easily_ compute the deviation after the edge flip **without actually performing the edge flip**; if this number decreases, then the edge flip should be performed. We recommend flipping all edges in a single pass, after the edge collapse step.
+We want to flip an edge any time it reduces the total deviation from regular degree (degree 6). In particular, let _a1_, _a2_ be the degrees of an edge that we're thinking about flipping, and let _b1_, _b2_ be the degrees of the two vertices across from this edge. The total deviation in the initial configuration is `|a1-6| + |a2-6| + |b1-6| + |b2-6|`. You should be able to easily compute the deviation after the edge flip **without actually performing the edge flip**; if this number decreases, then the edge flip should be performed. We recommend flipping all edges in a single pass, after the edge collapse step.
 
 #### Vertex Averaging
 

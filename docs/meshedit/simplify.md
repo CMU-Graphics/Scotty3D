@@ -113,11 +113,11 @@ The one final thing we want to think about is performance. At each iteration, we
                     // surface if this edge is collapsed
     };
 
-Within ` Halfedge_Mesh::simplify`, you will create a dictionary `vertex_quadrics` (a `std::unordered_map`) mapping vertices (`VertexRef`) to quadric error matrices (`Mat4`). This is a hash map, and its usage is detailed in the [C++ documentation](https://en.cppreference.com/w/cpp/container/unordered_map). To initialize the record for a given edge `e`, you can use this dictionary to write
+Within `Halfedge_Mesh::simplify`, you will create a dictionary `vertex_quadrics` mapping vertices to quadric error matrices. We will use a `std::unordered_map` for this purpose, which is the hash map provided by the STL. Its usage is detailed in the [C++ documentation](https://en.cppreference.com/w/cpp/container/unordered_map). To initialize the record for a given edge `e`, you can use this dictionary to write
 
     Edge_Record record(vertex_quadrics, e);
 
-Similarly to how we created a mapping from vertices to quadric matrices, we will also want to associate this record with its edge using the `edge_records` map:
+Similarly to how we created a dictionary mapping vertices to quadric matrices, we will also want to associate this record with its edge using the `edge_records` dictionary:
 
     edge_records[e] = record;
 
