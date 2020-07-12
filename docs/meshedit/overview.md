@@ -17,12 +17,11 @@ The following sections contain guidelines for implementing the functionality of 
   - [Tutorial: Edge Flip](edge_flip)
   - [Beveling](bevel)
 - [Global Mesh Operations](global)
-  - [Triangulation](triangulation)
-  - [Subdivision](subdivision)
-    - [Linear Subdivision](linear)
-    - [Catmull-Clark Subdivision](catmull)
-    - [Loop Subdivision](loop)
-  - [Simplification](simplify)
-  - [Isotropic Remeshing](remesh)
+  - [Triangulation](global/triangulate)
+  - [Linear Subdivision](global/linear)
+  - [Catmull-Clark Subdivision](global/catmull)
+  - [Loop Subdivision](global/loop)
+  - [Isotropic Remeshing](global/remesh)
+  - [Simplification](global/simplify)
 
 As always, be mindful of the [project philosophy](philosophy).

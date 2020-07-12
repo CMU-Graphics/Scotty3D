@@ -166,6 +166,8 @@ preserve the appearance of the original mesh as closely as possible.
 
 <video src="{{ site.baseurl }}/guide/simplify.mp4" controls preload muted loop style="max-width: 100%; margin: 0 auto;"></video>
 
+### Key Bindings
+
 | Key                   | Command                                            |
 | :-------------------: | :--------------------------------------------:     |
 | `r`               | Swap between `Move`, `Rotate`, `Scale`, and `Bevel`.   |

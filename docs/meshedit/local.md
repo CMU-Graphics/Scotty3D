@@ -1,7 +1,7 @@
 ---
 layout: default
 title: "Local Ops"
-permalink: /meshedit/local
+permalink: /meshedit/local/
 ---
 
 # Local Mesh Operations

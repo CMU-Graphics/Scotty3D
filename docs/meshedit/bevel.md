@@ -1,7 +1,7 @@
 ---
 layout: default
 title: "Local Ops: Beveling"
-permalink: /meshedit/bevel
+permalink: /meshedit/bevel/
 ---
 
 # Beveling 
