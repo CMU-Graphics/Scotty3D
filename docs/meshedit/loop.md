@@ -6,7 +6,7 @@ permalink: /meshedit/global/loop/
 
 # Loop Subdivision
 
-For an in-practice example, see the [User Guide](../../guide/model).
+For an in-practice example, see the [User Guide](/guide/model).
 
 Loop subdivision (named after [Charles Loop](http://charlesloop.com/)) is a standard approximating subdivision scheme for triangle meshes. At a high level, it consists of two basic steps:
 

@@ -6,7 +6,7 @@ permalink: /meshedit/global/triangulate/
 
 # Triangulation
 
-For an in-practice example, see the [User Guide](../../guide/model).
+For an in-practice example, see the [User Guide](/guide/model).
 
 A variety of geometry processing algorithms become easier to implement (or are only well defined) when the input consists purely of triangles. The method `Halfedge_Mesh::triangulate` converts any polygon mesh into a triangle mesh by splitting each polygon into triangles. 
 
