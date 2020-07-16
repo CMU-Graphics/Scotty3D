@@ -6,7 +6,7 @@ permalink: /meshedit/global/remesh/
 
 # Isotropic Remeshing
 
-For an in-practice example, see the [User Guide](/guide/model).
+For an in-practice example, see the [User Guide](/Scotty3D/guide/model).
 
 Scotty3D also supports remeshing, an operation that keeps the number of samples roughly the same while improving the shape of individual triangles. The isotropic remeshing algorithm tries to make the mesh as "uniform" as possible, i.e., triangles as close as possible to equilateral triangles of equal size, and vertex degrees as close as possible to 6 (note: this algorithm is for **triangle meshes only**). The algorithm to be implemented is based on the paper [Botsch and Kobbelt, "A Remeshing Approach to Multiresolution Modeling"](http://graphics.uni-bielefeld.de/publications/disclaimer.php?dlurl=sgp04.pdf) (Section 4), and can be summarized in just a few simple steps:
 

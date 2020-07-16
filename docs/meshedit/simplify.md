@@ -8,7 +8,7 @@ permalink: /meshedit/global/simplify/
 
 ![Surface simplification via quadric error metric](quad_simplify.png)
 
-For an in-practice example, see the [User Guide](/guide/model).
+For an in-practice example, see the [User Guide](/Scotty3D/guide/model).
 
 Just as with images, meshes often have far more samples than we really need. The simplification method in Scotty3D simplifies a given triangle mesh by applying _quadric error simplification_ (note that this method is for **triangle meshes only**!). This method was originally developed at CMU by Michael Garland and Paul Heckbert, in their paper [Surface Simplification Using Quadric Error Metrics](http://www.cs.cmu.edu/~./garland/quadrics/quadrics.html). (Looking at this paper -- or the many slides and presentations online that reference it -- may be very helpful in understanding and implementing this part of the assignment!)
 

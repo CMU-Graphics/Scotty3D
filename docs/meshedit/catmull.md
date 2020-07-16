@@ -6,7 +6,7 @@ permalink: /meshedit/global/catmull/
 
 # Catmull-Clark Subdivision
 
-For an in-practice example, see the [User Guide](/guide/model).
+For an in-practice example, see the [User Guide](/Scotty3D/guide/model).
 
 The only difference between Catmull-Clark and [linear](../linear) subdivision is the choice of positions for new vertices. Whereas linear subdivision simply takes a uniform average of the old vertex positions, Catmull-Clark uses a very carefully-designed _weighted_ average to ensure that the surface converges to a nice, round surface as the number of subdivision steps increases. The original scheme is described in the paper _"Recursively generated B-spline surfaces on arbitrary topological meshes"_ by (Pixar co-founder) Ed Catmull and James Clark. Since then, the scheme has been thoroughly discussed, extended, and analyzed; more modern descriptions of the algorithm may be easier to read, including those from the [Wikipedia](https://en.wikipedia.org/wiki/Catmull-Clark_subdivision_surface) and [this webpage](http://www.rorydriscoll.com/2008/08/01/catmull-clark-subdivision-the-basics/). In short, the new vertex positions can be calculated by:
 

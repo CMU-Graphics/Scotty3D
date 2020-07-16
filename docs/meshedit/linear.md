@@ -6,7 +6,7 @@ permalink: /meshedit/global/linear/
 
 # Linear Subdivision
 
-For an in-practice example, see the [User Guide](/guide/model).
+For an in-practice example, see the [User Guide](/Scotty3D/guide/model).
 
 Unlike most other global remeshing operations, linear (and Catmull-Clark) subdivision will proceed by completely replacing the original halfedge mesh with a new one. The high-level procedure is:
 
