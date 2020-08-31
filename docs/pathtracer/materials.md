@@ -11,7 +11,7 @@ Now that you have implemented the ability to sample more complex light paths, it
 To get started take a look at the BSDF interface in `rays/bsdf.h`. There are a number of key methods you should understand in `BSDF class`:
 
 * `Spectrum evaluate(Vec3 out_dir, Vec3 in_dir)`: evaluates the distribution function for a given pair of directions.
-* `BSDF_Sample sample(Vec3 out_dir)`: given the `out_dir`, generates a random sample of the in-direction (which may be a reflection direction or a refracted transmitted light direction). It returns a `BSDF_Sample`, which contains the in-direction(`direction`), its probability (`pdf`), as well as the `absorbtion` for this pair of directions. (You do not need to worry about the `emissive` for the materials that we are asking you to implement, since those materials do not emit light.)
+* `BSDF_Sample sample(Vec3 out_dir)`: given the `out_dir`, generates a random sample of the in-direction (which may be a reflection direction or a refracted transmitted light direction). It returns a `BSDF_Sample`, which contains the in-direction(`direction`), its probability (`pdf`), as well as the `attenuation` for this pair of directions. (You do not need to worry about the `emissive` for the materials that we are asking you to implement, since those materials do not emit light.)
 
 There are also two helper functions in the BSDF class in `student/bsdf.cpp` that you will need to implement:
 
