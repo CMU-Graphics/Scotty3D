@@ -40,5 +40,5 @@ The basic idea is that you will assign a probability to each pixel in the enviro
 * When computing areas corresponding to a pixel, use the value of theta at the pixel centers.
 * We recommend precomputing the joint distributions p(phi, theta) and marginal distributions p(theta) in the constructor of `Sampler::Sphere::Image` and storing the resulting values in fields `pdf`. See `rays/sampler.h`.
 * `Spectrum::luma()` returns the luminance (brightness) of a Spectrum. The probability of a pixel should be proportional to the product of its luminance and the solid angle it subtends.
-* `std::binary_search` is your friend. Documentation is [here](https://en.cppreference.com/w/cpp/algorithm/binary_search).
+* `std::lower_bound` is your friend. Documentation is [here](https://en.cppreference.com/w/cpp/algorithm/lower_bound).
 
