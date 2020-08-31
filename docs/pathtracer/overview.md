@@ -10,6 +10,16 @@ PathTrace is (as the name suggests) a simple path tracer that can render picture
 
 ![CBsphere](CBsphere.png)
 
+Implementing the functionality of PathTracer is split in to 7 tasks, and here are the instructions for each of them:
+- [(Task 1) Generating Camera Rays](camera_rays.md)
+- [(Task 2) Intersecting Objects](intersecting_objects.md)
+- [(Task 3) Bounding Volume Hierarchy](bounding_volume_hierarchy.md)
+- [(Task 4) Shadow Rays](shadow_rays.md)
+- [(Task 5) Path Tracing](path_tracing.md)
+- [(Task 6) Materials](materials.md)
+- [(Task 7) Environment Lighting](environment_lighting.md)
+
+
 The files that you will work with for PathTracer are all under `src/student` directory. Some of the particularly important ones are outlined below. Methods that we expect you to implement are marked with "TODO (PathTracer)", which you may search for.
 
 | File(s)  |      Purpose      |  Need to modify? |
@@ -23,5 +33,4 @@ The files that you will work with for PathTracer are all under `src/student` dir
 |`student/bsdf.cpp`|Contains implementations of several BSDFs (diffuse, mirror, glass). For each, you will define the distribution of the BSDF and write a method to sample from that distribution.|Yes|
 |`student/samplers.cpp`|When implementing raytracing and environment light, we often want to sample randomly from a hemisphere, uniform grid, or shphere. This file contains various functions that simulate such random sampling.|Yes|
 
-Implementing the functionality of PathTracer is split in to 7 tasks; the sidebar on the right contains links to a page for each.
 
