@@ -30,10 +30,6 @@ Note:
 
 After correctly implementing path tracing, your renderer should be able to make a beautifully lit picture of the Cornell Box with:
 
-```
-./scotty3d -s 1024 -m 4 -t 8 ../media/pathtracer/advanced/CBspheres_lambertian.dae
-```
-
 ![cornell_lambertian](cornell_lambertian.png)
 
 Note the time-quality tradeoff here. With these commandline arguments, your path tracer will be running with 8 worker threads at a sample rate of 1024 camera rays per pixel, with a max ray depth of 4. This will produce an image with relatively high quality but will take quite some time to render. Rendering a high quality image will take a very long time as indicated by the image sequence below, so start testing your path tracer early!
