@@ -27,8 +27,8 @@ Once you have implemented `Pathtracer::trace_pixel`, `Rect::Uniform::sample` and
 **Tips:**
 
 *   Since it'll be hard to know if you camera rays are correct until you implement primitive intersection, we recommend debugging your camera rays by checking what your implementation of `Camera::generate_ray` does with rays at the center of the screen (0.5, 0.5) and at the corners of the image.
-*   The code can log the results of raytracing for visualization and debugging. To do so, simply call function `Pathtracer::log_ray` in your `Pathtracer::trace_pixel`. Function `Pathtracer::log_ray` takes in 3 arguments: the ray thay you want to log, a float that specifies the time/distance to log that ray up to, as well as the color. You don't need to worry about the color as it is being set by default.
-After running the ray tracer, rays will be shown as lines in visualizer. Press v to switch to the visualizer, and use s to toggle showing rays. A yellow ray indicates that it intersected some primitive (which you will implement soon). Be sure to wait for rendering to complete so you see all rays while visualizing, a message is printed to standard output on completion. **Ray logging is NOT thread-safe, so only use with a single thread (the default -t 1 setting) and remember to disable it out when you render using multiple threads**.
+*   The code can log the results of raytracing for visualization and debugging. To do so, simply call function `Pathtracer::log_ray` in your `Pathtracer::trace_pixel`. Function `Pathtracer::log_ray` takes in 3 arguments: the ray thay you want to log, a float that specifies the time/distance to log that ray up to, as well as the color. You don't need to worry about the color as it is being set to white by default.
+After running the ray tracer, rays will be shown as lines in visualizer. Press v to switch to the visualizer, and use s to toggle showing rays. A yellow ray indicates that it intersected some primitive (which you will implement soon). Be sure to wait for rendering to complete so you see all rays while visualizing, a message is printed to standard output on completion. 
 
 **Extra credit ideas:**
 
