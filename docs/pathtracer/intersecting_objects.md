@@ -8,9 +8,9 @@ permalink: /pathtracer/intersecting_objects
 
 Now that your ray tracer generates camera rays, we need to be able to answer the core query in ray tracing: "does this ray hit this object?" Here, you will start by implementing ray-object intersection routines against the two types of objects in the starter code: triangles and spheres. Later, we will use a BVH to accelerate these queries, but for now we consider an intersection test against a single object.
 
-The `Object` interface is implemented by both the `Triangle` class and `Sphere` class. You can find the definition for `Object`, `Triangle` and `Sphere` in `rays/object.h`, `src/rays/shapes.h`, and `rays/tri_mesh.h`, respectively.
+First, take a look at the `rays/object.h` for the interface of `Object` class. An `Object` can be **either** a `Tri_Mesh`, a `Shape`, a BVH(which you will implement in Task 3), or a list of `Objects`. Right now, you will be dealing with `Tri_Mesh`'s case and `Shape`'s case, and you can find the definition for `Triangle` and `Sphere` in  `rays/shapes.h` and `rays/tri_mesh.h`, respectively.
 
-The `hit` routine that you need to implement (for both kinds of objects) takes in a ray, and returns a `Trace` structure, which contains information on whether the ray hits the object and if hits, the information describing the surface at the point of the hit. See `rays/trace.h` for the definition of `Trace`.
+The `hit` routine that you need to implement (for both `Tri_Mesh` and `Sphere `) takes in a ray, and returns a `Trace` structure, which contains information on whether the ray hits the object and if hits, the information describing the surface at the point of the hit. See `rays/trace.h` for the definition of `Trace`.
 
 In order to correctly implement `hit` you need to understand some of the fields in the Ray structure defined in `lib/ray.h`.
 
