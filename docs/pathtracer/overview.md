@@ -19,7 +19,6 @@ Implementing the functionality of PathTracer is split in to 7 tasks, and here ar
 - [(Task 6) Materials](materials.md)
 - [(Task 7) Environment Lighting](environment_lighting.md)
 
-
 The files that you will work with for PathTracer are all under `src/student` directory. Some of the particularly important ones are outlined below. Methods that we expect you to implement are marked with "TODO (PathTracer)", which you may search for.
 
 | File(s)  |      Purpose      |  Need to modify? |
