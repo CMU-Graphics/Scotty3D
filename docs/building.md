@@ -42,7 +42,7 @@ Notes:
 
 ### Windows
 
-The windows build only supports the Visual Studio compiler (for now). To get the compiler, download and install the Visual Studio 2019 Build Tools [here](https://visualstudio.microsoft.com/downloads/#build-tools-for-visual-studio-2019). If you want to instead use the full Visual Studio, you can download IDE Visual Studio Community 2019 [here](https://visualstudio.microsoft.com/downloads/). Be sure to install the "Desktop development with C++" component.
+The windows build is easiest to set up using the Visual Studio compiler (for now). To get the compiler, download and install the Visual Studio 2019 Build Tools [here](https://visualstudio.microsoft.com/downloads/#build-tools-for-visual-studio-2019). If you want to instead use the full Visual Studio IDE, you can download Visual Studio Community 2019 [here](https://visualstudio.microsoft.com/downloads/). Be sure to install the "Desktop development with C++" component.
 
 You can download CMake for windows [here](https://cmake.org/download/).
 
