@@ -1,0 +1,15 @@
+name: Ubuntu
+on: [push]
+jobs:
+  build-ubuntu:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v1
+    - name: update
+      run: sudo apt update
+    - name: deps
+      run: sudo apt install pkg-config libgtk-3-dev libsdl2-dev
+    - name: configure
+      run: mkdir build && cd build && cmake ..
+    - name: build
+      run: cmake --build build 

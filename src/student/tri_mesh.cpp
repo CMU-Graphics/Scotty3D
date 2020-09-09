@@ -1,0 +1,74 @@
+
+#include "debug.h"
+#include "../rays/tri_mesh.h"
+
+namespace PT {
+
+BBox Triangle::bbox() const {
+
+    // TODO (PathTracer): Task 2
+    // compute the bounding box of the triangle
+    
+    BBox box;
+    return box;
+}
+
+Trace Triangle::hit(const Ray& ray) const {
+
+    // Vertices of triangle - has postion and surface normal
+    Tri_Mesh_Vert v_0 = vertex_list[v0];
+    Tri_Mesh_Vert v_1 = vertex_list[v1];
+    Tri_Mesh_Vert v_2 = vertex_list[v2];
+    (void)v_0; (void)v_1; (void)v_2; 
+
+	// TODO (PathTracer): Task 2
+    // Intersect this ray with a triangle defined by the three above points.
+	
+	Trace ret;
+	ret.hit = false; // was there an intersection?
+	ret.time = 0.0f; // at what time did the intersection occur?
+	ret.position = Vec3{}; // where was the intersection?
+	ret.normal = Vec3{}; // what was the surface normal at the intersection?
+                         // (this should be interpolated between the three vertex normals)
+	return ret;
+}
+
+Triangle::Triangle(Tri_Mesh_Vert* verts, unsigned int v0, unsigned int v1, unsigned int v2) 
+    : vertex_list(verts), v0(v0), v1(v1), v2(v2) {}
+
+void Tri_Mesh::build(const GL::Mesh& mesh) {
+
+    verts.clear();
+    triangles.clear();
+    
+    for(const auto& v : mesh.verts()) {
+        verts.push_back({v.pos, v.norm});
+    }
+    
+    const auto& idxs = mesh.indices();
+
+    std::vector<Triangle> tris;
+    for(size_t i = 0; i < idxs.size(); i += 3) {
+        tris.push_back(Triangle(verts.data(), idxs[i], idxs[i+1], idxs[i+2]));
+    }
+
+    triangles.build(std::move(tris), 4);
+}
+
+Tri_Mesh::Tri_Mesh(const GL::Mesh& mesh) {
+    build(mesh);
+}
+
+BBox Tri_Mesh::bbox() const {
+    return triangles.bbox();
+}
+
+Trace Tri_Mesh::hit(const Ray& ray) const {
+    return triangles.hit(ray);
+}
+
+size_t Tri_Mesh::visualize(GL::Lines& lines, GL::Lines& active, size_t level, const Mat4& trans) const {
+    return triangles.visualize(lines, active, level, trans);
+}
+
+}

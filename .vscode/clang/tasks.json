@@ -1,0 +1,23 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Build Release",
+            "type": "shell",
+            "command": "mkdir build_rel ; pushd build_rel ; CC=clang CXX=clang++ cmake -DCMAKE_BUILD_TYPE=Release .. ; make -j7 ; popd",
+            "args": [],
+            "group": "build",
+            "problemMatcher": "$gcc"
+        },
+        {
+            "label": "Build Debug",
+            "type": "shell",
+            "command": "mkdir build_dbg ; pushd build_dbg ; CC=clang CXX=clang++ cmake -DCMAKE_BUILD_TYPE=Debug .. ; make -j7 ; popd",
+            "args": [],
+            "group": "build",
+            "problemMatcher": "$gcc"
+        }
+    ]
+}

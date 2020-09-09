@@ -1,0 +1,13 @@
+name: MacOS
+on: [push]
+jobs:
+  build-osx:
+    runs-on: macos-latest
+    steps:
+    - uses: actions/checkout@v1
+    - name: deps
+      run: brew install sdl2 pkg-config
+    - name: configure
+      run: mkdir build && cd build && cmake ..
+    - name: build
+      run: cmake --build build
