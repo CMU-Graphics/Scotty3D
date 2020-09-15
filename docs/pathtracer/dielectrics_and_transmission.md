@@ -10,7 +10,7 @@ permalink: /pathtracer/dielectrics_and_transmission
 
 The [Fresnel Equations](https://en.wikipedia.org/wiki/Fresnel_equations) (another [link](http://hyperphysics.phy-astr.gsu.edu/hbase/phyopt/freseq.html) here) describe the amount of reflection from a surface. The description below is an approximation for dielectric materials (materials that don't conduct electricity). In this assignment you're asked to implement a glass material, which is a dielectric.
 
-In the description below, <img src="dielectric_eq1.png" width="20"> and ![dielectric_eq2](dielectric_eq2.png) refer to the index of refraction of the medium containing an incoming ray, and the zenith angle of the ray to the surface of a new medium. ![dielectric_eq3](dielectric_eq3.png) and ![dielectric_eq4](dielectric_eq4.png) refer to the index of refraction of the new medium and the angle to the surface normal of a transmitted ray.
+In the description below, <img src="dielectric_eq1.png" width="15"> and ![dielectric_eq2](dielectric_eq2.png) refer to the index of refraction of the medium containing an incoming ray, and the zenith angle of the ray to the surface of a new medium. ![dielectric_eq3](dielectric_eq3.png) and ![dielectric_eq4](dielectric_eq4.png) refer to the index of refraction of the new medium and the angle to the surface normal of a transmitted ray.
 
 The Fresnel equations state that reflection from a surface is a function of the surface's index of refraction, as well as the polarity of the incoming light. Since our renderer doesn't account for polarity, we'll apply a common approximation of averaging the reflectance of polarizes light in perpendicular and parallel polarized light:
 
