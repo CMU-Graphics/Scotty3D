@@ -7,10 +7,10 @@
 #include <optional>
 #include <unordered_map>
 
-#include "../util/camera.h"
 #include "../geometry/halfedge.h"
 #include "../platform/gl.h"
 #include "../scene/scene.h"
+#include "../util/camera.h"
 
 namespace Gui {
 
@@ -19,54 +19,51 @@ public:
     Model();
 
     // Gui view API
-    bool keydown(Widgets& widgets, SDL_Keysym key, Camera& cam);
+    bool keydown(Widgets &widgets, SDL_Keysym key, Camera &cam);
     void unset_mesh();
-    
-    std::string UIsidebar(Undo& undo, Widgets& widgets, Scene_Maybe obj, Camera& cam);
-    void render(Scene_Maybe obj_opt, Widgets& widgets, Camera& cam);
-    
+
+    std::string UIsidebar(Undo &undo, Widgets &widgets, Scene_Maybe obj, Camera &cam);
+    void render(Scene_Maybe obj_opt, Widgets &widgets, Camera &cam);
+
     Vec3 selected_pos();
     void clear_select();
-    std::string end_transform(Widgets& widgets, Undo& undo, Scene_Object& obj);
-    void apply_transform(Widgets& widgets);
-    std::string select(Widgets& widgets, Scene_ID click, Vec3 cam, Vec2 spos, Vec3 dir);
+    std::string end_transform(Widgets &widgets, Undo &undo, Scene_Object &obj);
+    void apply_transform(Widgets &widgets);
+    std::string select(Widgets &widgets, Scene_ID click, Vec3 cam, Vec2 spos, Vec3 dir);
 
-    std::tuple<GL::Mesh&,GL::Instances&,GL::Instances&,GL::Instances&> shapes();
+    std::tuple<GL::Mesh &, GL::Instances &, GL::Instances &, GL::Instances &> shapes();
     unsigned int select_id() const;
     unsigned int hover_id() const;
     void set_hover(unsigned int id);
 
 private:
-    template<typename T> 
-    std::string update_mesh(Undo& undo, Scene_Object& obj, Halfedge_Mesh&& before, Halfedge_Mesh::ElementRef ref, T&& op);
-    template<typename T>
-    std::string update_mesh_global(Undo& undo, Scene_Object& obj, Halfedge_Mesh&& before, T&& op);
+    template <typename T>
+    std::string update_mesh(Undo &undo, Scene_Object &obj, Halfedge_Mesh &&before,
+                            Halfedge_Mesh::ElementRef ref, T &&op);
+    template <typename T>
+    std::string update_mesh_global(Undo &undo, Scene_Object &obj, Halfedge_Mesh &&before, T &&op);
 
-    void zoom_to(Halfedge_Mesh::ElementRef ref, Camera& cam);
-    void set_mesh(Halfedge_Mesh& mesh);
+    void zoom_to(Halfedge_Mesh::ElementRef ref, Camera &cam);
+    void set_mesh(Halfedge_Mesh &mesh);
     void begin_transform();
-    bool begin_bevel(std::string& err);
+    bool begin_bevel(std::string &err);
     void set_selected(Halfedge_Mesh::ElementRef elem);
     std::optional<Halfedge_Mesh::ElementRef> selected_element();
     void rebuild();
-    
-    void update_vertex(Halfedge_Mesh::VertexRef vert);
-    void vertex_viz(Halfedge_Mesh::VertexRef v, float& size, Mat4& transform);
-    void edge_viz(Halfedge_Mesh::EdgeRef e, Mat4& transform);
-    void halfedge_viz(Halfedge_Mesh::HalfedgeRef h, Mat4& transform);
-    void face_viz(Halfedge_Mesh::FaceRef face, std::vector<GL::Mesh::Vert>& verts, 
-                  std::vector<GL::Mesh::Index>& idxs, size_t insert_at);
 
-    Halfedge_Mesh* my_mesh = nullptr;
+    void update_vertex(Halfedge_Mesh::VertexRef vert);
+    void vertex_viz(Halfedge_Mesh::VertexRef v, float &size, Mat4 &transform);
+    void edge_viz(Halfedge_Mesh::EdgeRef e, Mat4 &transform);
+    void halfedge_viz(Halfedge_Mesh::HalfedgeRef h, Mat4 &transform);
+    void face_viz(Halfedge_Mesh::FaceRef face, std::vector<GL::Mesh::Vert> &verts,
+                  std::vector<GL::Mesh::Index> &idxs, size_t insert_at);
+
+    Halfedge_Mesh *my_mesh = nullptr;
     Halfedge_Mesh old_mesh;
 
-    enum class Bevel {
-        face,
-        edge,
-        vert
-    };
+    enum class Bevel { face, edge, vert };
     Bevel beveling;
-    
+
     struct Transform_Data {
         std::vector<Vec3> verts;
         Vec3 center;
@@ -92,4 +89,4 @@ private:
     std::unordered_map<unsigned int, float> vert_sizes;
 };
 
-}
+} // namespace Gui

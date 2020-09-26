@@ -29,7 +29,7 @@ Finally, to build the project:
 ```
 mkdir build
 cd build
-cmake .. 
+cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo .. 
 make -j4
 ```
 
@@ -73,7 +73,7 @@ To build the project:
 ```
 mkdir build
 cd build
-cmake .. 
+cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo .. 
 make -j4
 ```
 

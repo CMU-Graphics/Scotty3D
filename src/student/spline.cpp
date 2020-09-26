@@ -1,10 +1,11 @@
 
-#include "debug.h"
 #include "../geometry/spline.h"
+#include "debug.h"
 
-template<typename T>
-T Spline<T>::cubic_unit_spline(float time, const T& position0, const T& position1, const T& tangent0, const T& tangent1) {
-    
+template <typename T>
+T Spline<T>::cubic_unit_spline(float time, const T &position0, const T &position1,
+                               const T &tangent0, const T &tangent1) {
+
     // TODO (Animation): Task 1a
     // Given time in [0,1] compute the cubic spline coefficients and use them to compute
     // the interpolated value at time 'time' based on the positions & tangenets
@@ -15,11 +16,10 @@ T Spline<T>::cubic_unit_spline(float time, const T& position0, const T& position
     return T();
 }
 
-template<typename T>
-T Spline<T>::at(float time) const {
+template <typename T> T Spline<T>::at(float time) const {
 
     // TODO (Animation): Task 1b
-    
+
     // Given a time, find the nearest positions & tangent values
     // defined by the control point map.
 

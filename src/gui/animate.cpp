@@ -1,7 +1,7 @@
 
 #include "animate.h"
-#include "manager.h"
 #include "../scene/renderer.h"
+#include "manager.h"
 
 #include <tuple>
 
@@ -17,28 +17,27 @@ Camera Anim_Camera::at(float t) const {
     return ret;
 }
 
-void Anim_Camera::set(float t, const Camera& cam) {
-    splines.set(t, cam.pos(), 
-                Quat::euler(Mat4::rotate_z_to(cam.center() - cam.pos()).to_euler()), 
+void Anim_Camera::set(float t, const Camera &cam) {
+    splines.set(t, cam.pos(), Quat::euler(Mat4::rotate_z_to(cam.center() - cam.pos()).to_euler()),
                 cam.get_fov(), cam.get_ar());
 }
 
-void Animate::update_dim(Vec2 dim) {
-    ui_camera.dim(dim);
-}
+void Animate::update_dim(Vec2 dim) { ui_camera.dim(dim); }
 
-bool Animate::keydown(Widgets& widgets, Undo& undo, Scene_ID sel, SDL_Keysym key) {
-    
+bool Animate::keydown(Widgets &widgets, Undo &undo, Scene_ID sel, SDL_Keysym key) {
+
 #ifdef __APPLE__
-	if(key.sym == SDLK_BACKSPACE && key.mod & KMOD_GUI) {
+    if (key.sym == SDLK_BACKSPACE && key.mod & KMOD_GUI) {
 #else
-	if(key.sym == SDLK_DELETE) {
-#endif 
-        if(joint_select) undo.del_bone(sel, joint_select);
-        else if(sel) undo.del_obj(sel); 
+    if (key.sym == SDLK_DELETE) {
+#endif
+        if (joint_select)
+            undo.del_bone(sel, joint_select);
+        else if (sel)
+            undo.del_obj(sel);
     }
 
-    if(key.sym == SDLK_SPACE) {
+    if (key.sym == SDLK_SPACE) {
         playing = !playing;
         last_frame = SDL_GetPerformanceCounter();
         return true;
@@ -47,40 +46,45 @@ bool Animate::keydown(Widgets& widgets, Undo& undo, Scene_ID sel, SDL_Keysym key
     return false;
 }
 
-void Animate::render(Scene& scene, Scene_Maybe obj_opt, Widgets& widgets, Camera& user_cam) {
+void Animate::render(Scene &scene, Scene_Maybe obj_opt, Widgets &widgets, Camera &user_cam) {
 
     Mat4 view = user_cam.get_view();
-    auto& R = Renderer::get();
+    auto &R = Renderer::get();
 
     ui_camera.render(view);
 
-    if(visualize_splines)
-        for(auto& e : spline_cache) R.lines(e.second, view);
+    if (visualize_splines)
+        for (auto &e : spline_cache)
+            R.lines(e.second, view);
 
-    if(!obj_opt.has_value()) return;
-    Scene_Item& item = obj_opt.value();
+    if (!obj_opt.has_value())
+        return;
+    Scene_Item &item = obj_opt.value();
 
-    if(item.is<Scene_Light>()) {
-        Scene_Light& light = item.get<Scene_Light>();
-        if(light.is_env()) return;
+    if (item.is<Scene_Light>()) {
+        Scene_Light &light = item.get<Scene_Light>();
+        if (light.is_env())
+            return;
     }
 
-    Pose& pose = item.pose();
-	float scale = std::min((user_cam.pos() - pose.pos).norm() / 5.5f, 10.0f);
-    
+    Pose &pose = item.pose();
+    float scale = std::min((user_cam.pos() - pose.pos).norm() / 5.5f, 10.0f);
+
     item.render(view);
 
-    if(item.is<Scene_Object>() && item.get<Scene_Object>().armature.has_bones()) {
-        
-        Scene_Object& obj = item.get<Scene_Object>();
+    if (item.is<Scene_Object>() && item.get<Scene_Object>().armature.has_bones()) {
+
+        Scene_Object &obj = item.get<Scene_Object>();
         joint_id_offset = scene.used_ids();
-        obj.armature.render(view * obj.pose.transform(), joint_select, false, true, joint_id_offset);
-        
-        if(!joint_select) {
+        obj.armature.render(view * obj.pose.transform(), joint_select, false, true,
+                            joint_id_offset);
+
+        if (!joint_select) {
             R.begin_outline();
             BBox box = obj.bbox();
             obj.render(view, false, true);
-            obj.armature.outline(view * obj.pose.transform(), joint_select, false, true, box, joint_id_offset);
+            obj.armature.outline(view * obj.pose.transform(), joint_select, false, true, box,
+                                 joint_id_offset);
             R.end_outline(view, box);
         } else {
             widgets.active = Widget_Type::rotate;
@@ -90,29 +94,32 @@ void Animate::render(Scene& scene, Scene_Maybe obj_opt, Widgets& widgets, Camera
         R.outline(view, item);
     }
 
-    if(joint_select) {
-        
-        Scene_Object& obj = item.get<Scene_Object>();
+    if (joint_select) {
+
+        Scene_Object &obj = item.get<Scene_Object>();
         widgets.render(view, pose.transform() * obj.armature.posed_base_of(joint_select), scale);
 
-    } else widgets.render(view, pose.pos, scale);
+    } else {
+        widgets.render(view, pose.pos, scale);
+    }
 }
 
-void Animate::make_spline(Scene_ID id, const Anim_Pose& pose) {
+void Animate::make_spline(Scene_ID id, const Anim_Pose &pose) {
 
-    if(!pose.splines.any()) return;
+    if (!pose.splines.any())
+        return;
 
     auto entry = spline_cache.find(id);
-    if(entry == spline_cache.end()) {
+    if (entry == spline_cache.end()) {
         std::tie(entry, std::ignore) = spline_cache.insert({id, GL::Lines()});
     }
 
-    GL::Lines& lines = entry->second;
+    GL::Lines &lines = entry->second;
     lines.clear();
 
     Vec3 prev = pose.at(0.0f).pos;
-    for(int i = 1; i < max_frame; i++) {
-        
+    for (int i = 1; i < max_frame; i++) {
+
         float f = (float)i;
         float c = (float)(i % 20) / 19.0f;
         Vec3 cur = pose.at(f).pos;
@@ -124,15 +131,15 @@ void Animate::make_spline(Scene_ID id, const Anim_Pose& pose) {
 void Animate::camera_spline() {
 
     auto entry = spline_cache.find(0);
-    if(entry == spline_cache.end()) {
+    if (entry == spline_cache.end()) {
         std::tie(entry, std::ignore) = spline_cache.insert({0, GL::Lines()});
     }
 
-    GL::Lines& lines = entry->second;
+    GL::Lines &lines = entry->second;
     lines.clear();
 
     Vec3 prev = anim_camera.at(0.0f).pos();
-    for(int i = 1; i < max_frame; i++) {
+    for (int i = 1; i < max_frame; i++) {
         float f = (float)i;
         float c = (float)(i % 20) / 19.0f;
         Vec3 cur = anim_camera.at(f).pos();
@@ -141,29 +148,30 @@ void Animate::camera_spline() {
     }
 }
 
-void Animate::UIsidebar(Manager& manager, Undo& undo, Scene_Maybe obj_opt, Camera& user_cam) {
-    
-    if(joint_select) {
+void Animate::UIsidebar(Manager &manager, Undo &undo, Scene_Maybe obj_opt, Camera &user_cam) {
+
+    if (joint_select) {
         ImGui::Text("Edit Joint");
-        if(ImGui::DragFloat3("Pose", joint_select->pose.data, 1.0f, 0.0f, 0.0f, "%.2f"))
+        if (ImGui::DragFloat3("Pose", joint_select->pose.data, 1.0f, 0.0f, 0.0f, "%.2f"))
             obj_opt.value().get().get<Scene_Object>().set_pose_dirty();
-        if(ImGui::IsItemActivated()) 
+        if (ImGui::IsItemActivated())
             old_euler = joint_select->pose;
-        if(ImGui::IsItemDeactivatedAfterEdit() && old_euler != joint_select->pose) {
+        if (ImGui::IsItemDeactivatedAfterEdit() && old_euler != joint_select->pose) {
             joint_select->pose = joint_select->pose.range(0.0f, 360.0f);
             undo.pose_bone(obj_opt.value().get().id(), joint_select, old_euler);
         }
         ImGui::Separator();
     }
 
-    if(ui_camera.UI(undo, user_cam)) {
+    if (ui_camera.UI(undo, user_cam)) {
         camera_selected = true;
-        if(obj_opt.has_value()) prev_selected = obj_opt.value().get().id();
+        if (obj_opt.has_value())
+            prev_selected = obj_opt.value().get().id();
     }
 }
 
-void Animate::end_transform(Undo& undo, Scene_Item& obj) {
-    if(joint_select) {
+void Animate::end_transform(Undo &undo, Scene_Item &obj) {
+    if (joint_select) {
         undo.pose_bone(obj.id(), joint_select, old_euler);
     } else {
         undo.update_pose(obj.id(), old_pose);
@@ -172,34 +180,36 @@ void Animate::end_transform(Undo& undo, Scene_Item& obj) {
     old_p_to_j = Mat4::I;
 }
 
-Vec3 Animate::selected_pos(Scene_Item& item) {
-    if(joint_select) {
-        return item.pose().transform() * item.get<Scene_Object>().armature.posed_base_of(joint_select);
+Vec3 Animate::selected_pos(Scene_Item &item) {
+    if (joint_select) {
+        return item.pose().transform() *
+               item.get<Scene_Object>().armature.posed_base_of(joint_select);
     }
     return item.pose().pos;
 }
 
-void Animate::apply_transform(Widgets& widgets, Scene_Item& item) {
-    if(joint_select) {
-        Scene_Object& obj = item.get<Scene_Object>();
-		Vec3 euler = widgets.apply_action(old_pose).euler;
+void Animate::apply_transform(Widgets &widgets, Scene_Item &item) {
+    if (joint_select) {
+        Scene_Object &obj = item.get<Scene_Object>();
+        Vec3 euler = widgets.apply_action(old_pose).euler;
         joint_select->pose = (old_p_to_j * Mat4::euler(euler)).to_euler();
-		obj.set_pose_dirty();
-	} else {
+        obj.set_pose_dirty();
+    } else {
         item.pose() = widgets.apply_action(old_pose);
     }
 }
 
-bool Animate::select(Scene& scene, Widgets& widgets, Scene_ID selected, Scene_ID id, Vec3 cam, Vec2 spos, Vec3 dir) {
+bool Animate::select(Scene &scene, Widgets &widgets, Scene_ID selected, Scene_ID id, Vec3 cam,
+                     Vec2 spos, Vec3 dir) {
 
-    if(widgets.want_drag()) {
+    if (widgets.want_drag()) {
 
-        if(joint_select) {
+        if (joint_select) {
 
-            Scene_Object& obj = scene.get_obj(selected);
-			Vec3 base = obj.pose.transform() * obj.armature.posed_base_of(joint_select);
+            Scene_Object &obj = scene.get_obj(selected);
+            Vec3 base = obj.pose.transform() * obj.armature.posed_base_of(joint_select);
             widgets.start_drag(base, cam, spos, dir);
-            
+
             Mat4 j_to_p = obj.pose.transform() * obj.armature.joint_to_posed(joint_select);
             old_euler = joint_select->pose;
             old_pose.euler = j_to_p.to_euler();
@@ -208,36 +218,36 @@ bool Animate::select(Scene& scene, Widgets& widgets, Scene_ID selected, Scene_ID
 
         } else {
 
-            Scene_Item& item = scene.get(selected).value();
-            Pose& pose = item.pose();
+            Scene_Item &item = scene.get(selected).value();
+            Pose &pose = item.pose();
             widgets.start_drag(pose.pos, cam, spos, dir);
             old_pose = pose;
         }
 
         return false;
-    } 
-    
+    }
+
     Scene_Maybe mb = scene.get(selected);
-    if(mb.has_value()) {
+    if (mb.has_value()) {
 
-        Scene_Item& item = mb.value().get();
-        if(item.is<Scene_Object>()) {
+        Scene_Item &item = mb.value().get();
+        if (item.is<Scene_Object>()) {
 
-            Scene_Object& obj = item.get<Scene_Object>();
-            if(id >= joint_id_offset && obj.armature.has_bones()) {
+            Scene_Object &obj = item.get<Scene_Object>();
+            if (id >= joint_id_offset && obj.armature.has_bones()) {
 
                 Scene_ID j_id = id - joint_id_offset;
                 joint_select = obj.armature.get_joint(j_id);
-                if(joint_select) {
+                if (joint_select) {
                     widgets.active = Widget_Type::rotate;
                 }
                 return false;
             }
         }
     }
-    
+
     if (id >= n_Widget_IDs) {
-        if(id == selected) {
+        if (id == selected) {
             joint_select = nullptr;
         }
         return true;
@@ -247,31 +257,32 @@ bool Animate::select(Scene& scene, Widgets& widgets, Scene_ID selected, Scene_ID
     return false;
 }
 
-void Animate::timeline(Manager& manager, Undo& undo, Scene& scene, Scene_Maybe obj, Camera& user_cam) {
+void Animate::timeline(Manager &manager, Undo &undo, Scene &scene, Scene_Maybe obj,
+                       Camera &user_cam) {
 
     // NOTE(max): this is pretty messy
     //      Would be good to add the ability to set per-component keyframes
-    //      ^ I started with that but it was hard to make work with assimp and 
+    //      ^ I started with that but it was hard to make work with assimp and
     //        generally made everything a lot messier.
 
     ImVec2 size = ImGui::GetWindowSize();
 
     ImGui::Columns(2);
     ImGui::SetColumnWidth(0, 150.0f);
-    
-    if(!playing) {
-        if(ImGui::Button("Play")) {
+
+    if (!playing) {
+        if (ImGui::Button("Play")) {
             playing = true;
             last_frame = SDL_GetPerformanceCounter();
         }
     } else {
-        if(ImGui::Button("Stop")) {
+        if (ImGui::Button("Stop")) {
             playing = false;
         }
     }
 
     ImGui::SameLine();
-    if(ImGui::Button("Render")) {
+    if (ImGui::Button("Render")) {
         ui_render.open();
     }
     ui_render.animate(scene, ui_camera, user_cam, max_frame);
@@ -279,18 +290,18 @@ void Animate::timeline(Manager& manager, Undo& undo, Scene& scene, Scene_Maybe o
     ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, {0.0f, 0.0f});
     ImGui::Dummy({1.0f, 4.0f});
     ImGui::PopStyleVar();
-    
-    if(ImGui::Button("Add Frames")) {
+
+    if (ImGui::Button("Add Frames")) {
         max_frame += 3 * frame_rate;
     }
-    if(ImGui::Button("Crop End")) {
+    if (ImGui::Button("Crop End")) {
         max_frame = current_frame + 1;
         current_frame = std::min(current_frame, max_frame - 1);
-        scene.for_items([this](Scene_Item& item) {
+        scene.for_items([this](Scene_Item &item) {
             item.animation().splines.crop((float)max_frame);
-            if(item.is<Scene_Object>()) 
+            if (item.is<Scene_Object>())
                 item.get<Scene_Object>().armature.crop((float)max_frame);
-            else if(item.is<Scene_Light>()) 
+            else if (item.is<Scene_Light>())
                 item.get<Scene_Light>().lanim.splines.crop((float)max_frame);
             make_spline(item.id(), item.animation());
         });
@@ -303,11 +314,11 @@ void Animate::timeline(Manager& manager, Undo& undo, Scene& scene, Scene_Maybe o
 
     ImGui::NextColumn();
 
-    Scene_Item* select = nullptr;
-    if(obj.has_value()) {
-        Scene_Item& item = obj.value();
+    Scene_Item *select = nullptr;
+    if (obj.has_value()) {
+        Scene_Item &item = obj.value();
         select = &item;
-        if(item.id() != prev_selected) {
+        if (item.id() != prev_selected) {
             camera_selected = false;
             prev_selected = item.id();
         }
@@ -317,36 +328,37 @@ void Animate::timeline(Manager& manager, Undo& undo, Scene& scene, Scene_Maybe o
 
     ImGui::Text("Keyframe:");
     ImGui::SameLine();
-    if(ImGui::Button("Clear")) {
-        if(camera_selected) {
+    if (ImGui::Button("Clear")) {
+        if (camera_selected) {
             anim_camera.splines.erase((float)current_frame);
             camera_spline();
-        } else if(select) {
+        } else if (select) {
             select->animation().splines.erase((float)current_frame);
             make_spline(select->id(), select->animation());
         }
     }
 
-    auto set_item = [&, this](Scene_Item& item) {
-        if(item.is<Scene_Object>()) {
+    auto set_item = [&, this](Scene_Item &item) {
+        if (item.is<Scene_Object>()) {
             undo.anim_pose_bones(item.id(), (float)current_frame);
-        } if(item.is<Scene_Light>()) {
+        }
+        if (item.is<Scene_Light>()) {
             undo.anim_light(item.id(), (float)current_frame);
         }
         make_spline(item.id(), item.animation());
     };
 
     ImGui::SameLine();
-    if(ImGui::Button("Set")) {
-        if(camera_selected) {
+    if (ImGui::Button("Set")) {
+        if (camera_selected) {
             undo.anim_camera(anim_camera, (float)current_frame, ui_camera.get());
             camera_spline();
-        } else if(select) {
+        } else if (select) {
             set_item(*select);
         }
     }
     ImGui::SameLine();
-    if(ImGui::Button("Set All")) {
+    if (ImGui::Button("Set All")) {
         undo.anim_camera(anim_camera, (float)current_frame, ui_camera.get());
         camera_spline();
         scene.for_items(set_item);
@@ -355,13 +367,14 @@ void Animate::timeline(Manager& manager, Undo& undo, Scene& scene, Scene_Maybe o
     ImGui::Separator();
     ImGui::Dummy({74.0f, 1.0f});
     ImGui::SameLine();
-    if(ImGui::SliderInt("Frame", &current_frame, 0, max_frame - 1)) {
+    if (ImGui::SliderInt("Frame", &current_frame, 0, max_frame - 1)) {
         frame_changed = true;
     }
-    ImGui::BeginChild("Timeline", {size.x - 20.0f, size.y - 80.0f}, false, ImGuiWindowFlags_HorizontalScrollbar);
+    ImGui::BeginChild("Timeline", {size.x - 20.0f, size.y - 80.0f}, false,
+                      ImGuiWindowFlags_HorizontalScrollbar);
 
     ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, {0.0f, 0.0f});
-   
+
     const int name_chars = 6;
     std::vector<bool> frames;
     std::vector<Scene_ID> live_ids;
@@ -372,8 +385,9 @@ void Animate::timeline(Manager& manager, Undo& undo, Scene& scene, Scene_Maybe o
 
         std::string name = "Camera";
         ImVec2 sz = ImGui::CalcTextSize(name.c_str());
-        if(camera_selected)
-            ImGui::TextColored({Color::outline.x, Color::outline.y, Color::outline.z, 1.0f}, "%s", name.c_str());
+        if (camera_selected)
+            ImGui::TextColored({Color::outline.x, Color::outline.y, Color::outline.z, 1.0f}, "%s",
+                               name.c_str());
         else
             ImGui::Text("%s", name.c_str());
         ImGui::SameLine();
@@ -383,53 +397,56 @@ void Animate::timeline(Manager& manager, Undo& undo, Scene& scene, Scene_Maybe o
 
         std::set<float> keys = anim_camera.splines.keys();
 
-        for(float f : keys) {
+        for (float f : keys) {
             int frame = (int)std::round(f);
-            if(frame >= 0 && frame < max_frame)
+            if (frame >= 0 && frame < max_frame)
                 frames[frame] = true;
         }
 
-        for(int i = 0; i < max_frame; i++) {
-            if(i > 0) ImGui::SameLine();
+        for (int i = 0; i < max_frame; i++) {
+            if (i > 0)
+                ImGui::SameLine();
             ImGui::PushID(i);
 
             bool color = false;
             std::string label = "_";
 
-            if(i == current_frame) {
+            if (i == current_frame) {
                 ImGui::PushStyleColor(ImGuiCol_Button, ImGui::GetColorU32(ImGuiCol_ButtonActive));
                 color = true;
             }
 
-            if(frames[i]) {
+            if (frames[i]) {
                 label = "*";
-                if(i != current_frame) {
+                if (i != current_frame) {
                     color = true;
-                    ImGui::PushStyleColor(ImGuiCol_Button, ImGui::GetColorU32(ImGuiCol_ButtonHovered));
+                    ImGui::PushStyleColor(ImGuiCol_Button,
+                                          ImGui::GetColorU32(ImGuiCol_ButtonHovered));
                 }
             }
-            if(ImGui::SmallButton(label.c_str())) {
+            if (ImGui::SmallButton(label.c_str())) {
                 current_frame = i;
                 frame_changed = true;
                 camera_selected = true;
             }
-            if(color) ImGui::PopStyleColor();
-            ImGui::PopID();   
+            if (color)
+                ImGui::PopStyleColor();
+            ImGui::PopID();
         }
         ImGui::PopID();
     }
 
-    scene.for_items([&, this](Scene_Item& item) {
-        
+    scene.for_items([&, this](Scene_Item &item) {
         frames.clear();
         frames.resize(max_frame);
 
-        std::string name = const_cast<const Scene_Item&>(item).name();
+        std::string name = const_cast<const Scene_Item &>(item).name();
         name.resize(name_chars);
-        
+
         ImVec2 size = ImGui::CalcTextSize(name.c_str());
-        if(!camera_selected && select && item.id() == select->id())
-            ImGui::TextColored({Color::outline.x, Color::outline.y, Color::outline.z, 1.0f}, "%s", name.c_str());
+        if (!camera_selected && select && item.id() == select->id())
+            ImGui::TextColored({Color::outline.x, Color::outline.y, Color::outline.z, 1.0f}, "%s",
+                               name.c_str());
         else
             ImGui::Text("%s", name.c_str());
         ImGui::SameLine();
@@ -440,83 +457,85 @@ void Animate::timeline(Manager& manager, Undo& undo, Scene& scene, Scene_Maybe o
 
         Anim_Pose animation = item.animation();
         std::set<float> keys = animation.splines.keys();
-        if(item.is<Scene_Light>()) {
+        if (item.is<Scene_Light>()) {
             std::set<float> more_keys = item.get<Scene_Light>().lanim.splines.keys();
             keys.insert(more_keys.begin(), more_keys.end());
         }
-        if(item.is<Scene_Object>()) {
+        if (item.is<Scene_Object>()) {
             std::set<float> more_keys = item.get<Scene_Object>().armature.keys();
             keys.insert(more_keys.begin(), more_keys.end());
         }
 
-        for(float f : keys) {
+        for (float f : keys) {
             int frame = (int)std::round(f);
-            if(frame >= 0 && frame < max_frame)
+            if (frame >= 0 && frame < max_frame)
                 frames[frame] = true;
         }
 
-        for(int i = 0; i < max_frame; i++) {
-            if(i > 0) ImGui::SameLine();
+        for (int i = 0; i < max_frame; i++) {
+            if (i > 0)
+                ImGui::SameLine();
             ImGui::PushID(i);
 
             bool color = false;
             std::string label = "_";
 
-            if(i == current_frame) {
+            if (i == current_frame) {
                 ImGui::PushStyleColor(ImGuiCol_Button, ImGui::GetColorU32(ImGuiCol_ButtonActive));
                 color = true;
             }
 
-            if(frames[i]) {
+            if (frames[i]) {
                 label = "*";
-                if(i != current_frame) {
+                if (i != current_frame) {
                     color = true;
-                    ImGui::PushStyleColor(ImGuiCol_Button, ImGui::GetColorU32(ImGuiCol_ButtonHovered));
+                    ImGui::PushStyleColor(ImGuiCol_Button,
+                                          ImGui::GetColorU32(ImGuiCol_ButtonHovered));
                 }
             }
 
-            if(ImGui::SmallButton(label.c_str())) {
+            if (ImGui::SmallButton(label.c_str())) {
                 current_frame = i;
                 frame_changed = true;
                 camera_selected = false;
                 manager.set_select(item.id());
             }
-            if(color) ImGui::PopStyleColor();
+            if (color)
+                ImGui::PopStyleColor();
             ImGui::PopID();
         }
-        
+
         live_ids.push_back(item.id());
 
         ImGui::SameLine();
         ImGui::Dummy({142.0f, 1.0f});
         ImGui::PopID();
     });
-    
+
     ImGui::PopStyleVar();
     ImGui::EndChild();
 
     std::unordered_map<Scene_ID, GL::Lines> new_cache;
-    for(Scene_ID i : live_ids) {
+    for (Scene_ID i : live_ids) {
         auto entry = spline_cache.find(i);
-        if(entry != spline_cache.end()) {
+        if (entry != spline_cache.end()) {
             new_cache[i] = std::move(entry->second);
         }
     }
     spline_cache = std::move(new_cache);
 
-    if(frame_changed) update(scene);
+    if (frame_changed)
+        update(scene);
 }
 
-Camera Animate::set_time(Scene& scene, float time) {
-    
+Camera Animate::set_time(Scene &scene, float time) {
+
     current_frame = (int)time;
 
-    scene.for_items([time](Scene_Item& item) {
-        item.set_time(time);
-    });
+    scene.for_items([time](Scene_Item &item) { item.set_time(time); });
 
     Camera cam = anim_camera.at(time);
-    if(anim_camera.splines.any()) {
+    if (anim_camera.splines.any()) {
         ui_camera.load(cam.center(), cam.pos(), cam.get_ar(), cam.get_fov());
     } else {
         cam = ui_camera.get();
@@ -530,42 +549,30 @@ void Animate::set(int n_frames, int fps) {
     current_frame = std::min(current_frame, max_frame - 1);
 }
 
-Anim_Camera& Animate::camera() {
-    return anim_camera;
-}
+Anim_Camera &Animate::camera() { return anim_camera; }
 
-const Anim_Camera& Animate::camera() const {
-    return anim_camera;
-}
+const Anim_Camera &Animate::camera() const { return anim_camera; }
 
-float Animate::fps() const {
-    return (float)frame_rate;
-}
+float Animate::fps() const { return (float)frame_rate; }
 
-int Animate::n_frames() const {
-    return max_frame;
-}
+int Animate::n_frames() const { return max_frame; }
 
-std::string Animate::pump_output(Scene& scene) {
-    return ui_render.step(*this, scene);
-}
+std::string Animate::pump_output(Scene &scene) { return ui_render.step(*this, scene); }
 
-void Animate::refresh(Scene& scene) {
-    set_time(scene, (float)current_frame);
-}
+void Animate::refresh(Scene &scene) { set_time(scene, (float)current_frame); }
 
 void Animate::clear() {
     anim_camera.splines.clear();
     joint_select = nullptr;
 }
 
-void Animate::update(Scene& scene) {
+void Animate::update(Scene &scene) {
 
     Uint64 time = SDL_GetPerformanceCounter();
 
-    if(playing) {
-        if((time - last_frame) * frame_rate / SDL_GetPerformanceFrequency()) {
-            if(current_frame == max_frame - 1) {
+    if (playing) {
+        if ((time - last_frame) * frame_rate / SDL_GetPerformanceFrequency()) {
+            if (current_frame == max_frame - 1) {
                 playing = false;
                 current_frame = 0;
             } else {
@@ -575,10 +582,10 @@ void Animate::update(Scene& scene) {
         }
     }
 
-    if(displayed_frame != current_frame) {
+    if (displayed_frame != current_frame) {
         set_time(scene, (float)current_frame);
         displayed_frame = current_frame;
     }
 }
 
-}
+} // namespace Gui

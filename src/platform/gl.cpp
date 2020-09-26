@@ -1,4 +1,4 @@
-	
+
 #include "gl.h"
 #include "../lib/log.h"
 
@@ -12,985 +12,989 @@ static bool is_gl45 = false;
 static bool is_gl41 = false;
 
 void setup() {
-	std::string ver = version();
-	is_gl45 = ver.find("4.5") != std::string::npos;
-	is_gl41 = ver.find("4.1") != std::string::npos;
+    std::string ver = version();
+    is_gl45 = ver.find("4.5") != std::string::npos;
+    is_gl41 = ver.find("4.1") != std::string::npos;
 
-	setup_debug_proc();
-	Effects::init();
+    setup_debug_proc();
+    Effects::init();
 }
 
 void shutdown() {
-	Effects::destroy();
-	check_leaked_handles();
+    Effects::destroy();
+    check_leaked_handles();
 }
 
-void color_mask(bool enable) {
-	glColorMask(enable, enable, enable, enable);
-}
+void color_mask(bool enable) { glColorMask(enable, enable, enable, enable); }
 
-std::string version() {
-	return std::string((char*)glGetString(GL_VERSION));
-}
-std::string renderer() {
-	return std::string((char*)glGetString(GL_RENDERER));
-}
+std::string version() { return std::string((char *)glGetString(GL_VERSION)); }
+std::string renderer() { return std::string((char *)glGetString(GL_RENDERER)); }
 
 void global_params() {
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
-	glPolygonOffset(1.0f, 1.0f);
-	glEnable(GL_DEPTH_TEST);
-	glDepthFunc(GL_GREATER);
-	glClearDepth(0.0);
-	if(glClipControl) glClipControl(GL_LOWER_LEFT, GL_ZERO_TO_ONE);
-	glCullFace(GL_BACK);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+    glPolygonOffset(1.0f, 1.0f);
+    glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_GREATER);
+    glClearDepth(0.0);
+    if (glClipControl)
+        glClipControl(GL_LOWER_LEFT, GL_ZERO_TO_ONE);
+    glCullFace(GL_BACK);
 }
 
 void clear_screen(Vec4 col) {
-	Framebuffer::bind_screen();
-	glClearColor(col.x, col.y, col.z, col.w);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    Framebuffer::bind_screen();
+    glClearColor(col.x, col.y, col.z, col.w);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
 void enable(Opt opt) {
-	switch(opt) {
-	case Opt::wireframe: {
-		glEnable(GL_POLYGON_OFFSET_LINE);
-		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-	} break;
-	case Opt::offset: {
-		glEnable(GL_POLYGON_OFFSET_FILL);
-	} break;
-	case Opt::culling: {
-		glEnable(GL_CULL_FACE);
-	} break;
-	case Opt::depth_write: {
-		glDepthMask(GL_TRUE);
-	} break;
-	}
+    switch (opt) {
+    case Opt::wireframe: {
+        glEnable(GL_POLYGON_OFFSET_LINE);
+        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    } break;
+    case Opt::offset: {
+        glEnable(GL_POLYGON_OFFSET_FILL);
+    } break;
+    case Opt::culling: {
+        glEnable(GL_CULL_FACE);
+    } break;
+    case Opt::depth_write: {
+        glDepthMask(GL_TRUE);
+    } break;
+    }
 }
 
 void disable(Opt opt) {
-	switch(opt) {
-	case Opt::wireframe: {
-		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-		glDisable(GL_POLYGON_OFFSET_LINE);
-	} break;
-	case Opt::offset: {
-		glDisable(GL_POLYGON_OFFSET_FILL);
-	} break;
-	case Opt::culling: {
-		glDisable(GL_CULL_FACE);
-	} break;
-	case Opt::depth_write: {
-		glDepthMask(GL_FALSE);
-	} break;
-	}
+    switch (opt) {
+    case Opt::wireframe: {
+        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+        glDisable(GL_POLYGON_OFFSET_LINE);
+    } break;
+    case Opt::offset: {
+        glDisable(GL_POLYGON_OFFSET_FILL);
+    } break;
+    case Opt::culling: {
+        glDisable(GL_CULL_FACE);
+    } break;
+    case Opt::depth_write: {
+        glDepthMask(GL_FALSE);
+    } break;
+    }
 }
 
-void viewport(Vec2 dim) {
-	glViewport(0, 0, (GLsizei)dim.x, (GLsizei)dim.y);
-}
+void viewport(Vec2 dim) { glViewport(0, 0, (GLsizei)dim.x, (GLsizei)dim.y); }
 
 int max_msaa() {
-	int samples;
-	glGetIntegerv(GL_MAX_SAMPLES, &samples);
-	return samples;
+    int samples;
+    glGetIntegerv(GL_MAX_SAMPLES, &samples);
+    return samples;
 }
 
-Tex2D::Tex2D() {
-	id = 0;
-}
+Tex2D::Tex2D() { id = 0; }
 
-Tex2D::Tex2D(Tex2D&& src) {
-	id = src.id; src.id = 0;
+Tex2D::Tex2D(Tex2D &&src) {
+    id = src.id;
+    src.id = 0;
 }
 
 Tex2D::~Tex2D() {
-	if(id) glDeleteTextures(1, &id);
-	id = 0;
+    if (id)
+        glDeleteTextures(1, &id);
+    id = 0;
 }
 
-void Tex2D::operator=(Tex2D&& src) {
-	if(id) glDeleteTextures(1, &id);
-	id = src.id; src.id = 0;
+void Tex2D::operator=(Tex2D &&src) {
+    if (id)
+        glDeleteTextures(1, &id);
+    id = src.id;
+    src.id = 0;
 }
 
 void Tex2D::bind(int idx) const {
-	glActiveTexture(GL_TEXTURE0 + idx);
-	glBindTexture(GL_TEXTURE_2D, id);
+    glActiveTexture(GL_TEXTURE0 + idx);
+    glBindTexture(GL_TEXTURE_2D, id);
 }
 
-void Tex2D::image(int w, int h, unsigned char* img) {
-	if(!id) glGenTextures(1, &id);
-	glBindTexture(GL_TEXTURE_2D, id);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, img);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);	
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glBindTexture(GL_TEXTURE_2D, 0);
+void Tex2D::image(int w, int h, unsigned char *img) {
+    if (!id)
+        glGenTextures(1, &id);
+    glBindTexture(GL_TEXTURE_2D, id);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, img);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-TexID Tex2D::get_id() const {
-	return id;
+TexID Tex2D::get_id() const { return id; }
+
+Mesh::Mesh() { create(); }
+
+Mesh::Mesh(std::vector<Vert> &&vertices, std::vector<Index> &&indices) {
+    create();
+    recreate(std::move(vertices), std::move(indices));
 }
 
-Mesh::Mesh() {
-	create();
+Mesh::Mesh(Mesh &&src) {
+    vao = src.vao;
+    src.vao = 0;
+    ebo = src.ebo;
+    src.ebo = 0;
+    vbo = src.vbo;
+    src.vbo = 0;
+    dirty = src.dirty;
+    src.dirty = true;
+    n_elem = src.n_elem;
+    src.n_elem = 0;
+    _bbox = src._bbox;
+    src._bbox.reset();
+    _verts = std::move(src._verts);
+    _idxs = std::move(src._idxs);
 }
 
-Mesh::Mesh(std::vector<Vert>&& vertices, std::vector<Index>&& indices) {
-	create();
-	recreate(std::move(vertices), std::move(indices));
+void Mesh::operator=(Mesh &&src) {
+    destroy();
+    vao = src.vao;
+    src.vao = 0;
+    vbo = src.vbo;
+    src.vbo = 0;
+    ebo = src.ebo;
+    src.ebo = 0;
+    dirty = src.dirty;
+    src.dirty = true;
+    n_elem = src.n_elem;
+    src.n_elem = 0;
+    _bbox = src._bbox;
+    src._bbox.reset();
+    _verts = std::move(src._verts);
+    _idxs = std::move(src._idxs);
 }
 
-Mesh::Mesh(Mesh&& src) {
-	vao = src.vao; src.vao = 0;
-	ebo = src.ebo; src.ebo = 0;
-	vbo = src.vbo; src.vbo = 0;
-	dirty = src.dirty; src.dirty = true;
-	n_elem = src.n_elem; src.n_elem = 0;
-	_bbox = src._bbox; src._bbox.reset();
-	_verts = std::move(src._verts);
-	_idxs = std::move(src._idxs);
-}
-
-void Mesh::operator=(Mesh&& src) {
-	destroy();
-	vao = src.vao; src.vao = 0;
-	vbo = src.vbo; src.vbo = 0;
-	ebo = src.ebo; src.ebo = 0;
-	dirty = src.dirty; src.dirty = true;
-	n_elem = src.n_elem; src.n_elem = 0;
-	_bbox = src._bbox; src._bbox.reset();
-	_verts = std::move(src._verts);
-	_idxs = std::move(src._idxs);
-}
-
-Mesh::~Mesh() {
-	destroy();
-}
+Mesh::~Mesh() { destroy(); }
 
 void Mesh::create() {
-	// Hack to let stuff get created for headless mode
-	if(!glGenVertexArrays) return;
+    // Hack to let stuff get created for headless mode
+    if (!glGenVertexArrays)
+        return;
 
-	glGenVertexArrays(1, &vao);
-	glGenBuffers(1, &vbo);
-	glGenBuffers(1, &ebo);
+    glGenVertexArrays(1, &vao);
+    glGenBuffers(1, &vbo);
+    glGenBuffers(1, &ebo);
 
-	glBindVertexArray(vao);
+    glBindVertexArray(vao);
 
-	glBindBuffer(GL_ARRAY_BUFFER, vbo);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vert), (GLvoid*)0);
-	glEnableVertexAttribArray(0);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vert), (GLvoid *)0);
+    glEnableVertexAttribArray(0);
 
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vert), (GLvoid*)sizeof(Vec3));
-	glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vert), (GLvoid *)sizeof(Vec3));
+    glEnableVertexAttribArray(1);
 
-	glVertexAttribIPointer(2, 1, GL_UNSIGNED_INT, sizeof(Vert), (GLvoid*)(2 * sizeof(Vec3)));
-	glEnableVertexAttribArray(2);
+    glVertexAttribIPointer(2, 1, GL_UNSIGNED_INT, sizeof(Vert), (GLvoid *)(2 * sizeof(Vec3)));
+    glEnableVertexAttribArray(2);
 
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-	
-	glBindVertexArray(0);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+
+    glBindVertexArray(0);
 }
 
 void Mesh::destroy() {
-	// Hack to let stuff get destroyed for headless mode
-	if(!glDeleteBuffers) return;
+    // Hack to let stuff get destroyed for headless mode
+    if (!glDeleteBuffers)
+        return;
 
-	glDeleteBuffers(1, &ebo);
-	glDeleteBuffers(1, &vbo);
-	glDeleteVertexArrays(1, &vao);
-	ebo = vao = vbo = 0;
+    glDeleteBuffers(1, &ebo);
+    glDeleteBuffers(1, &vbo);
+    glDeleteVertexArrays(1, &vao);
+    ebo = vao = vbo = 0;
 }
 
 void Mesh::update() {
-	glBindVertexArray(vao);
+    glBindVertexArray(vao);
 
-	glBindBuffer(GL_ARRAY_BUFFER, vbo);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(Vert) * _verts.size(), _verts.data(), GL_DYNAMIC_DRAW);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(Vert) * _verts.size(), _verts.data(), GL_DYNAMIC_DRAW);
 
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(Index) * _idxs.size(), _idxs.data(), GL_DYNAMIC_DRAW);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(Index) * _idxs.size(), _idxs.data(),
+                 GL_DYNAMIC_DRAW);
 
-	glBindVertexArray(0);
+    glBindVertexArray(0);
 
-	dirty = false;
+    dirty = false;
 }
 
-void Mesh::recreate(std::vector<Vert>&& vertices, std::vector<Index>&& indices) {
+void Mesh::recreate(std::vector<Vert> &&vertices, std::vector<Index> &&indices) {
 
-	dirty = true;
-	_verts = std::move(vertices);
-	_idxs = std::move(indices);
+    dirty = true;
+    _verts = std::move(vertices);
+    _idxs = std::move(indices);
 
-	_bbox.reset();
-	for(auto& v : _verts) {
-		_bbox.enclose(v.pos);
-	}
-	n_elem = (GLuint)_idxs.size();
+    _bbox.reset();
+    for (auto &v : _verts) {
+        _bbox.enclose(v.pos);
+    }
+    n_elem = (GLuint)_idxs.size();
 }
 
-GLuint Mesh::tris() const {
-	return n_elem / 3;
+GLuint Mesh::tris() const { return n_elem / 3; }
+
+std::vector<Mesh::Vert> &Mesh::edit_verts() {
+    dirty = true;
+    return _verts;
 }
 
-std::vector<Mesh::Vert>& Mesh::edit_verts() {
-	dirty = true;
-	return _verts;
+std::vector<Mesh::Index> &Mesh::edit_indices() {
+    dirty = true;
+    return _idxs;
 }
 
-std::vector<Mesh::Index>& Mesh::edit_indices() {
-	dirty = true;
-	return _idxs;
-}
+const std::vector<Mesh::Vert> &Mesh::verts() const { return _verts; }
 
-const std::vector<Mesh::Vert>& Mesh::verts() const {
-	return _verts;
-}
+const std::vector<Mesh::Index> &Mesh::indices() const { return _idxs; }
 
-const std::vector<Mesh::Index>& Mesh::indices() const {
-	return _idxs;
-}
-
-BBox Mesh::bbox() const {
-	return _bbox;
-}
+BBox Mesh::bbox() const { return _bbox; }
 
 void Mesh::render() {
-	if(dirty) update();
-	glBindVertexArray(vao);
-	glDrawElements(GL_TRIANGLES, n_elem, GL_UNSIGNED_INT, nullptr);
-	glBindVertexArray(0);
+    if (dirty)
+        update();
+    glBindVertexArray(vao);
+    glDrawElements(GL_TRIANGLES, n_elem, GL_UNSIGNED_INT, nullptr);
+    glBindVertexArray(0);
 }
 
-Instances::Instances(GL::Mesh&& mesh) : mesh(std::move(mesh)) {
-	create();
+Instances::Instances(GL::Mesh &&mesh) : mesh(std::move(mesh)) { create(); }
+
+Instances::Instances(Instances &&src) {
+    mesh = std::move(src.mesh);
+    data = std::move(src.data);
+    vbo = src.vbo;
+    src.vbo = 0;
+    dirty = src.dirty;
+    src.dirty = true;
 }
 
-Instances::Instances(Instances&& src) {
-	mesh = std::move(src.mesh);
-	data = std::move(src.data);
-	vbo = src.vbo; src.vbo = 0;
-	dirty = src.dirty; src.dirty = true;
-}
+Instances::~Instances() { destroy(); }
 
-Instances::~Instances() {
-	destroy();
-}
-
-void Instances::operator=(Instances&& src) {
-	destroy();
-	mesh = std::move(src.mesh);
-	data = std::move(src.data);
-	vbo = src.vbo; src.vbo = 0;
-	dirty = src.dirty; src.dirty = true;
+void Instances::operator=(Instances &&src) {
+    destroy();
+    mesh = std::move(src.mesh);
+    data = std::move(src.data);
+    vbo = src.vbo;
+    src.vbo = 0;
+    dirty = src.dirty;
+    src.dirty = true;
 }
 
 void Instances::create() {
-	// Hack to let stuff get created for headless mode
-	if(!glGenBuffers) return;
+    // Hack to let stuff get created for headless mode
+    if (!glGenBuffers)
+        return;
 
-	glGenBuffers(1, &vbo);
-	glBindVertexArray(mesh.vao);
-	glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    glGenBuffers(1, &vbo);
+    glBindVertexArray(mesh.vao);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
 
-	glEnableVertexAttribArray(3);
-	glVertexAttribIPointer(3, 1, GL_UNSIGNED_INT, sizeof(Info), (GLvoid*)0);
-	glVertexAttribDivisor(3, 1);
+    glEnableVertexAttribArray(3);
+    glVertexAttribIPointer(3, 1, GL_UNSIGNED_INT, sizeof(Info), (GLvoid *)0);
+    glVertexAttribDivisor(3, 1);
 
-	const int base_idx = 4;
-	for(int i = 0; i < 4; i++) {
-		glEnableVertexAttribArray(base_idx + i);
-		glVertexAttribPointer(base_idx + i, 4, GL_FLOAT, GL_FALSE, sizeof(Info), (void*)(sizeof(GLuint) + sizeof(Vec4) * i));
-		glVertexAttribDivisor(base_idx + i, 1);
-	}
-	glBindVertexArray(0);
+    const int base_idx = 4;
+    for (int i = 0; i < 4; i++) {
+        glEnableVertexAttribArray(base_idx + i);
+        glVertexAttribPointer(base_idx + i, 4, GL_FLOAT, GL_FALSE, sizeof(Info),
+                              (void *)(sizeof(GLuint) + sizeof(Vec4) * i));
+        glVertexAttribDivisor(base_idx + i, 1);
+    }
+    glBindVertexArray(0);
 }
 
 void Instances::render() {
-	
-	if(mesh.dirty) mesh.update();
-	if(dirty) update();
 
-	glBindVertexArray(mesh.vao);
-	glDrawElementsInstanced(GL_TRIANGLES, mesh.n_elem, GL_UNSIGNED_INT, nullptr, (GLsizei)data.size());
-	glBindVertexArray(0);
+    if (mesh.dirty)
+        mesh.update();
+    if (dirty)
+        update();
+
+    glBindVertexArray(mesh.vao);
+    glDrawElementsInstanced(GL_TRIANGLES, mesh.n_elem, GL_UNSIGNED_INT, nullptr,
+                            (GLsizei)data.size());
+    glBindVertexArray(0);
 }
 
-Instances::Info& Instances::get(size_t idx) {
-	dirty = true;
-	return data[idx];
+Instances::Info &Instances::get(size_t idx) {
+    dirty = true;
+    return data[idx];
 }
 
-size_t Instances::add(const Mat4& transform, GLuint id) {
-	data.push_back({id, transform});
-	dirty = true;
-	return data.size() - 1;
+size_t Instances::add(const Mat4 &transform, GLuint id) {
+    data.push_back({id, transform});
+    dirty = true;
+    return data.size() - 1;
 }
 
 void Instances::clear() {
-	data.clear();
-	dirty = true;
+    data.clear();
+    dirty = true;
 }
 
 void Instances::update() {
-	glBindVertexArray(mesh.vao);
-	glBindBuffer(GL_ARRAY_BUFFER, vbo);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(Info) * data.size(), data.data(), GL_DYNAMIC_DRAW);
-	glBindVertexArray(0);
-	dirty = false;
+    glBindVertexArray(mesh.vao);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(Info) * data.size(), data.data(), GL_DYNAMIC_DRAW);
+    glBindVertexArray(0);
+    dirty = false;
 }
 
 void Instances::destroy() {
-	// Hack to let stuff get destroyed for headless mode
-	if(!glDeleteBuffers) return;
+    // Hack to let stuff get destroyed for headless mode
+    if (!glDeleteBuffers)
+        return;
 
-	glDeleteBuffers(1, &vbo);
-	vbo = 0;
-	mesh.destroy();
+    glDeleteBuffers(1, &vbo);
+    vbo = 0;
+    mesh.destroy();
 }
 
-Lines::Lines(std::vector<Vert>&& verts, float thickness) 
-	: thickness(thickness), vertices(std::move(verts)) {
-	create();
-	dirty = true;
+Lines::Lines(std::vector<Vert> &&verts, float thickness)
+    : thickness(thickness), vertices(std::move(verts)) {
+    create();
+    dirty = true;
 }
 
-Lines::Lines(float thickness) : thickness(thickness) {
-	create();
+Lines::Lines(float thickness) : thickness(thickness) { create(); }
+
+Lines::Lines(Lines &&src) {
+    dirty = src.dirty;
+    src.dirty = true;
+    thickness = src.thickness;
+    src.thickness = 0.0f;
+    vao = src.vao;
+    src.vao = 0;
+    vbo = src.vbo;
+    src.vbo = 0;
+    vertices = std::move(src.vertices);
 }
 
-Lines::Lines(Lines&& src) {
-	dirty = src.dirty; src.dirty = true;
-	thickness = src.thickness; src.thickness = 0.0f;
-	vao = src.vao; src.vao = 0;
-	vbo = src.vbo; src.vbo = 0;
-	vertices = std::move(src.vertices);
+void Lines::operator=(Lines &&src) {
+    destroy();
+    dirty = src.dirty;
+    src.dirty = true;
+    thickness = src.thickness;
+    src.thickness = 0.0f;
+    vao = src.vao;
+    src.vao = 0;
+    vbo = src.vbo;
+    src.vbo = 0;
+    vertices = std::move(src.vertices);
 }
 
-void Lines::operator=(Lines&& src) {
-	destroy();
-	dirty = src.dirty; src.dirty = true;
-	thickness = src.thickness; src.thickness = 0.0f;
-	vao = src.vao; src.vao = 0;
-	vbo = src.vbo; src.vbo = 0;
-	vertices = std::move(src.vertices);
-}
-
-Lines::~Lines() {
-	destroy();
-}
+Lines::~Lines() { destroy(); }
 
 void Lines::update() const {
 
-	glBindVertexArray(vao);
-	glBindBuffer(GL_ARRAY_BUFFER, vbo);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(Vert) * vertices.size(), vertices.data(), GL_DYNAMIC_DRAW);
-	glBindVertexArray(0);
+    glBindVertexArray(vao);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(Vert) * vertices.size(), vertices.data(), GL_DYNAMIC_DRAW);
+    glBindVertexArray(0);
 
-	dirty = false;
+    dirty = false;
 }
 
 void Lines::render(bool smooth) const {
 
-	if(dirty) update();
+    if (dirty)
+        update();
 
-	glLineWidth(thickness);
-	if(smooth) glEnable(GL_LINE_SMOOTH);
-	else glDisable(GL_LINE_SMOOTH);
+    glLineWidth(thickness);
+    if (smooth)
+        glEnable(GL_LINE_SMOOTH);
+    else
+        glDisable(GL_LINE_SMOOTH);
 
-	glBindVertexArray(vao);
-	glDrawArrays(GL_LINES, 0, (GLsizei)vertices.size());
-	glBindVertexArray(0);
+    glBindVertexArray(vao);
+    glDrawArrays(GL_LINES, 0, (GLsizei)vertices.size());
+    glBindVertexArray(0);
 }
 
 void Lines::clear() {
-	vertices.clear();
-	dirty = true;
+    vertices.clear();
+    dirty = true;
 }
 
 void Lines::pop() {
-	vertices.pop_back();
-	vertices.pop_back();
-	dirty = true;
+    vertices.pop_back();
+    vertices.pop_back();
+    dirty = true;
 }
 
 void Lines::add(Vec3 start, Vec3 end, Vec3 color) {
 
-	vertices.push_back({start, color});
-	vertices.push_back({end, color});
-	dirty = true;
+    vertices.push_back({start, color});
+    vertices.push_back({end, color});
+    dirty = true;
 }
 
 void Lines::create() {
-	// Hack to let stuff get created for headless mode
-	if(!glGenBuffers) return;
+    // Hack to let stuff get created for headless mode
+    if (!glGenBuffers)
+        return;
 
-	glGenVertexArrays(1, &vao);
-	glGenBuffers(1, &vbo);
+    glGenVertexArrays(1, &vao);
+    glGenBuffers(1, &vbo);
 
-	glBindVertexArray(vao);
+    glBindVertexArray(vao);
 
-	glBindBuffer(GL_ARRAY_BUFFER, vbo);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vert), (GLvoid*)0);
-	glEnableVertexAttribArray(0);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vert), (GLvoid *)0);
+    glEnableVertexAttribArray(0);
 
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vert), (GLvoid*)sizeof(Vec3));
-	glEnableVertexAttribArray(1);
-	
-	glBindVertexArray(0);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vert), (GLvoid *)sizeof(Vec3));
+    glEnableVertexAttribArray(1);
+
+    glBindVertexArray(0);
 }
 
 void Lines::destroy() {
-	// Hack to let stuff get destroyed for headless mode
-	if(!glDeleteBuffers) return;
+    // Hack to let stuff get destroyed for headless mode
+    if (!glDeleteBuffers)
+        return;
 
-	glDeleteBuffers(1, &vbo);
-	glDeleteVertexArrays(1, &vao);
-	vao = vbo = 0;
-	vertices.clear();
-	dirty = false;
+    glDeleteBuffers(1, &vbo);
+    glDeleteVertexArrays(1, &vao);
+    vao = vbo = 0;
+    vertices.clear();
+    dirty = false;
 }
 
 Shader::Shader() {}
 
-Shader::Shader(std::string vertex, std::string fragment) {
-	load(vertex, fragment);
+Shader::Shader(std::string vertex, std::string fragment) { load(vertex, fragment); }
+
+Shader::Shader(Shader &&src) {
+    program = src.program;
+    src.program = 0;
+    v = src.v;
+    src.v = 0;
+    f = src.f;
+    src.f = 0;
 }
 
-Shader::Shader(Shader&& src) {
-	program = src.program; src.program = 0;
-	v = src.v; src.v = 0;
-	f = src.f; src.f = 0;
+void Shader::operator=(Shader &&src) {
+    destroy();
+    program = src.program;
+    src.program = 0;
+    v = src.v;
+    src.v = 0;
+    f = src.f;
+    src.f = 0;
 }
 
-void Shader::operator=(Shader&& src) {
-	destroy();
-	program = src.program; src.program = 0;
-	v = src.v; src.v = 0;
-	f = src.f; src.f = 0;
-}
+Shader::~Shader() { destroy(); }
 
-Shader::~Shader() {
-	destroy();
-}
-
-void Shader::bind() const {
-	glUseProgram(program);
-}
+void Shader::bind() const { glUseProgram(program); }
 
 void Shader::destroy() {
-	// Hack to let stuff get destroyed for headless mode
-	if(!glUseProgram) return;
+    // Hack to let stuff get destroyed for headless mode
+    if (!glUseProgram)
+        return;
 
-	glUseProgram(0);
-	glDeleteShader(v);
-	glDeleteShader(f);
-	glDeleteProgram(program);
-	v = f = program = 0;
+    glUseProgram(0);
+    glDeleteShader(v);
+    glDeleteShader(f);
+    glDeleteProgram(program);
+    v = f = program = 0;
 }
 
 void Shader::uniform_block(std::string name, GLuint i) const {
-	GLuint idx = glGetUniformBlockIndex(program, name.c_str());   
-	glUniformBlockBinding(program, idx, i);
+    GLuint idx = glGetUniformBlockIndex(program, name.c_str());
+    glUniformBlockBinding(program, idx, i);
 }
 
 void Shader::uniform(std::string name, int count, const Vec2 items[]) const {
-	glUniform2fv(loc(name), count, (GLfloat*)items);
+    glUniform2fv(loc(name), count, (GLfloat *)items);
 }
 
-void Shader::uniform(std::string name, GLfloat fl) const {
-	glUniform1f(loc(name), fl);
+void Shader::uniform(std::string name, GLfloat fl) const { glUniform1f(loc(name), fl); }
+
+void Shader::uniform(std::string name, const Mat4 &mat) const {
+    glUniformMatrix4fv(loc(name), 1, GL_FALSE, mat.data);
 }
 
-void Shader::uniform(std::string name, const Mat4& mat) const {
-	glUniformMatrix4fv(loc(name), 1, GL_FALSE, mat.data);
-}
+void Shader::uniform(std::string name, Vec3 vec3) const { glUniform3fv(loc(name), 1, vec3.data); }
 
-void Shader::uniform(std::string name, Vec3 vec3) const {
-	glUniform3fv(loc(name), 1, vec3.data);
-}
+void Shader::uniform(std::string name, Vec2 vec2) const { glUniform2fv(loc(name), 1, vec2.data); }
 
-void Shader::uniform(std::string name, Vec2 vec2) const {
-	glUniform2fv(loc(name), 1, vec2.data);
-}
+void Shader::uniform(std::string name, GLint i) const { glUniform1i(loc(name), i); }
 
-void Shader::uniform(std::string name, GLint i) const {
-	glUniform1i(loc(name), i);
-}
+void Shader::uniform(std::string name, GLuint i) const { glUniform1ui(loc(name), i); }
 
-void Shader::uniform(std::string name, GLuint i) const {
-	glUniform1ui(loc(name), i);
-}
+void Shader::uniform(std::string name, bool b) const { glUniform1i(loc(name), b); }
 
-void Shader::uniform(std::string name, bool b) const {
-	glUniform1i(loc(name), b);
-}
-
-GLuint Shader::loc(std::string name) const {
-
-	return glGetUniformLocation(program, name.c_str());
-}
+GLuint Shader::loc(std::string name) const { return glGetUniformLocation(program, name.c_str()); }
 
 void Shader::load(std::string vertex, std::string fragment) {
 
-	v = glCreateShader(GL_VERTEX_SHADER);
-	f = glCreateShader(GL_FRAGMENT_SHADER);
-	const GLchar* vs_c = vertex.c_str();
-	const GLchar* fs_c = fragment.c_str();
-	glShaderSource(v, 1, &vs_c, NULL);
-	glShaderSource(f, 1, &fs_c, NULL);
-	glCompileShader(v);
-	glCompileShader(f);
+    v = glCreateShader(GL_VERTEX_SHADER);
+    f = glCreateShader(GL_FRAGMENT_SHADER);
+    const GLchar *vs_c = vertex.c_str();
+    const GLchar *fs_c = fragment.c_str();
+    glShaderSource(v, 1, &vs_c, NULL);
+    glShaderSource(f, 1, &fs_c, NULL);
+    glCompileShader(v);
+    glCompileShader(f);
 
-	if(!validate(v)) {
-		destroy();
-		return;
-	}
-	if(!validate(f)) {
-		destroy();
-		return;
-	}
+    if (!validate(v)) {
+        destroy();
+        return;
+    }
+    if (!validate(f)) {
+        destroy();
+        return;
+    }
 
-	program = glCreateProgram();
-	glAttachShader(program, v);
-	glAttachShader(program, f);
-	glLinkProgram(program);
+    program = glCreateProgram();
+    glAttachShader(program, v);
+    glAttachShader(program, f);
+    glLinkProgram(program);
 }
 
 bool Shader::validate(GLuint program) {
 
-	GLint compiled = 0;
-	glGetShaderiv(program, GL_COMPILE_STATUS, &compiled);
-	if(compiled == GL_FALSE) {
-		
-		GLint len = 0;
-		glGetShaderiv(program, GL_INFO_LOG_LENGTH, &len);
+    GLint compiled = 0;
+    glGetShaderiv(program, GL_COMPILE_STATUS, &compiled);
+    if (compiled == GL_FALSE) {
 
-		GLchar* msg = new GLchar[len];
-		glGetShaderInfoLog(program, len, &len, msg);
+        GLint len = 0;
+        glGetShaderiv(program, GL_INFO_LOG_LENGTH, &len);
 
-		warn("Shader %d failed to compile: %s", program, msg);
-		delete[] msg;
+        GLchar *msg = new GLchar[len];
+        glGetShaderInfoLog(program, len, &len, msg);
 
-		return false;
-	}
-	return true;
+        warn("Shader %d failed to compile: %s", program, msg);
+        delete[] msg;
+
+        return false;
+    }
+    return true;
 }
 
 Framebuffer::Framebuffer() {}
 
 Framebuffer::Framebuffer(int outputs, Vec2 dim, int samples, bool d) {
-	setup(outputs, dim, samples, d);
+    setup(outputs, dim, samples, d);
 }
 
 void Framebuffer::setup(int outputs, Vec2 dim, int samples, bool d) {
-	destroy();
-	assert(outputs >= 0 && outputs < 31);
-	depth = d;
-	output_textures.resize(outputs);
-	resize(dim, samples);
+    destroy();
+    assert(outputs >= 0 && outputs < 31);
+    depth = d;
+    output_textures.resize(outputs);
+    resize(dim, samples);
 }
 
-Framebuffer::Framebuffer(Framebuffer&& src) {
-	output_textures = std::move(src.output_textures);
-	depth_tex = src.depth_tex; src.depth_tex = 0;
-	framebuffer = src.framebuffer; src.framebuffer = 0;
-	w = src.w; src.w = 0;
-	h = src.h; src.h = 0;
-	s = src.s; src.s = 0;
+Framebuffer::Framebuffer(Framebuffer &&src) {
+    output_textures = std::move(src.output_textures);
+    depth_tex = src.depth_tex;
+    src.depth_tex = 0;
+    framebuffer = src.framebuffer;
+    src.framebuffer = 0;
+    w = src.w;
+    src.w = 0;
+    h = src.h;
+    src.h = 0;
+    s = src.s;
+    src.s = 0;
 }
 
-void Framebuffer::operator=(Framebuffer&& src) {
-	destroy();
-	output_textures = std::move(src.output_textures);
-	depth_tex = src.depth_tex; src.depth_tex = 0;
-	framebuffer = src.framebuffer; src.framebuffer = 0;
-	w = src.w; src.w = 0;
-	h = src.h; src.h = 0;
-	s = src.s; src.s = 0;
+void Framebuffer::operator=(Framebuffer &&src) {
+    destroy();
+    output_textures = std::move(src.output_textures);
+    depth_tex = src.depth_tex;
+    src.depth_tex = 0;
+    framebuffer = src.framebuffer;
+    src.framebuffer = 0;
+    w = src.w;
+    src.w = 0;
+    h = src.h;
+    src.h = 0;
+    s = src.s;
+    src.s = 0;
 }
 
-Framebuffer::~Framebuffer() {
-	destroy();
-}
+Framebuffer::~Framebuffer() { destroy(); }
 
 void Framebuffer::create() {
-	// Hack to let stuff get created for headless mode
-	if(!glGenFramebuffers) return;
+    // Hack to let stuff get created for headless mode
+    if (!glGenFramebuffers)
+        return;
 
-	glGenFramebuffers(1, &framebuffer);
-	glGenTextures((GLsizei)output_textures.size(), (GLuint*)output_textures.data());
-	if(depth) glGenTextures(1, &depth_tex);
+    glGenFramebuffers(1, &framebuffer);
+    glGenTextures((GLsizei)output_textures.size(), (GLuint *)output_textures.data());
+    if (depth)
+        glGenTextures(1, &depth_tex);
 }
 
 void Framebuffer::destroy() {
-	// Hack to let stuff get destroyed for headless mode
-	if(!glDeleteFramebuffers) return;
+    // Hack to let stuff get destroyed for headless mode
+    if (!glDeleteFramebuffers)
+        return;
 
-	glDeleteTextures(1, &depth_tex);
-	glDeleteTextures((GLsizei)output_textures.size(), (GLuint*)output_textures.data());
-	glDeleteFramebuffers(1, &framebuffer);
-	depth_tex = framebuffer = 0;
+    glDeleteTextures(1, &depth_tex);
+    glDeleteTextures((GLsizei)output_textures.size(), (GLuint *)output_textures.data());
+    glDeleteFramebuffers(1, &framebuffer);
+    depth_tex = framebuffer = 0;
 }
 
 void Framebuffer::resize(Vec2 dim, int samples) {
 
-	destroy();
-	create();
-	
-	w = (int)dim.x;
-	h = (int)dim.y;
-	s = samples;
-	assert(w > 0 && h > 0 && s > 0);
+    destroy();
+    create();
 
-	glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+    w = (int)dim.x;
+    h = (int)dim.y;
+    s = samples;
+    assert(w > 0 && h > 0 && s > 0);
 
-	GLenum type = samples == 1 ? GL_TEXTURE_2D : GL_TEXTURE_2D_MULTISAMPLE;
+    glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
 
-	std::vector<GLenum> draw_buffers;
+    GLenum type = samples == 1 ? GL_TEXTURE_2D : GL_TEXTURE_2D_MULTISAMPLE;
 
-	for(GLenum i = 0; i < output_textures.size(); i++) {
+    std::vector<GLenum> draw_buffers;
 
-		glBindTexture(type, output_textures[i]);
+    for (GLenum i = 0; i < output_textures.size(); i++) {
 
-		if(s > 1) {
-			glTexImage2DMultisample(type, s, GL_RGB8, w, h, GL_TRUE);
-		} else {
-			glTexImage2D(type, 0, GL_RGB8, w, h, 0, GL_RGB, GL_UNSIGNED_BYTE, 0);
-			glTexParameteri(type, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-			glTexParameteri(type, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		}
+        glBindTexture(type, output_textures[i]);
 
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, type, output_textures[i], 0);
+        if (s > 1) {
+            glTexImage2DMultisample(type, s, GL_RGB8, w, h, GL_TRUE);
+        } else {
+            glTexImage2D(type, 0, GL_RGB8, w, h, 0, GL_RGB, GL_UNSIGNED_BYTE, 0);
+            glTexParameteri(type, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+            glTexParameteri(type, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        }
 
-		draw_buffers.push_back(GL_COLOR_ATTACHMENT0 + i);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, type, output_textures[i],
+                               0);
 
-		glBindTexture(type, 0);
-	}
+        draw_buffers.push_back(GL_COLOR_ATTACHMENT0 + i);
 
-	if(depth) {
-		glBindTexture(type, depth_tex);
-		if(s > 1) {
-			glTexImage2DMultisample(type, s, GL_DEPTH_COMPONENT32F, w, h, GL_TRUE);
-		} else {
-			glTexImage2D(type, 0, GL_DEPTH_COMPONENT32F, w, h, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0);
-			glTexParameteri(type, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-			glTexParameteri(type, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		}
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, type, depth_tex, 0);
-		glBindTexture(type, 0);
-	}
+        glBindTexture(type, 0);
+    }
 
-	glDrawBuffers((GLsizei)draw_buffers.size(), draw_buffers.data());
+    if (depth) {
+        glBindTexture(type, depth_tex);
+        if (s > 1) {
+            glTexImage2DMultisample(type, s, GL_DEPTH_COMPONENT32F, w, h, GL_TRUE);
+        } else {
+            glTexImage2D(type, 0, GL_DEPTH_COMPONENT32F, w, h, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0);
+            glTexParameteri(type, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+            glTexParameteri(type, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        }
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, type, depth_tex, 0);
+        glBindTexture(type, 0);
+    }
 
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glDrawBuffers((GLsizei)draw_buffers.size(), draw_buffers.data());
+
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 void Framebuffer::clear(int buf, Vec4 col) const {
-	assert(buf >= 0 && buf < (int)output_textures.size());
-	bind();
-	glClearBufferfv(GL_COLOR, buf, col.data);
+    assert(buf >= 0 && buf < (int)output_textures.size());
+    bind();
+    glClearBufferfv(GL_COLOR, buf, col.data);
 }
 
 void Framebuffer::clear_d() const {
-	bind();
-	glClear(GL_DEPTH_BUFFER_BIT);
+    bind();
+    glClear(GL_DEPTH_BUFFER_BIT);
 }
 
-void Framebuffer::bind_screen() {
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-}
+void Framebuffer::bind_screen() { glBindFramebuffer(GL_FRAMEBUFFER, 0); }
 
-void Framebuffer::bind() const {
-	glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
-}
+void Framebuffer::bind() const { glBindFramebuffer(GL_FRAMEBUFFER, framebuffer); }
 
 GLuint Framebuffer::get_output(int buf) const {
-	assert(buf >= 0 && buf < (int)output_textures.size());
-	return output_textures[buf];
+    assert(buf >= 0 && buf < (int)output_textures.size());
+    return output_textures[buf];
 }
 
-int Framebuffer::bytes() const {
-	return w * h * 4;
-}
+int Framebuffer::bytes() const { return w * h * 4; }
 
-int Framebuffer::samples() const {
-	return s;
-}
+int Framebuffer::samples() const { return s; }
 
-void Framebuffer::flush() const {
-	glFlush();
-}
+void Framebuffer::flush() const { glFlush(); }
 
 GLuint Framebuffer::get_depth() const {
-	assert(depth_tex);
-	return depth_tex;
+    assert(depth_tex);
+    return depth_tex;
 }
 
-bool Framebuffer::can_read_at() const {
-	return is_gl45 && s == 1;
+bool Framebuffer::can_read_at() const { return is_gl45 && s == 1; }
+
+void Framebuffer::read_at(int buf, int x, int y, GLubyte *data) const {
+    assert(can_read_at());
+    assert(buf >= 0 && buf < (int)output_textures.size());
+    glGetTextureSubImage(output_textures[buf], 0, x, y, 0, 1, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, 4,
+                         data);
 }
 
-void Framebuffer::read_at(int buf, int x, int y, GLubyte* data) const {
-	assert(can_read_at());
-	assert(buf >= 0 && buf < (int)output_textures.size());
-	glGetTextureSubImage(output_textures[buf], 0, x, y, 0, 1, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, 4, data);
+void Framebuffer::read(int buf, GLubyte *data) const {
+    assert(s == 1);
+    assert(buf >= 0 && buf < (int)output_textures.size());
+    glBindTexture(GL_TEXTURE_2D, output_textures[buf]);
+    glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
 }
 
-void Framebuffer::read(int buf, GLubyte* data) const {
-	assert(s == 1);
-	assert(buf >= 0 && buf < (int)output_textures.size());
-	glBindTexture(GL_TEXTURE_2D, output_textures[buf]);
-	glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
-}
+void Framebuffer::blit_to(int buf, const Framebuffer &fb, bool avg) const {
 
-void Framebuffer::blit_to(int buf, const Framebuffer& fb, bool avg) const {
+    assert(buf >= 0 && buf < (int)output_textures.size());
+    if (s > 1) {
+        Effects::resolve_to(buf, *this, fb, avg);
+        return;
+    }
 
-	assert(buf >= 0 && buf < (int)output_textures.size());
-	if(s > 1) {
-		Effects::resolve_to(buf, *this, fb, avg);
-		return;
-	}
+    glBindFramebuffer(GL_READ_FRAMEBUFFER, framebuffer);
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fb.framebuffer);
 
-	glBindFramebuffer(GL_READ_FRAMEBUFFER, framebuffer);
-	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fb.framebuffer);
+    glReadBuffer(GL_COLOR_ATTACHMENT0 + buf);
+    glBlitFramebuffer(0, 0, w, h, 0, 0, fb.w, fb.h, GL_COLOR_BUFFER_BIT, GL_NEAREST);
 
-	glReadBuffer(GL_COLOR_ATTACHMENT0 + buf);
-	glBlitFramebuffer(0, 0, w, h, 0, 0, fb.w, fb.h, GL_COLOR_BUFFER_BIT, GL_NEAREST);
-
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 void Framebuffer::blit_to_screen(int buf, Vec2 dim) const {
 
-	assert(buf >= 0 && buf < (int)output_textures.size());
-	if(s > 1) {
-		Effects::resolve_to_screen(buf, *this);
-		return;
-	}
+    assert(buf >= 0 && buf < (int)output_textures.size());
+    if (s > 1) {
+        Effects::resolve_to_screen(buf, *this);
+        return;
+    }
 
-	glBindFramebuffer(GL_READ_FRAMEBUFFER, framebuffer);
-	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+    glBindFramebuffer(GL_READ_FRAMEBUFFER, framebuffer);
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 
-	glReadBuffer(GL_COLOR_ATTACHMENT0 + buf);
-	glBlitFramebuffer(0, 0, w, h, 0, 0, (GLint)dim.x, (GLint)dim.y, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+    glReadBuffer(GL_COLOR_ATTACHMENT0 + buf);
+    glBlitFramebuffer(0, 0, w, h, 0, 0, (GLint)dim.x, (GLint)dim.y, GL_COLOR_BUFFER_BIT,
+                      GL_NEAREST);
 
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-bool Framebuffer::is_multisampled() const {
-	return s > 1;
-}
+bool Framebuffer::is_multisampled() const { return s > 1; }
 
 void Effects::init() {
-	// Hack to let stuff get created for headless mode
-	if(!glGenVertexArrays) return;
+    // Hack to let stuff get created for headless mode
+    if (!glGenVertexArrays)
+        return;
 
-	glGenVertexArrays(1, &vao);
-	resolve_shader.load(effects_v, resolve_f);
-	outline_shader.load(effects_v, outline_f);
-	outline_shader_ms.load(effects_v, is_gl45 || is_gl41 ? outline_ms_f_4 : outline_ms_f_33);
+    glGenVertexArrays(1, &vao);
+    resolve_shader.load(effects_v, resolve_f);
+    outline_shader.load(effects_v, outline_f);
+    outline_shader_ms.load(effects_v, is_gl45 || is_gl41 ? outline_ms_f_4 : outline_ms_f_33);
 }
 
 void Effects::destroy() {
-	// Hack to let stuff get destroyed for headless mode
-	if(!glDeleteVertexArrays) return;
+    // Hack to let stuff get destroyed for headless mode
+    if (!glDeleteVertexArrays)
+        return;
 
-	glDeleteVertexArrays(1, &vao);
-	vao = 0;
-	resolve_shader.~Shader();
-	outline_shader.~Shader();
-	outline_shader_ms.~Shader();
+    glDeleteVertexArrays(1, &vao);
+    vao = 0;
+    resolve_shader.~Shader();
+    outline_shader.~Shader();
+    outline_shader_ms.~Shader();
 }
 
-void Effects::outline(const Framebuffer& from, const Framebuffer& to, Vec3 color, Vec2 min, Vec2 max) {
+void Effects::outline(const Framebuffer &from, const Framebuffer &to, Vec3 color, Vec2 min,
+                      Vec2 max) {
 
-	glFlush();
-	to.bind();
+    glFlush();
+    to.bind();
 
-	Vec2 quad[] = {
-		Vec2{min.x, max.y},
-		min,
-		max,
-		Vec2{max.x, min.y}
-	};
+    Vec2 quad[] = {Vec2{min.x, max.y}, min, max, Vec2{max.x, min.y}};
 
-	if(from.is_multisampled()) {	
-		glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, from.get_depth());
-		outline_shader_ms.bind();
-		outline_shader_ms.uniform("depth", 0);
-		outline_shader_ms.uniform("color", color);
-		outline_shader_ms.uniform("bounds", 4, quad);
-	} else {
-		glBindTexture(GL_TEXTURE_2D, from.get_depth());
-		outline_shader.bind();
-		outline_shader.uniform("depth", 0);
-		outline_shader.uniform("color", color);
-		outline_shader.uniform("i_screen_size", 1.0f / Vec2(from.w, from.h));
-		outline_shader.uniform("bounds", 4, quad);
-	}
+    if (from.is_multisampled()) {
+        glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, from.get_depth());
+        outline_shader_ms.bind();
+        outline_shader_ms.uniform("depth", 0);
+        outline_shader_ms.uniform("color", color);
+        outline_shader_ms.uniform("bounds", 4, quad);
+    } else {
+        glBindTexture(GL_TEXTURE_2D, from.get_depth());
+        outline_shader.bind();
+        outline_shader.uniform("depth", 0);
+        outline_shader.uniform("color", color);
+        outline_shader.uniform("i_screen_size", 1.0f / Vec2(from.w, from.h));
+        outline_shader.uniform("bounds", 4, quad);
+    }
 
-	glBindVertexArray(vao);
-	glDisable(GL_DEPTH_TEST);
-	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-	glEnable(GL_DEPTH_TEST);
-	glBindVertexArray(0);
-	glFlush();
+    glBindVertexArray(vao);
+    glDisable(GL_DEPTH_TEST);
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+    glEnable(GL_DEPTH_TEST);
+    glBindVertexArray(0);
+    glFlush();
 }
 
-void Effects::resolve_to_screen(int buf, const Framebuffer& framebuffer) {
+void Effects::resolve_to_screen(int buf, const Framebuffer &framebuffer) {
 
-	Framebuffer::bind_screen();
+    Framebuffer::bind_screen();
 
-	resolve_shader.bind();
-	
-	assert(buf >= 0 && buf < (int)framebuffer.output_textures.size());
-	glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, framebuffer.output_textures[buf]);
+    resolve_shader.bind();
 
-	resolve_shader.uniform("tex", 0);
-	resolve_shader.uniform("samples", framebuffer.s);
-	resolve_shader.uniform("bounds", 4, screen_quad);
+    assert(buf >= 0 && buf < (int)framebuffer.output_textures.size());
+    glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, framebuffer.output_textures[buf]);
 
-	glBindVertexArray(vao);
-	glDisable(GL_DEPTH_TEST);
-	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-	glEnable(GL_DEPTH_TEST);
-	glBindVertexArray(0);
+    resolve_shader.uniform("tex", 0);
+    resolve_shader.uniform("samples", framebuffer.s);
+    resolve_shader.uniform("bounds", 4, screen_quad);
+
+    glBindVertexArray(vao);
+    glDisable(GL_DEPTH_TEST);
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+    glEnable(GL_DEPTH_TEST);
+    glBindVertexArray(0);
 }
 
-void Effects::resolve_to(int buf, const Framebuffer& from, const Framebuffer& to, bool avg) {
+void Effects::resolve_to(int buf, const Framebuffer &from, const Framebuffer &to, bool avg) {
 
-	to.bind();
+    to.bind();
 
-	resolve_shader.bind();
-	
-	assert(buf >= 0 && buf < (int)from.output_textures.size());
-	glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, from.output_textures[buf]);
+    resolve_shader.bind();
 
-	resolve_shader.uniform("tex", 0);
-	resolve_shader.uniform("samples", avg ? from.s : 1);
-	resolve_shader.uniform("bounds", 4, screen_quad);
+    assert(buf >= 0 && buf < (int)from.output_textures.size());
+    glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, from.output_textures[buf]);
 
-	glBindVertexArray(vao);
-	glDisable(GL_DEPTH_TEST);
-	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-	glEnable(GL_DEPTH_TEST);
-	glBindVertexArray(0);
+    resolve_shader.uniform("tex", 0);
+    resolve_shader.uniform("samples", avg ? from.s : 1);
+    resolve_shader.uniform("bounds", 4, screen_quad);
+
+    glBindVertexArray(vao);
+    glDisable(GL_DEPTH_TEST);
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+    glEnable(GL_DEPTH_TEST);
+    glBindVertexArray(0);
 }
 
-static void debug_proc(GLenum glsource, GLenum gltype, GLuint, GLenum severity, GLsizei, const GLchar* glmessage, const void*) {
+static void debug_proc(GLenum glsource, GLenum gltype, GLuint, GLenum severity, GLsizei,
+                       const GLchar *glmessage, const void *) {
 
-	std::string message(glmessage);
-	std::string source, type;
+    std::string message(glmessage);
+    std::string source, type;
 
-	switch(glsource) {
-	case GL_DEBUG_SOURCE_API:
-		source = "OpenGL API";
-		break;
-	case GL_DEBUG_SOURCE_WINDOW_SYSTEM:
-		source = "Window System";
-		break;
-	case GL_DEBUG_SOURCE_SHADER_COMPILER:
-		source = "Shader Compiler";
-		break;
-	case GL_DEBUG_SOURCE_THIRD_PARTY:
-		source = "Third Party";
-		break;
-	case GL_DEBUG_SOURCE_APPLICATION:
-		source = "Application";
-		break;
-	case GL_DEBUG_SOURCE_OTHER:
-		source = "Other";
-		break;
-	}
+    switch (glsource) {
+    case GL_DEBUG_SOURCE_API:
+        source = "OpenGL API";
+        break;
+    case GL_DEBUG_SOURCE_WINDOW_SYSTEM:
+        source = "Window System";
+        break;
+    case GL_DEBUG_SOURCE_SHADER_COMPILER:
+        source = "Shader Compiler";
+        break;
+    case GL_DEBUG_SOURCE_THIRD_PARTY:
+        source = "Third Party";
+        break;
+    case GL_DEBUG_SOURCE_APPLICATION:
+        source = "Application";
+        break;
+    case GL_DEBUG_SOURCE_OTHER:
+        source = "Other";
+        break;
+    }
 
-	switch(gltype) {
-	case GL_DEBUG_TYPE_ERROR:
-		type = "Error";
-		break;
-	case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR:
-		type = "Deprecated";
-		break;
-	case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR:
-		type = "Undefined Behavior";
-		break;
-	case GL_DEBUG_TYPE_PORTABILITY:
-		type = "Portability";
-		break;
-	case GL_DEBUG_TYPE_PERFORMANCE:
-		type = "Performance";
-		break;
-	case GL_DEBUG_TYPE_MARKER:
-		type = "Marker";
-		break;
-	case GL_DEBUG_TYPE_PUSH_GROUP:
-		type = "Push Group";
-		break;
-	case GL_DEBUG_TYPE_POP_GROUP:
-		type = "Pop Group";
-		break;
-	case GL_DEBUG_TYPE_OTHER:
-		type = "Other";
-		break;
-	}
+    switch (gltype) {
+    case GL_DEBUG_TYPE_ERROR:
+        type = "Error";
+        break;
+    case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR:
+        type = "Deprecated";
+        break;
+    case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR:
+        type = "Undefined Behavior";
+        break;
+    case GL_DEBUG_TYPE_PORTABILITY:
+        type = "Portability";
+        break;
+    case GL_DEBUG_TYPE_PERFORMANCE:
+        type = "Performance";
+        break;
+    case GL_DEBUG_TYPE_MARKER:
+        type = "Marker";
+        break;
+    case GL_DEBUG_TYPE_PUSH_GROUP:
+        type = "Push Group";
+        break;
+    case GL_DEBUG_TYPE_POP_GROUP:
+        type = "Pop Group";
+        break;
+    case GL_DEBUG_TYPE_OTHER:
+        type = "Other";
+        break;
+    }
 
-	switch(severity) {
-	case GL_DEBUG_SEVERITY_HIGH:
-	case GL_DEBUG_SEVERITY_MEDIUM:
-		warn("OpenGL | source: %s type: %s message: %s", source.c_str(), type.c_str(), message.c_str());
-		break;
-	}
+    switch (severity) {
+    case GL_DEBUG_SEVERITY_HIGH:
+    case GL_DEBUG_SEVERITY_MEDIUM:
+        warn("OpenGL | source: %s type: %s message: %s", source.c_str(), type.c_str(),
+             message.c_str());
+        break;
+    }
 }
 
 static void check_leaked_handles() {
 
-	#define GL_CHECK(type) if(glIs##type && glIs##type(i) == GL_TRUE) { warn("Leaked OpenGL handle %u of type %s", i, #type); leaked = true;}
+#define GL_CHECK(type)                                                                             \
+    if (glIs##type && glIs##type(i) == GL_TRUE) {                                                  \
+        warn("Leaked OpenGL handle %u of type %s", i, #type);                                      \
+        leaked = true;                                                                             \
+    }
 
-	bool leaked = false;
-	for(GLuint i = 0; i < 10000; i++) {
-		GL_CHECK(Texture);
-		GL_CHECK(Buffer);
-		GL_CHECK(Framebuffer);
-		GL_CHECK(Renderbuffer);
-		GL_CHECK(VertexArray);
-		GL_CHECK(Program);
-		GL_CHECK(ProgramPipeline);
-		GL_CHECK(Query);
+    bool leaked = false;
+    for (GLuint i = 0; i < 10000; i++) {
+        GL_CHECK(Texture);
+        GL_CHECK(Buffer);
+        GL_CHECK(Framebuffer);
+        GL_CHECK(Renderbuffer);
+        GL_CHECK(VertexArray);
+        GL_CHECK(Program);
+        GL_CHECK(ProgramPipeline);
+        GL_CHECK(Query);
 
-		if(glIsShader(i) == GL_TRUE) {
+        if (glIsShader(i) == GL_TRUE) {
 
-			leaked = true;
-			GLint shader_len = 0;
-			glGetShaderiv(i, GL_SHADER_SOURCE_LENGTH, &shader_len);
+            leaked = true;
+            GLint shader_len = 0;
+            glGetShaderiv(i, GL_SHADER_SOURCE_LENGTH, &shader_len);
 
-			GLchar* shader = new GLchar[shader_len];
-			glGetShaderSource(i, shader_len, nullptr, shader);
+            GLchar *shader = new GLchar[shader_len];
+            glGetShaderSource(i, shader_len, nullptr, shader);
 
-			warn("Leaked OpenGL shader %u. Source: %s", i, shader); 
+            warn("Leaked OpenGL shader %u. Source: %s", i, shader);
 
-			delete[] shader;
-		}
-	}
+            delete[] shader;
+        }
+    }
 
-	if(leaked) {
-		warn("Leaked OpenGL objects!");
-	}
+    if (leaked) {
+        warn("Leaked OpenGL objects!");
+    }
 
-	#undef GL_CHECK
+#undef GL_CHECK
 }
 
 static void setup_debug_proc() {
-	if(!glDebugMessageCallback || !glDebugMessageControl) return;
-	glEnable(GL_DEBUG_OUTPUT);
-	glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
-	glDebugMessageCallback(debug_proc, nullptr);
-	glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
+    if (!glDebugMessageCallback || !glDebugMessageControl)
+        return;
+    glEnable(GL_DEBUG_OUTPUT);
+    glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+    glDebugMessageCallback(debug_proc, nullptr);
+    glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
 }
 
 const std::string Effects::effects_v = R"(
@@ -1095,7 +1099,7 @@ void main() {
 })";
 
 namespace Shaders {
-	const std::string line_v = R"(
+const std::string line_v = R"(
 #version 330 core
 
 layout (location = 0) in vec3 v_pos;
@@ -1108,7 +1112,7 @@ void main() {
 	gl_Position = mvp * vec4(v_pos, 1.0f);
 	f_col = v_col;
 })";
-	const std::string line_f = R"(
+const std::string line_f = R"(
 #version 330 core
 
 layout (location = 0) out vec4 out_col;
@@ -1120,8 +1124,8 @@ smooth in vec3 f_col;
 void main() {
 	out_id = vec4(0.0f);
 	out_col = vec4(f_col, alpha);
-})"; 
-	const std::string mesh_v = R"(
+})";
+const std::string mesh_v = R"(
 #version 330 core
 
 layout (location = 0) in vec3 v_pos;
@@ -1138,7 +1142,7 @@ void main() {
 	f_norm = (normal * vec4(v_norm, 0.0f)).xyz;
 	gl_Position = mvp * vec4(v_pos, 1.0f);
 })";
-	const std::string inst_v = R"(
+const std::string inst_v = R"(
 #version 330 core
 
 layout (location = 0) in vec3 v_pos;
@@ -1161,7 +1165,7 @@ void main() {
 	f_norm = (n * vec4(v_norm, 0.0f)).xyz;
 	gl_Position = proj * mv * vec4(v_pos, 1.0f);
 })";
-	const std::string mesh_f = R"(
+const std::string mesh_f = R"(
 #version 330 core
 
 uniform bool solid, use_v_id;
@@ -1193,7 +1197,7 @@ void main() {
 		float light = clamp(0.3f + 0.6f * ndotl, 0.0f, alpha);
 		out_col = vec4(light * use_color, alpha);
 	}
-})"; 
+})";
 const std::string dome_v = R"(
 #version 330 core
 
@@ -1237,6 +1241,7 @@ void main() {
 		}
 	}
 	else discard;
-})"; 
-}
-}
+})";
+
+} // namespace Shaders
+} // namespace GL

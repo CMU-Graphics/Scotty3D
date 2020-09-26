@@ -8,17 +8,16 @@
 
 namespace PT {
 
-template<typename Primitive>
-class BVH {
+template <typename Primitive> class BVH {
 public:
     BVH() = default;
-    BVH(std::vector<Primitive>&& primitives, size_t max_leaf_size = 1);
-    void build(std::vector<Primitive>&& primitives, size_t max_leaf_size = 1);
+    BVH(std::vector<Primitive> &&primitives, size_t max_leaf_size = 1);
+    void build(std::vector<Primitive> &&primitives, size_t max_leaf_size = 1);
 
     BBox bbox() const;
-    Trace hit(const Ray& ray) const;
+    Trace hit(const Ray &ray) const;
 
-    size_t visualize(GL::Lines& lines, GL::Lines& active, size_t level, const Mat4& trans) const;
+    size_t visualize(GL::Lines &lines, GL::Lines &active, size_t level, const Mat4 &trans) const;
 
     std::vector<Primitive> destructure();
     void clear();
@@ -37,11 +36,10 @@ private:
     std::vector<Primitive> primitives;
 };
 
-}
+} // namespace PT
 
 #ifdef SCOTTY3D_BUILD_REF
 #include "../reference/bvh.cpp"
 #else
 #include "../student/bvh.cpp"
 #endif
-

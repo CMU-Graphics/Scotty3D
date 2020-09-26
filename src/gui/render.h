@@ -1,13 +1,13 @@
 
 #pragma once
 
-#include <mutex>
 #include <SDL2/SDL.h>
+#include <mutex>
 
-#include "../util/camera.h"
-#include "../scene/scene.h"
 #include "../platform/gl.h"
 #include "../rays/pathtracer.h"
+#include "../scene/scene.h"
+#include "../util/camera.h"
 
 #include "widgets.h"
 
@@ -18,19 +18,20 @@ class Manager;
 
 class Render {
 public:
-    Render(Scene& scene, Vec2 dim);
+    Render(Scene &scene, Vec2 dim);
 
-    std::string headless_render(Animate& animate, Scene& scene, std::string output, 
-        bool a, int w, int h, int s, int ls, int d, float exp, bool w_from_ar);
-    std::pair<float,float> completion_time() const;
+    std::string headless_render(Animate &animate, Scene &scene, std::string output, bool a, int w,
+                                int h, int s, int ls, int d, float exp, bool w_from_ar);
+    std::pair<float, float> completion_time() const;
 
-    bool keydown(Widgets& widgets, SDL_Keysym key);
-    Mode UIsidebar(Manager& manager, Undo& undo, Scene& scene, Scene_Maybe selected, Camera& user_cam);
-    void render(Scene_Maybe obj, Widgets& widgets, Camera& user_cam);
-    
+    bool keydown(Widgets &widgets, SDL_Keysym key);
+    Mode UIsidebar(Manager &manager, Undo &undo, Scene &scene, Scene_Maybe selected,
+                   Camera &user_cam);
+    void render(Scene_Maybe obj, Widgets &widgets, Camera &user_cam);
+
     void update_dim(Vec2 dim);
     void load_cam(Vec3 pos, Vec3 front, float ar, float fov);
-    const Camera& get_cam() const;
+    const Camera &get_cam() const;
 
 private:
     GL::Lines bvh_viz, bvh_active;
@@ -45,4 +46,4 @@ private:
     size_t bvh_levels = 0;
 };
 
-}
+} // namespace Gui

@@ -1,6 +1,6 @@
 
-#include "debug.h"
 #include "../rays/env_light.h"
+#include "debug.h"
 
 #include <limits>
 
@@ -16,7 +16,7 @@ Light_Sample Env_Map::sample() const {
     Samplers::Sphere::Uniform uniform;
     ret.direction = uniform.sample(ret.pdf);
 
-    // Once you've implemented Samplers::Sphere::Image, remove the above and 
+    // Once you've implemented Samplers::Sphere::Image, remove the above and
     // uncomment this line to use importance sampling instead.
     // ret.direction = sampler.sample(ret.pdf);
 
@@ -42,7 +42,8 @@ Light_Sample Env_Hemisphere::sample() const {
 }
 
 Spectrum Env_Hemisphere::sample_direction(Vec3 dir) const {
-    if(dir.y > 0.0f) return radiance;
+    if (dir.y > 0.0f)
+        return radiance;
     return {};
 }
 
@@ -54,8 +55,6 @@ Light_Sample Env_Sphere::sample() const {
     return ret;
 }
 
-Spectrum Env_Sphere::sample_direction(Vec3) const {
-    return radiance;
-}
+Spectrum Env_Sphere::sample_direction(Vec3) const { return radiance; }
 
-}
+} // namespace PT

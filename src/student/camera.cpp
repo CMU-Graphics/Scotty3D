@@ -1,6 +1,6 @@
 
-#include "debug.h"
 #include "../util/camera.h"
+#include "debug.h"
 
 Ray Camera::generate_ray(Vec2 screen_coord) const {
 

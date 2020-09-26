@@ -23,17 +23,17 @@ Debug_Data debug_data;
             // This runs when the button is clicked
         }
 
-    Similarly, you can directly connect UI elements to data values by 
+    Similarly, you can directly connect UI elements to data values by
     passing in the address of your storage variable:
 
         Checkbox("My Checkbox", &bool_variable);
 
-    Then, bool_variable will always reflect the state of the checkbox. 
+    Then, bool_variable will always reflect the state of the checkbox.
 
     These constructs are composable to make pretty advanced UI elements!
     The whole Scotty3D UI is implemented in this way.
-    
-    Some useful functions are documented below, and you can refer to 
+
+    Some useful functions are documented below, and you can refer to
     deps/imgui/imgui.h for many more.
 */
 void student_debug_ui() {
@@ -43,13 +43,13 @@ void student_debug_ui() {
     Checkbox("Pathtracer: use normal colors", &debug_data.normal_colors);
 
     // ImGui examples
-    if(Button("Press Me")) {
+    if (Button("Press Me")) {
         info("Debug button pressed!");
     }
 
     // We need to store values somewhere, or else they will get reset every time
     // we run this function (which is every frame). For convenience, we make them
-    // static, which gives them the same storage class as global variables. 
+    // static, which gives them the same storage class as global variables.
 
     static int int_value = 0;
     InputInt("Int Input", &int_value);

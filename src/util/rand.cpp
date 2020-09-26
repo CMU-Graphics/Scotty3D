@@ -15,20 +15,17 @@ float unit() {
     return d(rng);
 }
 
-int integer(int min, int max) {
-    return (int)lerp((float)min, (float)max, unit());
-}
+int integer(int min, int max) { return (int)lerp((float)min, (float)max, unit()); }
 
-bool coin_flip(float p) {
-    return unit() < p;
-}
+bool coin_flip(float p) { return unit() < p; }
 
 void seed() {
     std::random_device r;
-    std::random_device::result_type seed = r() ^ 
-            (std::random_device::result_type)std::hash<std::thread::id>()(std::this_thread::get_id()) ^
-            (std::random_device::result_type)std::hash<time_t>()(std::time(nullptr));
+    std::random_device::result_type seed =
+        r() ^
+        (std::random_device::result_type)std::hash<std::thread::id>()(std::this_thread::get_id()) ^
+        (std::random_device::result_type)std::hash<time_t>()(std::time(nullptr));
     rng.seed(seed);
 }
 
-}
+} // namespace RNG

@@ -1,12 +1,12 @@
 
-#include "debug.h"
 #include "../rays/bvh.h"
+#include "debug.h"
 #include <stack>
 
 namespace PT {
 
-template<typename Primitive>
-void BVH<Primitive>::build(std::vector<Primitive>&& prims, size_t max_leaf_size) {
+template <typename Primitive>
+void BVH<Primitive>::build(std::vector<Primitive> &&prims, size_t max_leaf_size) {
 
     // NOTE (PathTracer):
     // This BVH is parameterized on the type of the primitive it contains. This allows
@@ -37,12 +37,12 @@ void BVH<Primitive>::build(std::vector<Primitive>&& prims, size_t max_leaf_size)
     // primitives.
 
     BBox box;
-    for(const Primitive& prim : primitives) box.enclose(prim.bbox());
+    for (const Primitive &prim : primitives)
+        box.enclose(prim.bbox());
     new_node(box, 0, primitives.size(), 0, 0);
 }
 
-template<typename Primitive>
-Trace BVH<Primitive>::hit(const Ray& ray) const {
+template <typename Primitive> Trace BVH<Primitive>::hit(const Ray &ray) const {
 
     // TODO (PathTracer): Task 3
     // Implement ray - BVH intersection test. A ray intersects
@@ -53,24 +53,23 @@ Trace BVH<Primitive>::hit(const Ray& ray) const {
     // Again, remember you can use hit() on any Primitive value.
 
     Trace ret;
-    for(const Primitive& prim : primitives) {
+    for (const Primitive &prim : primitives) {
         Trace hit = prim.hit(ray);
         ret = Trace::min(ret, hit);
     }
     return ret;
 }
 
-template<typename Primitive>
-BVH<Primitive>::BVH(std::vector<Primitive>&& prims, size_t max_leaf_size) {
+template <typename Primitive>
+BVH<Primitive>::BVH(std::vector<Primitive> &&prims, size_t max_leaf_size) {
     build(std::move(prims), max_leaf_size);
 }
 
-template<typename Primitive>
-bool BVH<Primitive>::Node::is_leaf() const {
+template <typename Primitive> bool BVH<Primitive>::Node::is_leaf() const {
     return l == 0 && r == 0;
 }
 
-template<typename Primitive>
+template <typename Primitive>
 size_t BVH<Primitive>::new_node(BBox box, size_t start, size_t size, size_t l, size_t r) {
     Node n;
     n.bbox = box;
@@ -82,49 +81,44 @@ size_t BVH<Primitive>::new_node(BBox box, size_t start, size_t size, size_t l, s
     return nodes.size() - 1;
 }
 
-template<typename Primitive>
-BBox BVH<Primitive>::bbox() const {
-    return nodes[0].bbox;
-}
+template <typename Primitive> BBox BVH<Primitive>::bbox() const { return nodes[0].bbox; }
 
-template<typename Primitive>
-std::vector<Primitive> BVH<Primitive>::destructure() {
+template <typename Primitive> std::vector<Primitive> BVH<Primitive>::destructure() {
     nodes.clear();
     return std::move(primitives);
 }
 
-template<typename Primitive>
-void BVH<Primitive>::clear() {
+template <typename Primitive> void BVH<Primitive>::clear() {
     nodes.clear();
     primitives.clear();
 }
 
-template<typename Primitive>
-size_t BVH<Primitive>::visualize(GL::Lines& lines, GL::Lines& active, size_t level, const Mat4& trans) const {
+template <typename Primitive>
+size_t BVH<Primitive>::visualize(GL::Lines &lines, GL::Lines &active, size_t level,
+                                 const Mat4 &trans) const {
 
-    std::stack<std::pair<size_t,size_t>> tstack;
-    tstack.push({0,0});
+    std::stack<std::pair<size_t, size_t>> tstack;
+    tstack.push({0, 0});
     size_t max_level = 0;
 
-    if(nodes.empty()) return max_level;
+    if (nodes.empty())
+        return max_level;
 
     while (!tstack.empty()) {
 
         auto [idx, lvl] = tstack.top();
         max_level = std::max(max_level, lvl);
-        const Node& node = nodes[idx];
+        const Node &node = nodes[idx];
         tstack.pop();
 
         Vec3 color = lvl == level ? Vec3(1.0f, 0.0f, 0.0f) : Vec3(1.0f);
-        GL::Lines& add = lvl == level ? active : lines;
+        GL::Lines &add = lvl == level ? active : lines;
 
         BBox box = node.bbox;
         box.transform(trans);
         Vec3 min = box.min, max = box.max;
 
-        auto edge = [&](Vec3 a, Vec3 b) {
-            add.add(a, b, color);
-        };
+        auto edge = [&](Vec3 a, Vec3 b) { add.add(a, b, color); };
 
         edge(min, Vec3{max.x, min.y, min.z});
         edge(min, Vec3{min.x, max.y, min.z});
@@ -139,11 +133,13 @@ size_t BVH<Primitive>::visualize(GL::Lines& lines, GL::Lines& active, size_t lev
         edge(Vec3{max.x, min.y, min.z}, Vec3{max.x, max.y, min.z});
         edge(Vec3{max.x, min.y, min.z}, Vec3{max.x, min.y, max.z});
 
-        if(node.l) tstack.push({node.l, lvl + 1});
-        if(node.r) tstack.push({node.r, lvl + 1});
+        if (node.l)
+            tstack.push({node.l, lvl + 1});
+        if (node.r)
+            tstack.push({node.r, lvl + 1});
 
-        if(!node.l && !node.r) {
-            for(size_t i = node.start; i < node.start + node.size; i++) {
+        if (!node.l && !node.r) {
+            for (size_t i = node.start; i < node.start + node.size; i++) {
                 size_t c = primitives[i].visualize(lines, active, level - lvl, trans);
                 max_level = std::max(c, max_level);
             }
@@ -152,4 +148,4 @@ size_t BVH<Primitive>::visualize(GL::Lines& lines, GL::Lines& active, size_t lev
     return max_level;
 }
 
-}
+} // namespace PT
