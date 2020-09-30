@@ -88,7 +88,7 @@ bool Manager::keydown(Undo &undo, SDL_Keysym key, Scene &scene, Camera &cam) {
         return true;
     case SDLK_f: {
         if (mode == Mode::rig) {
-            cam.look_at(Vec3{}, -cam.front() * cam.dist());
+            cam.look_at(Vec3{}, cam.front() - cam.dist());
             return true;
         } else if (layout.selected()) {
             frame(scene, cam);

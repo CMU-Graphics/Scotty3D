@@ -264,7 +264,7 @@ void Renderer::halfedge_editor(Renderer::HalfedgeOpt opt) {
 
     MeshOpt fopt = MeshOpt();
     fopt.modelview = opt.modelview;
-    fopt.color = opt.color;
+    fopt.color = opt.f_color;
     fopt.per_vert_id = true;
     fopt.sel_color = Gui::Color::outline;
     fopt.sel_id = opt.editor.select_id();
@@ -278,14 +278,16 @@ void Renderer::halfedge_editor(Renderer::HalfedgeOpt opt) {
     inst_shader.uniform("solid", false);
     inst_shader.uniform("proj", _proj);
     inst_shader.uniform("modelview", opt.modelview);
-    inst_shader.uniform("color", opt.color);
     inst_shader.uniform("alpha", fopt.alpha);
     inst_shader.uniform("sel_color", Gui::Color::outline);
     inst_shader.uniform("hov_color", Gui::Color::hover);
     inst_shader.uniform("sel_id", fopt.sel_id);
     inst_shader.uniform("hov_id", fopt.hov_id);
 
+    inst_shader.uniform("color", opt.v_color);
     spheres.render();
+    inst_shader.uniform("color", opt.e_color);
     cylinders.render();
+    inst_shader.uniform("color", opt.he_color);
     arrows.render();
 }

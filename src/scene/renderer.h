@@ -44,7 +44,10 @@ public:
         HalfedgeOpt(Gui::Model &e) : editor(e) {}
         Gui::Model &editor;
         Mat4 modelview;
-        Vec3 color;
+        Vec3 f_color = Vec3{1.0f};
+        Vec3 v_color = Vec3{1.0f};
+        Vec3 e_color = Vec3{0.8f};
+        Vec3 he_color = Vec3{0.6f};
     };
 
     // NOTE(max): updates & uses the indices in mesh for selection/traversal

@@ -72,6 +72,7 @@ private:
     Transform_Data trans_begin;
     GL::Instances spheres, cylinders, arrows;
     GL::Mesh face_mesh;
+    Vec3 f_col = Vec3{1.0f}, v_col = Vec3{1.0f}, e_col = Vec3{0.8f}, he_col = Vec3{0.6f};
 
     // This all needs to be updated when the mesh connectivity changes
     unsigned int selected_elem_id = UINT32_MAX, hovered_elem_id = UINT32_MAX;

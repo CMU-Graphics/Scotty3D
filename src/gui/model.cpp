@@ -65,6 +65,12 @@ void Model::update_vertex(Halfedge_Mesh::VertexRef vert) {
         size_t idx = id_to_info[h->face()->id()].instance;
         face_viz(h->face(), face_mesh.edit_verts(), face_mesh.edit_indices(), idx);
 
+        Halfedge_Mesh::HalfedgeRef fh = h->face()->halfedge();
+        do {
+            halfedge_viz(fh, arrows.get(id_to_info[fh->id()].instance).transform);
+            fh = fh->next();
+        } while (fh != h->face()->halfedge());
+
         h = h->twin()->next();
     } while (h != vert->halfedge());
 
@@ -283,10 +289,20 @@ void Model::halfedge_viz(Halfedge_Mesh::HalfedgeRef h, Mat4 &transform) {
     float v0s = vert_sizes[v_0->id()], v1s = vert_sizes[v_1->id()];
     float s = 0.3f * (v0s < v1s ? v0s : v1s);
 
-    // Move to center of edge and away from edge
+    // Move to center of edge and towards center of face
     Vec3 offset = (v1 - v0) * 0.2f;
-    Vec3 face_n = h->face()->normal();
-    offset += cross(face_n, dir).unit() * s * 0.2f + face_n * s * 0.05f;
+    Vec3 base = h->face()->halfedge()->vertex()->pos;
+    
+    if(base == v0) {
+        base = h->next()->next()->vertex()->pos;
+    } else if(base == v1) {
+        Halfedge_Mesh::HalfedgeRef hf = h;
+        do { hf = hf->next(); } while(hf->next() != h);
+        base = hf->vertex()->pos;
+    }
+
+    Vec3 face_n = cross(base - v0, base - v1).unit();
+    offset += cross(face_n, dir).unit() * s * 0.2f;
 
     // Align edge
     if (dir.y == 1.0f || dir.y == -1.0f) {
@@ -553,11 +569,19 @@ void Model::zoom_to(Halfedge_Mesh::ElementRef ref, Camera &cam) {
 
     float d = cam.dist();
     Vec3 center = Halfedge_Mesh::center_of(ref);
-    Vec3 pos = center - my_mesh->normal_of(ref) * d;
+    Vec3 pos = center + my_mesh->normal_of(ref) * d;
     cam.look_at(center, pos);
 }
 
 std::string Model::UIsidebar(Undo &undo, Widgets &widgets, Scene_Maybe obj_opt, Camera &camera) {
+
+    if(ImGui::CollapsingHeader("Edit Colors")) {
+        ImGui::ColorEdit3("Face", f_col.data);
+        ImGui::ColorEdit3("Vertex", v_col.data);
+        ImGui::ColorEdit3("Edge", e_col.data);
+        ImGui::ColorEdit3("Halfedge", he_col.data);
+    }
+    ImGui::Separator();
 
     if (!obj_opt.has_value())
         return {};
@@ -752,7 +776,10 @@ void Model::render(Scene_Maybe obj_opt, Widgets &widgets, Camera &cam) {
 
     Renderer::HalfedgeOpt opts(*this);
     opts.modelview = view;
-    opts.color = obj.material.layout_color();
+    opts.v_color = v_col;
+    opts.f_color = f_col;
+    opts.e_color = e_col;
+    opts.he_color = he_col;
     Renderer::get().halfedge_editor(opts);
 
     auto elem = selected_element();

@@ -22,7 +22,10 @@ void Camera::look_at(Vec3 cent, Vec3 pos) {
     position = pos;
     looking_at = cent;
     radius = (pos - cent).norm();
-    rot = Quat::euler(Mat4::rotate_z_to(front()).to_euler());
+    if(dot(front(), UP) == -1.0f)
+        rot = Quat::euler(Vec3{270.0f, 0.0f, 0.0f});
+    else
+        rot = Quat::euler(Mat4::rotate_z_to(front()).to_euler());
     update_pos();
 }
 
