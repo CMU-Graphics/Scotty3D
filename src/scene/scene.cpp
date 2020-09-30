@@ -314,11 +314,6 @@ static void load_node(Scene &scobj, std::vector<std::string> &errors,
             }
         }
 
-        if (!mesh->HasNormals()) {
-            errors.push_back("Mesh has no normals.");
-            continue;
-        }
-
         std::vector<Vec3> verts;
 
         for (unsigned int j = 0; j < mesh->mNumVertices; j++) {
@@ -500,10 +495,11 @@ std::string Scene::load(bool new_scene, Undo &undo, Gui::Manager &gui, std::stri
 
     Assimp::Importer importer;
     const aiScene *scene = importer.ReadFile(
-        file.c_str(), aiProcess_GenSmoothNormals | aiProcess_PopulateArmatureData |
-                          aiProcess_ValidateDataStructure | aiProcess_OptimizeMeshes |
-                          aiProcess_FindInstances | aiProcess_FindDegenerates |
-                          aiProcess_JoinIdenticalVertices | aiProcess_FindInvalidData);
+        file.c_str(), aiProcess_PopulateArmatureData | aiProcess_FixInfacingNormals |
+                      aiProcess_ValidateDataStructure | aiProcess_OptimizeMeshes |
+                      aiProcess_FindInstances | aiProcess_FindDegenerates |
+                      aiProcess_DropNormals | aiProcess_JoinIdenticalVertices |
+                      aiProcess_FindInvalidData);
 
     if (!scene) {
         return "Parsing scene " + file + ": " + std::string(importer.GetErrorString());
