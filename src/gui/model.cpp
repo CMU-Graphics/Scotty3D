@@ -286,7 +286,6 @@ void Model::halfedge_viz(Halfedge_Mesh::HalfedgeRef h, Mat4 &transform) {
     // Move to center of edge and away from edge
     Vec3 offset = (v1 - v0) * 0.2f;
     Vec3 face_n = h->face()->normal();
-    Vec3 avg = 0.5f * (v0 + v1);
     offset += cross(face_n, dir).unit() * s * 0.2f + face_n * s * 0.05f;
 
     // Align edge
