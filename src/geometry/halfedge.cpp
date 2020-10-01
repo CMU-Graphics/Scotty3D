@@ -28,6 +28,7 @@ void Halfedge_Mesh::clear() {
     faces.clear();
     boundaries.clear();
     render_dirty_flag = true;
+    next_id = Gui::n_Widget_IDs;
 }
 
 void Halfedge_Mesh::copy_to(Halfedge_Mesh &mesh) { copy_to(mesh, 0); }
@@ -42,10 +43,10 @@ Halfedge_Mesh::ElementRef Halfedge_Mesh::copy_to(Halfedge_Mesh &mesh, unsigned i
     // with elements of the new mesh.  (Note that we can use a single
     // map for both interior and boundary faces, because the map
     // doesn't care which list of faces these iterators come from.)
-    std::unordered_map<HalfedgeCRef, HalfedgeRef> halfedgeOldToNew(n_halfedges());
-    std::unordered_map<VertexCRef, VertexRef> vertexOldToNew(n_vertices());
-    std::unordered_map<EdgeCRef, EdgeRef> edgeOldToNew(n_edges());
-    std::unordered_map<FaceCRef, FaceRef> faceOldToNew(n_faces());
+    std::unordered_map<unsigned int, HalfedgeRef> halfedgeOldToNew(n_halfedges());
+    std::unordered_map<unsigned int, VertexRef> vertexOldToNew(n_vertices());
+    std::unordered_map<unsigned int, EdgeRef> edgeOldToNew(n_edges());
+    std::unordered_map<unsigned int, FaceRef> faceOldToNew(n_faces());
 
     // Copy geometry from the original mesh and create a map from
     // pointers in the original mesh to those in the new mesh.
@@ -53,49 +54,49 @@ Halfedge_Mesh::ElementRef Halfedge_Mesh::copy_to(Halfedge_Mesh &mesh, unsigned i
         auto hn = mesh.halfedges.insert(mesh.halfedges.end(), *h);
         if (h->id() == eid)
             ret = hn;
-        halfedgeOldToNew[h] = hn;
+        halfedgeOldToNew[h->id()] = hn;
     }
     for (VertexCRef v = vertices_begin(); v != vertices_end(); v++) {
         auto vn = mesh.vertices.insert(mesh.vertices.end(), *v);
         if (v->id() == eid)
             ret = vn;
-        vertexOldToNew[v] = vn;
+        vertexOldToNew[v->id()] = vn;
     }
     for (EdgeCRef e = edges_begin(); e != edges_end(); e++) {
         auto en = mesh.edges.insert(mesh.edges.end(), *e);
         if (e->id() == eid)
             ret = en;
-        edgeOldToNew[e] = en;
+        edgeOldToNew[e->id()] = en;
     }
     for (FaceCRef f = faces_begin(); f != faces_end(); f++) {
         auto fn = mesh.faces.insert(mesh.faces.end(), *f);
         if (f->id() == eid)
             ret = fn;
-        faceOldToNew[f] = fn;
+        faceOldToNew[f->id()] = fn;
     }
     for (FaceCRef b = boundaries_begin(); b != boundaries_end(); b++) {
         auto bn = mesh.boundaries.insert(mesh.boundaries.end(), *b);
         if (b->id() == eid)
             ret = bn;
-        faceOldToNew[b] = bn;
+        faceOldToNew[b->id()] = bn;
     }
 
     // "Search and replace" old pointers with new ones.
     for (HalfedgeRef he = mesh.halfedges_begin(); he != mesh.halfedges_end(); he++) {
-        he->next() = halfedgeOldToNew[he->next()];
-        he->twin() = halfedgeOldToNew[he->twin()];
-        he->vertex() = vertexOldToNew[he->vertex()];
-        he->edge() = edgeOldToNew[he->edge()];
-        he->face() = faceOldToNew[he->face()];
+        he->next() = halfedgeOldToNew[he->next()->id()];
+        he->twin() = halfedgeOldToNew[he->twin()->id()];
+        he->vertex() = vertexOldToNew[he->vertex()->id()];
+        he->edge() = edgeOldToNew[he->edge()->id()];
+        he->face() = faceOldToNew[he->face()->id()];
     }
     for (VertexRef v = mesh.vertices_begin(); v != mesh.vertices_end(); v++)
-        v->halfedge() = halfedgeOldToNew[v->halfedge()];
+        v->halfedge() = halfedgeOldToNew[v->halfedge()->id()];
     for (EdgeRef e = mesh.edges_begin(); e != mesh.edges_end(); e++)
-        e->halfedge() = halfedgeOldToNew[e->halfedge()];
+        e->halfedge() = halfedgeOldToNew[e->halfedge()->id()];
     for (FaceRef f = mesh.faces_begin(); f != mesh.faces_end(); f++)
-        f->halfedge() = halfedgeOldToNew[f->halfedge()];
+        f->halfedge() = halfedgeOldToNew[f->halfedge()->id()];
     for (FaceRef b = mesh.boundaries_begin(); b != mesh.boundaries_end(); b++)
-        b->halfedge() = halfedgeOldToNew[b->halfedge()];
+        b->halfedge() = halfedgeOldToNew[b->halfedge()->id()];
 
     mesh.render_dirty_flag = true;
     mesh.next_id = next_id;
@@ -467,6 +468,8 @@ bool Halfedge_Mesh::subdivide(SubD strategy) {
     } break;
 
     case SubD::loop: {
+        if (boundaries.size())
+            return false;
         for (FaceRef f = faces_begin(); f != faces_end(); f++) {
             if (f->degree() != 3)
                 return false;

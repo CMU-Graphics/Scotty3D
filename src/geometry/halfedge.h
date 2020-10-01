@@ -508,6 +508,7 @@ public:
     Size n_vertices() const { return vertices.size(); };
     Size n_edges() const { return edges.size(); };
     Size n_faces() const { return faces.size(); };
+    Size n_boundaries() const { return boundaries.size(); };
     Size n_halfedges() const { return halfedges.size(); };
 
     /// Check if half-edge mesh is valid

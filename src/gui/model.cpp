@@ -62,24 +62,30 @@ void Model::update_vertex(Halfedge_Mesh::VertexRef vert) {
         vertex_viz(v, d, vi.transform);
         vert_sizes[v->id()] = d;
 
-        size_t idx = id_to_info[h->face()->id()].instance;
-        face_viz(h->face(), face_mesh.edit_verts(), face_mesh.edit_indices(), idx);
+        if(!h->face()->is_boundary()) {
+            size_t idx = id_to_info[h->face()->id()].instance;
+            face_viz(h->face(), face_mesh.edit_verts(), face_mesh.edit_indices(), idx);
 
-        Halfedge_Mesh::HalfedgeRef fh = h->face()->halfedge();
-        do {
-            halfedge_viz(fh, arrows.get(id_to_info[fh->id()].instance).transform);
-            fh = fh->next();
-        } while (fh != h->face()->halfedge());
+            Halfedge_Mesh::HalfedgeRef fh = h->face()->halfedge();
+            do {
+                halfedge_viz(fh, arrows.get(id_to_info[fh->id()].instance).transform);
+                fh = fh->next();
+            } while (fh != h->face()->halfedge());
+        }
 
         h = h->twin()->next();
     } while (h != vert->halfedge());
 
     // Update surrounding halfedges & edges
     do {
-        GL::Instances::Info &hi = arrows.get(id_to_info[h->id()].instance);
-        halfedge_viz(h, hi.transform);
-        GL::Instances::Info &thi = arrows.get(id_to_info[h->twin()->id()].instance);
-        halfedge_viz(h->twin(), thi.transform);
+        if(!h->is_boundary()) {
+            GL::Instances::Info &hi = arrows.get(id_to_info[h->id()].instance);
+            halfedge_viz(h, hi.transform);
+        }
+        if(!h->twin()->is_boundary()) {
+            GL::Instances::Info &thi = arrows.get(id_to_info[h->twin()->id()].instance);
+            halfedge_viz(h->twin(), thi.transform);
+        }
         GL::Instances::Info &e = cylinders.get(id_to_info[h->edge()->id()].instance);
         edge_viz(h->edge(), e.transform);
 
@@ -375,8 +381,6 @@ void Model::rebuild() {
     std::vector<GL::Mesh::Index> idxs;
 
     for (auto f = mesh.faces_begin(); f != mesh.faces_end(); f++) {
-        if (f->is_boundary())
-            continue;
         face_viz(f, verts, idxs, verts.size());
     }
     face_mesh.recreate(std::move(verts), std::move(idxs));
