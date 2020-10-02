@@ -95,11 +95,6 @@ void Model::update_vertex(Halfedge_Mesh::VertexRef vert) {
 
 void Model::apply_transform(Widgets &widgets) {
 
-    if (widgets.is_dragging() && widgets.active == Widget_Type::bevel) {
-        int x = 0;
-        info("%d", x);
-    }
-
     auto elem = *selected_element();
 
     Widget_Type action = widgets.active;
