@@ -1,2 +1,5 @@
 theme: jekyll-theme-cayman
 baseurl: /Scotty3D
+plugins:
+  - jekyll-sitemap
+  
