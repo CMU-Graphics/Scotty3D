@@ -233,11 +233,6 @@ bool Widgets::is_dragging() { return dragging; }
 
 bool Widgets::want_drag() { return start_dragging; }
 
-void Widgets::set_dragging(bool drag, bool plane) {
-    dragging = drag;
-    drag_plane = plane;
-}
-
 void Widgets::start_drag(Vec3 pos, Vec3 cam, Vec2 spos, Vec3 dir) {
 
     start_dragging = false;

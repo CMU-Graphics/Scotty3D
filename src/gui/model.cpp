@@ -823,10 +823,10 @@ std::string Model::select(Widgets &widgets, Scene_ID click, Vec3 cam, Vec2 spos,
 
         std::string err;
         if (!begin_bevel(err)) {
-            widgets.set_dragging(false, false);
+            widgets.end_drag();
             return err;
         } else {
-            widgets.set_dragging(true, true);
+            widgets.start_drag(Halfedge_Mesh::center_of(selected_element().value()), cam, spos, dir);
         }
 
     } else if (!widgets.is_dragging() && click >= n_Widget_IDs) {

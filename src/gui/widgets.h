@@ -121,7 +121,6 @@ public:
 
     bool want_drag();
     bool is_dragging();
-    void set_dragging(bool dragging, bool plane);
 
 private:
     void generate_lines(Vec3 pos);
