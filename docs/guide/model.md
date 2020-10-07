@@ -170,10 +170,15 @@ preserve the appearance of the original mesh as closely as possible.
 
 | Key                   | Command                                            |
 | :-------------------: | :--------------------------------------------:     |
-| `r`               | Swap between `Move`, `Rotate`, `Scale`, and `Bevel`.   |
+| `c` | Center the camera on the current element. |
+| `m` | Use the `Move` tool. |
+| `r` | Use the `Rotate` tool. |
+| `s` | Use the `Scale` tool. |
+| `b` | Use the `Bevel` tool. |
 | `v`                 | Select the current halfedge's vertex                |
 | `e`                 | Select the current halfedge's edge                |
 | `f`                 | Select the current halfedge's face                |
 | `t`                 | Select the current halfedge's twin                |
 | `n`                 | Select the current halfedge's next                |
 | `h`                 | Select the current element's halfedge                |
+| `delete` | Erase the currently selected vertex or edge. |
