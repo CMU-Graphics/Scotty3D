@@ -35,6 +35,9 @@ void Halfedge_Mesh::copy_to(Halfedge_Mesh &mesh) { copy_to(mesh, 0); }
 
 Halfedge_Mesh::ElementRef Halfedge_Mesh::copy_to(Halfedge_Mesh &mesh, unsigned int eid) {
 
+    // Erase erase lists
+    do_erase();
+
     // Clear any existing elements.
     mesh.clear();
     ElementRef ret = vertices_begin();
@@ -329,87 +332,154 @@ void Halfedge_Mesh::to_mesh(GL::Mesh &mesh, bool split_faces) const {
 
 void Halfedge_Mesh::mark_dirty() { render_dirty_flag = true; }
 
-std::string Halfedge_Mesh::validate() const {
+std::string Halfedge_Mesh::validate() {
 
     if (!check_finite())
         return "A vertex position was set to a non-finite value.";
 
-    std::set<HalfedgeCRef> permutation;
+    std::set<HalfedgeRef> permutation;
 
     // Check valid halfedge permutation
-    for (HalfedgeCRef h = halfedges_begin(); h != halfedges_end(); h++) {
+    for (HalfedgeRef h = halfedges_begin(); h != halfedges_end(); h++) {
+
+        if (herased.find(h) != herased.end()) continue;
+
+        if (herased.find(h->next()) != herased.end()) {
+            return "A halfedge's next is erased!";
+        }
+        if (herased.find(h->twin()) != herased.end()) {
+            return "A halfedge's twin is erased!";
+        }
+        if (verased.find(h->vertex()) != verased.end()) {
+            return "A halfedge's vertex is erased!";
+        }
+        if (ferased.find(h->face()) != ferased.end()) {
+            return "A halfedge's face is erased!";
+        }
+        if (eerased.find(h->edge()) != eerased.end()) {
+            return "A halfedge's edge is erased!";
+        }
 
         // Check whether each halfedge's next points to a unique halfedge
         if (permutation.find(h->next()) == permutation.end()) {
             permutation.insert(h->next());
         } else {
-            return "A halfedge is the next of more than one halfedge!";
+            return "A halfedge is the next of multiple halfedge!";
         }
     }
-    for (HalfedgeCRef h = halfedges_begin(); h != halfedges_end(); h++) {
+
+    for (HalfedgeRef h = halfedges_begin(); h != halfedges_end(); h++) {
+
+        if (herased.find(h) != herased.end()) continue;
 
         // Check whether each halfedge was pointed to by a halfedge
         if (permutation.find(h) == permutation.end()) {
             return "A halfedge is the next of zero halfedges!";
         }
-    }
 
-    // Check twin relationships
-    for (HalfedgeCRef h = halfedges_begin(); h != halfedges_end(); h++) {
-
+        // Check twin relationships
         if (h->twin() == h) {
-            return "A halfedge's twin points to itself!";
+            return "A halfedge's twin is itself!";
         }
         if (h->twin()->twin() != h) {
-            return "A halfedge's twin's twin does not point to itself!";
+            return "A halfedge's twin's twin is not itself!";
         }
     }
 
     // Check whether each halfedge incident on a vertex points to that vertex
-    for (VertexCRef v = vertices_begin(); v != vertices_end(); v++) {
-        HalfedgeCRef h = v->halfedge();
+    for (VertexRef v = vertices_begin(); v != vertices_end(); v++) {
+        
+        if (verased.find(v) != verased.end()) continue;
+        
+        HalfedgeRef h = v->halfedge();
+        if (herased.find(h) != herased.end()) {
+            return "A vertex's halfedge is erased!";
+        }
+
         do {
             if (h->vertex() != v) {
-                return "A halfedge does not point to its vertex!";
+                return "A vertex's halfedge does not point to that vertex!";
             }
             h = h->twin()->next();
         } while (h != v->halfedge());
     }
 
     // Check whether each halfedge incident on an edge points to that edge
-    for (EdgeCRef e = edges_begin(); e != edges_end(); e++) {
-        HalfedgeCRef h = e->halfedge();
+    for (EdgeRef e = edges_begin(); e != edges_end(); e++) {
+
+        if (eerased.find(e) != eerased.end()) continue;
+
+        HalfedgeRef h = e->halfedge();
+        if (herased.find(h) != herased.end()) {
+            return "An edge's halfedge is erased!";
+        }
+
         do {
             if (h->edge() != e) {
-                return "A halfedge does not point to its edge!";
+                return "An edge's halfedge does not point to that edge!";
             }
             h = h->twin();
         } while (h != e->halfedge());
     }
 
     // Check whether each halfedge incident on a face points to that face
-    for (FaceCRef f = faces_begin(); f != faces_end(); f++) {
-        HalfedgeCRef h = f->halfedge();
+    for (FaceRef f = faces_begin(); f != faces_end(); f++) {
+
+        if (ferased.find(f) != ferased.end()) continue;
+
+        HalfedgeRef h = f->halfedge();
+        if(herased.find(h) != herased.end()) {
+            return "A face's halfedge is erased!";
+        }
+
         do {
             if (h->face() != f) {
-                return "A halfedge does not point to its face!";
+                return "A face's halfedge does not point to that face!";
             }
             h = h->next();
         } while (h != f->halfedge());
     }
 
     // Check whether each halfedge incident on a boundary loop points to that boundary loop
-    for (FaceCRef b = boundaries_begin(); b != boundaries_end(); b++) {
-        HalfedgeCRef h = b->halfedge();
+    for (FaceRef b = boundaries_begin(); b != boundaries_end(); b++) {
+
+        if (ferased.find(b) != ferased.end()) continue;
+
+        HalfedgeRef h = b->halfedge();
+        if (herased.find(h) != herased.end()) {
+            return "A boundary's halfedge is erased!";
+        }
+
         do {
             if (h->face() != b) {
-                return "A halfedge does not point to its boundary loop!";
+                return "A boundary halfedge does not point to its boundary loop!";
             }
             h = h->next();
         } while (h != b->halfedge());
     }
 
+    do_erase();
     return {};
+}
+
+void Halfedge_Mesh::do_erase() {
+    for (auto& v : verased) {
+        vertices.erase(v);
+    }
+    for (auto& e : eerased) {
+        edges.erase(e);
+    }
+    for (auto& f : ferased) {
+        if(f->is_boundary()) boundaries.erase(f);
+        else faces.erase(f);
+    }
+    for (auto& h : herased) {
+        halfedges.erase(h);
+    }
+    verased.clear();
+    eerased.clear();
+    ferased.clear();
+    herased.clear();
 }
 
 std::string Halfedge_Mesh::from_mesh(const GL::Mesh &mesh) {

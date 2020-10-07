@@ -572,6 +572,26 @@ void Model::zoom_to(Halfedge_Mesh::ElementRef ref, Camera &cam) {
     cam.look_at(center, pos);
 }
 
+std::optional<std::reference_wrapper<Scene_Object>> Model::is_my_obj(Scene_Maybe obj_opt) {
+
+    if (!obj_opt.has_value())
+        return std::nullopt;
+
+    Scene_Item &item = obj_opt.value();
+    if (!item.is<Scene_Object>())
+        return std::nullopt;
+
+    Scene_Object &obj = item.get<Scene_Object>();
+    if (obj.opt.shape_type != PT::Shape_Type::none)
+        return std::nullopt;
+
+    if (!my_mesh || !obj.is_editable())
+        return std::nullopt;
+
+    assert(my_mesh == &obj.get_mesh());
+    return obj;
+}
+
 std::string Model::UIsidebar(Undo &undo, Widgets &widgets, Scene_Maybe obj_opt, Camera &camera) {
 
     if(ImGui::CollapsingHeader("Edit Colors")) {
@@ -582,20 +602,9 @@ std::string Model::UIsidebar(Undo &undo, Widgets &widgets, Scene_Maybe obj_opt, 
     }
     ImGui::Separator();
 
-    if (!obj_opt.has_value())
-        return {};
-
-    Scene_Item &item = obj_opt.value();
-    if (!item.is<Scene_Object>())
-        return {};
-
-    Scene_Object &obj = item.get<Scene_Object>();
-    if (obj.opt.shape_type != PT::Shape_Type::none)
-        return {};
-
-    if (!my_mesh || !obj.is_editable())
-        return {};
-    assert(my_mesh == &obj.get_mesh());
+    auto opt = is_my_obj(obj_opt);
+    if(!opt.has_value()) return {};
+    Scene_Object& obj = opt.value();
 
     Halfedge_Mesh &mesh = *my_mesh;
     Halfedge_Mesh before;
@@ -648,7 +657,7 @@ std::string Model::UIsidebar(Undo &undo, Widgets &widgets, Scene_Maybe obj_opt, 
         std::string err = std::visit(
             overloaded{
                 [&](Halfedge_Mesh::VertexRef vert) -> std::string {
-                    if (ImGui::Button("Erase")) {
+                    if (ImGui::Button("Erase [del]")) {
                         mesh.copy_to(before);
                         return update_mesh(undo, obj, std::move(before), vert,
                                            [](Halfedge_Mesh &m, Halfedge_Mesh::ElementRef vert) {
@@ -659,7 +668,7 @@ std::string Model::UIsidebar(Undo &undo, Widgets &widgets, Scene_Maybe obj_opt, 
                     return {};
                 },
                 [&](Halfedge_Mesh::EdgeRef edge) -> std::string {
-                    if (ImGui::Button("Erase")) {
+                    if (ImGui::Button("Erase [del]")) {
                         mesh.copy_to(before);
                         return update_mesh(undo, obj, std::move(before), edge,
                                            [](Halfedge_Mesh &m, Halfedge_Mesh::ElementRef edge) {
@@ -752,6 +761,40 @@ std::string Model::UIsidebar(Undo &undo, Widgets &widgets, Scene_Maybe obj_opt, 
     }
 
     return {};
+}
+
+void Model::erase_selected(Undo& undo, Scene_Maybe obj_opt) {
+
+    auto opt = is_my_obj(obj_opt);
+    if(!opt.has_value()) return;
+    Scene_Object& obj = opt.value();
+
+    auto sel_ = selected_element();
+    if(!sel_.has_value()) return;
+
+    Halfedge_Mesh::ElementRef sel = sel_.value();
+    Halfedge_Mesh &mesh = *my_mesh;
+    
+    Halfedge_Mesh before;
+    mesh.copy_to(before);
+
+    std::visit(overloaded{
+        [&](Halfedge_Mesh::VertexRef vert) {
+            return update_mesh(undo, obj, std::move(before), vert,
+                [](Halfedge_Mesh &m, Halfedge_Mesh::ElementRef vert) {
+                    return m.erase_vertex(
+                        std::get<Halfedge_Mesh::VertexRef>(vert));
+                });
+        },
+        [&](Halfedge_Mesh::EdgeRef edge) {
+            return update_mesh(undo, obj, std::move(before), edge,
+                [](Halfedge_Mesh &m, Halfedge_Mesh::ElementRef edge) {
+                    return m.erase_edge(
+                        std::get<Halfedge_Mesh::EdgeRef>(edge));
+                });
+        },
+        [](auto) { return std::string{}; }
+    }, sel);
 }
 
 void Model::clear_select() { selected_elem_id = 0; }

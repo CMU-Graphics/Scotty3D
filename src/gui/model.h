@@ -27,6 +27,7 @@ public:
 
     Vec3 selected_pos();
     void clear_select();
+    void erase_selected(Undo& undo, Scene_Maybe obj_opt);
     std::string end_transform(Widgets &widgets, Undo &undo, Scene_Object &obj);
     void apply_transform(Widgets &widgets);
     std::string select(Widgets &widgets, Scene_ID click, Vec3 cam, Vec2 spos, Vec3 dir);
@@ -48,6 +49,7 @@ private:
     void begin_transform();
     bool begin_bevel(std::string &err);
     void set_selected(Halfedge_Mesh::ElementRef elem);
+    std::optional<std::reference_wrapper<Scene_Object>> is_my_obj(Scene_Maybe obj_opt);
     std::optional<Halfedge_Mesh::ElementRef> selected_element();
     void rebuild();
 

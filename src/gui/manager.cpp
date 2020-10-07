@@ -53,7 +53,9 @@ bool Manager::keydown(Undo &undo, SDL_Keysym key, Scene &scene, Camera &cam) {
     Uint16 mod = KMOD_CTRL;
     if (key.sym == SDLK_DELETE && layout.selected()) {
 #endif
-        if (mode != Mode::model && mode != Mode::rig && mode != Mode::animate) {
+        if (mode == Mode::model) {
+            model.erase_selected(undo, scene.get(layout.selected()));
+        } else if (mode != Mode::rig && mode != Mode::animate) {
             undo.del_obj(layout.selected());
             return true;
         }
@@ -90,7 +92,7 @@ bool Manager::keydown(Undo &undo, SDL_Keysym key, Scene &scene, Camera &cam) {
         if (mode == Mode::rig) {
             cam.look_at(Vec3{}, -cam.front() * cam.dist());
             return true;
-        } else if (layout.selected()) {
+        } else if (mode != Mode::model && layout.selected()) {
             frame(scene, cam);
             return true;
         }
@@ -463,10 +465,9 @@ void Manager::UIsidebar(Scene &scene, Undo &undo, float menu_height, Camera &cam
             new_light_focus = true;
         }
     }
-    if (!scene.empty()) {
-        ImGui::Separator();
-        ImGui::Text("Select an Object");
-    }
+
+    ImGui::Separator();
+    ImGui::Text("Select an Object");
 
     scene.for_items([&](Scene_Item &obj) {
         if ((mode == Mode::model || mode == Mode::rig) &&

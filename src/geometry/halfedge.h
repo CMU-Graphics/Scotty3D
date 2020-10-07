@@ -132,6 +132,7 @@
 #include <list>
 #include <optional>
 #include <string>
+#include <set>
 #include <variant>
 #include <vector>
 
@@ -447,12 +448,14 @@ public:
         iterating over a linked list, and want to delete some of the elements as you go. How do you
         do this without causing any problems? For instance, if you delete the current element, will
         you be able to iterate to the next element?  Etc.
+
+        Note: the elements are not actually deleted until validate() is called in order to facilitate
+        checking for dangling references.
     */
-    void erase(HalfedgeRef h) { halfedges.erase(h); }
-    void erase(VertexRef v) { vertices.erase(v); }
-    void erase(EdgeRef e) { edges.erase(e); }
-    void erase(FaceRef f) { faces.erase(f); }
-    void erase_boundary(FaceRef f) { boundaries.erase(f); }
+    void erase(VertexRef v) { verased.insert(v); }
+    void erase(EdgeRef e) { eerased.insert(e); }
+    void erase(FaceRef f) { ferased.insert(f); }
+    void erase(HalfedgeRef h) { herased.insert(h); }
 
     /*
         These methods allocate new mesh elements, returning a pointer (i.e., iterator) to the
@@ -512,7 +515,7 @@ public:
     Size n_halfedges() const { return halfedges.size(); };
 
     /// Check if half-edge mesh is valid
-    std::string validate() const;
+    std::string validate();
 
     //////////////////////////////////////////////////////////////////////////////////////////
     // End methods students should use, begin internal methods - you don't need to use these
@@ -545,11 +548,14 @@ public:
     /// vertices)
     std::string from_mesh(const GL::Mesh &mesh);
 
-    /// For rendering
-    bool render_dirty_flag = false;
+    /// WARNING: erased elements stay in the element lists until do_erase()
+    /// or validate() are called
+    void do_erase();
+
     void mark_dirty();
     bool flipped() const { return flip_orientation; }
     void flip() { flip_orientation = !flip_orientation; };
+    bool render_dirty_flag = false;
 
     Vec3 normal_of(ElementRef elem);
     static Vec3 center_of(ElementRef elem);
@@ -560,9 +566,15 @@ private:
     std::list<Edge> edges;
     std::list<Face> faces, boundaries;
     std::list<Halfedge> halfedges;
+    
+    bool check_finite() const;
     unsigned int next_id;
     bool flip_orientation = false;
-    bool check_finite() const;
+
+    std::set<VertexRef> verased;
+    std::set<EdgeRef> eerased;
+    std::set<FaceRef> ferased;
+    std::set<HalfedgeRef> herased;
 };
 
 /*

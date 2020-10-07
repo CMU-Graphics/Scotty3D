@@ -22,7 +22,8 @@ public:
     virtual ~Action_Base() = default;
 };
 
-template <typename T> class MeshOp : public Action_Base {
+template <typename T> 
+class MeshOp : public Action_Base {
     void undo() {
         Scene_Object &obj = scene.get_obj(id);
         obj.set_mesh(mesh);
@@ -31,6 +32,7 @@ template <typename T> class MeshOp : public Action_Base {
         Scene_Object &obj = scene.get_obj(id);
         auto sel = obj.set_mesh(mesh, eid);
         op(obj.get_mesh(), sel);
+        obj.get_mesh().do_erase();
     }
     Scene &scene;
     Scene_ID id;
