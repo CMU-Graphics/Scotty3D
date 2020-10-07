@@ -47,7 +47,9 @@ Finally, you may remove the object from the scene by pressing `Delete` or hittin
 
 | Key                   | Command                                            |
 | :-------------------: | :--------------------------------------------:     |
-| `r` | Swap between `Move`, `Rotate`, and `Scale`. |
+| `m` | Use `Move` tool. |
+| `r` | Use `Rotate` tool. |
+| `s` | Use `Scale` tool. |
 | `delete` | Delete currently selected mesh. |
 
 ## Demo
