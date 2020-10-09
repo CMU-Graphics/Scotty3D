@@ -220,17 +220,23 @@ void Model::unset_mesh() { my_mesh = nullptr; }
 void Model::vertex_viz(Halfedge_Mesh::VertexRef v, float &size, Mat4 &transform) {
 
     // Sphere size ~ 0.05 * min incident edge length
-    float d = FLT_MAX;
+    float min = FLT_MAX;
+    float avg = 0.0f;
+    size_t d = 0;
+
     auto he = v->halfedge();
     do {
         Vec3 n = he->twin()->vertex()->pos;
-        float e = (n - v->pos).norm_squared();
-        d = d < e ? d : e;
+        float len = he->edge()->length();
+        min = std::min(min, len);
+        avg += len;
+        d++;
         he = he->twin()->next();
     } while (he != v->halfedge());
 
-    d = std::sqrt(d);
-    size = d < 2.0f ? d : 2.0f;
+    avg = avg / d;
+    size = clamp(min, avg / 10.0f, avg);
+
     transform = Mat4{Vec4{size, 0.0f, 0.0f, 0.0f}, Vec4{0.0f, size, 0.0f, 0.0f},
                      Vec4{0.0f, 0.0f, size, 0.0f}, Vec4{v->pos, 1.0f}};
 }
@@ -361,7 +367,7 @@ void Model::rebuild() {
 
     std::vector<GL::Mesh::Vert> verts;
     std::vector<GL::Mesh::Index> idxs;
-
+    
     for (auto f = mesh.faces_begin(); f != mesh.faces_end(); f++) {
         face_viz(f, verts, idxs, verts.size());
     }
@@ -864,6 +870,7 @@ std::string Model::select(Widgets &widgets, Scene_ID click, Vec3 cam, Vec2 spos,
             return err;
         } else {
             widgets.start_drag(Halfedge_Mesh::center_of(selected_element().value()), cam, spos, dir);
+            apply_transform(widgets);
         }
 
     } else if (!widgets.is_dragging() && click >= n_Widget_IDs) {

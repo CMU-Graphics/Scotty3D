@@ -561,9 +561,10 @@ void Manager::UInew_light(Scene &scene, Undo &undo) {
 
     unsigned int idx = 0;
 
+    ImGui::SetNextWindowSizeConstraints({200.0f, 0.0f}, {FLT_MAX,FLT_MAX});
     ImGui::Begin("New Light", &new_light_window,
-                 ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar |
-                     ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysAutoResize);
+                    ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar |
+                    ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysAutoResize);
 
     static Spectrum color = Spectrum(1.0f);
     static float intensity = 1.0f;
@@ -705,6 +706,7 @@ void Manager::UInew_obj(Undo &undo) {
         new_obj_window = false;
     };
 
+    ImGui::SetNextWindowSizeConstraints({200.0f, 0.0f}, {FLT_MAX,FLT_MAX});
     ImGui::Begin("New Object", &new_obj_window,
                  ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar |
                  ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysAutoResize);
