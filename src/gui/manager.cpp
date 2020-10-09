@@ -707,7 +707,7 @@ void Manager::UInew_obj(Undo &undo) {
 
     ImGui::Begin("New Object", &new_obj_window,
                  ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar |
-                     ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysAutoResize);
+                 ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysAutoResize);
 
     if (ImGui::CollapsingHeader("Cube")) {
         ImGui::PushID(idx++);
@@ -731,6 +731,7 @@ void Manager::UInew_obj(Undo &undo) {
         ImGui::PopID();
     }
 
+#if 0 // These have some problems converting to halfedge
     ImGui::Separator();
 
     if (ImGui::CollapsingHeader("Cylinder")) {
@@ -748,7 +749,6 @@ void Manager::UInew_obj(Undo &undo) {
 
     ImGui::Separator();
 
-#if 0 // The procedural torus has some problems converting to halfedge
 	if(ImGui::CollapsingHeader("Torus")) {
 		ImGui::PushID(idx++);
 		static float IR = 0.8f, OR = 1.0f;
@@ -764,23 +764,6 @@ void Manager::UInew_obj(Undo &undo) {
 	}
 
 	ImGui::Separator();
-#endif
-
-    if (ImGui::CollapsingHeader("Sphere")) {
-        ImGui::PushID(idx++);
-        static float R = 1.0f;
-        ImGui::SliderFloat("Radius", &R, 0.01f, 10.0f, "%.2f");
-        if (ImGui::Button("Add")) {
-            Scene_Object &obj = undo.add_obj(GL::Mesh(), "Sphere");
-            obj.opt.shape_type = PT::Shape_Type::sphere;
-            obj.opt.shape = PT::Shape(PT::Sphere(R));
-            obj.set_mesh_dirty();
-            new_obj_window = false;
-        }
-        ImGui::PopID();
-    }
-
-    ImGui::Separator();
 
     if (ImGui::CollapsingHeader("Cone")) {
         ImGui::PushID(idx++);
@@ -792,6 +775,23 @@ void Manager::UInew_obj(Undo &undo) {
         ImGui::SliderInt("Sides", &S, 3, 100);
         if (ImGui::Button("Add")) {
             add_mesh("Cone", Util::cone_mesh(BR, TR, H, S));
+        }
+        ImGui::PopID();
+    }
+#endif
+
+    ImGui::Separator();
+
+    if (ImGui::CollapsingHeader("Sphere")) {
+        ImGui::PushID(idx++);
+        static float R = 1.0f;
+        ImGui::SliderFloat("Radius", &R, 0.01f, 10.0f, "%.2f");
+        if (ImGui::Button("Add")) {
+            Scene_Object &obj = undo.add_obj(GL::Mesh(), "Sphere");
+            obj.opt.shape_type = PT::Shape_Type::sphere;
+            obj.opt.shape = PT::Shape(PT::Sphere(R));
+            obj.set_mesh_dirty();
+            new_obj_window = false;
         }
         ImGui::PopID();
     }

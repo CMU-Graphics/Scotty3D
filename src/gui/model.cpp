@@ -217,19 +217,6 @@ std::optional<Halfedge_Mesh::ElementRef> Model::selected_element() {
 
 void Model::unset_mesh() { my_mesh = nullptr; }
 
-void Model::set_mesh(Halfedge_Mesh &mesh) {
-
-    Halfedge_Mesh *old = my_mesh;
-    my_mesh = &mesh;
-    if (old != my_mesh) {
-        selected_elem_id = 0;
-        hovered_elem_id = 0;
-        rebuild();
-    } else if (old->render_dirty_flag) {
-        rebuild();
-    }
-}
-
 void Model::vertex_viz(Halfedge_Mesh::VertexRef v, float &size, Mat4 &transform) {
 
     // Sphere size ~ 0.05 * min incident edge length
@@ -572,23 +559,40 @@ void Model::zoom_to(Halfedge_Mesh::ElementRef ref, Camera &cam) {
     cam.look_at(center, pos);
 }
 
-std::optional<std::reference_wrapper<Scene_Object>> Model::is_my_obj(Scene_Maybe obj_opt) {
+std::optional<std::reference_wrapper<Scene_Object>> Model::set_my_obj(Scene_Maybe obj_opt) {
 
-    if (!obj_opt.has_value())
+    if (!obj_opt.has_value()) {
+        my_mesh = nullptr;
         return std::nullopt;
+    }
 
     Scene_Item &item = obj_opt.value();
-    if (!item.is<Scene_Object>())
+    if (!item.is<Scene_Object>()) {
+        my_mesh = nullptr;
         return std::nullopt;
+    }
 
     Scene_Object &obj = item.get<Scene_Object>();
-    if (obj.opt.shape_type != PT::Shape_Type::none)
+    if (obj.opt.shape_type != PT::Shape_Type::none) {
+        my_mesh = nullptr;
         return std::nullopt;
+    }
 
-    if (!my_mesh || !obj.is_editable())
+    if (!obj.is_editable()) {
+        my_mesh = nullptr;
         return std::nullopt;
+    }
+    
+    Halfedge_Mesh *old = my_mesh;
+    my_mesh = &obj.get_mesh();
 
-    assert(my_mesh == &obj.get_mesh());
+    if (old != my_mesh) {
+        selected_elem_id = 0;
+        hovered_elem_id = 0;
+        rebuild();
+    } else if (old->render_dirty_flag) {
+        rebuild();
+    }
     return obj;
 }
 
@@ -602,7 +606,7 @@ std::string Model::UIsidebar(Undo &undo, Widgets &widgets, Scene_Maybe obj_opt, 
     }
     ImGui::Separator();
 
-    auto opt = is_my_obj(obj_opt);
+    auto opt = set_my_obj(obj_opt);
     if(!opt.has_value()) return {};
     Scene_Object& obj = opt.value();
 
@@ -765,7 +769,7 @@ std::string Model::UIsidebar(Undo &undo, Widgets &widgets, Scene_Maybe obj_opt, 
 
 void Model::erase_selected(Undo& undo, Scene_Maybe obj_opt) {
 
-    auto opt = is_my_obj(obj_opt);
+    auto opt = set_my_obj(obj_opt);
     if(!opt.has_value()) return;
     Scene_Object& obj = opt.value();
 
@@ -801,20 +805,10 @@ void Model::clear_select() { selected_elem_id = 0; }
 
 void Model::render(Scene_Maybe obj_opt, Widgets &widgets, Camera &cam) {
 
-    if (!obj_opt.has_value())
-        return;
-
-    Scene_Item &item = obj_opt.value();
-    if (!item.is<Scene_Object>())
-        return;
-
-    Scene_Object &obj = item.get<Scene_Object>();
-    if (obj.opt.shape_type != PT::Shape_Type::none)
-        return;
+    auto obj = set_my_obj(obj_opt);
+    if (!obj.has_value()) return;
 
     Mat4 view = cam.get_view();
-
-    set_mesh(obj.get_mesh());
 
     Renderer::HalfedgeOpt opts(*this);
     opts.modelview = view;

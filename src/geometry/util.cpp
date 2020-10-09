@@ -187,7 +187,7 @@ Data cone(float bradius, float tradius, float height, int sides, bool caps) {
         vertices[vert] = Vec3(std::cos(rad) * tradius, height, std::sin(rad) * tradius);
         vert++;
     }
-    int v = 0;
+    size_t v = 0;
     while (vert <= vertices.size() - 4) {
         float rad = (float)v / n_sides * _2pi;
         vertices[vert] = Vec3(std::cos(rad) * tradius, height, std::sin(rad) * tradius);

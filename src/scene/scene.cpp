@@ -495,11 +495,10 @@ std::string Scene::load(bool new_scene, Undo &undo, Gui::Manager &gui, std::stri
 
     Assimp::Importer importer;
     const aiScene *scene = importer.ReadFile(
-        file.c_str(), aiProcess_PopulateArmatureData | aiProcess_FixInfacingNormals |
-                      aiProcess_ValidateDataStructure | aiProcess_OptimizeMeshes |
+        file.c_str(), aiProcess_PopulateArmatureData | aiProcess_OptimizeMeshes |
+                      aiProcess_ValidateDataStructure | aiProcess_FindInvalidData |
                       aiProcess_FindInstances | aiProcess_FindDegenerates |
-                      aiProcess_DropNormals | aiProcess_JoinIdenticalVertices |
-                      aiProcess_FindInvalidData);
+                      aiProcess_DropNormals | aiProcess_JoinIdenticalVertices);
 
     if (!scene) {
         return "Parsing scene " + file + ": " + std::string(importer.GetErrorString());
