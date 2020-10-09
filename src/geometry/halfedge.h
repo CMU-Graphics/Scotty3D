@@ -190,6 +190,14 @@ public:
     // Student Local Operations | student/meshedit.cpp
     //////////////////////////////////////////////////////////////////////////////////////////
 
+    // Note: if you erase elements in these methods, they will not be erased from the 
+    // element lists until do_erase or validate are called. This is to facilitate checking
+    // for dangling references to elements that will be erased.
+    // The rest of the codebase will automatically call validate() after each op,
+    // but you may need to be aware of this when implementing global ops.
+    // Specifically, when you need to collapse an edge in iostropic_remesh() or simplify(),
+    // you should call collapse_edge_erase() instead of collapse_edge()
+
     /*
         Merge all faces incident on a given vertex, returning a
         pointer to the merged face.
@@ -259,6 +267,16 @@ public:
     */
     void bevel_face_positions(const std::vector<Vec3> &start_positions, FaceRef face,
                               float tangent_offset, float normal_offset);
+
+    /*
+        Collapse an edge, returning a pointer to the collapsed vertex
+        ** Also deletes the erased elements **
+    */
+    std::optional<VertexRef> collapse_edge_erase(EdgeRef e) {
+        auto r = collapse_edge(e);
+        do_erase();
+        return r;
+    }
 
     //////////////////////////////////////////////////////////////////////////////////////////
     // Student Global Operations | student/meshedit.cpp

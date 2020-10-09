@@ -8,31 +8,31 @@
 
 /* Note on local operation return types:
 
-        The local operations all return a std::optional<T> type. This is used so that your
-        implementation can signify that it does not want to perform the operation for
-        whatever reason (e.g. you don't want to allow the user to erase the last vertex).
+    The local operations all return a std::optional<T> type. This is used so that your
+    implementation can signify that it does not want to perform the operation for
+    whatever reason (e.g. you don't want to allow the user to erase the last vertex).
 
-        An optional can have two values: std::nullopt, or a value of the type it is
-        parameterized on. In this way, it's similar to a pointer, but has two advantages:
-        the value it holds need not be allocated elsewhere, and it provides an API that
-        forces the user to check if it is null before using the value.
+    An optional can have two values: std::nullopt, or a value of the type it is
+    parameterized on. In this way, it's similar to a pointer, but has two advantages:
+    the value it holds need not be allocated elsewhere, and it provides an API that
+    forces the user to check if it is null before using the value.
 
-        In your implementaiton, if you have successfully performed the operation, you can
-        simply return the required reference:
+    In your implementaiton, if you have successfully performed the operation, you can
+    simply return the required reference:
 
-                ... collapse the edge ...
-                return collapsed_vertex_ref;
+            ... collapse the edge ...
+            return collapsed_vertex_ref;
 
-        And if you wish to deny the operation, you can return the null optional:
+    And if you wish to deny the operation, you can return the null optional:
 
-                return std::nullopt;
+            return std::nullopt;
 
-        Note that the stubs below all reject their duties by returning the null optional.
+    Note that the stubs below all reject their duties by returning the null optional.
 */
 
 /*
-        This method should replace the given vertex and all its neighboring
-        edges and faces with a single face, returning the new face.
+    This method should replace the given vertex and all its neighboring
+    edges and faces with a single face, returning the new face.
  */
 std::optional<Halfedge_Mesh::FaceRef> Halfedge_Mesh::erase_vertex(Halfedge_Mesh::VertexRef v) {
 
@@ -41,8 +41,8 @@ std::optional<Halfedge_Mesh::FaceRef> Halfedge_Mesh::erase_vertex(Halfedge_Mesh:
 }
 
 /*
-        This method should erase the given edge and return an iterator to the
-        merged face.
+    This method should erase the given edge and return an iterator to the
+    merged face.
  */
 std::optional<Halfedge_Mesh::FaceRef> Halfedge_Mesh::erase_edge(Halfedge_Mesh::EdgeRef e) {
 
@@ -51,8 +51,8 @@ std::optional<Halfedge_Mesh::FaceRef> Halfedge_Mesh::erase_edge(Halfedge_Mesh::E
 }
 
 /*
-        This method should collapse the given edge and return an iterator to
-        the new vertex created by the collapse.
+    This method should collapse the given edge and return an iterator to
+    the new vertex created by the collapse.
 */
 std::optional<Halfedge_Mesh::VertexRef> Halfedge_Mesh::collapse_edge(Halfedge_Mesh::EdgeRef e) {
 
@@ -61,8 +61,8 @@ std::optional<Halfedge_Mesh::VertexRef> Halfedge_Mesh::collapse_edge(Halfedge_Me
 }
 
 /*
-        This method should collapse the given face and return an iterator to
-        the new vertex created by the collapse.
+    This method should collapse the given face and return an iterator to
+    the new vertex created by the collapse.
 */
 std::optional<Halfedge_Mesh::VertexRef> Halfedge_Mesh::collapse_face(Halfedge_Mesh::FaceRef f) {
 
@@ -71,8 +71,8 @@ std::optional<Halfedge_Mesh::VertexRef> Halfedge_Mesh::collapse_face(Halfedge_Me
 }
 
 /*
-        This method should flip the given edge and return an iterator to the
-        flipped edge.
+    This method should flip the given edge and return an iterator to the
+    flipped edge.
 */
 std::optional<Halfedge_Mesh::EdgeRef> Halfedge_Mesh::flip_edge(Halfedge_Mesh::EdgeRef e) {
 
@@ -81,9 +81,9 @@ std::optional<Halfedge_Mesh::EdgeRef> Halfedge_Mesh::flip_edge(Halfedge_Mesh::Ed
 }
 
 /*
-        This method should split the given edge and return an iterator to the
-        newly inserted vertex. The halfedge of this vertex should point along
-        the edge that was split, rather than the new edges.
+    This method should split the given edge and return an iterator to the
+    newly inserted vertex. The halfedge of this vertex should point along
+    the edge that was split, rather than the new edges.
 */
 std::optional<Halfedge_Mesh::VertexRef> Halfedge_Mesh::split_edge(Halfedge_Mesh::EdgeRef e) {
 
@@ -93,35 +93,35 @@ std::optional<Halfedge_Mesh::VertexRef> Halfedge_Mesh::split_edge(Halfedge_Mesh:
 
 /* Note on the beveling process:
 
-        Each of the bevel_vertex, bevel_edge, and bevel_face functions do not represent
-        a full bevel operation. Instead, they should only update the _connectivity_ of
-        the mesh, _not_ the positions of newly created vertices. In fact, you should set
-        the positions of new vertices to be exactly the same as wherever they "started from."
+    Each of the bevel_vertex, bevel_edge, and bevel_face functions do not represent
+    a full bevel operation. Instead, they should only update the _connectivity_ of
+    the mesh, _not_ the positions of newly created vertices. In fact, you should set
+    the positions of new vertices to be exactly the same as wherever they "started from."
 
-        When you click on a mesh element while in bevel mode, one of those three functions
-        is called. But, because you may then adjust the distance/offset of the newly
-        beveled face, we need another method of updating the positions of the new vertices.
+    When you click on a mesh element while in bevel mode, one of those three functions
+    is called. But, because you may then adjust the distance/offset of the newly
+    beveled face, we need another method of updating the positions of the new vertices.
 
-        This is where bevel_vertex_positions, bevel_edge_positions, and
-        bevel_face_positions come in: these functions are called repeatedly as you
-        move your mouse, the position of which determins the normal and tangent offset
-        parameters. These functions are also passed an array of the original vertex
-        positions: for  bevel_vertex, it has one element, the original vertex position,
-        for bevel_edge,  two for the two vertices, and for bevel_face, it has the original
-        position of each vertex in halfedge order. You should use these positions, as well
-        as the normal and tangent offset fields to assign positions to the new vertices.
+    This is where bevel_vertex_positions, bevel_edge_positions, and
+    bevel_face_positions come in: these functions are called repeatedly as you
+    move your mouse, the position of which determins the normal and tangent offset
+    parameters. These functions are also passed an array of the original vertex
+    positions: for  bevel_vertex, it has one element, the original vertex position,
+    for bevel_edge,  two for the two vertices, and for bevel_face, it has the original
+    position of each vertex in halfedge order. You should use these positions, as well
+    as the normal and tangent offset fields to assign positions to the new vertices.
 
-        Finally, note that the normal and tangent offsets are not relative values - you
-        should compute a particular new position from them, not a delta to apply.
+    Finally, note that the normal and tangent offsets are not relative values - you
+    should compute a particular new position from them, not a delta to apply.
 */
 
 /*
-        This method should replace the vertex v with a face, corresponding to
-        a bevel operation. It should return the new face.  NOTE: This method is
-        responsible for updating the *connectivity* of the mesh only---it does not
-        need to update the vertex positions.  These positions will be updated in
-        Halfedge_Mesh::bevel_vertex_positions (which you also have to
-        implement!)
+    This method should replace the vertex v with a face, corresponding to
+    a bevel operation. It should return the new face.  NOTE: This method is
+    responsible for updating the *connectivity* of the mesh only---it does not
+    need to update the vertex positions.  These positions will be updated in
+    Halfedge_Mesh::bevel_vertex_positions (which you also have to
+    implement!)
 */
 std::optional<Halfedge_Mesh::FaceRef> Halfedge_Mesh::bevel_vertex(Halfedge_Mesh::VertexRef v) {
 
@@ -130,12 +130,12 @@ std::optional<Halfedge_Mesh::FaceRef> Halfedge_Mesh::bevel_vertex(Halfedge_Mesh:
 }
 
 /*
-        This method should replace the edge e with a face, corresponding to a
-        bevel operation. It should return the new face. NOTE: This method is
-        responsible for updating the *connectivity* of the mesh only---it does not
-        need to update the vertex positions.  These positions will be updated in
-        Halfedge_Mesh::bevel_edge_positions (which you also have to
-        implement!)
+    This method should replace the edge e with a face, corresponding to a
+    bevel operation. It should return the new face. NOTE: This method is
+    responsible for updating the *connectivity* of the mesh only---it does not
+    need to update the vertex positions.  These positions will be updated in
+    Halfedge_Mesh::bevel_edge_positions (which you also have to
+    implement!)
 */
 std::optional<Halfedge_Mesh::FaceRef> Halfedge_Mesh::bevel_edge(Halfedge_Mesh::EdgeRef e) {
 
@@ -144,13 +144,13 @@ std::optional<Halfedge_Mesh::FaceRef> Halfedge_Mesh::bevel_edge(Halfedge_Mesh::E
 }
 
 /*
-        This method should replace the face f with an additional, inset face
-        (and ring of faces around it), corresponding to a bevel operation. It
-        should return the new face.  NOTE: This method is responsible for updating
-        the *connectivity* of the mesh only---it does not need to update the vertex
-        positions. These positions will be updated in
-        Halfedge_Mesh::bevel_face_positions (which you also have to
-        implement!)
+    This method should replace the face f with an additional, inset face
+    (and ring of faces around it), corresponding to a bevel operation. It
+    should return the new face.  NOTE: This method is responsible for updating
+    the *connectivity* of the mesh only---it does not need to update the vertex
+    positions. These positions will be updated in
+    Halfedge_Mesh::bevel_face_positions (which you also have to
+    implement!)
 */
 std::optional<Halfedge_Mesh::FaceRef> Halfedge_Mesh::bevel_face(Halfedge_Mesh::FaceRef f) {
 
@@ -159,14 +159,14 @@ std::optional<Halfedge_Mesh::FaceRef> Halfedge_Mesh::bevel_face(Halfedge_Mesh::F
 }
 
 /*
-        Compute new vertex positions for the vertices of the beveled vertex.
+    Compute new vertex positions for the vertices of the beveled vertex.
 
-        These vertices can be accessed via new_halfedges[i]->vertex()->pos for
-        i = 1, ..., new_halfedges.size()-1.
+    These vertices can be accessed via new_halfedges[i]->vertex()->pos for
+    i = 1, ..., new_halfedges.size()-1.
 
-        The basic strategy here is to loop over the list of outgoing halfedges,
-        and use the original vertex position and its associated outgoing edge
-        to compute a new vertex position along the outgoing edge.
+    The basic strategy here is to loop over the list of outgoing halfedges,
+    and use the original vertex position and its associated outgoing edge
+    to compute a new vertex position along the outgoing edge.
 */
 void Halfedge_Mesh::bevel_vertex_positions(const std::vector<Vec3> &start_positions,
                                            Halfedge_Mesh::FaceRef face, float tangent_offset) {
@@ -185,24 +185,24 @@ void Halfedge_Mesh::bevel_vertex_positions(const std::vector<Vec3> &start_positi
 }
 
 /*
-        Compute new vertex positions for the vertices of the beveled edge.
+    Compute new vertex positions for the vertices of the beveled edge.
 
-        These vertices can be accessed via new_halfedges[i]->vertex()->pos for
-        i = 1, ..., new_halfedges.size()-1.
+    These vertices can be accessed via new_halfedges[i]->vertex()->pos for
+    i = 1, ..., new_halfedges.size()-1.
 
-        The basic strategy here is to loop over the list of outgoing halfedges,
-        and use the preceding and next vertex position from the original mesh
-        (in the orig array) to compute an offset vertex position.
+    The basic strategy here is to loop over the list of outgoing halfedges,
+    and use the preceding and next vertex position from the original mesh
+    (in the orig array) to compute an offset vertex position.
 
-        Note that there is a 1-to-1 correspondence between halfedges in
-        newHalfedges and vertex positions
-        in orig.  So, you can write loops of the form
+    Note that there is a 1-to-1 correspondence between halfedges in
+    newHalfedges and vertex positions
+    in orig.  So, you can write loops of the form
 
-        for(size_t i = 0; i < new_halfedges.size(); i++)
-        {
-                Vector3D pi = start_positions[i]; // get the original vertex
-                position corresponding to vertex i
-        }
+    for(size_t i = 0; i < new_halfedges.size(); i++)
+    {
+            Vector3D pi = start_positions[i]; // get the original vertex
+            position corresponding to vertex i
+    }
 */
 void Halfedge_Mesh::bevel_edge_positions(const std::vector<Vec3> &start_positions,
                                          Halfedge_Mesh::FaceRef face, float tangent_offset) {
@@ -221,25 +221,25 @@ void Halfedge_Mesh::bevel_edge_positions(const std::vector<Vec3> &start_position
 }
 
 /*
-        Compute new vertex positions for the vertices of the beveled face.
+    Compute new vertex positions for the vertices of the beveled face.
 
-        These vertices can be accessed via new_halfedges[i]->vertex()->pos for
-        i = 1, ..., new_halfedges.size()-1.
+    These vertices can be accessed via new_halfedges[i]->vertex()->pos for
+    i = 1, ..., new_halfedges.size()-1.
 
-        The basic strategy here is to loop over the list of outgoing halfedges,
-        and use the preceding and next vertex position from the original mesh
-        (in the start_positions array) to compute an offset vertex
-        position.
+    The basic strategy here is to loop over the list of outgoing halfedges,
+    and use the preceding and next vertex position from the original mesh
+    (in the start_positions array) to compute an offset vertex
+    position.
 
-        Note that there is a 1-to-1 correspondence between halfedges in
-        new_halfedges and vertex positions
-        in orig. So, you can write loops of the form
+    Note that there is a 1-to-1 correspondence between halfedges in
+    new_halfedges and vertex positions
+    in orig. So, you can write loops of the form
 
-        for(size_t i = 0; i < new_halfedges.size(); hs++)
-        {
-                Vec3 pi = start_positions[i]; // get the original vertex
-                position corresponding to vertex i
-        }
+    for(size_t i = 0; i < new_halfedges.size(); i++)
+    {
+            Vec3 pi = start_positions[i]; // get the original vertex
+            position corresponding to vertex i
+    }
 */
 void Halfedge_Mesh::bevel_face_positions(const std::vector<Vec3> &start_positions,
                                          Halfedge_Mesh::FaceRef face, float tangent_offset,
@@ -262,7 +262,7 @@ void Halfedge_Mesh::bevel_face_positions(const std::vector<Vec3> &start_position
 }
 
 /*
-        Splits all non-triangular faces into triangles.
+    Splits all non-triangular faces into triangles.
 */
 void Halfedge_Mesh::triangulate() {
 
@@ -317,13 +317,13 @@ void Halfedge_Mesh::triangulate() {
 */
 
 /*
-        Compute new vertex positions for a mesh that splits each polygon
-        into quads (by inserting a vertex at the face midpoint and each
-        of the edge midpoints).  The new vertex positions will be stored
-        in the members Vertex::new_pos, Edge::new_pos, and
-        Face::new_pos.  The values of the positions are based on
-        simple linear interpolation, e.g., the edge midpoints and face
-        centroids.
+    Compute new vertex positions for a mesh that splits each polygon
+    into quads (by inserting a vertex at the face midpoint and each
+    of the edge midpoints).  The new vertex positions will be stored
+    in the members Vertex::new_pos, Edge::new_pos, and
+    Face::new_pos.  The values of the positions are based on
+    simple linear interpolation, e.g., the edge midpoints and face
+    centroids.
 */
 void Halfedge_Mesh::linear_subdivide_positions() {
 
@@ -339,14 +339,14 @@ void Halfedge_Mesh::linear_subdivide_positions() {
 }
 
 /*
-        Compute new vertex positions for a mesh that splits each polygon
-        into quads (by inserting a vertex at the face midpoint and each
-        of the edge midpoints).  The new vertex positions will be stored
-        in the members Vertex::new_pos, Edge::new_pos, and
-        Face::new_pos.  The values of the positions are based on
-        the Catmull-Clark rules for subdivision.
+    Compute new vertex positions for a mesh that splits each polygon
+    into quads (by inserting a vertex at the face midpoint and each
+    of the edge midpoints).  The new vertex positions will be stored
+    in the members Vertex::new_pos, Edge::new_pos, and
+    Face::new_pos.  The values of the positions are based on
+    the Catmull-Clark rules for subdivision.
 
-        Note: this will only be called on meshes without boundary
+    Note: this will only be called on meshes without boundary
 */
 void Halfedge_Mesh::catmullclark_subdivide_positions() {
 
@@ -414,9 +414,9 @@ void Halfedge_Mesh::loop_subdivide() {
 }
 
 /*
-        Isotropic remeshing. Note that this function returns success in a similar
-        manner to the local operations, except with only a boolean value.
-        (e.g. you may want to return false if this is not a triangle mesh)
+    Isotropic remeshing. Note that this function returns success in a similar
+    manner to the local operations, except with only a boolean value.
+    (e.g. you may want to return false if this is not a triangle mesh)
 */
 bool Halfedge_Mesh::isotropic_remesh() {
 
@@ -429,6 +429,13 @@ bool Halfedge_Mesh::isotropic_remesh() {
     //    been destroyed by a collapse (which ones?)
     // -> Now flip each edge if it improves vertex degree
     // -> Finally, apply some tangential smoothing to the vertex positions
+
+    // Note: if you erase elements in a local operation, they will not be actually deleted
+    // until do_erase or validate are called. This is to facilitate checking
+    // for dangling references to elements that will be erased.
+    // The rest of the codebase will automatically call validate() after each op,
+    // but here simply calling collapse_edge() will not erase the elements.
+    // You should use collapse_edge_erase() instead for the desired behavior.
 
     return false;
 }
@@ -522,10 +529,10 @@ template <class T> struct PQueue {
 };
 
 /*
-        Mesh simplification. Note that this function returns success in a similar
-        manner to the local operations, except with only a boolean value.
-        (e.g. you may want to return false if you can't simplify the mesh any
-        further without destroying it.)
+    Mesh simplification. Note that this function returns success in a similar
+    manner to the local operations, except with only a boolean value.
+    (e.g. you may want to return false if you can't simplify the mesh any
+    further without destroying it.)
 */
 bool Halfedge_Mesh::simplify() {
 
@@ -548,6 +555,13 @@ bool Halfedge_Mesh::simplify() {
     //    the collapsed vertex AFTER it's been collapsed. Also remember to assign
     //    a quadric to the collapsed vertex, and to pop the collapsed edge off the
     //    top of the queue.
+
+    // Note: if you erase elements in a local operation, they will not be actually deleted
+    // until do_erase or validate are called. This is to facilitate checking
+    // for dangling references to elements that will be erased.
+    // The rest of the codebase will automatically call validate() after each op,
+    // but here simply calling collapse_edge() will not erase the elements.
+    // You should use collapse_edge_erase() instead for the desired behavior.
 
     return false;
 }

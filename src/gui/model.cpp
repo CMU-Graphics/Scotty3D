@@ -226,7 +226,6 @@ void Model::vertex_viz(Halfedge_Mesh::VertexRef v, float &size, Mat4 &transform)
 
     auto he = v->halfedge();
     do {
-        Vec3 n = he->twin()->vertex()->pos;
         float len = he->edge()->length();
         min = std::min(min, len);
         avg += len;
