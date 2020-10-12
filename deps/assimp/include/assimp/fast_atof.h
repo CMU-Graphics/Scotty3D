@@ -269,6 +269,12 @@ const char* fast_atoreal_move(const char* c, Real& out, bool check_comma = true)
         ++c;
     }
 
+    if ((c[0] == 'N' || c[0] == 'n') && ASSIMP_strincmp(c, "nan(ind)", 8) == 0) {
+        out = std::numeric_limits<Real>::quiet_NaN();
+        c += 8;
+        return c;
+    }
+
     if ((c[0] == 'N' || c[0] == 'n') && ASSIMP_strincmp(c, "nan", 3) == 0) {
         out = std::numeric_limits<Real>::quiet_NaN();
         c += 3;
