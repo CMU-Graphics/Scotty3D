@@ -324,6 +324,7 @@ static void load_node(Scene &scobj, std::vector<std::string> &errors,
         std::vector<std::vector<Halfedge_Mesh::Index>> polys;
         for (unsigned int j = 0; j < mesh->mNumFaces; j++) {
             const aiFace &face = mesh->mFaces[j];
+            if(face.mNumIndices < 3) continue;
             std::vector<Halfedge_Mesh::Index> poly;
             for (unsigned int k = 0; k < face.mNumIndices; k++) {
                 poly.push_back(face.mIndices[k]);
