@@ -20,35 +20,6 @@ Pathtracer::Pathtracer(Gui::Widget_Render &gui, Vec2 screen_dim)
 
 Pathtracer::~Pathtracer() { thread_pool.stop(); }
 
-void Pathtracer::refit_scene(Scene &layout_scene) {
-
-    std::unordered_map<Scene_ID, Object> obj_map;
-    std::vector<Object> objs = scene.destructure();
-    for (auto &o : objs)
-        obj_map.insert({o.id(), std::move(o)});
-
-    std::set<Scene_ID> light_ids;
-    for (auto &l : lights)
-        light_ids.insert(l.id());
-
-    layout_scene.for_items([&](const Scene_Item &item) {
-        auto entry = obj_map.find(item.id());
-        if (entry != obj_map.end()) {
-            entry->second.set_trans(item.pose().transform());
-            if (light_ids.count(entry->first)) {
-                obj_map.erase(entry);
-            }
-        }
-    });
-
-    objs.clear();
-    for (auto &o : obj_map)
-        objs.push_back(std::move(o.second));
-
-    build_lights(layout_scene, objs);
-    scene.build(std::move(objs));
-}
-
 void Pathtracer::build_lights(Scene &layout_scene, std::vector<Object> &objs) {
 
     lights.clear();
@@ -160,7 +131,7 @@ void Pathtracer::build_scene(Scene &layout_scene) {
                     obj_list.push_back(
                         Object(std::move(shape), obj.id(), idx, obj.pose.transform()));
                 } else {
-                    Tri_Mesh mesh(obj.posed_mesh());
+                    Tri_Mesh mesh(obj.posed_mesh(), obj.get_mesh().flipped());
                     std::lock_guard<std::mutex> lock(obj_mut);
                     obj_list.push_back(
                         Object(std::move(mesh), obj.id(), idx, obj.pose.transform()));
@@ -236,7 +207,7 @@ size_t Pathtracer::visualize_bvh(GL::Lines &lines, GL::Lines &active, size_t dep
     return scene.visualize(lines, active, depth, Mat4::I);
 }
 
-void Pathtracer::begin_render(Scene &layout_scene, const Camera &cam, bool refit) {
+void Pathtracer::begin_render(Scene &layout_scene, const Camera &cam) {
 
     size_t n_threads = std::thread::hardware_concurrency();
     size_t samples_per_epoch = std::max(size_t(1), n_samples / (n_threads * 10));
@@ -247,10 +218,7 @@ void Pathtracer::begin_render(Scene &layout_scene, const Camera &cam, bool refit
     total_epochs = n_samples / samples_per_epoch + !!(n_samples % samples_per_epoch);
 
     build_time = SDL_GetPerformanceCounter();
-    if (refit)
-        refit_scene(layout_scene);
-    else
-        build_scene(layout_scene);
+    build_scene(layout_scene);
     render_time = SDL_GetPerformanceCounter();
     build_time = render_time - build_time;
 

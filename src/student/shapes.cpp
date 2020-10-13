@@ -25,6 +25,10 @@ Trace Sphere::hit(const Ray &ray) const {
     // but only the _later_ one is within ray.time_bounds, you should
     // return that one!
 
+    // Note: ray.dir is not necessarily a unit vector if this object has a scale transform.
+    // If you want it to be so, you should use ray.dir.unit(), and also note that you will
+    // have to re-scale ret.time to be the distance along the original non-unit ray.dir.
+
     Trace ret;
     ret.hit = false;       // was there an intersection?
     ret.time = 0.0f;       // at what time did the intersection occur?

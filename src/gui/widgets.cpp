@@ -635,7 +635,7 @@ std::string Widget_Render::step(Animate &animate, Scene &scene) {
                     return "Failed to write output!";
                 }
 
-                pathtracer.begin_render(scene, cam, true);
+                pathtracer.begin_render(scene, cam);
                 next_frame++;
             }
         }

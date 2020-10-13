@@ -57,11 +57,15 @@ void Tri_Mesh::build(const GL::Mesh &mesh) {
     triangles.build(std::move(tris), 4);
 }
 
-Tri_Mesh::Tri_Mesh(const GL::Mesh &mesh) { build(mesh); }
+Tri_Mesh::Tri_Mesh(const GL::Mesh &mesh, bool flip) { build(mesh); flip_normals = flip; }
 
 BBox Tri_Mesh::bbox() const { return triangles.bbox(); }
 
-Trace Tri_Mesh::hit(const Ray &ray) const { return triangles.hit(ray); }
+Trace Tri_Mesh::hit(const Ray &ray) const { 
+    Trace t = triangles.hit(ray); 
+    if(flip_normals) t.normal = -t.normal;
+    return t;
+}
 
 size_t Tri_Mesh::visualize(GL::Lines &lines, GL::Lines &active, size_t level,
                            const Mat4 &trans) const {

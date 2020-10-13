@@ -32,7 +32,7 @@ public:
     const GL::Tex2D &get_output_texture(float exposure);
     size_t visualize_bvh(GL::Lines &lines, GL::Lines &active, size_t level);
 
-    void begin_render(Scene &scene, const Camera &camera, bool refit = false);
+    void begin_render(Scene &scene, const Camera &camera);
     void cancel();
     bool in_progress() const;
     float progress() const;
@@ -41,7 +41,6 @@ public:
 private:
     // Internal
     void build_scene(Scene &scene);
-    void refit_scene(Scene &scene);
     void build_lights(Scene &scene, std::vector<Object> &objs);
     void do_trace(size_t samples);
     void accumulate(const HDR_Image &sample);
