@@ -502,7 +502,7 @@ std::string Scene::load(bool new_scene, Undo &undo, Gui::Manager &gui, std::stri
         file.c_str(), aiProcess_PopulateArmatureData | aiProcess_OptimizeMeshes |
                       aiProcess_ValidateDataStructure | aiProcess_FindInvalidData |
                       aiProcess_FindInstances | aiProcess_FindDegenerates |
-                      aiProcess_DropNormals | aiProcess_JoinIdenticalVertices);
+                      aiProcess_DropNormals);
 
     if (!scene) {
         return "Parsing scene " + file + ": " + std::string(importer.GetErrorString());
