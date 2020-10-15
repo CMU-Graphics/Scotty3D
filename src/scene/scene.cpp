@@ -890,7 +890,6 @@ std::string Scene::write(std::string file, const Camera &render_cam,
                 size_t vert_idx = 0;
                 for (auto v = mesh.vertices_begin(); v != mesh.vertices_end(); v++) {
                     id_to_idx[v->id()] = vert_idx;
-                    Vec3 n = mesh.flipped() ? -v->normal() : v->normal();
                     ai_mesh->mVertices[vert_idx] = vecVec(v->pos);
                     vert_idx++;
                 }
