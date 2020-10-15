@@ -460,6 +460,16 @@ struct Edge_Record {
     float cost;
 };
 
+/* Comparison operator for Edge_Records so std::set will properly order them */
+bool operator<(const Edge_Record &r1, const Edge_Record &r2) {
+    if (r1.cost != r2.cost) {
+        return r1.cost < r2.cost;
+    }
+    Halfedge_Mesh::EdgeRef e1 = r1.edge;
+    Halfedge_Mesh::EdgeRef e2 = r2.edge;
+    return &*e1 < &*e2;
+}
+
 /** Helper type for quadric simplification
  *
  * A PQueue is a minimum-priority queue that
