@@ -502,7 +502,7 @@ std::string Scene::load(bool new_scene, Undo &undo, Gui::Manager &gui, std::stri
         file.c_str(), aiProcess_PopulateArmatureData | aiProcess_OptimizeMeshes |
                       aiProcess_ValidateDataStructure | aiProcess_FindInvalidData |
                       aiProcess_FindInstances | aiProcess_FindDegenerates |
-                      aiProcess_DropNormals);
+                      aiProcess_DropNormals | aiProcess_JoinIdenticalVertices);
 
     if (!scene) {
         return "Parsing scene " + file + ": " + std::string(importer.GetErrorString());
@@ -880,7 +880,6 @@ std::string Scene::write(std::string file, const Camera &render_cam,
                 size_t n_faces = mesh.n_faces();
 
                 ai_mesh->mVertices = new aiVector3D[n_verts];
-                ai_mesh->mNormals = new aiVector3D[n_verts];
                 ai_mesh->mNumVertices = (unsigned int)n_verts;
 
                 ai_mesh->mFaces = new aiFace[n_faces];
@@ -893,7 +892,6 @@ std::string Scene::write(std::string file, const Camera &render_cam,
                     id_to_idx[v->id()] = vert_idx;
                     Vec3 n = mesh.flipped() ? -v->normal() : v->normal();
                     ai_mesh->mVertices[vert_idx] = vecVec(v->pos);
-                    ai_mesh->mNormals[vert_idx] = vecVec(n);
                     vert_idx++;
                 }
 
@@ -915,7 +913,7 @@ std::string Scene::write(std::string file, const Camera &render_cam,
                     face_idx++;
                 }
 
-            } else {
+            } else if(obj.opt.shape_type == PT::Shape_Type::none) {
 
                 const auto &verts = obj.mesh().verts();
                 const auto &elems = obj.mesh().indices();
