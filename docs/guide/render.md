@@ -35,7 +35,11 @@ In Render mode, simply check the box for "Logged Rays", and you would be able to
 
 ![ray](render_mode/bvh.png)
 
+## Materials and Other Object Options
 
+You can change the material and other property of your mesh by selecting the object and choose "Edit Pose", "Edit Mesh", and "Edit Material". For example, you can make a colored cow by "Edit Material" -> "Diffuse light", and pick a color that you like.
+
+![material](render_mode/material.png)
 
 
 
