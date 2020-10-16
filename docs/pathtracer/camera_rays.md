@@ -24,6 +24,10 @@ This tutorial from [Scratchapixel](https://www.scratchapixel.com/lessons/3d-basi
 
 Once you have implemented `Pathtracer::trace_pixel`, `Rect::Uniform::sample` and `Camera::generate_ray`, you should have a working camera.
 
+You can visualize the result of the generated rays by checking the box for Logged rays under Visualize.
+
+![logged_rays](new_results/log_ray.png)
+
 **Tips:**
 
 *   Since it'll be hard to know if you camera rays are correct until you implement primitive intersection, we recommend debugging your camera rays by checking what your implementation of `Camera::generate_ray` does with rays at the center of the screen (0.5, 0.5) and at the corners of the image.

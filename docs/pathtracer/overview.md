@@ -8,7 +8,7 @@ permalink: /pathtracer/
 
 PathTrace is (as the name suggests) a simple path tracer that can render pictures with global illumination effects. The first part of the assignment will focus on providing an efficient implementation of **ray-scene geometry queries**. In the second half of the assignment you will **add the ability to simulate how light bounces around the scene**, which will allow your renderer to synthesize much higher-quality images. Much like in MeshEdit, input scenes are defined in COLLADA files, so you can create your own scenes for your scenes to render using free software like [Blender](https://www.blender.org/).)
 
-![CBsphere](CBsphere.png)
+![CBsphere](new_results/32k_large.png)
 
 Implementing the functionality of PathTracer is split in to 7 tasks, and here are the instructions for each of them:
 - [(Task 1) Generating Camera Rays](camera_rays.md)

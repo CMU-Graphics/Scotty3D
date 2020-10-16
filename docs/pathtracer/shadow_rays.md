@@ -26,7 +26,6 @@ Your job is to implement the logic needed to compute whether hit point is in sha
 * You will find it useful to debug your shadow code using the `DirectionalLight` since it produces hard shadows that are easy to reason about.
 * You would want to comment out the line `Spectrum radiance_out = Spectrum(0.5f);` and initialize the `radiance_out` to a more reasonable value. Hint: is there supposed to have any amount of light before we even start considering each light sample?
 
-At this point you should be able to render very striking images. For example, here is the Stanford Dragon model rendered with both a directional light (light coming from a single direction only) and a hemispherical light (light coming from all directions). Notice how both have realistic shadows in response to the the lighting conditions.
+At this point you should be able to render very striking images. For example, here is the head of Peter Schröder rendered with an area light from above.
 
-![shadow_directional](shadow_directional.png)
-![shadow_hemisphere](shadow_hemisphere.png)
+![shadow_directional](new_results/shadow_peter.png)

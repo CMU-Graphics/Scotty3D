@@ -28,13 +28,15 @@ Note:
 
 ---
 
-After correctly implementing path tracing, your renderer should be able to make a beautifully lit picture of the Cornell Box with:
+After correctly implementing path tracing, your renderer should be able to make a beautifully lit picture of the Cornell Box. Below is the rendering result of 1024 sample per pixel.
 
-![cornell_lambertian](cornell_lambertian.png)
+![cornell_lambertian](new_results/lambertian.png)
 
-Note the time-quality tradeoff here. With these commandline arguments, your path tracer will be running with 8 worker threads at a sample rate of 1024 camera rays per pixel, with a max ray depth of 4. This will produce an image with relatively high quality but will take quite some time to render. Rendering a high quality image will take a very long time as indicated by the image sequence below, so start testing your path tracer early!
+Note the time-quality tradeoff here. With these commandline arguments, your path tracer will be running with 8 worker threads at a sample rate of 1024 camera rays per pixel, with a max ray depth of 4. This will produce an image with relatively high quality but will take quite some time to render. Rendering a high quality image will take a very long time as indicated by the image sequence below, so start testing your path tracer early! Below are the result and runtime of rendering cornell box with different sample per pixel at 640 by 430 on Macbook Pro(3.1 GHz Dual-Core Intel Core i5).
 
-![spheres](spheres.png)
+![spheres](new_results/timing.png)
+
+Also note that if you have enabled Russian Roulette, your result may seem noisier.
 
 Here are a few tips:
 
