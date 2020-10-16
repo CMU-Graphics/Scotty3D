@@ -18,9 +18,11 @@ In this task you need to implement the `Env_Map::sample` and `Env_Map::sample_di
 To get things working, your first implementation of `Env_Map::sample` will be quite simple. You should generate a random direction on the sphere (**with uniform (1/4pi) probability with respect to solid angle**), convert this direction to coordinates (phi, theta) and then look up the appropriate radiance value in the texture map using **bilinear interpolation** (note: we recommend you begin with bilinear interpolation to keep things simple.)
 
 
-Since high dynamic range environment maps can be large files, we have not included them in the starter code repo. You can download a set of environment maps from this [link](http://15462.courses.cs.cmu.edu/fall2015content/misc/asst3_images/asst3_exr_archive.zip).You can designate rendering to use a particular environment map from the GUI: go to `layout` -> `new light` -> `environment map`-> `add`, and then select one of the environment maps that you have just downloaded.
+Since high dynamic range environment maps can be large files, we have not included them in the starter code repo. You can download a set of environment maps from this [link](http://15462.courses.cs.cmu.edu/fall2015content/misc/asst3_images/asst3_exr_archive.zip). You can designate rendering to use a particular environment map from the GUI: go to `layout` -> `new light` -> `environment map`-> `add`, and then select one of the environment maps that you have just downloaded.
 
 ![envmap_gui](envmap_gui.png)
+
+For more HDRIs for creative environment maps, check out [HDRIHAVEN](https://hdrihaven.com/)
 
 
 **Tips:**
@@ -33,7 +35,22 @@ Since high dynamic range environment maps can be large files, we have not includ
 
 Much like light in the real world, most of the energy provided by an environment light source is concentrated in the directions toward bright light sources. **Therefore, it makes sense to bias selection of sampled directions towards the directions for which incoming radiance is the greatest.** In this final task you will implement an importance sampling scheme for environment lights. For environment lights with large variation in incoming light intensities, good importance sampling will significantly improve the quality of renderings.
 
-The basic idea is that you will assign a probability to each pixel in the environment map based on the total flux passing through the solid angle it represents. We've written up [a set of notes for you here](importance_sampling.md).
+The basic idea is that you will assign a probability to each pixel in the environment map based on the total flux passing through the solid angle it represents. 
+
+A pixel with coordinate <img src="environment_eq1.png" width ="45"> subtends an area <img src="environment_eq2.png" width = "80"> on the unit sphere (where <img src="environment_eq3.png" width = "20"> and <img src="environment_eq4.png" width = "20"> the angles subtended by each pixel -- as determined by the resolution of the texture). Thus, the flux through a pixel is proportional to <img src="environment_eq5.png" width = "45">. (We only care about the relative flux through each pixel to create a distribution.)
+
+**Summing the fluxes for all pixels, then normalizing the values so that they sum to one, yields a discrete probability distribution for picking a pixel based on flux through its corresponding solid angle on the sphere.**
+
+The question is now how to sample from this 2D discrete probability distribution. We recommend the following process which reduces the problem to drawing samples from two 1D distributions, each time using the inversion method discussed in class:
+
+* Given <img src="environment_eq6.png" width ="45"> the probability distribution for all pixels, compute the marginal probability distribution <img src="environment_eq7.png" width ="100"> for selecting a value from each row of pixels.
+
+* Given for any pixel, compute the conditional probability <img src="environment_eq8.png" width ="100">.
+
+Given the marginal distribution for <img src="environment_eq9.png" width ="10"> and the conditional distributions <img src="environment_eq10.png" width ="45"> for environment map rows, it is easy to select a pixel as follows:
+
+1. Use the inversion method to first select a "row" of the environment map according to <img src="environment_eq11.png" width ="35">.
+2. Given this row, use the inversion method to select a pixel in the row according to <img src="environment_eq12.png" width ="45">.
 
 **Here are a few tips:**
 
