@@ -8,13 +8,12 @@ permalink: /pathtracer/visualization_of_normals
 
 For debugging purposes:
 
-You can replace the `radiance_out = Spectrum(5.f)` in `student/pathtracer.cpp` that the starter code gives you with:
+You can set the `bool normal_colors` to true in `student/debug.h` to check if the normals that you have computed at the hit point are correct or not for debugging purposes.
 
-```
-(result.n).normalize();
-return Spectrum(result.normal.n.x/2.0 + 0.5, result.normal.y/2.0 + 0.5, result.normal.z/2.0 + 0.5);
-```
+Here are some reference results:
 
-Reference results for CBspheres, bunny, dragon, and wall-e:
+![normalviz](new_results/norm1.png)
 
-![normalviz](normalviz.png)
+![normalviz](new_results/norm2.png)
+
+![normalviz](new_results/norm3.png)
