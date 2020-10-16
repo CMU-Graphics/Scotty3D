@@ -18,7 +18,7 @@ First, take a look at the definition for our `BVH` in `rays/bvh.h`. We represent
 
 The BVH class also maintains a vector of all primitives in the BVH. The fields start and range in the BVH `Node` refer the range of contained primitives in this array. The primitives in this array are not initially in any particular order, and you will need to _rearrange the order_ as you build the BVH so that your BVH can accurately represent the spacial hierarchy.
 
-The starter code constructs a valid BVH, but it is a trivial BVH with a single node containing all scene primitives. Once you are done with this task, you can check the box for BVH in the left bar under "Visualize" to visualize your BVH and adjust the levels.
+The starter code constructs a valid BVH, but it is a trivial BVH with a single node containing all scene primitives. Once you are done with this task, you can check the box for BVH in the left bar under "Visualize" when you start render to visualize your BVH and see each levels.
 
 ![visualize](new_results/bvh_button.png)
 
