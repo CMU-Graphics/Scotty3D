@@ -28,12 +28,39 @@ Implement the class `BSDF_Mirror` which represents a material with perfect specu
 
 ## Step 2
 
-Implement the class `BSDF_Glass` which is a glass-like material that both reflects light and transmit light. As discussed in class the fraction of light that is reflected and transmitted through glass is given by the dielectric Fresnel equations, which are [documented in detail here](dielectrics_and_transmission.md). Specifically your implementation should:
+Implement the class `BSDF_Glass` which is a glass-like material that both reflects light and transmit light. As discussed in class the fraction of light that is reflected and transmitted through glass is given by the dielectric Fresnel equations.
+
+### Dielectrics and Transmission
+
+### Fresnel Equations for Dielectric
+
+The [Fresnel Equations](https://en.wikipedia.org/wiki/Fresnel_equations) (another [link](http://hyperphysics.phy-astr.gsu.edu/hbase/phyopt/freseq.html) here) describe the amount of reflection from a surface. The description below is an approximation for dielectric materials (materials that don't conduct electricity). In this assignment you're asked to implement a glass material, which is a dielectric.
+
+In the description below, <img src="dielectric_eq1.png" width="18"> and <img src="dielectric_eq2.png" width="15"> refer to the index of refraction of the medium containing an incoming ray, and the zenith angle of the ray to the surface of a new medium. <img src="dielectric_eq3.png" width="18"> and <img src="dielectric_eq4.png" width="15"> refer to the index of refraction of the new medium and the angle to the surface normal of a transmitted ray.
+
+The Fresnel equations state that reflection from a surface is a function of the surface's index of refraction, as well as the polarity of the incoming light. Since our renderer doesn't account for polarity, we'll apply a common approximation of averaging the reflectance of polarizes light in perpendicular and parallel polarized light:
+
+<img src="dielectric_eq5.png" width="200">
+
+The parallel and perpendicular terms are given by:
+
+<img src="dielectric_eq6.png" width="200">
+
+<img src="dielectric_eq7.png" width="200">
+
+Therefore, for a dielectric material, the fraction of reflected light will be given by <img src="dielectric_eq8.png" width="18">, and the amount of transmitted light will be given by <img src="dielectric_eq9.png" width="50">.
+
+Alternatively, you may compute <img src="dielectric_eq8.png" width="18">  using [Schlick's approximation](https://en.wikipedia.org/wiki/Schlick%27s_approximation).
+
+### Distribution Function for Transmitted Light
+
+We described the BRDF for perfect specular reflection in class, however we did not discuss the distribution function for transmitted light. Since refraction "spreads" or "condenses" a beam, unlike perfect reflection, the radiance along the ray changes due to a refraction event. In your assignment you should use Snell's Law to compute the direction of refraction rays, and use the following distribution function to compute the radiance of transmitted rays. We refer you guys to Pharr, Jakob, and and Humphries's book [Physically Based Rendering](http://www.pbr-book.org/) for a derivation based on Snell's Law and the relation <img src="dielectric_eq10.png" width="150">. (But you are more than welcome to attempt a derivation on your own!)
+
+Specifically your implementation should:
 
 * Implement `refract` to add support for refracted ray paths.
 * Implement `BSDF_refract::sample` as well as `BSDF_Glass::sample`. Your implementation should use the Fresnel equations to compute the fraction of reflected light and the fraction of transmitted light. The returned ray sample should be either a reflection ray or a refracted ray, with the probability of which type of ray to use for the current path proportional to the Fresnel reflectance. (e.g., If the Fresnel reflectance is 0.9, then you should generate a reflection ray 90% of the time. What should the pdf be in this case?) Note that you can also use [Schlick's approximation](https://en.wikipedia.org/wiki/Schlick's_approximation) instead.
 * You should read the [provided notes](dielectrics_and_transmission.md) on the Fresnel equations as well as on how to compute a transmittance BSDF.
-When you are done, you will be able to render images like these:
 
 When you are done, you will be able to render images like these:
 
