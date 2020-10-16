@@ -21,6 +21,8 @@ Implementing the functionality of PathTracer is split in to 7 tasks, and here ar
 
 The files that you will work with for PathTracer are all under `src/student` directory. Some of the particularly important ones are outlined below. Methods that we expect you to implement are marked with "TODO (PathTracer)", which you may search for.
 
+We have also provided you very powerful debugging tool in `src/student/debug.h` and `src/student/debug.cpp`. Please see the comments in those two files in order to use them effectively. :-)
+
 | File(s)  |      Purpose      |  Need to modify? |
 |----------|-------------------|------------------|
 | `student/pathtracer.cpp` |  This is the main workhorse class. Inside the ray tracer class everything begins with the method `Pathtracer::trace_pixel` in pathtracer.cpp. This method computes the value of the specified pixel in the output image. | Yes |
