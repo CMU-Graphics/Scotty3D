@@ -31,7 +31,7 @@ In Render mode, simply check the box for "Logged Rays", and you would be able to
 
 ## Visualize BVH
 
-In Render mode, simply check the box for "Logged Rays", and you would be able to see the camera rays that you generated in task 3 when you start rendering. You can click on the horizontal bar to see each level of your BVH.
+In Render mode, simply check the box for "BVH", and you would be able to see the BVH you generated in task 3 when you start rendering. You can click on the horizontal bar to see each level of your BVH.
 
 ![ray](render_mode/bvh.png)
 
