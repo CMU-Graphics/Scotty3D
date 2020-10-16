@@ -37,5 +37,5 @@ When you are done, you will be able to render images like these:
 
 When you are done, you will be able to render images like these:
 
-![cornell_classic](cornell_classic.png)
+![cornell_classic](new_results/32k_large.png)
 
