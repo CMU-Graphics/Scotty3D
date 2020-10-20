@@ -26,7 +26,7 @@ Once you have implemented `Pathtracer::trace_pixel`, `Rect::Uniform::sample` and
 
 You can visualize the result of the generated rays by checking the box for Logged rays under Visualize.
 
-![logged_rays](new_results/log_ray.png)
+![logged_rays](new_results/log_rays.png)
 
 **Tips:**
 
