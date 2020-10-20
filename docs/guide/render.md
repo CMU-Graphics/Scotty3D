@@ -6,9 +6,15 @@ permalink: /guide/render/
 
 # Render
 
-Welcome! This is Scotty3D's realistic, globally illuminated pathtracing renderer, capable of creating images of complex scenes using path tracing.
+Welcome! This is Scotty3D's realistic, globally illuminated renderer, capable of creating images of complex scenes using path tracing.
 
 ## Moving Camera
+
+The render mode comes with its own camera, representing the position, view direction, field of view, and aspect ratio with which to render the scene. These parameters are visually represented by the camera control cage, which shows up as a black wire-frame pyramid that traces out the unit-distance view plane. Note that changing camera settings (e.g. field of view) will adjust the geometry of the camera cage.
+
+To move the render camera to the current view, click "Move to View." This will reposition the camera so that it has exactly what you have on screen in view.
+
+To freely move the camera without updating its field of view/aspect ratio to match the current viewport, click "Free Move," and use the normal 3D navigation tools to position the camera. When you are done, click "Confirm Move" or "Cancel Move" to apply or cancel the updated camera position. Feel free to play around with the field of view (FOV) and aspect ratio (AR) sliders while in the free move mode - they will adjust your current view to use these values, so you can see how exactly the effect the visible region.
 
 ## Create light
 
@@ -22,12 +28,11 @@ Click on "Open Render Window", and you will be able to set the parameters to ren
 
 ![light](render_mode/window.png)
 
-## Enable Logged Ray for Debugging
+## Enable Ray Logging for Debugging
 
 In Render mode, simply check the box for "Logged Rays", and you would be able to see the camera rays that you generated in task 1.
 
 ![ray](render_mode/log_ray.png)
-
 
 ## Visualize BVH
 
