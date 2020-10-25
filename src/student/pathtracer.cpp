@@ -56,7 +56,7 @@ Spectrum Pathtracer::trace_ray(const Ray &ray) {
     // code sets radiance_out to (0.5,0.5,0.5) so that you can test your geometry
     // queries before you implement path tracing.
     Spectrum radiance_out =
-        debug_data.normal_colors ? Spectrum(0.5f) : Spectrum::direction(hit.normal);
+        debug_data.normal_colors ? Spectrum::direction(hit.normal) : Spectrum(0.5f);
     {
         auto sample_light = [&](const auto &light) {
             // If the light is discrete (e.g. a point light), then we only need
