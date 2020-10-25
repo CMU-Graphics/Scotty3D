@@ -30,7 +30,7 @@ struct Ray {
 
     /// The origin or starting point of this ray
     Vec3 point;
-    /// The unit direction the ray travels in
+    /// The direction the ray travels in
     Vec3 dir;
     /// The minimum and maximum time/distance at which this ray should exist
     Vec2 time_bounds;
