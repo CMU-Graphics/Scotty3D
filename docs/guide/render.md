@@ -8,6 +8,12 @@ permalink: /guide/render/
 
 Welcome! This is Scotty3D's realistic, globally illuminated renderer, capable of creating images of complex scenes using path tracing.
 
+## Render Window
+
+In render mode, click on "Open Render Window", and you will be able to set the parameters to render your model. Enjoy the excitement of seeing the images becoming clearer and clearer ;-)
+
+![light](render_mode/window.png)
+
 ## Moving Camera
 
 The render mode comes with its own camera, representing the position, view direction, field of view, and aspect ratio with which to render the scene. These parameters are visually represented by the camera control cage, which shows up as a black wire-frame pyramid that traces out the unit-distance view plane. Note that changing camera settings (e.g. field of view) will adjust the geometry of the camera cage.
@@ -22,15 +28,10 @@ To create a lighting for your scene, simply go to the menu on the left side, cli
 
 ![light](render_mode/light.png)
 
-## Render Window
-
-Click on "Open Render Window", and you will be able to set the parameters to render your model. Enjoy the excitement of seeing the images becoming clearer and clearer ;-)
-
-![light](render_mode/window.png)
 
 ## Enable Ray Logging for Debugging
 
-In Render mode, simply check the box for "Logged Rays", and you would be able to see the camera rays that you generated in task 1.
+In Render mode, simply check the box for "Logged Rays", and you would be able to see the camera rays that you generated in task 1 when you start render.
 
 ![ray](render_mode/log_ray.png)
 
