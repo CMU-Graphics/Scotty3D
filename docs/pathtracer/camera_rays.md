@@ -8,7 +8,7 @@ permalink: /pathtracer/camera_rays
 
 "Camera rays" emanate from the camera and measure the amount of scene radiance that reaches a point on the camera's sensor plane. (Given a point on the virtual sensor plane, there is a corresponding camera ray that is traced into the scene.) 
 
-Take a look at `Pathtracer::trace_pixel` in `studnet/pathtracer.cpp`. The job of this function is to compute the amount of energy arriving at this pixel of the image. Conveniently, we've given you a function `Pathtracer::trace_ray(r)` that provides a measurement of incoming scene radiance along the direction given by ray `r`. See `lib/ray.h` for the interface of ray.
+Take a look at `Pathtracer::trace_pixel` in `student/pathtracer.cpp`. The job of this function is to compute the amount of energy arriving at this pixel of the image. Conveniently, we've given you a function `Pathtracer::trace_ray(r)` that provides a measurement of incoming scene radiance along the direction given by ray `r`. See `lib/ray.h` for the interface of ray.
 
 When the number of samples per pixel is 1, you should sample incoming radiance at the center of each pixel by constructing a ray `r` that begins at this sensor location and travels through the camera's pinhole. Once you have computed this ray, then call `Pathtracer::trace_ray(r)` to get the energy deposited in the pixel. When supersampling is enabled, the expected behavior of the program is being addressed below.
 
