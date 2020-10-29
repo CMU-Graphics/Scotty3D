@@ -26,7 +26,7 @@ To choose a sample within the pixel, you should implement `Rect::Uniform::sample
 
 Once you have implemented `Pathtracer::trace_pixel`, `Rect::Uniform::sample` and `Camera::generate_ray`, you should have a working camera.
 
-*Tip:*   Since it'll be hard to know if you camera rays are correct until you implement primitive intersection, we recommend debugging your camera rays by checking what your implementation of `Camera::generate_ray` does with rays at the center of the screen (0.5, 0.5) and at the corners of the image.
+**Tip:**   Since it'll be hard to know if you camera rays are correct until you implement primitive intersection, we recommend debugging your camera rays by checking what your implementation of `Camera::generate_ray` does with rays at the center of the screen (0.5, 0.5) and at the corners of the image.
 
 The code can log the results of raytracing for visualization and debugging. To do so, simply call function `Pathtracer::log_ray` in your `Pathtracer::trace_pixel`. Function `Pathtracer::log_ray` takes in 3 arguments: the ray thay you want to log, a float that specifies the time/distance to log that ray up to, as well as the color. You don't need to worry about the color as it is being set to white by default. You can only log only a portion of the generated rays for a cleaner visual effect, for example, do `if (RNG::coin_flip(0.0005f))log_ray(out, 10.0f);` to log 0.05% of generated camera rays.
 
