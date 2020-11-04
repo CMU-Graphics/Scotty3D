@@ -31,7 +31,7 @@ Once you have implemented `Pathtracer::trace_pixel`, `Rect::Uniform::sample` and
 The code can log the results of raytracing for visualization and debugging. To do so, simply call function `Pathtracer::log_ray` in your `Pathtracer::trace_pixel`. Function `Pathtracer::log_ray` takes in 3 arguments: the ray thay you want to log, a float that specifies the time/distance to log that ray up to, as well as the color. You don't need to worry about the color as it is being set to white by default. You can only log only a portion of the generated rays for a cleaner visual effect, for example, do `if (RNG::coin_flip(0.0005f))log_ray(out, 10.0f);` to log 0.05% of generated camera rays.
 
 You can visualize the result of the generated rays by checking the box for Logged rays under Visualize and then **start render**(Open Render Window -> Start Render).
-After running the ray tracer, rays will be shown as lines in visualizer. A yellow ray indicates that it intersected some primitive (which you will implement soon). Be sure to wait for rendering to complete so you see all rays while visualizing, a message is printed to standard output on completion. 
+After running the ray tracer, rays will be shown as lines in visualizer. Be sure to wait for rendering to complete so you see all rays while visualizing, a message is printed to standard output on completion. 
 
 ![logged_rays](new_results/log_rays.png)
 
