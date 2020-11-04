@@ -12,6 +12,8 @@ You can set the `bool normal_colors` to true in `student/debug.h` to check if th
 
 Here are some reference results:
 
+![normalviz](new_results/cbox_normal.png)
+
 ![normalviz](new_results/norm1.png)
 
 ![normalviz](new_results/norm2.png)
