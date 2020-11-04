@@ -22,9 +22,6 @@ The starter code constructs a valid BVH, but it is a trivial BVH with a single n
 
 Finally, note that the BVH visualizer will start drawing from `BVH::root_idx`, so be sure to set this to the proper index (probably 0 or `nodes.size() - 1`, depending on your implementation) when you build the BVH.
 
-![visualize](new_results/bvh_button.png)
-
-![bvh](new_results/bvh.png)
 
 ## Step 0: Bounding Box Calculation
 
@@ -39,3 +36,24 @@ Your job is to construct a `BVH` using the [Surface Area Heuristic](http://15462
 ## Step 2: Ray-BVH Intersection
 
 Implement the ray-BVH intersection routine `Trace BVH<Primitive>::hit(const Ray& ray)`. You may wish to consider the node visit order optimizations we discussed in class. Once complete, your renderer should be able to render all of the test scenes in a reasonable amount of time. [Visualization of normals](visualization_of_normals.md) may help with debugging.
+
+## Visualization
+
+In Render mode, simply check the box for "BVH", and you would be able to see the BVH you generated in task 3 when you **start rendering**. You can click on the horizontal bar to see each level of your BVH.
+
+![visualize](new_results/bvh_button.png)
+
+The bvh constructed for spot on the 10th level.
+![bvh](new_results/bvh.png)
+
+The bvh constructed for a scene composed of several cubs and spheres on the 0th level.
+![0](new_results/l0.png)
+
+The bvh constructed for a scene composed of several cubs and spheres on the 1st level.
+![1](new_results/l2.png)
+
+The bvh constructed for bunny on the 10th level.
+![bunny](new_results/bvh_bunny_10.png)
+
+
+
