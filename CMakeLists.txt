@@ -15,7 +15,7 @@ endif()
 
 # define sources
 
-set(SOURCES_SCOTTY3D_GUI 
+set(SOURCES_SCOTTY3D_GUI
                     "src/gui/manager.cpp"
                     "src/gui/manager.h"
                     "src/gui/model.cpp"
@@ -107,6 +107,7 @@ if(SCOTTY3D_BUILD_REF)
                     "src/reference/shapes.cpp"
                     "src/reference/bsdf.cpp"
                     "src/reference/bbox.cpp"
+                    "src/reference/bvh.inl"
                     "src/reference/skeleton.cpp"
                     "src/reference/env_light.cpp"
                     "src/reference/tri_mesh.cpp")
@@ -121,6 +122,7 @@ else()
                     "src/student/bbox.cpp"
                     "src/student/debug.h"
                     "src/student/debug.cpp"
+                    "src/student/bvh.inl"
                     "src/student/env_light.cpp"
                     "src/student/skeleton.cpp"
                     "src/student/tri_mesh.cpp")
@@ -232,7 +234,7 @@ include_directories(${ASSIMP_INCLUDE_DIRS})
 
 
 
-# link libraries 
+# link libraries
 
 if(WIN32)
     target_include_directories(Scotty3D PRIVATE "deps/win")

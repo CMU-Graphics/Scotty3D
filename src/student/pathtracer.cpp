@@ -37,13 +37,18 @@ Spectrum Pathtracer::trace_ray(const Ray &ray) {
         return {};
     }
 
+    // If we're using a two-sided material, treat back-faces the same as front-faces
+    const BSDF &bsdf = materials[hit.material];
+    if(!bsdf.is_sided() && dot(hit.normal, ray.dir) > 0.0f) {
+        hit.normal = -hit.normal;
+    }
+
     // Set up a coordinate frame at the hit point, where the surface normal becomes {0, 1, 0}
     // This gives us out_dir and later in_dir in object space, where computations involving the
     // normal become much easier. For example, cos(theta) = dot(N,dir) = dir.y!
     Mat4 object_to_world = Mat4::rotate_to(hit.normal);
     Mat4 world_to_object = object_to_world.T();
     Vec3 out_dir = world_to_object.rotate(ray.point - hit.position).unit();
-    const BSDF &bsdf = materials[hit.material];
 
     // Now we can compute the rendering equation at this point.
     // We split it into two stages: sampling lighting (i.e. directly connecting

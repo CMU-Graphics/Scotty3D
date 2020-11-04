@@ -548,6 +548,7 @@ void Widget_Render::begin(Scene &scene, Widget_Camera &cam, Camera &user_cam) {
         ImGui::SetNextWindowFocus();
         render_window_focus = false;
     }
+    ImGui::SetNextWindowSize({675.0f, 625.0f}, ImGuiCond_Once);
     ImGui::Begin("Render Image", &render_window, ImGuiWindowFlags_NoCollapse);
 
     static const char *method_names[] = {"Rasterize", "Path Trace"};

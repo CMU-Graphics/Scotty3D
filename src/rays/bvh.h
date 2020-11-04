@@ -34,12 +34,13 @@ private:
 
     std::vector<Node> nodes;
     std::vector<Primitive> primitives;
+    size_t root_idx = 0;
 };
 
 } // namespace PT
 
 #ifdef SCOTTY3D_BUILD_REF
-#include "../reference/bvh.cpp"
+#include "../reference/bvh.inl"
 #else
-#include "../student/bvh.cpp"
+#include "../student/bvh.inl"
 #endif

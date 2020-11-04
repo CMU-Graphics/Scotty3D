@@ -33,7 +33,7 @@ struct Ray {
     /// The direction the ray travels in
     Vec3 dir;
     /// The minimum and maximum time/distance at which this ray should exist
-    Vec2 time_bounds;
+    mutable Vec2 time_bounds;
     /// Recursive depth of ray
     size_t depth = 0;
 };

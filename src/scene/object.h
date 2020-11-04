@@ -49,6 +49,7 @@ public:
     bool is_editable() const;
     bool is_shape() const;
     void try_make_editable(PT::Shape_Type prev = PT::Shape_Type::none);
+    void flip_normals();
 
     void set_mesh_dirty();
     void set_skel_dirty();

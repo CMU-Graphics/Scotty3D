@@ -32,7 +32,7 @@ private:
 class Tri_Mesh {
 public:
     Tri_Mesh() = default;
-    Tri_Mesh(const GL::Mesh &mesh, bool flip = false);
+    Tri_Mesh(const GL::Mesh &mesh);
 
     BBox bbox() const;
     Trace hit(const Ray &ray) const;
@@ -44,7 +44,6 @@ public:
 private:
     std::vector<Tri_Mesh_Vert> verts;
     BVH<Triangle> triangles;
-    bool flip_normals = false;
 };
 
 } // namespace PT

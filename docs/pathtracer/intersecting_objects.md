@@ -18,7 +18,7 @@ In order to correctly implement `hit` you need to understand some of the fields 
 * `dir`: represents the 3D direction of the ray (this direction will be normalized)
 * `time_bounds`: correspond to the minimum and maximum points on the ray with its x-component as the lower bound and y-component as the upper bound. That is, intersections that lie outside the [`ray.time_bounds.x`, `ray.time_bounds.y`]  range should not be considered valid intersections with the primitive.
 
-<!-- One important detail of the Ray structure is that `time_bounds` is a mutable field of the Ray. This means that this fields can be modified by constant member functions such as `Triangle::hit`. When finding the first intersection of a ray and the scene, you almost certainly want to update the ray's `time_bounds` value after finding each hit with scene geometry. By bounding the ray as tightly as possible, your ray tracer will be able to avoid unnecessary tests with scene geometry that is known to not be able to result in a closest hit, resulting in higher performance. -->
+One important detail of the Ray structure is that `time_bounds` is a mutable field of the Ray. This means that this fields can be modified by constant member functions such as `Triangle::hit`. When finding the first intersection of a ray and the scene, you almost certainly want to update the ray's `time_bounds` value after finding each hit with scene geometry. By bounding the ray as tightly as possible, your ray tracer will be able to avoid unnecessary tests with scene geometry that is known to not be able to result in a closest hit, resulting in higher performance.
 
 ---
 
@@ -37,7 +37,7 @@ There are two important details you should be aware of about intersection:
     * `position`: the exact position of the hit point. This can be easily computed by the `time` above as with the ray's `point` and `dir`.
     * `normal`: the normal of the surface at the hit point. This normal should be the interpolated normal (obtained via interpolation of the per-vertex normals according to the barycentric coordinates of the hit point)
 
-* When intersection occurs with the back-face of a triangle (the side of the triangle opposite the direction of the normal) you should flip the returned normal to point in that direction. That is, always return a normal pointing in the direction the ray came from!
+<!-- * When intersection occurs with the back-face of a triangle (the side of the triangle opposite the direction of the normal) you should flip the returned normal to point in that direction. That is, always return a normal pointing in the direction the ray came from! -->
 
 Once you've successfully implemented triangle intersection, you will be able to render many of the scenes in the media directory. However, your ray tracer will be very slow!
 

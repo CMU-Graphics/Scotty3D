@@ -111,6 +111,15 @@ public:
                           underlying);
     }
 
+    bool is_sided() const {
+        return std::visit(overloaded{[](const BSDF_Lambertian &) { return false; },
+                                     [](const BSDF_Mirror &) { return false; },
+                                     [](const BSDF_Glass &) { return true; },
+                                     [](const BSDF_Diffuse &) { return false; },
+                                     [](const BSDF_Refract &) { return true; }},
+                          underlying);
+    }
+
 private:
     std::variant<BSDF_Lambertian, BSDF_Mirror, BSDF_Glass, BSDF_Diffuse, BSDF_Refract> underlying;
 };

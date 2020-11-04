@@ -53,8 +53,10 @@ void Scene_Object::try_make_editable(PT::Shape_Type prev) {
     }
 
     std::string err = halfedge.from_mesh(_mesh);
-    if (err.empty())
+    if (err.empty()) {
         editable = true;
+        opt.smooth_normals = true;
+    }
 
     mesh_dirty = true;
     skel_dirty = true;
@@ -118,6 +120,11 @@ void Scene_Object::sync_anim_mesh() {
         }
     }
     skel_dirty = pose_dirty = false;
+}
+
+void Scene_Object::flip_normals() {
+    halfedge.flip();
+    mesh_dirty = true;
 }
 
 void Scene_Object::sync_mesh() {

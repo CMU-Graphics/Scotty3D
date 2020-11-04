@@ -293,7 +293,7 @@ Mode Manager::item_options(Undo &undo, Mode cur_mode, Scene_Item &item, Pose &ol
                 }
                 ImGui::SameLine();
                 if (ImGui::Button("Flip Normals")) {
-                    obj.get_mesh().flip();
+                    obj.flip_normals();
                 }
                 if (ImGui::Checkbox("Smooth Normals", &obj.opt.smooth_normals)) {
                     update();

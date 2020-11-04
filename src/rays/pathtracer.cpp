@@ -131,7 +131,7 @@ void Pathtracer::build_scene(Scene &layout_scene) {
                     obj_list.push_back(
                         Object(std::move(shape), obj.id(), idx, obj.pose.transform()));
                 } else {
-                    Tri_Mesh mesh(obj.posed_mesh(), obj.get_mesh().flipped());
+                    Tri_Mesh mesh(obj.posed_mesh());
                     std::lock_guard<std::mutex> lock(obj_mut);
                     obj_list.push_back(
                         Object(std::move(mesh), obj.id(), idx, obj.pose.transform()));
