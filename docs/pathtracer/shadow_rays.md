@@ -26,6 +26,33 @@ Your job is to implement the logic needed to compute whether hit point is in sha
 * You will find it useful to debug your shadow code using the `DirectionalLight` since it produces hard shadows that are easy to reason about.
 * You would want to comment out the line `Spectrum radiance_out = Spectrum(0.5f);` and initialize the `radiance_out` to a more reasonable value. Hint: is there supposed to have any amount of light before we even start considering each light sample?
 
-At this point you should be able to render very striking images. For example, here is the head of Peter Schröder rendered with an area light from above.
+At this point you should be able to render very striking images. 
 
-![shadow_directional](new_results/shadow_peter.png)
+## Sample results:
+
+The head of Peter Schröder rendered with an area light from above.
+
+![shadow_area](new_results/shadow_peter.png)
+
+A sphere and a cube with hemishphere lighting
+
+![shadow_hemisphere](new_results/cube_sphere_hemisphere.png)
+
+Hex and cube under diretional lighting
+
+![ref1](new_results/ref1.png)
+
+Bunny on a plane under point light
+
+![ref1](new_results/ref2.png)
+
+Spot on a sphere under diretional lighting
+
+![ref1](new_results/ref3.png)
+
+
+Spot on a sphere under hemisphere lighting
+
+![ref1](new_results/ref4.png)
+
+
