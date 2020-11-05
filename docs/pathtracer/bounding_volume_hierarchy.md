@@ -46,10 +46,10 @@ In Render mode, simply check the box for "BVH", and you would be able to see the
 The bvh constructed for spot on the 10th level.
 ![bvh](new_results/bvh.png)
 
-The bvh constructed for a scene composed of several cubs and spheres on the 0th level.
+The bvh constructed for a scene composed of several cubes and spheres on the 0th level.
 ![0](new_results/l0.png)
 
-The bvh constructed for a scene composed of several cubs and spheres on the 1st level.
+The bvh constructed for a scene composed of several cubes and spheres on the 1st level.
 ![1](new_results/l2.png)
 
 The bvh constructed for bunny on the 10th level.
