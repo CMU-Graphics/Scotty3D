@@ -30,7 +30,7 @@ At this point you should be able to render very striking images.
 
 ## Sample results:
 
-The head of Peter Schröder rendered with an area light from above.
+The head of Peter Schröder rendered with hemishphere lighting.
 
 ![shadow_area](new_results/shadow_peter.png)
 
