@@ -85,7 +85,7 @@ size_t BVH<Primitive>::new_node(BBox box, size_t start, size_t size, size_t l, s
     return nodes.size() - 1;
 }
 
-template <typename Primitive> BBox BVH<Primitive>::bbox() const { return nodes[0].bbox; }
+template <typename Primitive> BBox BVH<Primitive>::bbox() const { return nodes[root_idx].bbox; }
 
 template <typename Primitive> std::vector<Primitive> BVH<Primitive>::destructure() {
     nodes.clear();
