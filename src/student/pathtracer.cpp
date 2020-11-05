@@ -50,18 +50,20 @@ Spectrum Pathtracer::trace_ray(const Ray &ray) {
     Mat4 world_to_object = object_to_world.T();
     Vec3 out_dir = world_to_object.rotate(ray.point - hit.position).unit();
 
+    // Debugging: if the normal colors flag is set, return the normal color
+    if(debug_data.normal_colors)
+        return Spectrum::direction(hit.normal);
+
     // Now we can compute the rendering equation at this point.
     // We split it into two stages: sampling lighting (i.e. directly connecting
     // the current path to each light in the scene), then sampling the BSDF
     // to create a new path segment.
 
     // TODO (PathTracer): Task 5
-    // Instead of initializing this value to a constant color, use the direct,
-    // indirect lighting components calculated in the code below. The starter
-    // code sets radiance_out to (0.5,0.5,0.5) so that you can test your geometry
-    // queries before you implement path tracing.
-    Spectrum radiance_out =
-        debug_data.normal_colors ? Spectrum::direction(hit.normal) : Spectrum(0.5f);
+    // The starter code sets radiance_out to (0.5,0.5,0.5) so that you can test your geometry
+    // queries before you implement path tracing. You should change this to (0,0,0) and accumulate
+    // the direct and indirect lighting computed below.
+    Spectrum radiance_out = Spectrum(0.5f);
     {
         auto sample_light = [&](const auto &light) {
             // If the light is discrete (e.g. a point light), then we only need
