@@ -501,7 +501,15 @@ void ColladaExporter::WriteDirectionalLight(const aiLight *const light) {
     mOutput << startstr << "<color sid=\"color\">"
             << color.r << " " << color.g << " " << color.b
             << "</color>" << endstr;
-
+    mOutput << startstr << "<constant_attenuation>"
+            << light->mAttenuationConstant
+            << "</constant_attenuation>" << endstr;
+    mOutput << startstr << "<linear_attenuation>"
+            << light->mAttenuationLinear
+            << "</linear_attenuation>" << endstr;
+    mOutput << startstr << "<quadratic_attenuation>"
+            << light->mAttenuationQuadratic
+            << "</quadratic_attenuation>" << endstr;
     PopTag();
     mOutput << startstr << "</directional>" << endstr;
 }
