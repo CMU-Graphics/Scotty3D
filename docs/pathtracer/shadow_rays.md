@@ -30,7 +30,7 @@ At this point you should be able to render very striking images.
 
 ## Sample results:
 
-At this point, you can add all kinds of lights among the options you have when you create "New Light" in Layout mode, except for Sphere Light and Environment Map which you will implement in task 7 (Note that you can still fill in Sphere::Uniform::sample in Samplers.cpp now to view the result of a mesh under Sphere Light).
+At this point, you can add all kinds of lights among the options you have when you create "New Light" in Layout mode, except for Sphere Light and Environment Map which you will implement in task 7 (Note that you can still fill in `Sphere::Uniform::sample` in `Samplers.cpp` now to view the result of a mesh under Sphere Light).
 
 The head of Peter Schröder rendered with hemishphere lighting.
 
