@@ -6,7 +6,7 @@ permalink: /guide/rig/
 
 # Rig
 
-### Rigging Action
+### Rigging Setup
 
 Select the `Rig` tab to create a skeletal rig for an object.
 
@@ -24,7 +24,7 @@ Once you've implemented **inverse kinematics** the skeleton should be setup like
 
 Each joint has an associated `Radius`  which controls the part of the mesh influenced by the selected bone during animaton. The radius is visualized by the blue capsule around each bone and can be edited using the menu. The position of the joint can also be edited using the `Extent` values in the menu.
 
-After setting up the skeleton and assigning radii, the mesh can be posed in the [animate](animate) mode.
+After setting up the skeleton and assigning radii, the mesh can be posed in the [animate](../animate) mode.
 
 <!--
 

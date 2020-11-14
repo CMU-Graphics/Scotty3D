@@ -10,10 +10,10 @@ When you select the Animate tab, a timeline window will show up at the bottom of
 [picture here]()
 
 
-Animation is performed by creating **keyframes** and **interpolating** along those keyframes.
+Animation is performed by creating **keyframes** and **interpolating** between them.
 
-### Posing Action
-If you have [rigged](rig) an object with a skeleton, it can now be posed by selecting a bone and changing its pose i.e., joint rotation.
+### Posing
+Once you have [rigged](../rig) an object with a skeleton, it can now be posed by selecting a joint and changing its pose i.e., joint rotation.
 Once you've implemented **inverse kinematics** and **skinning**, as you change the pose, the mesh will deform. 
 
 [picture/video here](TODO)
