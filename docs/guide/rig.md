@@ -28,7 +28,7 @@ Each joint has an associated `Radius`  which controls the part of the mesh influ
 
 <video src="{{ site.baseurl }}/guide/rigging_mode/guide-rigging-2.mov" controls preload muted loop style="max-width: 100%; margin: 0 auto;"></video>
 
-After setting up the skeleton and assigning radii, the mesh can be posed in the [animate](../animate) mode.
+Note that rigging only uses extents of the bone for skeleton setup, joint pose does not influence the skeleton. Once rigging is done, the object can be posed by changing joint rotations in the [animate](../animate) mode. 
 
 <!--
 
