@@ -16,7 +16,7 @@ If you want to branch off at a joint, simply click on the joint to branch off of
 <video src="{{ site.baseurl }}/guide/rigging_mode/guide-rigging-1.mov" controls preload muted loop style="max-width: 100%; margin: 0 auto;"></video>
 
 To view a rigged example, see `media/human.dae` example and select the object in the Rig tab to view its joints.
-Once you've implemented **inverse kinematics** the skeleton should be setup like so:
+Once you've implemented forward kinematics the skeleton should be setup like so:
 
 ![rigged-human](./rigging_mode/guide-rigging-human.png)
 
