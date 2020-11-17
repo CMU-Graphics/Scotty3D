@@ -30,15 +30,20 @@ Each joint has an associated `Radius`  which controls the part of the mesh influ
 
 Note that rigging only uses extents of the bone for skeleton setup, joint pose does not influence the skeleton. Once rigging is done, the object can be posed by changing joint rotations in the [animate](../animate) mode. 
 
+
+## Inverse Kinematics
+Instead of computing the positions of the bones from the joint poses (forward kinematics), in inverse kinematics, joint positions are computed from target positions. 
+To associate a target position with a joint, select `Add IK` and edit the target position. Multiple target positions can be associated with the same joint but targets need to be explicitly enabled using the checkbox.
+In the [animate](../animate) mode, once inverse kinematics is implemented, joint rotation(pose) is updated based on the enabled IK handles.
+
+[TODO IK video]()
+
 <!--
 
 ### Toggling Linear Blend Skinning with Threshold
 
 You can press `u` or `U` to toggle between linear blend skinning with or without threshold.
 
-### Inverse Kinematics
-
-Multiple targets can be specified for IK purposes. To specify an additional target, just select a new joint and right click. To clear all targets, press `i` or `I`.
 -->
 
 

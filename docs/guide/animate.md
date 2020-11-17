@@ -31,8 +31,11 @@ Check `Draw Splines` to visualize the spline along which objects are animated.
 `Add Frames` inserts 90 empty frames into the timeline. `Crop End` deletes frames from the selected location to the end of the timeline.
 
 ### Posing
-Once you have [rigged](../rig) an object with a skeleton, it can now be posed by selecting a joint and changing its pose i.e., rotating the joint.
-Once you've implemented **inverse kinematics** and **skinning**, as you change the pose, the mesh will deform. 
+Once you have [rigged](../rig) an object with a skeleton, it can now be posed by selecting a joint and changing its pose i.e., rotating the joint. This is called Forward Kinematics.
+Joint poses can also be indirectly changed by using the IK (Inverse Kinematics) handles to provide target positions.  
+Note that IK handles need to be explicitly enabled using the checkbox. 
+
+Once you've implemented **forward kinematics**, **inverse kinematics** and **skinning**, as you change the pose, the mesh will deform. 
 Different poses can be set as keyframes to animate the object.
 
 <video src="{{ site.baseurl }}/guide/animate-mode/guide-posing-rig.mp4" controls preload muted loop style="max-width: 100%; margin: 0 auto;"></video>
