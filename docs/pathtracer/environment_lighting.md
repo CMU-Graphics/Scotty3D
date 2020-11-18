@@ -59,3 +59,17 @@ Given the marginal distribution for <img src="environment_eq9.png" width ="10"> 
 * `Spectrum::luma()` returns the luminance (brightness) of a Spectrum. The probability of a pixel should be proportional to the product of its luminance and the solid angle it subtends.
 * `std::lower_bound` is your friend. Documentation is [here](https://en.cppreference.com/w/cpp/algorithm/lower_bound).
 
+
+## Sample results for importance sampling:
+
+ennis.exr with 32 spp
+
+![ennis](new_results/ennis32importance.png) 
+
+uffiz.exr with 32 spp
+
+![uffiz](new_results/uffiz32importance.png) 
+
+field.exr with 32 spp
+
+![ennis](new_results/field1024importance.png) 
