@@ -10,8 +10,8 @@ There are four primary components that must be implemented to support Animation 
 
 **A4.0**
 
-- [(Task 1) Spline Interpolation](camera_rays.md)
-- [(Task 2) Skeleton Kinematics](intersecting_objects.md)
+- [(Task 1) Spline Interpolation](splines.md)
+- [(Task 2) Skeleton Kinematics](skeleton_kinematics.md)
 
 **A4.5**
 - Soon to come
