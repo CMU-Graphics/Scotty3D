@@ -94,12 +94,11 @@ which is a simple extension actually. Since each term is independent and added t
 
 You should implement multi-target IK, which will take a `std::map` of `Joint`s and target points for that joint. Each joint can only have 1 target point.
 
-In order to implement this, you should update `Joint::calculateAngleGradient` and `Skeleton::reachForTarget`. `Joint::calculateAngleGradient` should calculate the gradient of <img src=task2_media/0079.png height="14"> in the x,y, and z directions, and add them to `Joint::ikAngleGradient` for all relevant joints. `Skeleton::reachForTarget` should actually do the gradient descent calculations and update the angles of each joint, saving them with `Joint::setAngle`. In this function, you should probably use a very small timestep, but do several iterations (say, 10s to 100s) of gradient descent in order to speed things up. For even faster and better results, you can also implement a variable timestep instead of just using a fixed one. Note also that the root joint should never be updated.
+In order to implement this, you should update `Joint::compute_gradient` and `Skeleton::step_ik`. `Joint::compute_gradient` should calculate the gradient of <img src=task2_media/0079.png height="14"> in the x,y, and z directions, and add them to `Joint::angle_gradient` for all relevant joints. `Skeleton::step_ik` should actually do the gradient descent calculations and update the `pose` of each joint. In this function, you should probably use a very small timestep, but do several iterations (say, 10s to 100s) of gradient descent in order to speed things up. For even faster and better results, you can also implement a variable timestep instead of just using a fixed one. Note also that the root joint should never be updated.
 
 A key thing for this part is to _remember what coordinate frame you're in_, because if you calculate the gradients in the wrong coordinate frame or use the axis of rotation in the wrong coordinate frame your answers will come out very wrong!
 
 #### Using your IK!
 Once you have IK implemented, you should be able to create a series of joints, and get a particular joint to move to the desired final position you have selected.
 
-[[media/ik.gif]]
 
