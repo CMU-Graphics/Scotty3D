@@ -8,11 +8,14 @@ permalink: /animation/
 
 There are four primary components that must be implemented to support Animation functionality.
 
-##A4.0
+**A4.0**
+
 - [(Task 1) Spline Interpolation](camera_rays.md)
 - [(Task 2) Skeleton Kinematics](intersecting_objects.md)
-##A4.5
+
+**A4.5**
 - Soon to come
+
 
 Each of these components is described at the linked page.
 
