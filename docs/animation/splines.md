@@ -52,7 +52,7 @@ ome to Scotty3D! This 3D graphics software implements interactive mesh editing, 
 
 In other words, a reasonable guess for the tangent is given by the difference between neighboring points. (See the Wikipedia and our course slides for more details.)
 
-<img src=task1_media/spline_diagram.jpg height="30"> <br/>
+<img src=task1_media/spline_diagram.jpg> <br/>
 
 This scheme works great if we have two well-defined knots on either side of the query time t. But what happens if we get a query time near the beginning or end of the spline? Or what if the spline contains fewer than four knots? We still have to somehow come up with a reasonable definition for the positions and tangents of the curve at these times. For this assignment, your Catmull-Rom spline interpolation should satisfy the following properties:
 
