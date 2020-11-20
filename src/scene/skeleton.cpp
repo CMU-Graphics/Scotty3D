@@ -24,8 +24,12 @@ Skeleton::Skeleton(unsigned int obj_id) {
 Skeleton::~Skeleton() {
     for (Joint *j : roots)
         delete j;
-    for (Joint *j : erased)
-        delete j;
+    for (auto& e : erased)
+        delete e.first;
+    for (IK_Handle *h : handles)
+        delete h;
+    for (IK_Handle *h : erased_handles)
+        delete h;
 }
 
 bool Skeleton::set_time(float time) {
@@ -57,6 +61,15 @@ void Skeleton::crop(float t) {
     for_joints([t](Joint *j) { j->anim.crop(t); });
 }
 
+Skeleton::IK_Handle *Skeleton::get_handle(unsigned int id) {
+    IK_Handle *j = nullptr;
+    for(IK_Handle *h : handles) {
+        if (h->_id == id)
+            j = h;
+    }
+    return j;
+}
+
 Joint *Skeleton::get_joint(unsigned int id) {
     Joint *j = nullptr;
     for_joints([&](Joint *jt) {
@@ -66,7 +79,7 @@ Joint *Skeleton::get_joint(unsigned int id) {
     return j;
 }
 
-void Skeleton::render(const Mat4 &view, Joint *select, bool root, bool posed, unsigned int offset) {
+void Skeleton::render(const Mat4 &view, Joint *jselect, IK_Handle *hselect, bool root, bool posed, unsigned int offset) {
 
     Renderer &R = Renderer::get();
 
@@ -81,41 +94,55 @@ void Skeleton::render(const Mat4 &view, Joint *select, bool root, bool posed, un
         R.capsule(opt, j->extent.norm(), j->radius);
     });
 
-    if (select) {
+    if (jselect) {
         R.begin_outline();
 
         Mat4 model = Mat4::translate(base_pos) *
-                     (posed ? select->joint_to_posed() : select->joint_to_bind()) *
-                     Mat4::rotate_to(select->extent);
+                     (posed ? jselect->joint_to_posed() : jselect->joint_to_bind()) *
+                     Mat4::rotate_to(jselect->extent);
 
         Renderer::MeshOpt opt;
         opt.modelview = view;
-        opt.id = select->_id + offset;
+        opt.id = jselect->_id + offset;
         opt.depth_only = true;
 
         BBox box;
-        R.capsule(opt, model, select->extent.norm(), select->radius, box);
+        R.capsule(opt, model, jselect->extent.norm(), jselect->radius, box);
         R.end_outline(view, box);
     }
     R.reset_depth();
 
-    Renderer::MeshOpt opt;
-    opt.id = root_id + offset;
-    opt.modelview = V * Mat4::scale(Vec3{0.1f});
-    opt.color = root ? Gui::Color::outline : Gui::Color::hover;
-    R.sphere(opt);
+    {
+        Renderer::MeshOpt opt;
+        opt.id = root_id + offset;
+        opt.modelview = V * Mat4::scale(Vec3{0.1f});
+        opt.color = root ? Gui::Color::outline : Gui::Color::hover;
+        R.sphere(opt);
+    }
 
     for_joints([&](Joint *j) {
         Renderer::MeshOpt opt;
         opt.modelview = V * (posed ? j->joint_to_posed() : j->joint_to_bind()) *
                         Mat4::translate(j->extent) * Mat4::scale(Vec3{j->radius * 0.25f});
         opt.id = j->_id + offset;
-        opt.color = select == j ? Gui::Color::outline : Gui::Color::hover;
+        opt.color = jselect == j ? Gui::Color::outline : Gui::Color::hover;
         R.sphere(opt);
     });
+
+    GL::Lines ik_lines;
+    for(IK_Handle* h : handles) {
+        Renderer::MeshOpt opt;
+        opt.modelview = V * Mat4::translate(h->target) * Mat4::scale(Vec3{h->joint->radius * 0.3f});
+        opt.id = h->_id + offset;
+        opt.color = hselect == h ? Gui::Color::outline : Gui::Color::hoverg;
+        Vec3 j_world = posed ? posed_end_of(h->joint) : end_of(h->joint);
+        ik_lines.add(h->target, j_world - base_pos, h->enabled ? Vec3(1.0f, 0.0f, 0.0f) : Vec3(0.0f));
+        R.sphere(opt);
+    }
+    R.lines(ik_lines, V);
 }
 
-void Skeleton::outline(const Mat4 &view, Joint *select, bool root, bool posed, BBox &box,
+void Skeleton::outline(const Mat4 &view, bool root, bool posed, BBox &box,
                        unsigned int offset) {
 
     Renderer &R = Renderer::get();
@@ -145,6 +172,10 @@ unsigned int Skeleton::n_bones() {
     return n;
 }
 
+unsigned int Skeleton::n_handles() {
+    return (unsigned int)handles.size();
+}
+
 Vec3 &Skeleton::base() { return base_pos; }
 
 Joint *Skeleton::add_child(Joint *j, Vec3 e) {
@@ -162,6 +193,13 @@ void Skeleton::restore(Joint *j) {
     } else {
         roots.insert(j);
     }
+    
+    auto entry = erased.find(j);
+    assert(entry != erased.end());
+
+    for (IK_Handle* handle : entry->second) {
+        restore(handle);
+    }
     erased.erase(j);
 }
 
@@ -171,7 +209,16 @@ void Skeleton::erase(Joint *j) {
     } else {
         roots.erase(j);
     }
-    erased.insert(j);
+    std::vector<IK_Handle*> herase;
+    for (IK_Handle* h : handles) {
+        if (h->joint == j) {
+            herase.push_back(h);
+        }
+    }
+    for (IK_Handle* h : herase) {
+        erase(h);
+    }
+    erased.insert({j, std::move(herase)});
 }
 
 Vec3 Skeleton::posed_base_of(Joint *j) { return j->is_root() ? base() : posed_end_of(parent(j)); }
@@ -216,3 +263,32 @@ std::unordered_map<unsigned int, Vec3> Skeleton::at(float t) {
 void Skeleton::set(float t, const std::unordered_map<unsigned int, Vec3> &data) {
     for_joints([&data, t](Joint *j) { j->anim.set(t, Quat::euler(data.at(j->_id))); });
 }
+
+void Skeleton::restore(IK_Handle *h) {
+    handles.insert(h);
+    erased_handles.erase(h);
+}
+
+void Skeleton::erase(IK_Handle *h) {
+    handles.erase(h);
+    erased_handles.insert(h);
+}
+
+Skeleton::IK_Handle *Skeleton::add_handle(Vec3 pos, Joint* j) {
+    IK_Handle* handle = new IK_Handle{pos - base_pos, j, false, next_id++};
+    handles.insert(handle);
+    return handle;
+}
+
+bool Skeleton::do_ik() {
+    std::vector<IK_Handle*> enabled;
+    for (IK_Handle* h : handles) {
+        if (h->enabled) {
+            enabled.push_back(h);
+        }
+    }
+    if (enabled.empty()) return false;
+    step_ik(std::move(enabled));
+    return true;
+}
+

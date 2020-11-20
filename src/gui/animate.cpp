@@ -26,17 +26,6 @@ void Animate::update_dim(Vec2 dim) { ui_camera.dim(dim); }
 
 bool Animate::keydown(Widgets &widgets, Undo &undo, Scene_ID sel, SDL_Keysym key) {
 
-#ifdef __APPLE__
-    if (key.sym == SDLK_BACKSPACE && key.mod & KMOD_GUI) {
-#else
-    if (key.sym == SDLK_DELETE) {
-#endif
-        if (joint_select)
-            undo.del_bone(sel, joint_select);
-        else if (sel)
-            undo.del_obj(sel);
-    }
-
     if (key.sym == SDLK_SPACE) {
         playing = !playing;
         last_frame = SDL_GetPerformanceCounter();
@@ -76,16 +65,17 @@ void Animate::render(Scene &scene, Scene_Maybe obj_opt, Widgets &widgets, Camera
 
         Scene_Object &obj = item.get<Scene_Object>();
         joint_id_offset = scene.used_ids();
-        obj.armature.render(view * obj.pose.transform(), joint_select, false, true,
+        obj.armature.render(view * obj.pose.transform(), joint_select, handle_select, false, true,
                             joint_id_offset);
 
-        if (!joint_select) {
+        if (!joint_select && !handle_select) {
             R.begin_outline();
             BBox box = obj.bbox();
             obj.render(view, false, true);
-            obj.armature.outline(view * obj.pose.transform(), joint_select, false, true, box,
-                                 joint_id_offset);
+            obj.armature.outline(view * obj.pose.transform(), false, true, box, joint_id_offset);
             R.end_outline(view, box);
+        } else if (handle_select) {
+            widgets.active = Widget_Type::move;
         } else {
             widgets.active = Widget_Type::rotate;
         }
@@ -94,7 +84,12 @@ void Animate::render(Scene &scene, Scene_Maybe obj_opt, Widgets &widgets, Camera
         R.outline(view, item);
     }
 
-    if (joint_select) {
+    if (handle_select) {
+
+        Scene_Object &obj = item.get<Scene_Object>();
+        widgets.render(view, pose.transform() * (handle_select->target + obj.armature.base()), scale);
+
+    } else if (joint_select) {
 
         Scene_Object &obj = item.get<Scene_Object>();
         widgets.render(view, pose.transform() * obj.armature.posed_base_of(joint_select), scale);
@@ -150,17 +145,47 @@ void Animate::camera_spline() {
 
 void Animate::UIsidebar(Manager &manager, Undo &undo, Scene_Maybe obj_opt, Camera &user_cam) {
 
-    if (joint_select) {
+    if (handle_select) {
+
+        Scene_ID id = obj_opt.value().get().id();
+
+        ImGui::Text("Edit IK Handle");
+        ImGui::DragFloat3("Pos", handle_select->target.data, 0.1f, 0.0f, 0.0f, "%.2f");
+        if (ImGui::IsItemActivated())
+            old_euler = handle_select->target;
+        if (ImGui::IsItemDeactivatedAfterEdit() && old_euler != handle_select->target) {
+            undo.move_handle(id, handle_select, old_euler);
+        }
+        ImGui::Checkbox("Enable", &handle_select->enabled);
+        ImGui::Separator();
+
+    } else if (joint_select) {
+
+        Scene_Item& item = obj_opt.value().get();
+        Scene_ID id = item.id();
+
         ImGui::Text("Edit Joint");
+        
         if (ImGui::DragFloat3("Pose", joint_select->pose.data, 1.0f, 0.0f, 0.0f, "%.2f"))
             obj_opt.value().get().get<Scene_Object>().set_pose_dirty();
         if (ImGui::IsItemActivated())
             old_euler = joint_select->pose;
         if (ImGui::IsItemDeactivatedAfterEdit() && old_euler != joint_select->pose) {
             joint_select->pose = joint_select->pose.range(0.0f, 360.0f);
-            undo.pose_bone(obj_opt.value().get().id(), joint_select, old_euler);
+            undo.pose_bone(id, joint_select, old_euler);
         }
         ImGui::Separator();
+    }
+
+    if (obj_opt.has_value()) {
+        Scene_Item& item = obj_opt.value().get();
+        if (item.is<Scene_Object>()) {
+            Scene_Object& obj = item.get<Scene_Object>();
+            if (obj.armature.has_bones()) {
+                if (obj.armature.do_ik())
+                    obj.set_pose_dirty();
+            }
+        }
     }
 
     if (ui_camera.UI(undo, user_cam)) {
@@ -171,17 +196,22 @@ void Animate::UIsidebar(Manager &manager, Undo &undo, Scene_Maybe obj_opt, Camer
 }
 
 void Animate::end_transform(Undo &undo, Scene_Item &obj) {
-    if (joint_select) {
+    if (handle_select) {
+        undo.move_handle(obj.id(), handle_select, old_pose.pos - obj.get<Scene_Object>().armature.base());
+    } else if (joint_select) {
         undo.pose_bone(obj.id(), joint_select, old_euler);
     } else {
         undo.update_pose(obj.id(), old_pose);
     }
     old_pose = {};
+    old_euler = {};
     old_p_to_j = Mat4::I;
 }
 
 Vec3 Animate::selected_pos(Scene_Item &item) {
-    if (joint_select) {
+    if (handle_select) {
+        return item.pose().transform() * (handle_select->target + item.get<Scene_Object>().armature.base());
+    } else if (joint_select) {
         return item.pose().transform() *
                item.get<Scene_Object>().armature.posed_base_of(joint_select);
     }
@@ -189,7 +219,9 @@ Vec3 Animate::selected_pos(Scene_Item &item) {
 }
 
 void Animate::apply_transform(Widgets &widgets, Scene_Item &item) {
-    if (joint_select) {
+    if (handle_select) {
+        handle_select->target = widgets.apply_action(old_pose).pos - item.get<Scene_Object>().armature.base();
+    } else if (joint_select) {
         Scene_Object &obj = item.get<Scene_Object>();
         Vec3 euler = widgets.apply_action(old_pose).euler;
         joint_select->pose = (old_p_to_j * Mat4::euler(euler)).to_euler();
@@ -204,7 +236,14 @@ bool Animate::select(Scene &scene, Widgets &widgets, Scene_ID selected, Scene_ID
 
     if (widgets.want_drag()) {
 
-        if (joint_select) {
+        if (handle_select) {
+
+            Scene_Object &obj = scene.get_obj(selected);
+            widgets.start_drag(handle_select->target + obj.armature.base(), cam, spos, dir);
+            old_pose = {};
+            old_pose.pos = handle_select->target + obj.armature.base();
+
+        } else if (joint_select) {
 
             Scene_Object &obj = scene.get_obj(selected);
             Vec3 base = obj.pose.transform() * obj.armature.posed_base_of(joint_select);
@@ -238,8 +277,11 @@ bool Animate::select(Scene &scene, Widgets &widgets, Scene_ID selected, Scene_ID
 
                 Scene_ID j_id = id - joint_id_offset;
                 joint_select = obj.armature.get_joint(j_id);
+                handle_select = obj.armature.get_handle(j_id);
                 if (joint_select) {
                     widgets.active = Widget_Type::rotate;
+                } else if(handle_select) {
+                    widgets.active = Widget_Type::move;
                 }
                 return false;
             }
@@ -249,11 +291,13 @@ bool Animate::select(Scene &scene, Widgets &widgets, Scene_ID selected, Scene_ID
     if (id >= n_Widget_IDs) {
         if (id == selected) {
             joint_select = nullptr;
+            handle_select = nullptr;
         }
         return true;
     }
 
     joint_select = nullptr;
+    handle_select = nullptr;
     return false;
 }
 
@@ -564,6 +608,15 @@ void Animate::refresh(Scene &scene) { set_time(scene, (float)current_frame); }
 void Animate::clear() {
     anim_camera.splines.clear();
     joint_select = nullptr;
+    handle_select = nullptr;
+}
+
+void Animate::invalidate(Skeleton::IK_Handle* handle) {
+    if (handle_select == handle) handle_select = nullptr; 
+}
+
+void Animate::invalidate(Joint* j) {
+    if (joint_select == j) joint_select = nullptr; 
 }
 
 void Animate::update(Scene &scene) {

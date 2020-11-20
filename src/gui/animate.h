@@ -52,6 +52,8 @@ public:
     const Anim_Camera &camera() const;
     Anim_Camera &camera();
     void set(int n_frames, int fps);
+    void invalidate(Skeleton::IK_Handle* handle);
+    void invalidate(Joint* handle);
 
 private:
     Uint64 last_frame = 0;
@@ -66,6 +68,7 @@ private:
     Anim_Camera anim_camera;
 
     Joint *joint_select = nullptr;
+    Skeleton::IK_Handle *handle_select = nullptr;
     unsigned int joint_id_offset = 0;
 
     Pose old_pose;

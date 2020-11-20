@@ -90,6 +90,8 @@ std::string HDR_Image::load_from(std::string file) {
                     size_t didx = 4 * (j * w + i);
                     size_t pidx = (h - j - 1) * w + i;
                     pixels[pidx] = Spectrum(data[didx], data[didx + 1], data[didx + 2]);
+                    if (!pixels[pidx].valid())
+                        pixels[pidx] = {};
                 }
             }
 
@@ -118,12 +120,12 @@ std::string HDR_Image::load_from(std::string file) {
         }
 
         stbi_image_free(data);
-    }
 
-    for (size_t i = 0; i < pixels.size(); i++) {
-        pixels[i].make_linear();
-        if (!pixels[i].valid())
-            pixels[i] = {};
+        for (size_t i = 0; i < pixels.size(); i++) {
+            pixels[i].make_linear();
+            if (!pixels[i].valid())
+                pixels[i] = {};
+        }
     }
 
     last_path = file;

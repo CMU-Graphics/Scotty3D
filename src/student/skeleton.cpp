@@ -111,3 +111,19 @@ void Skeleton::skin(const GL::Mesh &input, GL::Mesh &output,
     std::vector<GL::Mesh::Index> idxs = input.indices();
     output.recreate(std::move(verts), std::move(idxs));
 }
+
+void Joint::compute_gradient(Vec3 target, Vec3 current) {
+
+    // TODO(Animation): Task 2
+
+    // Computes the gradient of IK energy for this joint and, should be called
+    // recursively upward in the heirarchy. Each call should storing the result
+    // in the angle_gradient for this joint.
+}
+
+void Skeleton::step_ik(std::vector<IK_Handle*> active_handles) {
+
+    // TODO(Animation): Task 2
+
+    // Do several iterations of Jacobian Transpose gradient descent for IK
+}

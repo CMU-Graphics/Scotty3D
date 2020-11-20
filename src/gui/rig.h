@@ -25,6 +25,7 @@ public:
     void clear_select();
     void clear();
     void invalidate(Joint *j);
+    void invalidate(Skeleton::IK_Handle *j);
 
     void render(Scene_Maybe obj_opt, Widgets &widgets, Camera &cam);
     Mode UIsidebar(Manager &manager, Undo &undo, Widgets &widgets, Scene_Maybe obj);
@@ -36,6 +37,7 @@ private:
 
     Scene_Object *my_obj = nullptr;
     Joint *selected = nullptr;
+    Skeleton::IK_Handle *handle = nullptr;
     Joint *new_joint = nullptr;
     PT::Tri_Mesh mesh_bvh;
 };

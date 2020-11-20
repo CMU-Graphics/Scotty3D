@@ -13,11 +13,17 @@ bool Rig::keydown(Widgets &widgets, Undo &undo, SDL_Keysym key) {
 #ifdef __APPLE__
     if (key.sym == SDLK_BACKSPACE && key.mod & KMOD_GUI) {
 #else
-    if (key.sym == SDLK_DELETE && selected) {
+    if (key.sym == SDLK_DELETE && (selected || handle)) {
 #endif
-        undo.del_bone(my_obj->id(), selected);
-        selected = nullptr;
-        return true;
+        if (selected) {
+            undo.del_bone(my_obj->id(), selected);
+            selected = nullptr;
+            return true;
+        } else if(handle) {
+            undo.del_handle(my_obj->id(), handle);
+            handle = nullptr;
+            return true;
+        }
     }
     return false;
 }
@@ -38,6 +44,7 @@ void Rig::render(Scene_Maybe obj_opt, Widgets &widgets, Camera &cam) {
     if (my_obj != &obj) {
         my_obj = &obj;
         selected = nullptr;
+        handle = nullptr;
     }
     if (my_obj->rig_dirty) {
         mesh_bvh.build(obj.mesh());
@@ -46,15 +53,17 @@ void Rig::render(Scene_Maybe obj_opt, Widgets &widgets, Camera &cam) {
 
     Mat4 view = cam.get_view();
     obj.render(view, false, false, false, false);
-    obj.armature.render(view, selected, root_selected, false);
+    obj.armature.render(view, selected, handle, root_selected, false);
 
-    if (selected || root_selected) {
+    if (selected || handle || root_selected) {
 
         widgets.active = Widget_Type::move;
         Vec3 pos;
 
         if (selected)
             pos = obj.armature.end_of(selected);
+        else if (handle)
+            pos = handle->target + obj.armature.base();
         else
             pos = obj.armature.base();
 
@@ -70,11 +79,18 @@ void Rig::invalidate(Joint *j) {
         new_joint = nullptr;
 }
 
+void Rig::invalidate(Skeleton::IK_Handle *j) {
+    if (handle == j)
+        handle = nullptr;
+}
+
 void Rig::end_transform(Widgets &widgets, Undo &undo, Scene_Object &obj) {
     if (root_selected)
-        undo.move_root(obj.id(), old_ext);
-    else
+        undo.move_root(obj.id(), old_pos);
+    else if (selected)
         undo.move_bone(obj.id(), selected, old_ext);
+    else if (handle) 
+        undo.move_handle(obj.id(), handle, old_pos - my_obj->armature.base());
     obj.set_skel_dirty();
 }
 
@@ -86,16 +102,23 @@ void Rig::apply_transform(Widgets &widgets) {
         Vec3 new_pos = widgets.apply_action(Pose::moved(old_pos)).pos;
         selected->extent = new_pos - old_base;
         my_obj->set_skel_dirty();
+    } else if (handle) {
+        Vec3 new_pos = widgets.apply_action(Pose::moved(old_pos)).pos;
+        handle->target = new_pos - my_obj->armature.base();
+        my_obj->set_skel_dirty();
     }
 }
 
 Vec3 Rig::selected_pos() {
     if (root_selected) {
         return my_obj->armature.base();
-    } else {
-        assert(selected);
+    } else if (selected) {
         return my_obj->armature.end_of(selected);
+    } else if (handle) {
+        return handle->target + my_obj->armature.base();
     }
+    assert(false);
+    return Vec3();
 }
 
 void Rig::select(Scene &scene, Widgets &widgets, Undo &undo, Scene_ID id, Vec3 cam, Vec2 spos,
@@ -110,6 +133,7 @@ void Rig::select(Scene &scene, Widgets &widgets, Undo &undo, Scene_ID id, Vec3 c
 
         selected = new_joint;
         new_joint = nullptr;
+        handle = nullptr;
 
         creating_bone = false;
         root_selected = false;
@@ -118,17 +142,19 @@ void Rig::select(Scene &scene, Widgets &widgets, Undo &undo, Scene_ID id, Vec3 c
 
         if (root_selected) {
             old_pos = my_obj->armature.base();
-        } else {
-            assert(selected);
+        } else if (selected) {
             old_pos = my_obj->armature.end_of(selected);
             old_base = my_obj->armature.base_of(selected);
             old_ext = selected->extent;
+        } else if (handle) {
+            old_pos = handle->target + my_obj->armature.base();
         }
         widgets.start_drag(old_pos, cam, spos, dir);
 
     } else if (!id || id >= n_Widget_IDs) {
 
         selected = my_obj->armature.get_joint(id);
+        handle = my_obj->armature.get_handle(id);
         root_selected = my_obj->armature.is_root_id(id);
     }
 }
@@ -136,9 +162,13 @@ void Rig::select(Scene &scene, Widgets &widgets, Undo &undo, Scene_ID id, Vec3 c
 void Rig::clear() {
     my_obj = nullptr;
     selected = nullptr;
+    handle = nullptr;
 }
 
-void Rig::clear_select() { selected = nullptr; }
+void Rig::clear_select() { 
+    selected = nullptr; 
+    handle = nullptr;
+}
 
 void Rig::hover(Vec3 cam, Vec2 spos, Vec3 dir) {
 
@@ -183,6 +213,7 @@ Mode Rig::UIsidebar(Manager &manager, Undo &undo, Widgets &widgets, Scene_Maybe 
     if (my_obj != &obj) {
         my_obj = &obj;
         selected = nullptr;
+        handle = nullptr;
     }
     if (my_obj->rig_dirty) {
         mesh_bvh.build(obj.mesh());
@@ -196,11 +227,13 @@ Mode Rig::UIsidebar(Manager &manager, Undo &undo, Widgets &widgets, Scene_Maybe 
             creating_bone = false;
             my_obj->armature.erase(new_joint);
             new_joint = nullptr;
+            handle = nullptr;
             my_obj->set_skel_dirty();
         }
     } else if (ImGui::Button("New Bone")) {
 
         creating_bone = true;
+        handle = nullptr;
 
         if (!selected || root_selected) {
             new_joint = my_obj->armature.add_root(Vec3{0.0f});
@@ -223,9 +256,27 @@ Mode Rig::UIsidebar(Manager &manager, Undo &undo, Widgets &widgets, Scene_Maybe 
 
         ImGui::DragFloat3("Pose", selected->pose.data, 0.1f);
 
+        if (ImGui::Button("Add IK")) {
+            handle = my_obj->armature.add_handle(my_obj->armature.end_of(selected), selected);
+            undo.add_handle(my_obj->id(), handle);
+            selected = nullptr;
+        }
+        ImGui::SameLine();
         if (ImGui::Button("Delete [del]")) {
             undo.del_bone(my_obj->id(), selected);
             selected = nullptr;
+        }
+
+    } else if (handle) {
+        ImGui::Separator();
+        ImGui::Text("Edit Handle");
+
+        ImGui::DragFloat3("Target", handle->target.data, 0.1f);
+        ImGui::Checkbox("Enable", &handle->enabled);
+
+        if (ImGui::Button("Delete [del]")) {
+            undo.del_handle(my_obj->id(), handle);
+            handle = nullptr;
         }
     }
 

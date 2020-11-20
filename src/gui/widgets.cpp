@@ -709,6 +709,12 @@ void Widget_Render::animate(Scene &scene, Widget_Camera &cam, Camera &user_cam, 
     ImGui::End();
 }
 
+static bool postfix(const std::string &path, const std::string &type) {
+    if (path.length() >= type.length())
+        return path.compare(path.length() - type.length(), type.length(), type) == 0;
+    return false;
+}
+
 bool Widget_Render::UI(Scene &scene, Widget_Camera &cam, Camera &user_cam, std::string &err) {
 
     bool ret = false;
@@ -752,6 +758,11 @@ bool Widget_Render::UI(Scene &scene, Widget_Camera &cam, Camera &user_cam, std::
         NFD_SaveDialog("png", nullptr, &path);
         if (path) {
 
+            std::string spath(path);
+            if (!postfix(spath, ".png")) {
+                spath += ".png";
+            }
+
             std::vector<unsigned char> data;
 
             if (method == 1) {
@@ -762,7 +773,7 @@ bool Widget_Render::UI(Scene &scene, Widget_Camera &cam, Camera &user_cam, std::
                 stbi_flip_vertically_on_write(true);
             }
 
-            if (!stbi_write_png(path, (int)out_w, (int)out_h, 4, data.data(), (int)out_w * 4)) {
+            if (!stbi_write_png(spath.c_str(), (int)out_w, (int)out_h, 4, data.data(), (int)out_w * 4)) {
                 err = "Failed to write png!";
             }
             free(path);

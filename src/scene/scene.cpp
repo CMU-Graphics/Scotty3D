@@ -459,12 +459,19 @@ static void load_node(Scene &scobj, std::vector<std::string> &errors,
                 aiBone *bone = node_to_aibone[node];
                 aiVector3D t, r, s;
                 bone->mOffsetMatrix.Decompose(s, r, t);
-                Joint *c = skeleton.add_child(p, aiVec(t));
-                node_to_bone[node] = c;
-                c->pose = aiVec(r);
-                c->radius = bone->mWeights[0].mWeight;
-                for (unsigned int j = 0; j < node->mNumChildren; j++)
-                    build_tree(c, node->mChildren[j]);
+
+                std::string name(bone->mName.C_Str());
+                if (name.find("S3D-joint-IK") != std::string::npos) {
+                    Skeleton::IK_Handle *h = skeleton.add_handle(aiVec(t), p);
+                    h->enabled = bone->mWeights[0].mWeight > 1.0f;
+                } else {
+                    Joint *c = skeleton.add_child(p, aiVec(t));
+                    node_to_bone[node] = c;
+                    c->pose = aiVec(r);
+                    c->radius = bone->mWeights[0].mWeight;
+                    for (unsigned int j = 0; j < node->mNumChildren; j++)
+                        build_tree(c, node->mChildren[j]);
+                }
             };
             for (unsigned int j = 0; j < arm_node->mNumChildren; j++) {
                 aiNode *root_node = arm_node->mChildren[j];
@@ -1011,34 +1018,52 @@ std::string Scene::write(std::string file, const Camera &render_cam,
             ai_mat->AddProperty(new float(opt.intensity), 1, AI_MATKEY_SHININESS);
 
             if (obj.armature.has_bones()) {
-                ai_mesh->mNumBones = obj.armature.n_bones();
+                ai_mesh->mNumBones = obj.armature.n_bones() + obj.armature.n_handles();
                 ai_mesh->mBones = new aiBone *[ai_mesh->mNumBones];
 
                 size_t bone_idx = 0;
-                std::string prefix = "S3D-joint-" + std::to_string(obj.id()) + "-";
+                std::string jprefix = "S3D-joint-" + std::to_string(obj.id()) + "-";
+                std::string ikprefix = "S3D-joint-IK-" + std::to_string(obj.id()) + "-";
 
                 aiNode *arm_node = new aiNode();
                 scene.mRootNode->mChildren[node_idx++] = arm_node;
-                arm_node->mName = aiString(prefix + "armature");
+                arm_node->mName = aiString(jprefix + "armature");
                 arm_node->mTransformation = matMat(Mat4::translate(obj.armature.base_pos));
                 arm_node->mNumChildren = (unsigned int)obj.armature.roots.size();
                 arm_node->mChildren = new aiNode *[obj.armature.roots.size()];
 
                 std::unordered_map<Joint *, aiNode *> j_to_node;
+                std::unordered_map<Skeleton::IK_Handle *, aiNode *> ik_to_node;
 
-                std::function<void(std::string, aiNode *, Joint *)> joint_tree;
-                joint_tree = [&joint_tree, &j_to_node](std::string n, aiNode *node, Joint *j) {
-                    std::string name = n + std::to_string(j->_id);
-                    node->mName = aiString(name);
+                std::function<void(aiNode *, Joint *)> joint_tree;
+                joint_tree = [&](aiNode *node, Joint *j) {
+                    std::string jname = jprefix + std::to_string(j->_id);
+                    node->mName = aiString(jname);
                     j_to_node[j] = node;
-                    if (j->children.size()) {
-                        node->mNumChildren = (unsigned int)j->children.size();
-                        node->mChildren = new aiNode *[j->children.size()];
+                    size_t children = j->children.size();
+                    for (Skeleton::IK_Handle* h : obj.armature.handles) {
+                        if (h->joint == j) {
+                            children++;
+                        }
+                    }
+                    if (children > 0) {
+                        node->mNumChildren = (unsigned int)children;
+                        node->mChildren = new aiNode *[children];
                         size_t i = 0;
                         for (Joint *c : j->children) {
                             node->mChildren[i] = new aiNode();
-                            joint_tree(n, node->mChildren[i], c);
+                            joint_tree(node->mChildren[i], c);
                             i++;
+                        }
+                        for (Skeleton::IK_Handle* h : obj.armature.handles) {
+                            if (h->joint == j) {
+                                aiNode* iknode = new aiNode();
+                                std::string ikname = ikprefix + std::to_string(h->_id);
+                                iknode->mName = aiString(ikname);
+                                node->mChildren[i] = iknode;
+                                ik_to_node[h] = iknode;
+                                i++;
+                            }
                         }
                     }
                 };
@@ -1048,7 +1073,7 @@ std::string Scene::write(std::string file, const Camera &render_cam,
                     aiNode *root_node = new aiNode();
                     arm_node->mChildren[i] = root_node;
                     j_to_node[j] = root_node;
-                    joint_tree(prefix, root_node, j);
+                    joint_tree(root_node, j);
                     i++;
                 }
 
@@ -1061,12 +1086,23 @@ std::string Scene::write(std::string file, const Camera &render_cam,
                     ai_mesh->mBones[bone_idx++] = bone;
                     bone->mOffsetMatrix = matMat(Mat4::translate(j->extent) * Mat4::euler(j->pose));
                     bone->mNode = j_to_node[j];
-                    std::string name = prefix + std::to_string(j->_id);
+                    std::string name = jprefix + std::to_string(j->_id);
                     bone->mName = aiString(name);
                     bone->mNumWeights = 1;
                     bone->mWeights = new aiVertexWeight[1];
                     bone->mWeights[0].mWeight = j->radius;
                 });
+                for (Skeleton::IK_Handle* h : obj.armature.handles) {
+                    aiBone *bone = new aiBone();
+                    ai_mesh->mBones[bone_idx++] = bone;
+                    bone->mOffsetMatrix = matMat(Mat4::translate(h->target));
+                    bone->mNode = ik_to_node[h];
+                    std::string ikname = ikprefix + std::to_string(h->_id);
+                    bone->mName = aiString(ikname);
+                    bone->mNumWeights = 1;
+                    bone->mWeights = new aiVertexWeight[1];
+                    bone->mWeights[0].mWeight = h->enabled ? 2.0f : 1.0f;
+                }
             }
 
         } else if (entry.second.is<Scene_Light>()) {

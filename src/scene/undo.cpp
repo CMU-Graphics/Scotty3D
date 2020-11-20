@@ -74,6 +74,28 @@ void Undo::del_bone(Scene_ID id, Joint *j) {
             Scene_Object &obj = scene.get_obj(id);
             obj.armature.erase(j);
             gui.get_rig().invalidate(j);
+            gui.get_animate().invalidate(j);
+            obj.set_skel_dirty();
+        },
+        [this, id, j]() {
+            Scene_Object &obj = scene.get_obj(id);
+            obj.armature.restore(j);
+            obj.set_skel_dirty();
+        });
+}
+
+void Undo::del_handle(Scene_ID id, Skeleton::IK_Handle *j) {
+
+    Scene_Object &obj = scene.get_obj(id);
+    obj.armature.erase(j);
+    obj.set_skel_dirty();
+
+    action(
+        [this, id, j]() {
+            Scene_Object &obj = scene.get_obj(id);
+            obj.armature.erase(j);
+            gui.get_animate().invalidate(j);
+            gui.get_rig().invalidate(j);
             obj.set_skel_dirty();
         },
         [this, id, j]() {
@@ -97,6 +119,20 @@ void Undo::move_bone(Scene_ID id, Joint *j, Vec3 old) {
         });
 }
 
+void Undo::move_handle(Scene_ID id, Skeleton::IK_Handle *j, Vec3 old) {
+    action(
+        [this, id, j, ne = j->target]() {
+            Scene_Object &obj = scene.get_obj(id);
+            j->target = ne;
+            obj.set_skel_dirty();
+        },
+        [this, id, j, oe = old]() {
+            Scene_Object &obj = scene.get_obj(id);
+            j->target = oe;
+            obj.set_skel_dirty();
+        });
+}
+
 void Undo::pose_bone(Scene_ID id, Joint *j, Vec3 old) {
     action(
         [this, id, j, ne = j->pose]() {
@@ -108,6 +144,22 @@ void Undo::pose_bone(Scene_ID id, Joint *j, Vec3 old) {
             Scene_Object &obj = scene.get_obj(id);
             j->pose = oe;
             obj.set_pose_dirty();
+        });
+}
+
+void Undo::add_handle(Scene_ID id, Skeleton::IK_Handle *j) {
+    action(
+        [this, id, j]() {
+            Scene_Object &obj = scene.get_obj(id);
+            obj.armature.restore(j);
+            obj.set_skel_dirty();
+        },
+        [this, id, j]() {
+            Scene_Object &obj = scene.get_obj(id);
+            obj.armature.erase(j);
+            gui.get_rig().invalidate(j);
+            gui.get_animate().invalidate(j);
+            obj.set_skel_dirty();
         });
 }
 
@@ -123,6 +175,7 @@ void Undo::add_bone(Scene_ID id, Joint *j) {
             Scene_Object &obj = scene.get_obj(id);
             obj.armature.erase(j);
             gui.get_rig().invalidate(j);
+            gui.get_animate().invalidate(j);
             obj.set_skel_dirty();
         });
 }

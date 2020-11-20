@@ -38,6 +38,8 @@ void Manager::invalidate_obj(Scene_ID id) {
     if (id == layout.selected()) {
         layout.clear_select();
         model.unset_mesh();
+        rig.clear();
+        animate.clear();
     }
 }
 
@@ -129,12 +131,22 @@ void Manager::save_scene(Scene &scene) {
     set_error(error);
 }
 
+static bool postfix(const std::string &path, const std::string &type) {
+    if (path.length() >= type.length())
+        return path.compare(path.length() - type.length(), type.length(), type) == 0;
+    return false;
+}
+
 void Manager::write_scene(Scene &scene) {
 
     char *path = nullptr;
     NFD_SaveDialog("dae", nullptr, &path);
     if (path) {
-        std::string error = scene.write(std::string(path), render.get_cam(), animate);
+        std::string spath(path);
+        if (!postfix(path, ".dae")) {
+            spath += ".dae";
+        }
+        std::string error = scene.write(spath, render.get_cam(), animate);
         set_error(error);
         free(path);
     }

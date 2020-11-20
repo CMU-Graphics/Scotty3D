@@ -59,6 +59,13 @@ private:
     // Set of child joints - owned by this joint (could be shared_ptr and everything else weak_ptr)
     std::unordered_set<Joint *> children;
 
+    // Current angle gradient for IK
+    Vec3 angle_gradient;
+
+    // Computes the gradient of IK energy for this joint and, recursively,
+    // upward in the heirarchy, storing the result in angle_gradient.
+    void compute_gradient(Vec3 target, Vec3 current);
+
     void for_joints(std::function<void(Joint *)> func);
 
     unsigned int _id = 0;
@@ -70,6 +77,13 @@ private:
 
 class Skeleton {
 public:
+    struct IK_Handle {
+        Vec3 target;
+        Joint* joint = nullptr;
+        bool enabled = false;
+        unsigned int _id = 0;
+    };
+
     Skeleton();
     Skeleton(unsigned int obj_id);
     ~Skeleton();
@@ -80,36 +94,51 @@ public:
     void operator=(const Skeleton &src) = delete;
     Skeleton &operator=(Skeleton &&src) = default;
 
+    ////////////////////////////////////////////
+    // You will implement these functions
+
+    Vec3 end_of(Joint *j);
+    Vec3 posed_end_of(Joint *j);
+
+    void step_ik(std::vector<IK_Handle*> active_handles);
+
+    Mat4 joint_to_bind(const Joint *j) const;
+    Mat4 joint_to_posed(const Joint *j) const;
+
+    void find_joints(const GL::Mesh &src,
+                     std::unordered_map<unsigned int, std::vector<Joint *>> &map);
+    void skin(const GL::Mesh &input, GL::Mesh &output,
+              const std::unordered_map<unsigned int, std::vector<Joint *>> &map);
+
+    ////////////////////////////////////////////
+
     Vec3 &base();
     bool has_bones() const;
     unsigned int n_bones();
+    unsigned int n_handles();
 
     Joint *parent(Joint *j);
     Joint *get_joint(unsigned int id);
     void erase(Joint *j);
     void restore(Joint *j);
-    Vec3 end_of(Joint *j);
     Vec3 base_of(Joint *j);
-    Vec3 posed_end_of(Joint *j);
     Vec3 posed_base_of(Joint *j);
 
     void for_joints(std::function<void(Joint *)> func);
 
-    Mat4 joint_to_bind(const Joint *j) const;
-    Mat4 joint_to_posed(const Joint *j) const;
+    void erase(IK_Handle* handle);
+    void restore(IK_Handle* handle);
+    IK_Handle *get_handle(unsigned int id);
+    IK_Handle *add_handle(Vec3 pos, Joint* j);
+    bool do_ik();
 
     Joint *add_root(Vec3 extent);
     Joint *add_child(Joint *j, Vec3 extent);
     bool is_root_id(unsigned int id);
 
     bool set_time(float time);
-    void render(const Mat4 &view, Joint *select, bool root, bool posed, unsigned int offset = 0);
-    void outline(const Mat4 &view, Joint *select, bool root, bool posed, BBox &box,
-                 unsigned int offset = 0);
-    void find_joints(const GL::Mesh &src,
-                     std::unordered_map<unsigned int, std::vector<Joint *>> &map);
-    void skin(const GL::Mesh &input, GL::Mesh &output,
-              const std::unordered_map<unsigned int, std::vector<Joint *>> &map);
+    void render(const Mat4 &view, Joint *jselect, IK_Handle *hselect, bool root, bool posed, unsigned int offset = 0);
+    void outline(const Mat4 &view, bool root, bool posed, BBox &box, unsigned int offset = 0);
 
     void set(float t);
     void crop(float t);
@@ -123,6 +152,8 @@ public:
 private:
     Vec3 base_pos;
     unsigned int root_id, next_id;
-    std::unordered_set<Joint *> roots, erased;
+    std::unordered_set<Joint *> roots;
+    std::unordered_map<Joint*,std::vector<IK_Handle*>> erased;
+    std::unordered_set<IK_Handle*> handles, erased_handles;
     friend class Scene;
 };

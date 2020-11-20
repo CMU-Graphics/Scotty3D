@@ -59,9 +59,12 @@ public:
     void update_pose(Scene_ID id, Pose old);
 
     void del_bone(Scene_ID id, Joint *j);
+    void del_handle(Scene_ID id, Skeleton::IK_Handle *j);
+    void add_handle(Scene_ID id, Skeleton::IK_Handle *j);
     void add_bone(Scene_ID id, Joint *j);
     void move_bone(Scene_ID id, Joint *j, Vec3 old);
     void pose_bone(Scene_ID id, Joint *j, Vec3 old);
+    void move_handle(Scene_ID id, Skeleton::IK_Handle *j, Vec3 old);
     void move_root(Scene_ID id, Vec3 old);
 
     void update_light(Scene_ID id, Scene_Light::Options old);

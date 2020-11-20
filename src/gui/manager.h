@@ -39,6 +39,7 @@ struct Color {
     RGBv(red, 163, 66, 81);
     RGBv(green, 124, 172, 40);
     RGBv(blue, 64, 127, 193);
+    RGBv(hoverg, 102, 204, 102);
     static Vec3 axis(Axis a);
 };
 #undef RGBv
