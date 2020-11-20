@@ -14,7 +14,7 @@ Recall that a cubic polynomial is a function of the form
 
 where <img src="task1_media/0001.png" height="20">, and <img src="task1_media/0002.png" height="20"> are fixed coefficients. However, there are many different ways of specifying a cubic polynomial. In particular, rather than specifying the coefficients directly, we can specify the endpoints and tangents we wish to interpolate. This construction is called the "Hermite form" of the polynomial. In particular, the Hermite form is given by
 
-<img src="task1_media/0003.png height"="30">
+<img src="task1_media/0003.png" height="30">
 
 where <img src="task1_media/0004.png" height="20"> are the endpoint positions, <img src="task1_media/0005.png" height="20"> are the endpoint tangents, and <img src="task1_media/0006.png" height="20"> are the Hermite bases
 
