@@ -56,7 +56,7 @@ In other words, a reasonable guess for the tangent is given by the difference be
 
 This scheme works great if we have two well-defined knots on either side of the query time t. But what happens if we get a query time near the beginning or end of the spline? Or what if the spline contains fewer than four knots? We still have to somehow come up with a reasonable definition for the positions and tangents of the curve at these times. For this assignment, your Catmull-Rom spline interpolation should satisfy the following properties:
 
-*   If there are no knots at all in the spline, interpolation should return the default value for the interpolated type. This value can be computed by simply calling the constructor for the type: T(). For instance, if the spline is interpolating Vector3D objects, then the default value will be <img src="task1_media/0017.png height"="20">.
+*   If there are no knots at all in the spline, interpolation should return the default value for the interpolated type. This value can be computed by simply calling the constructor for the type: T(). For instance, if the spline is interpolating Vector3D objects, then the default value will be <img src="task1_media/0017.png" height="20">.
 *   If there is only one knot in the spline, interpolation should always return the value of that knot (independent of the time). In other words, we simply have a constant interpolant. (What, therefore, should we return for the 1st and 2nd derivatives?)
 *   If the query time is less than or equal to the initial knot, return the initial knot's value. (What do derivatives look like in this region?)
 *   If the query time is greater than or equal to the final knot, return the final knot's value. (What do derivatives look like in this region?)
