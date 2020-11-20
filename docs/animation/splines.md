@@ -45,7 +45,6 @@ The basic idea behind Catmull-Rom is that for a given time t, we first find the 
 <img src="task1_media/0014.png" height="30">
 
 We then use t1 and t2 as the endpoints of our cubic "piece," and for tangents we use the values
-ome to Scotty3D! This 3D graphics software implements interactive mesh editing, realistic path tracing, and dynamic animation. Implementing the functionality of the program constitutes the majority of the coursework for 15-462/662 Computer Graphics at Carnegie Mellon University
 <img src="task1_media/0015.png" height="30"> <br/>
 
 <img src="task1_media/0016.png" height="30"> <br/>
