@@ -443,47 +443,49 @@ static void load_node(Scene &scobj, std::vector<std::string> &errors,
 
             Skeleton &skeleton = new_obj.armature;
             aiNode *arm_node = mesh->mBones[0]->mArmature;
-            {
-                aiVector3D t, r, s;
-                arm_node->mTransformation.Decompose(s, r, t);
-                skeleton.base() = aiVec(t);
-            }
-
-            std::unordered_map<aiNode *, aiBone *> node_to_aibone;
-            for (unsigned int j = 0; j < mesh->mNumBones; j++) {
-                node_to_aibone[mesh->mBones[j]->mNode] = mesh->mBones[j];
-            }
-
-            std::function<void(Joint *, aiNode *)> build_tree;
-            build_tree = [&](Joint *p, aiNode *node) {
-                aiBone *bone = node_to_aibone[node];
-                aiVector3D t, r, s;
-                bone->mOffsetMatrix.Decompose(s, r, t);
-
-                std::string name(bone->mName.C_Str());
-                if (name.find("S3D-joint-IK") != std::string::npos) {
-                    Skeleton::IK_Handle *h = skeleton.add_handle(aiVec(t), p);
-                    h->enabled = bone->mWeights[0].mWeight > 1.0f;
-                } else {
-                    Joint *c = skeleton.add_child(p, aiVec(t));
-                    node_to_bone[node] = c;
-                    c->pose = aiVec(r);
-                    c->radius = bone->mWeights[0].mWeight;
-                    for (unsigned int j = 0; j < node->mNumChildren; j++)
-                        build_tree(c, node->mChildren[j]);
+            if(arm_node) {
+                {
+                    aiVector3D t, r, s;
+                    arm_node->mTransformation.Decompose(s, r, t);
+                    skeleton.base() = aiVec(t);
                 }
-            };
-            for (unsigned int j = 0; j < arm_node->mNumChildren; j++) {
-                aiNode *root_node = arm_node->mChildren[j];
-                aiBone *root_bone = node_to_aibone[root_node];
-                aiVector3D t, r, s;
-                root_bone->mOffsetMatrix.Decompose(s, r, t);
-                Joint *root = skeleton.add_root(aiVec(t));
-                node_to_bone[root_node] = root;
-                root->pose = aiVec(r);
-                root->radius = root_bone->mWeights[0].mWeight;
-                for (unsigned int k = 0; k < root_node->mNumChildren; k++)
-                    build_tree(root, root_node->mChildren[k]);
+
+                std::unordered_map<aiNode *, aiBone *> node_to_aibone;
+                for (unsigned int j = 0; j < mesh->mNumBones; j++) {
+                    node_to_aibone[mesh->mBones[j]->mNode] = mesh->mBones[j];
+                }
+
+                std::function<void(Joint *, aiNode *)> build_tree;
+                build_tree = [&](Joint *p, aiNode *node) {
+                    aiBone *bone = node_to_aibone[node];
+                    aiVector3D t, r, s;
+                    bone->mOffsetMatrix.Decompose(s, r, t);
+
+                    std::string name(bone->mName.C_Str());
+                    if (name.find("S3D-joint-IK") != std::string::npos) {
+                        Skeleton::IK_Handle *h = skeleton.add_handle(aiVec(t), p);
+                        h->enabled = bone->mWeights[0].mWeight > 1.0f;
+                    } else {
+                        Joint *c = skeleton.add_child(p, aiVec(t));
+                        node_to_bone[node] = c;
+                        c->pose = aiVec(r);
+                        c->radius = bone->mWeights[0].mWeight;
+                        for (unsigned int j = 0; j < node->mNumChildren; j++)
+                            build_tree(c, node->mChildren[j]);
+                    }
+                };
+                for (unsigned int j = 0; j < arm_node->mNumChildren; j++) {
+                    aiNode *root_node = arm_node->mChildren[j];
+                    aiBone *root_bone = node_to_aibone[root_node];
+                    aiVector3D t, r, s;
+                    root_bone->mOffsetMatrix.Decompose(s, r, t);
+                    Joint *root = skeleton.add_root(aiVec(t));
+                    node_to_bone[root_node] = root;
+                    root->pose = aiVec(r);
+                    root->radius = root_bone->mWeights[0].mWeight;
+                    for (unsigned int k = 0; k < root_node->mNumChildren; k++)
+                        build_tree(root, root_node->mChildren[k]);
+                }
             }
         }
 
@@ -919,7 +921,7 @@ std::string Scene::write(std::string file, const Camera &render_cam,
                     face_idx++;
                 }
 
-            } else if(obj.opt.shape_type == PT::Shape_Type::none) {
+            } else {
 
                 const auto &verts = obj.mesh().verts();
                 const auto &elems = obj.mesh().indices();
@@ -946,6 +948,7 @@ std::string Scene::write(std::string file, const Camera &render_cam,
                     face.mIndices[1] = elems[i + 1];
                     face.mIndices[2] = elems[i + 2];
                 }
+
             }
 
             std::string name(obj.opt.name);
