@@ -187,7 +187,7 @@ private:
 };
 
 #ifdef SCOTTY3D_BUILD_REF
-#include "../reference/spline.cpp"
+#include "../reference/spline.inl"
 #else
-#include "../student/spline.cpp"
+#include "../student/spline.inl"
 #endif

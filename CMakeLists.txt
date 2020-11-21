@@ -108,6 +108,7 @@ if(SCOTTY3D_BUILD_REF)
                     "src/reference/bsdf.cpp"
                     "src/reference/bbox.cpp"
                     "src/reference/bvh.inl"
+                    "src/reference/spline.inl"
                     "src/reference/skeleton.cpp"
                     "src/reference/env_light.cpp"
                     "src/reference/tri_mesh.cpp")
@@ -123,6 +124,7 @@ else()
                     "src/student/debug.h"
                     "src/student/debug.cpp"
                     "src/student/bvh.inl"
+                    "src/student/spline.inl"
                     "src/student/env_light.cpp"
                     "src/student/skeleton.cpp"
                     "src/student/tri_mesh.cpp")
