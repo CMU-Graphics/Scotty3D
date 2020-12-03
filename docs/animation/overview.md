@@ -14,7 +14,7 @@ There are four primary components that must be implemented to support Animation 
 - [(Task 2) Skeleton Kinematics](skeleton_kinematics.md)
 
 **A4.5**
-- Soon to come
+- [(Task 3) Linear Blend Skinning](skinning.md)
 
 
 Each of these components is described at the linked page.
