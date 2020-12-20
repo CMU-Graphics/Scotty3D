@@ -6,11 +6,11 @@ permalink: /build/
 
 # Building Scotty3D
 
-To get the code:
+![Ubuntu Build Status](https://github.com/CMU-Graphics/Scotty3D/workflows/Ubuntu/badge.svg) ![MacOS Build Status](https://github.com/CMU-Graphics/Scotty3D/workflows/MacOS/badge.svg) ![Windows Build Status](https://github.com/CMU-Graphics/Scotty3D/workflows/Windows/badge.svg)
 
-```git clone https://github.com/CMU-Graphics/Scotty3D.git```
+To get a copy of the codebase, see [Git Setup](git).
 
-Note: the first build on any platform will be very slow, as it must compile the source-based dependencies. Subsequent builds will only need to re-compile your edited Scotty3D code.
+Note: the first build on any platform will be very slow, as it must compile most dependencies. Subsequent builds will only need to re-compile your edited Scotty3D code.
 
 ### Linux 
 
