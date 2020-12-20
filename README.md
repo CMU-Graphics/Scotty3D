@@ -17,7 +17,7 @@ Please visit the [documentation website](https://cmu-graphics.github.io/Scotty3D
 
 ### PathTracer
 
-![fall 2020 path tracer 0](docs/results/pt_f20_0.png)
+![fall 2020 path tracer 0](docs/results/pt_f20_0.jpg)
 ![fall 2020 path tracer 1](docs/results/pt_f20_1.png)
 ![fall 2020 path tracer 2](docs/results/pt_f20_2.png)
 ![fall 2020 path tracer 3](docs/results/pt_f20_3.png)
