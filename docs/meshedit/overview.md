@@ -24,4 +24,4 @@ The following sections contain guidelines for implementing the functionality of 
   - [Isotropic Remeshing](global/remesh)
   - [Simplification](global/simplify)
 
-As always, be mindful of the [project philosophy](../philosophy).
+As always, be mindful of the [project philosophy](..).

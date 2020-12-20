@@ -6,7 +6,7 @@ permalink: /pathtracer/
 
 # PathTracer Overview
 
-PathTrace is (as the name suggests) a simple path tracer that can render pictures with global illumination effects. The first part of the assignment will focus on providing an efficient implementation of **ray-scene geometry queries**. In the second half of the assignment you will **add the ability to simulate how light bounces around the scene**, which will allow your renderer to synthesize much higher-quality images. Much like in MeshEdit, input scenes are defined in COLLADA files, so you can create your own scenes for your scenes to render using free software like [Blender](https://www.blender.org/).)
+PathTracer is (as the name suggests) a simple path tracer that can render scenes with global illumination. The first part of the assignment will focus on providing an efficient implementation of **ray-scene geometry queries**. In the second half of the assignment you will **add the ability to simulate how light bounces around the scene**, which will allow your renderer to synthesize much higher-quality images. Much like in MeshEdit, input scenes are defined in COLLADA files, so you can create your own scenes to render using Scotty3D or other free software like [Blender](https://www.blender.org/).
 
 ![CBsphere](new_results/32k_large.png)
 
@@ -21,7 +21,7 @@ Implementing the functionality of PathTracer is split in to 7 tasks, and here ar
 
 The files that you will work with for PathTracer are all under `src/student` directory. Some of the particularly important ones are outlined below. Methods that we expect you to implement are marked with "TODO (PathTracer)", which you may search for.
 
-We have also provided you very powerful debugging tool in `src/student/debug.h` and `src/student/debug.cpp`. Please see the comments in those two files in order to use them effectively. :-)
+You are also provided with some very useful debugging tool in `src/student/debug.h` and `src/student/debug.cpp`. Please read the comments in those two files to learn how to use them effectively.
 
 | File(s)  |      Purpose      |  Need to modify? |
 |----------|-------------------|------------------|
