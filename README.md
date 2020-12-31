@@ -11,6 +11,8 @@ Please visit the [documentation website](https://cmu-graphics.github.io/Scotty3D
 
 ## Sampled Student Work (Fall 2020)
 
+Showcase [video](https://www.youtube.com/watch?v=yJ5eY3EIImA&t=2s)!
+
 ### MeshEdit
 
 ![fall 2020 meshes](docs/results/me_f20.png)
