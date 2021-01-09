@@ -34,10 +34,11 @@ public:
         bool w_from_ar = false;
     };
 
-    App(Settings set, Platform *plt = nullptr);
+    App(Settings set, Platform* plt = nullptr);
     ~App();
 
     void render();
+    bool quit();
     void event(SDL_Event e);
 
 private:
@@ -53,7 +54,7 @@ private:
     Mat4 view, proj, iviewproj;
 
     // Systems
-    Platform *plt = nullptr;
+    Platform* plt = nullptr;
     Scene scene;
     Gui::Manager gui;
     Undo undo;

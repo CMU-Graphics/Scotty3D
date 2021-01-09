@@ -8,15 +8,25 @@ Camera::Camera(Vec2 dim) {
     set_ar(dim);
 }
 
-Mat4 Camera::get_view() const { return view; }
+Mat4 Camera::get_view() const {
+    return view;
+}
 
-Mat4 Camera::get_proj() const { return Mat4::project(vert_fov, aspect_ratio, near_plane); }
+Mat4 Camera::get_proj() const {
+    return Mat4::project(vert_fov, aspect_ratio, near_plane);
+}
 
-Vec3 Camera::pos() const { return position; }
+Vec3 Camera::pos() const {
+    return position;
+}
 
-Vec3 Camera::front() const { return (looking_at - position).unit(); }
+Vec3 Camera::front() const {
+    return (looking_at - position).unit();
+}
 
-float Camera::dist() const { return (position - looking_at).norm(); }
+float Camera::dist() const {
+    return (position - looking_at).norm();
+}
 
 void Camera::look_at(Vec3 cent, Vec3 pos) {
     position = pos;
@@ -38,6 +48,8 @@ void Camera::reset() {
     radius_sens = 0.25f;
     move_sens = 0.015f;
     orbit_sens = 0.2f;
+    aperture = 0.0f;
+    focal_dist = 1.0f;
     looking_at = Vec3();
     update_pos();
 }
@@ -69,7 +81,9 @@ void Camera::mouse_radius(float off) {
     update_pos();
 }
 
-void Camera::set_fov(float f) { vert_fov = f; }
+void Camera::set_fov(float f) {
+    vert_fov = f;
+}
 
 float Camera::get_h_fov() const {
     float vfov = Radians(vert_fov);
@@ -77,17 +91,45 @@ float Camera::get_h_fov() const {
     return Degrees(hfov);
 }
 
-float Camera::get_fov() const { return vert_fov; }
+float Camera::get_fov() const {
+    return vert_fov;
+}
 
-float Camera::get_ar() const { return aspect_ratio; }
+float Camera::get_ar() const {
+    return aspect_ratio;
+}
 
-float Camera::get_near() const { return near_plane; }
+float Camera::get_near() const {
+    return near_plane;
+}
 
-Vec3 Camera::center() const { return looking_at; }
+Vec3 Camera::center() const {
+    return looking_at;
+}
 
-void Camera::set_ar(float a) { aspect_ratio = a; }
+void Camera::set_ar(float a) {
+    aspect_ratio = a;
+}
 
-void Camera::set_ar(Vec2 dim) { aspect_ratio = dim.x / dim.y; }
+void Camera::set_ar(Vec2 dim) {
+    aspect_ratio = dim.x / dim.y;
+}
+
+void Camera::set_ap(float ap) {
+    aperture = ap;
+}
+
+float Camera::get_ap() const {
+    return aperture;
+}
+
+void Camera::set_dist(float dist) {
+    focal_dist = dist;
+}
+
+float Camera::get_dist() const {
+    return focal_dist;
+}
 
 void Camera::update_pos() {
     position = rot.rotate(Vec3{0.0f, 0.0f, 1.0f});

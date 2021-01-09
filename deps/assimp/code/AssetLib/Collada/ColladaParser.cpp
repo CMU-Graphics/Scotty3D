@@ -1271,6 +1271,9 @@ void ColladaParser::ReadLight(Collada::Light &pLight) {
             } else if (IsElement("falloff_angle")) {
                 pLight.mFalloffAngle = ReadFloatFromTextContent();
                 TestClosing("falloff_angle");
+            } else if (IsElement("pps")) {
+                pLight.mPPS = ReadFloatFromTextContent();
+                TestClosing("pps");
             } else if (IsElement("falloff_exponent")) {
                 pLight.mFalloffExponent = ReadFloatFromTextContent();
                 TestClosing("falloff_exponent");

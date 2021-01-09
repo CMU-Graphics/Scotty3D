@@ -23,8 +23,8 @@ struct Pose {
     static Pose id();
 };
 
-bool operator==(const Pose &l, const Pose &r);
-bool operator!=(const Pose &l, const Pose &r);
+bool operator==(const Pose& l, const Pose& r);
+bool operator!=(const Pose& l, const Pose& r);
 
 struct Anim_Pose {
     Pose at(float t) const;

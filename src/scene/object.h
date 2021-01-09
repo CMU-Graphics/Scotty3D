@@ -14,36 +14,32 @@ using Scene_ID = unsigned int;
 class Scene_Object {
 public:
     Scene_Object() = default;
-    Scene_Object(Scene_ID id, Pose pose, GL::Mesh &&mesh, std::string n = {});
-    Scene_Object(Scene_ID id, Pose pose, Halfedge_Mesh &&mesh, std::string n = {});
-    Scene_Object(const Scene_Object &src) = delete;
-    Scene_Object(Scene_Object &&src) = default;
+    Scene_Object(Scene_ID id, Pose pose, GL::Mesh&& mesh, std::string n = {});
+    Scene_Object(Scene_ID id, Pose pose, Halfedge_Mesh&& mesh, std::string n = {});
+    Scene_Object(const Scene_Object& src) = delete;
+    Scene_Object(Scene_Object&& src) = default;
     ~Scene_Object() = default;
 
-    void operator=(const Scene_Object &src) = delete;
-    Scene_Object &operator=(Scene_Object &&src) = default;
+    void operator=(const Scene_Object& src) = delete;
+    Scene_Object& operator=(Scene_Object&& src) = default;
 
-    Scene_ID id() const { return _id; }
-
+    Scene_ID id() const;
     void sync_mesh();
     void sync_anim_mesh();
     void set_time(float time);
 
-    const GL::Mesh &mesh() {
-        sync_mesh();
-        return _mesh;
-    }
-    const GL::Mesh &posed_mesh();
+    const GL::Mesh& mesh();
+    const GL::Mesh& posed_mesh();
 
-    void render(const Mat4 &view, bool solid = false, bool depth_only = false, bool posed = true,
+    void render(const Mat4& view, bool solid = false, bool depth_only = false, bool posed = true,
                 bool anim = true);
 
-    Halfedge_Mesh &get_mesh();
-    const Halfedge_Mesh &get_mesh() const;
-    void copy_mesh(Halfedge_Mesh &out);
-    void take_mesh(Halfedge_Mesh &&in);
-    void set_mesh(Halfedge_Mesh &in);
-    Halfedge_Mesh::ElementRef set_mesh(Halfedge_Mesh &in, unsigned int eid);
+    Halfedge_Mesh& get_mesh();
+    const Halfedge_Mesh& get_mesh() const;
+    void copy_mesh(Halfedge_Mesh& out);
+    void take_mesh(Halfedge_Mesh&& in);
+    void set_mesh(Halfedge_Mesh& in);
+    Halfedge_Mesh::ElementRef set_mesh(Halfedge_Mesh& in, unsigned int eid);
 
     BBox bbox();
     bool is_editable() const;
@@ -77,10 +73,10 @@ private:
     Halfedge_Mesh halfedge;
 
     mutable GL::Mesh _mesh, _anim_mesh;
-    mutable std::unordered_map<unsigned int, std::vector<Joint *>> vertex_joints;
+    mutable std::unordered_map<unsigned int, std::vector<Joint*>> vertex_joints;
     mutable bool editable = true;
     mutable bool mesh_dirty = false;
     mutable bool skel_dirty = false, pose_dirty = false;
 };
 
-bool operator!=(const Scene_Object::Options &l, const Scene_Object::Options &r);
+bool operator!=(const Scene_Object::Options& l, const Scene_Object::Options& r);

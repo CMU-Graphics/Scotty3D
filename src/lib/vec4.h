@@ -22,7 +22,9 @@ struct Vec4 {
         z = _z;
         w = _w;
     }
-    explicit Vec4(float f) { x = y = z = w = f; }
+    explicit Vec4(float f) {
+        x = y = z = w = f;
+    }
     explicit Vec4(int _x, int _y, int _z, int _w) {
         x = (float)_x;
         y = (float)_y;
@@ -36,11 +38,11 @@ struct Vec4 {
         w = _w;
     }
 
-    Vec4(const Vec4 &) = default;
-    Vec4 &operator=(const Vec4 &) = default;
+    Vec4(const Vec4&) = default;
+    Vec4& operator=(const Vec4&) = default;
     ~Vec4() = default;
 
-    float &operator[](int idx) {
+    float& operator[](int idx) {
         assert(idx >= 0 && idx <= 3);
         return data[idx];
     }
@@ -107,23 +109,47 @@ struct Vec4 {
         return *this;
     }
 
-    Vec4 operator+(Vec4 v) const { return Vec4(x + v.x, y + v.y, z + v.z, w + v.w); }
-    Vec4 operator-(Vec4 v) const { return Vec4(x - v.x, y - v.y, z - v.z, w - v.w); }
-    Vec4 operator*(Vec4 v) const { return Vec4(x * v.x, y * v.y, z * v.z, w * v.w); }
-    Vec4 operator/(Vec4 v) const { return Vec4(x / v.x, y / v.y, z / v.z, w / v.w); }
+    Vec4 operator+(Vec4 v) const {
+        return Vec4(x + v.x, y + v.y, z + v.z, w + v.w);
+    }
+    Vec4 operator-(Vec4 v) const {
+        return Vec4(x - v.x, y - v.y, z - v.z, w - v.w);
+    }
+    Vec4 operator*(Vec4 v) const {
+        return Vec4(x * v.x, y * v.y, z * v.z, w * v.w);
+    }
+    Vec4 operator/(Vec4 v) const {
+        return Vec4(x / v.x, y / v.y, z / v.z, w / v.w);
+    }
 
-    Vec4 operator+(float s) const { return Vec4(x + s, y + s, z + s, w + s); }
-    Vec4 operator-(float s) const { return Vec4(x - s, y - s, z - s, w - s); }
-    Vec4 operator*(float s) const { return Vec4(x * s, y * s, z * s, w * s); }
-    Vec4 operator/(float s) const { return Vec4(x / s, y / s, z / s, w / s); }
+    Vec4 operator+(float s) const {
+        return Vec4(x + s, y + s, z + s, w + s);
+    }
+    Vec4 operator-(float s) const {
+        return Vec4(x - s, y - s, z - s, w - s);
+    }
+    Vec4 operator*(float s) const {
+        return Vec4(x * s, y * s, z * s, w * s);
+    }
+    Vec4 operator/(float s) const {
+        return Vec4(x / s, y / s, z / s, w / s);
+    }
 
-    bool operator==(Vec4 v) const { return x == v.x && y == v.y && z == v.z && w == v.w; }
-    bool operator!=(Vec4 v) const { return x != v.x || y != v.y || z != v.z || w != v.w; }
+    bool operator==(Vec4 v) const {
+        return x == v.x && y == v.y && z == v.z && w == v.w;
+    }
+    bool operator!=(Vec4 v) const {
+        return x != v.x || y != v.y || z != v.z || w != v.w;
+    }
 
     /// Absolute value
-    Vec4 abs() const { return Vec4(std::abs(x), std::abs(y), std::abs(z), std::abs(w)); }
+    Vec4 abs() const {
+        return Vec4(std::abs(x), std::abs(y), std::abs(z), std::abs(w));
+    }
     /// Negation
-    Vec4 operator-() const { return Vec4(-x, -y, -z, -w); }
+    Vec4 operator-() const {
+        return Vec4(-x, -y, -z, -w);
+    }
     /// Are all members real numbers?
     bool valid() const {
         return !(std::isinf(x) || std::isinf(y) || std::isinf(z) || std::isinf(w) ||
@@ -145,13 +171,21 @@ struct Vec4 {
         return Vec4(x / n, y / n, z / n, w / n);
     }
 
-    float norm_squared() const { return x * x + y * y + z * z + w * w; }
-    float norm() const { return std::sqrt(norm_squared()); }
+    float norm_squared() const {
+        return x * x + y * y + z * z + w * w;
+    }
+    float norm() const {
+        return std::sqrt(norm_squared());
+    }
 
     /// Returns first three components
-    Vec3 xyz() const { return Vec3(x, y, z); }
+    Vec3 xyz() const {
+        return Vec3(x, y, z);
+    }
     /// Performs perspective division (xyz/w)
-    Vec3 project() const { return Vec3(x / w, y / w, z / w); }
+    Vec3 project() const {
+        return Vec3(x / w, y / w, z / w);
+    }
 
     union {
         struct {
@@ -164,10 +198,18 @@ struct Vec4 {
     };
 };
 
-inline Vec4 operator+(float s, Vec4 v) { return Vec4(v.x + s, v.y + s, v.z + s, v.w + s); }
-inline Vec4 operator-(float s, Vec4 v) { return Vec4(v.x - s, v.y - s, v.z - s, v.w - s); }
-inline Vec4 operator*(float s, Vec4 v) { return Vec4(v.x * s, v.y * s, v.z * s, v.w * s); }
-inline Vec4 operator/(float s, Vec4 v) { return Vec4(s / v.x, s / v.y, s / v.z, s / v.w); }
+inline Vec4 operator+(float s, Vec4 v) {
+    return Vec4(v.x + s, v.y + s, v.z + s, v.w + s);
+}
+inline Vec4 operator-(float s, Vec4 v) {
+    return Vec4(v.x - s, v.y - s, v.z - s, v.w - s);
+}
+inline Vec4 operator*(float s, Vec4 v) {
+    return Vec4(v.x * s, v.y * s, v.z * s, v.w * s);
+}
+inline Vec4 operator/(float s, Vec4 v) {
+    return Vec4(s / v.x, s / v.y, s / v.z, s / v.w);
+}
 
 /// Take minimum of each component
 inline Vec4 hmin(Vec4 l, Vec4 r) {
@@ -179,9 +221,11 @@ inline Vec4 hmax(Vec4 l, Vec4 r) {
 }
 
 /// 4D dot product
-inline float dot(Vec4 l, Vec4 r) { return l.x * r.x + l.y * r.y + l.z * r.z + l.w * r.w; }
+inline float dot(Vec4 l, Vec4 r) {
+    return l.x * r.x + l.y * r.y + l.z * r.z + l.w * r.w;
+}
 
-inline std::ostream &operator<<(std::ostream &out, Vec4 v) {
+inline std::ostream& operator<<(std::ostream& out, Vec4 v) {
     out << "{" << v.x << "," << v.y << "," << v.z << "," << v.w << "}";
     return out;
 }

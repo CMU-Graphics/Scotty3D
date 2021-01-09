@@ -94,7 +94,7 @@ std::optional<Halfedge_Mesh::VertexRef> Halfedge_Mesh::split_edge(Halfedge_Mesh:
 /* Note on the beveling process:
 
     Each of the bevel_vertex, bevel_edge, and bevel_face functions do not represent
-    a full bevel operation. Instead, they should only update the _connectivity_ of
+    a full bevel operation. Instead, they should update the _connectivity_ of
     the mesh, _not_ the positions of newly created vertices. In fact, you should set
     the positions of new vertices to be exactly the same as wherever they "started from."
 
@@ -125,6 +125,9 @@ std::optional<Halfedge_Mesh::VertexRef> Halfedge_Mesh::split_edge(Halfedge_Mesh:
 */
 std::optional<Halfedge_Mesh::FaceRef> Halfedge_Mesh::bevel_vertex(Halfedge_Mesh::VertexRef v) {
 
+    // Reminder: You should set the positions of new vertices (v->pos) to be exactly
+    // the same as wherever they "started from."
+
     (void)v;
     return std::nullopt;
 }
@@ -138,6 +141,9 @@ std::optional<Halfedge_Mesh::FaceRef> Halfedge_Mesh::bevel_vertex(Halfedge_Mesh:
     implement!)
 */
 std::optional<Halfedge_Mesh::FaceRef> Halfedge_Mesh::bevel_edge(Halfedge_Mesh::EdgeRef e) {
+
+    // Reminder: You should set the positions of new vertices (v->pos) to be exactly
+    // the same as wherever they "started from."
 
     (void)e;
     return std::nullopt;
@@ -154,6 +160,9 @@ std::optional<Halfedge_Mesh::FaceRef> Halfedge_Mesh::bevel_edge(Halfedge_Mesh::E
 */
 std::optional<Halfedge_Mesh::FaceRef> Halfedge_Mesh::bevel_face(Halfedge_Mesh::FaceRef f) {
 
+    // Reminder: You should set the positions of new vertices (v->pos) to be exactly
+    // the same as wherever they "started from."
+
     (void)f;
     return std::nullopt;
 }
@@ -168,7 +177,7 @@ std::optional<Halfedge_Mesh::FaceRef> Halfedge_Mesh::bevel_face(Halfedge_Mesh::F
     and use the original vertex position and its associated outgoing edge
     to compute a new vertex position along the outgoing edge.
 */
-void Halfedge_Mesh::bevel_vertex_positions(const std::vector<Vec3> &start_positions,
+void Halfedge_Mesh::bevel_vertex_positions(const std::vector<Vec3>& start_positions,
                                            Halfedge_Mesh::FaceRef face, float tangent_offset) {
 
     std::vector<HalfedgeRef> new_halfedges;
@@ -176,7 +185,7 @@ void Halfedge_Mesh::bevel_vertex_positions(const std::vector<Vec3> &start_positi
     do {
         new_halfedges.push_back(h);
         h = h->next();
-    } while (h != face->halfedge());
+    } while(h != face->halfedge());
 
     (void)new_halfedges;
     (void)start_positions;
@@ -204,7 +213,7 @@ void Halfedge_Mesh::bevel_vertex_positions(const std::vector<Vec3> &start_positi
             position corresponding to vertex i
     }
 */
-void Halfedge_Mesh::bevel_edge_positions(const std::vector<Vec3> &start_positions,
+void Halfedge_Mesh::bevel_edge_positions(const std::vector<Vec3>& start_positions,
                                          Halfedge_Mesh::FaceRef face, float tangent_offset) {
 
     std::vector<HalfedgeRef> new_halfedges;
@@ -212,7 +221,7 @@ void Halfedge_Mesh::bevel_edge_positions(const std::vector<Vec3> &start_position
     do {
         new_halfedges.push_back(h);
         h = h->next();
-    } while (h != face->halfedge());
+    } while(h != face->halfedge());
 
     (void)new_halfedges;
     (void)start_positions;
@@ -241,18 +250,17 @@ void Halfedge_Mesh::bevel_edge_positions(const std::vector<Vec3> &start_position
             position corresponding to vertex i
     }
 */
-void Halfedge_Mesh::bevel_face_positions(const std::vector<Vec3> &start_positions,
+void Halfedge_Mesh::bevel_face_positions(const std::vector<Vec3>& start_positions,
                                          Halfedge_Mesh::FaceRef face, float tangent_offset,
                                          float normal_offset) {
 
-    if (flip_orientation)
-        normal_offset = -normal_offset;
+    if(flip_orientation) normal_offset = -normal_offset;
     std::vector<HalfedgeRef> new_halfedges;
     auto h = face->halfedge();
     do {
         new_halfedges.push_back(h);
         h = h->next();
-    } while (h != face->halfedge());
+    } while(h != face->halfedge());
 
     (void)new_halfedges;
     (void)start_positions;
@@ -442,8 +450,9 @@ bool Halfedge_Mesh::isotropic_remesh() {
 
 /* Helper type for quadric simplification */
 struct Edge_Record {
-    Edge_Record() {}
-    Edge_Record(std::unordered_map<Halfedge_Mesh::VertexRef, Mat4> &vertex_quadrics,
+    Edge_Record() {
+    }
+    Edge_Record(std::unordered_map<Halfedge_Mesh::VertexRef, Mat4>& vertex_quadrics,
                 Halfedge_Mesh::EdgeRef e)
         : edge(e) {
 
@@ -461,8 +470,8 @@ struct Edge_Record {
 };
 
 /* Comparison operator for Edge_Records so std::set will properly order them */
-bool operator<(const Edge_Record &r1, const Edge_Record &r2) {
-    if (r1.cost != r2.cost) {
+bool operator<(const Edge_Record& r1, const Edge_Record& r2) {
+    if(r1.cost != r2.cost) {
         return r1.cost < r2.cost;
     }
     Halfedge_Mesh::EdgeRef e1 = r1.edge;
@@ -524,16 +533,24 @@ bool operator<(const Edge_Record &r1, const Edge_Record &r2) {
  *    queue.remove( item2 );
  *
  */
-template <class T> struct PQueue {
-    void insert(const T &item) { queue.insert(item); }
-    void remove(const T &item) {
-        if (queue.find(item) != queue.end()) {
+template<class T> struct PQueue {
+    void insert(const T& item) {
+        queue.insert(item);
+    }
+    void remove(const T& item) {
+        if(queue.find(item) != queue.end()) {
             queue.erase(item);
         }
     }
-    const T &top(void) const { return *(queue.begin()); }
-    void pop(void) { queue.erase(queue.begin()); }
-    size_t size() { return queue.size(); }
+    const T& top(void) const {
+        return *(queue.begin());
+    }
+    void pop(void) {
+        queue.erase(queue.begin());
+    }
+    size_t size() {
+        return queue.size();
+    }
 
     std::set<T> queue;
 };

@@ -1,6 +1,8 @@
 
 #pragma once
 
+#include "../lib/mathlib.h"
+
 namespace RNG {
 
 // Generate random float in the range [0,1]

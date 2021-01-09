@@ -29,15 +29,15 @@ struct Quat {
         z = complex.z;
         w = real;
     }
-    explicit Quat(const Vec4 &src) {
+    explicit Quat(const Vec4& src) {
         x = src.x;
         y = src.y;
         z = src.z;
         w = src.w;
     }
 
-    Quat(const Quat &) = default;
-    Quat &operator=(const Quat &) = default;
+    Quat(const Quat&) = default;
+    Quat& operator=(const Quat&) = default;
     ~Quat() = default;
 
     /// Create unit quaternion representing given axis-angle rotation
@@ -54,7 +54,7 @@ struct Quat {
 
     /// Create unit quaternion representing given euler angles (XYZ)
     static Quat euler(Vec3 angles) {
-        if (angles == Vec3{0.0f, 0.0f, 180.0f} || angles == Vec3{180.0f, 0.0f, 0.0f})
+        if(angles == Vec3{0.0f, 0.0f, 180.0f} || angles == Vec3{180.0f, 0.0f, 0.0f})
             return Quat{0.0f, 0.0f, -1.0f, 0.0f};
         float c1 = std::cos(Radians(angles[2] * 0.5f));
         float c2 = std::cos(Radians(angles[1] * 0.5f));
@@ -69,7 +69,7 @@ struct Quat {
         return Quat(x, y, z, w);
     }
 
-    float &operator[](int idx) {
+    float& operator[](int idx) {
         assert(idx >= 0 && idx <= 3);
         return data[idx];
     }
@@ -78,60 +78,52 @@ struct Quat {
         return data[idx];
     }
 
-    Quat conjugate() const { return Quat(-x, -y, -z, w); }
-    Quat inverse() const { return conjugate().unit(); }
-    Vec3 complex() const { return Vec3(x, y, z); }
-    float real() const { return w; }
+    Quat conjugate() const {
+        return Quat(-x, -y, -z, w);
+    }
+    Quat inverse() const {
+        return conjugate().unit();
+    }
+    Vec3 complex() const {
+        return Vec3(x, y, z);
+    }
+    float real() const {
+        return w;
+    }
 
-    float norm_squared() const { return x * x + y * y + z * z + w * w; }
-    float norm() const { return std::sqrt(norm_squared()); }
+    float norm_squared() const {
+        return x * x + y * y + z * z + w * w;
+    }
+    float norm() const {
+        return std::sqrt(norm_squared());
+    }
     Quat unit() const {
         float n = norm();
         return Quat(x / n, y / n, z / n, w / n);
     }
 
-    Quat operator*(const Quat &r) const {
+    Quat operator*(const Quat& r) const {
         return Quat(y * r.z - z * r.y + x * r.w + w * r.x, z * r.x - x * r.z + y * r.w + w * r.y,
                     x * r.y - y * r.x + z * r.w + w * r.z, w * r.w - x * r.x - y * r.y - z * r.z);
     }
-
-    Quat operator+(const Quat &r) const { return Quat(x + r.x, y + r.y, z + r.z, w + r.w); }
-    Quat operator-(const Quat &r) const { return Quat(x - r.x, y - r.y, z - r.z, w - r.w); }
-
-    void scale(float f) {
-        x *= f;
-        y *= f;
-        z *= f;
-        w *= f;
+    Quat operator*(float s) const {
+        return Quat(s * x, s * y, s * z, s * w);
     }
-    void make_log() {
-        float a0 = w;
-        w = 0.0f;
-        if (std::abs(a0) < 1.0f) {
-            float angle = std::acos(a0);
-            float sin_angle = std::sin(angle);
-            if (std::abs(sin_angle) > EPS_F) {
-                float coeff = angle / sin_angle;
-                x *= coeff;
-                y *= coeff;
-                z *= coeff;
-            }
-        }
+
+    Quat operator+(const Quat& r) const {
+        return Quat(x + r.x, y + r.y, z + r.z, w + r.w);
     }
-    void make_exp() {
-        float angle = std::sqrt(x * x + y * y + z * z);
-        float sin_angle = std::sin(angle);
-        w = std::cos(angle);
-        if (sin_angle > EPS_F) {
-            float coeff = sin_angle / angle;
-            x *= coeff;
-            y *= coeff;
-            z *= coeff;
-        }
+    Quat operator-(const Quat& r) const {
+        return Quat(x - r.x, y - r.y, z - r.z, w - r.w);
+    }
+    Quat operator-() const {
+        return Quat(-x, -y, -z, -w);
     }
 
     /// Convert quaternion to equivalent euler angle rotation (XYZ)
-    Vec3 to_euler() const { return unit().to_mat().to_euler(); }
+    Vec3 to_euler() const {
+        return unit().to_mat().to_euler();
+    }
 
     /// Convert quaternion to equivalent rotation matrix (orthonormal, 3x3)
     Mat4 to_mat() const {
@@ -143,26 +135,15 @@ struct Quat {
     }
 
     /// Apply rotation to given vector
-    Vec3 rotate(Vec3 v) const { return (((*this) * Quat(v, 0)) * conjugate()).complex(); }
-
-    /// Spherical linear interpolation between this and another quaternion weighted by t.
-    Quat slerp(Quat q, float t) {
-        float omega = std::acos(clamp(x * q.x + y * q.y + z * q.z + w * q.w, -1.0f, 1.0f));
-
-        if (std::abs(omega) < 16.0f * FLT_EPSILON) {
-            omega = 16.0f * FLT_EPSILON;
-        }
-        float som = std::sin(omega);
-        float st0 = std::sin((1 - t) * omega) / som;
-        float st1 = std::sin(t * omega) / som;
-
-        return Quat(x * st0 + q.x * st1, y * st0 + q.y * st1, z * st0 + q.z * st1,
-                    w * st0 + q.w * st1);
+    Vec3 rotate(Vec3 v) const {
+        return (((*this) * Quat(v, 0)) * conjugate()).complex();
     }
 
-    /// Are all members real numbers?
-    bool valid() const {
-        return !(std::isinf(x) || std::isinf(y) || std::isinf(z) || std::isinf(w));
+    bool operator==(const Quat& v) const {
+        return x == v.x && y == v.y && z == v.z && w == v.w;
+    }
+    bool operator!=(const Quat& v) const {
+        return x != v.x || y != v.y || z != v.z || w != v.w;
     }
 
     union {
@@ -176,9 +157,33 @@ struct Quat {
     };
 };
 
-inline Quat slerp(Quat q0, Quat q1, float t) { return q0.slerp(q1, t); }
+inline float dot(const Quat& q0, const Quat& q1) {
+    return q0.x * q1.x + q0.y * q1.y + q0.z * q1.z + q0.w * q1.w;
+}
 
-inline std::ostream &operator<<(std::ostream &out, Quat q) {
+inline std::ostream& operator<<(std::ostream& out, Quat q) {
     out << "Quat{" << q.x << "," << q.y << "," << q.z << "," << q.w << "}";
     return out;
+}
+
+inline Quat operator*(float s, const Quat& q) {
+    return Quat(s * q.x, s * q.y, s * q.z, s * q.w);
+}
+
+inline Quat operator+(float s, const Quat& q) {
+    return Quat(q.x, q.y, q.z, s + q.w);
+}
+
+inline Quat slerp(const Quat& q0, const Quat& q1, float t) {
+
+    float hcos = dot(q0, q1);
+
+    Quat shortest = hcos < 0 ? -q0 : q0;
+
+    if(std::abs(hcos) >= 1.0f - EPS_F) {
+        return (1.0f - t) * shortest + t * q1;
+    }
+
+    float a = std::acos(std::abs(hcos));
+    return (std::sin((1.0f - t) * a) * shortest + std::sin(t * a) * q1) * (1.0f / std::sin(a));
 }

@@ -184,6 +184,7 @@ struct Light {
 
     //! Common light intensity
     ai_real mIntensity;
+    ai_real mPPS;
 
     aiString env_map;
 };

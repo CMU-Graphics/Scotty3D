@@ -15,12 +15,14 @@
 struct BBox {
 
     /// Default min is max float value, default max is negative max float value
-    BBox() : min(FLT_MAX), max(-FLT_MAX) {}
+    BBox() : min(FLT_MAX), max(-FLT_MAX) {
+    }
     /// Set minimum and maximum extent
-    explicit BBox(Vec3 min, Vec3 max) : min(min), max(max) {}
+    explicit BBox(Vec3 min, Vec3 max) : min(min), max(max) {
+    }
 
-    BBox(const BBox &) = default;
-    BBox &operator=(const BBox &) = default;
+    BBox(const BBox&) = default;
+    BBox& operator=(const BBox&) = default;
     ~BBox() = default;
 
     /// Rest min to max float, max to negative max float
@@ -40,28 +42,31 @@ struct BBox {
     }
 
     /// Get center point of box
-    Vec3 center() const { return (min + max) * 0.5f; }
+    Vec3 center() const {
+        return (min + max) * 0.5f;
+    }
 
     // Check whether box has no volume
-    bool empty() const { return min.x > max.x || min.y > max.y || min.z > max.z; }
+    bool empty() const {
+        return min.x > max.x || min.y > max.y || min.z > max.z;
+    }
 
     /// Get surface area of the box
     float surface_area() const {
-        if (empty())
-            return 0.0f;
+        if(empty()) return 0.0f;
         Vec3 extent = max - min;
         return 2.0f * (extent.x * extent.z + extent.x * extent.y + extent.y * extent.z);
     }
 
     /// Transform box by a matrix
-    void transform(const Mat4 &trans) {
+    void transform(const Mat4& trans) {
         Vec3 amin = min, amax = max;
         min = max = trans[3].xyz();
-        for (int i = 0; i < 3; i++) {
-            for (int j = 0; j < 3; j++) {
+        for(int i = 0; i < 3; i++) {
+            for(int j = 0; j < 3; j++) {
                 float a = trans[j][i] * amin[j];
                 float b = trans[j][i] * amax[j];
-                if (a < b) {
+                if(a < b) {
                     min[i] += a;
                     max[i] += b;
                 } else {
@@ -73,7 +78,7 @@ struct BBox {
     }
 
     // TODO (PathTracer): see student/bbox.cpp
-    bool hit(const Ray &ray, Vec2 &times) const;
+    bool hit(const Ray& ray, Vec2& times) const;
 
     /// Get the eight corner points of the bounding box
     std::vector<Vec3> corners() const {
@@ -91,15 +96,15 @@ struct BBox {
 
     /// Given a screen transformation (projection), calculate screen-space ([-1,1]x[-1,1])
     /// bounds that will always contain the bounding box on screen
-    void screen_rect(const Mat4 &transform, Vec2 &min_out, Vec2 &max_out) const {
+    void screen_rect(const Mat4& transform, Vec2& min_out, Vec2& max_out) const {
 
         min_out = Vec2(FLT_MAX);
         max_out = Vec2(-FLT_MAX);
         auto c = corners();
         bool partially_behind = false, all_behind = true;
-        for (auto &v : c) {
+        for(auto& v : c) {
             Vec3 p = transform * v;
-            if (p.z < 0) {
+            if(p.z < 0) {
                 partially_behind = true;
             } else {
                 all_behind = false;
@@ -108,10 +113,10 @@ struct BBox {
             max_out = hmax(max_out, Vec2(p.x, p.y));
         }
 
-        if (partially_behind && !all_behind) {
+        if(partially_behind && !all_behind) {
             min_out = Vec2(-1.0f, -1.0f);
             max_out = Vec2(1.0f, 1.0f);
-        } else if (all_behind) {
+        } else if(all_behind) {
             min_out = Vec2(0.0f, 0.0f);
             max_out = Vec2(0.0f, 0.0f);
         }
@@ -120,7 +125,7 @@ struct BBox {
     Vec3 min, max;
 };
 
-inline std::ostream &operator<<(std::ostream &out, BBox b) {
+inline std::ostream& operator<<(std::ostream& out, BBox b) {
     out << "BBox{" << b.min << "," << b.max << "}";
     return out;
 }

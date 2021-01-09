@@ -3,7 +3,7 @@
 #include "util/rand.h"
 #include <sf_libs/CLI11.hpp>
 
-int main(int argc, char **argv) {
+int main(int argc, char** argv) {
 
     RNG::seed();
 
@@ -26,7 +26,7 @@ int main(int argc, char **argv) {
 
     CLI11_PARSE(args, argc, argv);
 
-    if (!settings.headless) {
+    if(!settings.headless) {
         Platform plt;
         App app(settings, &plt);
         plt.loop(app);

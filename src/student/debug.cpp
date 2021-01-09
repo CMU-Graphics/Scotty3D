@@ -43,7 +43,7 @@ void student_debug_ui() {
     Checkbox("Pathtracer: use normal colors", &debug_data.normal_colors);
 
     // ImGui examples
-    if (Button("Press Me")) {
+    if(Button("Press Me")) {
         info("Debug button pressed!");
     }
 

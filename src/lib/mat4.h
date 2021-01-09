@@ -16,9 +16,9 @@ struct Mat4 {
     static const Mat4 Zero;
 
     /// Return transposed matrix
-    static Mat4 transpose(const Mat4 &m);
+    static Mat4 transpose(const Mat4& m);
     /// Return inverse matrix (will be NaN if m is not invertible)
-    static Mat4 inverse(const Mat4 &m);
+    static Mat4 inverse(const Mat4& m);
     /// Return transformation matrix for given translation vector
     static Mat4 translate(Vec3 t);
     /// Return transformation matrix for given angle (degrees) and axis
@@ -48,7 +48,9 @@ struct Mat4 {
     /// an object is closer if is depth is greater.
     static Mat4 project(float fov, float ar, float n);
 
-    Mat4() { *this = I; }
+    Mat4() {
+        *this = I;
+    }
     explicit Mat4(Vec4 x, Vec4 y, Vec4 z, Vec4 w) {
         cols[0] = x;
         cols[1] = y;
@@ -56,11 +58,11 @@ struct Mat4 {
         cols[3] = w;
     }
 
-    Mat4(const Mat4 &) = default;
-    Mat4 &operator=(const Mat4 &) = default;
+    Mat4(const Mat4&) = default;
+    Mat4& operator=(const Mat4&) = default;
     ~Mat4() = default;
 
-    Vec4 &operator[](int idx) {
+    Vec4& operator[](int idx) {
         assert(idx >= 0 && idx <= 3);
         return cols[idx];
     }
@@ -69,86 +71,74 @@ struct Mat4 {
         return cols[idx];
     }
 
-    Mat4 operator+=(const Mat4 &m) {
-        for (int i = 0; i < 4; i++)
-            cols[i] += m.cols[i];
+    Mat4 operator+=(const Mat4& m) {
+        for(int i = 0; i < 4; i++) cols[i] += m.cols[i];
         return *this;
     }
-    Mat4 operator-=(const Mat4 &m) {
-        for (int i = 0; i < 4; i++)
-            cols[i] -= m.cols[i];
+    Mat4 operator-=(const Mat4& m) {
+        for(int i = 0; i < 4; i++) cols[i] -= m.cols[i];
         return *this;
     }
 
     Mat4 operator+=(float s) {
-        for (int i = 0; i < 4; i++)
-            cols[i] += s;
+        for(int i = 0; i < 4; i++) cols[i] += s;
         return *this;
     }
     Mat4 operator-=(float s) {
-        for (int i = 0; i < 4; i++)
-            cols[i] -= s;
+        for(int i = 0; i < 4; i++) cols[i] -= s;
         return *this;
     }
     Mat4 operator*=(float s) {
-        for (int i = 0; i < 4; i++)
-            cols[i] *= s;
+        for(int i = 0; i < 4; i++) cols[i] *= s;
         return *this;
     }
     Mat4 operator/=(float s) {
-        for (int i = 0; i < 4; i++)
-            cols[i] /= s;
+        for(int i = 0; i < 4; i++) cols[i] /= s;
         return *this;
     }
 
-    Mat4 operator+(const Mat4 &m) const {
+    Mat4 operator+(const Mat4& m) const {
         Mat4 r;
-        for (int i = 0; i < 4; i++)
-            r.cols[i] = cols[i] + m.cols[i];
+        for(int i = 0; i < 4; i++) r.cols[i] = cols[i] + m.cols[i];
         return r;
     }
-    Mat4 operator-(const Mat4 &m) const {
+    Mat4 operator-(const Mat4& m) const {
         Mat4 r;
-        for (int i = 0; i < 4; i++)
-            r.cols[i] = cols[i] - m.cols[i];
+        for(int i = 0; i < 4; i++) r.cols[i] = cols[i] - m.cols[i];
         return r;
     }
 
     Mat4 operator+(float s) const {
         Mat4 r;
-        for (int i = 0; i < 4; i++)
-            r.cols[i] = cols[i] + s;
+        for(int i = 0; i < 4; i++) r.cols[i] = cols[i] + s;
         return r;
     }
     Mat4 operator-(float s) const {
         Mat4 r;
-        for (int i = 0; i < 4; i++)
-            r.cols[i] = cols[i] - s;
+        for(int i = 0; i < 4; i++) r.cols[i] = cols[i] - s;
         return r;
     }
     Mat4 operator*(float s) const {
         Mat4 r;
-        for (int i = 0; i < 4; i++)
-            r.cols[i] = cols[i] * s;
+        for(int i = 0; i < 4; i++) r.cols[i] = cols[i] * s;
         return r;
     }
     Mat4 operator/(float s) const {
         Mat4 r;
-        for (int i = 0; i < 4; i++)
-            r.cols[i] = cols[i] / s;
+        for(int i = 0; i < 4; i++) r.cols[i] = cols[i] / s;
         return r;
     }
 
-    Mat4 operator*=(const Mat4 &v) {
+    Mat4 operator*=(const Mat4& v) {
         *this = *this * v;
         return *this;
     }
-    Mat4 operator*(const Mat4 &m) const {
+    Mat4 operator*(const Mat4& m) const {
         Mat4 ret;
-        for (int i = 0; i < 4; i++) {
-            for (int j = 0; j < 4; j++) {
+        for(int i = 0; i < 4; i++) {
+            for(int j = 0; j < 4; j++) {
                 ret[i][j] = 0.0f;
-                for (int k = 0; k < 4; k++) {
+                for(int k = 0; k < 4; k++) {
                     ret[i][j] += m[i][k] * cols[k][j];
                 }
             }
@@ -161,9 +151,13 @@ struct Mat4 {
     }
 
     /// Expands v to Vec4(v, 1.0), multiplies, and projects back to 3D
-    Vec3 operator*(Vec3 v) const { return operator*(Vec4(v, 1.0f)).project(); }
+    Vec3 operator*(Vec3 v) const {
+        return operator*(Vec4(v, 1.0f)).project();
+    }
     /// Expands v to Vec4(v, 0.0), multiplies, and projects back to 3D
-    Vec3 rotate(Vec3 v) const { return operator*(Vec4(v, 0.0f)).xyz(); }
+    Vec3 rotate(Vec3 v) const {
+        return operator*(Vec4(v, 0.0f)).xyz();
+    }
 
     /// Converts rotation (orthonormal 3x3) matrix to equivalent Euler angles
     Vec3 to_euler() const {
@@ -171,16 +165,15 @@ struct Mat4 {
         bool single = true;
         static const float singularity[] = {1.0f, 0.0f, 0.0f, 0.0f, 0.0f, -1.0f,
                                             0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0};
-        for (int i = 0; i < 12 && single; i++) {
+        for(int i = 0; i < 12 && single; i++) {
             single = single && std::abs(data[i] - singularity[i]) < 16.0f * FLT_EPSILON;
         }
-        if (single)
-            return Vec3{0.0f, 0.0f, 180.0f};
+        if(single) return Vec3{0.0f, 0.0f, 180.0f};
 
         Vec3 eul1, eul2;
 
         float cy = std::hypotf(cols[0][0], cols[0][1]);
-        if (cy > 16.0f * FLT_EPSILON) {
+        if(cy > 16.0f * FLT_EPSILON) {
             eul1[0] = std::atan2(cols[1][2], cols[2][2]);
             eul1[1] = std::atan2(-cols[0][2], cy);
             eul1[2] = std::atan2(cols[0][1], cols[0][0]);
@@ -196,16 +189,20 @@ struct Mat4 {
         }
         float d1 = std::abs(eul1[0]) + std::abs(eul1[1]) + std::abs(eul1[2]);
         float d2 = std::abs(eul2[0]) + std::abs(eul2[1]) + std::abs(eul2[2]);
-        if (d1 > d2)
+        if(d1 > d2)
             return Degrees(eul2);
         else
             return Degrees(eul1);
     }
 
     /// Returns matrix transpose
-    Mat4 T() const { return transpose(*this); }
+    Mat4 T() const {
+        return transpose(*this);
+    }
     /// Returns matrix inverse (will be NaN if m is not invertible)
-    Mat4 inverse() const { return inverse(*this); }
+    Mat4 inverse() const {
+        return inverse(*this);
+    }
 
     /// Returns determinant (brute force).
     float det() const {
@@ -241,42 +238,36 @@ struct Mat4 {
     };
 };
 
-inline bool operator==(const Mat4 &l, const Mat4 &r) {
-    for (int i = 0; i < 16; i++)
-        if (l.data[i] != r.data[i])
-            return false;
+inline bool operator==(const Mat4& l, const Mat4& r) {
+    for(int i = 0; i < 16; i++)
+        if(l.data[i] != r.data[i]) return false;
     return true;
 }
 
-inline bool operator!=(const Mat4 &l, const Mat4 &r) {
-    for (int i = 0; i < 16; i++)
-        if (l.data[i] != r.data[i])
-            return true;
+inline bool operator!=(const Mat4& l, const Mat4& r) {
+    for(int i = 0; i < 16; i++)
+        if(l.data[i] != r.data[i]) return true;
     return false;
 }
 
-inline Mat4 operator+(float s, const Mat4 &m) {
+inline Mat4 operator+(float s, const Mat4& m) {
     Mat4 r;
-    for (int i = 0; i < 4; i++)
-        r.cols[i] = m.cols[i] + s;
+    for(int i = 0; i < 4; i++) r.cols[i] = m.cols[i] + s;
     return r;
 }
-inline Mat4 operator-(float s, const Mat4 &m) {
+inline Mat4 operator-(float s, const Mat4& m) {
     Mat4 r;
-    for (int i = 0; i < 4; i++)
-        r.cols[i] = m.cols[i] - s;
+    for(int i = 0; i < 4; i++) r.cols[i] = m.cols[i] - s;
     return r;
 }
-inline Mat4 operator*(float s, const Mat4 &m) {
+inline Mat4 operator*(float s, const Mat4& m) {
     Mat4 r;
-    for (int i = 0; i < 4; i++)
-        r.cols[i] = m.cols[i] * s;
+    for(int i = 0; i < 4; i++) r.cols[i] = m.cols[i] * s;
     return r;
 }
-inline Mat4 operator/(float s, const Mat4 &m) {
+inline Mat4 operator/(float s, const Mat4& m) {
     Mat4 r;
-    for (int i = 0; i < 4; i++)
-        r.cols[i] = m.cols[i] / s;
+    for(int i = 0; i < 4; i++) r.cols[i] = m.cols[i] / s;
     return r;
 }
 
@@ -287,23 +278,22 @@ const inline Mat4 Mat4::Zero = Mat4{Vec4{0.0f, 0.0f, 0.0f, 0.0f}, Vec4{0.0f, 0.0
 
 inline Mat4 outer(Vec4 u, Vec4 v) {
     Mat4 B;
-    for (int i = 0; i < 4; i++)
-        for (int j = 0; j < 4; j++)
-            B[i][j] = u[i] * v[j];
+    for(int i = 0; i < 4; i++)
+        for(int j = 0; j < 4; j++) B[i][j] = u[i] * v[j];
     return B;
 }
 
-inline Mat4 Mat4::transpose(const Mat4 &m) {
+inline Mat4 Mat4::transpose(const Mat4& m) {
     Mat4 r;
-    for (int i = 0; i < 4; i++) {
-        for (int j = 0; j < 4; j++) {
+    for(int i = 0; i < 4; i++) {
+        for(int j = 0; j < 4; j++) {
             r[i][j] = m[j][i];
         }
     }
     return r;
 }
 
-inline Mat4 Mat4::inverse(const Mat4 &m) {
+inline Mat4 Mat4::inverse(const Mat4& m) {
     Mat4 r;
     r[0][0] = m[1][2] * m[2][3] * m[3][1] - m[1][3] * m[2][2] * m[3][1] +
               m[1][3] * m[2][1] * m[3][2] - m[1][1] * m[2][3] * m[3][2] -
@@ -361,9 +351,9 @@ inline Mat4 Mat4::rotate_to(Vec3 dir) {
 
     dir.normalize();
 
-    if (dir.y == 1.0f)
+    if(std::abs(dir.y - 1.0f) < EPS_F)
         return Mat4::I;
-    else if (dir.y == -1.0f)
+    else if(std::abs(dir.y + 1.0f) < EPS_F)
         return Mat4{Vec4{1.0f, 0.0f, 0.0f, 0.0f}, Vec4{0.0f, -1.0f, 0.0f, 0.0f},
                     Vec4{0.0f, 0.0f, 1.0f, 0.0}, Vec4{0.0f, 0.0f, 0.0f, 1.0f}};
     else {
@@ -468,7 +458,7 @@ inline Mat4 Mat4::look_at(Vec3 pos, Vec3 at, Vec3 up) {
     return r;
 }
 
-inline std::ostream &operator<<(std::ostream &out, Mat4 m) {
+inline std::ostream& operator<<(std::ostream& out, Mat4 m) {
     out << "{" << m[0] << "," << m[1] << "," << m[2] << "," << m[3] << "}";
     return out;
 }

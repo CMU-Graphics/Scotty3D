@@ -8,16 +8,23 @@
 
 namespace PT {
 
-template <typename Primitive> class BVH {
+template<typename Primitive> class BVH {
 public:
     BVH() = default;
-    BVH(std::vector<Primitive> &&primitives, size_t max_leaf_size = 1);
-    void build(std::vector<Primitive> &&primitives, size_t max_leaf_size = 1);
+    BVH(std::vector<Primitive>&& primitives, size_t max_leaf_size = 1);
+    void build(std::vector<Primitive>&& primitives, size_t max_leaf_size = 1);
+
+    BVH(BVH&& src) = default;
+    BVH& operator=(BVH&& src) = default;
+
+    BVH(const BVH& src) = delete;
+    BVH& operator=(const BVH& src) = delete;
 
     BBox bbox() const;
-    Trace hit(const Ray &ray) const;
+    Trace hit(const Ray& ray) const;
 
-    size_t visualize(GL::Lines &lines, GL::Lines &active, size_t level, const Mat4 &trans) const;
+    BVH copy() const;
+    size_t visualize(GL::Lines& lines, GL::Lines& active, size_t level, const Mat4& trans) const;
 
     std::vector<Primitive> destructure();
     void clear();

@@ -17,8 +17,8 @@
           <perspective>
             <xfov sid="xfov">121.28508</xfov>
             <aspect_ratio>1.7778001</aspect_ratio>
-            <znear sid="znear">0.0099999998</znear>
-            <zfar sid="zfar">100</zfar>
+            <znear sid="znear">0</znear>
+            <zfar sid="zfar">1</zfar>
           </perspective>
         </technique_common>
       </optics>

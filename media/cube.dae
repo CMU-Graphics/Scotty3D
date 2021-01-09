@@ -95,8 +95,8 @@
           <perspective>
             <yfov sid="yfov">90</yfov>
             <aspect_ratio>1.7777777</aspect_ratio>
-            <znear sid="znear">0.0099999998</znear>
-            <zfar sid="zfar">100</zfar>
+            <znear sid="znear">0</znear>
+            <zfar sid="zfar">1</zfar>
           </perspective>
         </technique_common>
       </optics>

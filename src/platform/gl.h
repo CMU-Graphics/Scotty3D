@@ -10,6 +10,15 @@
 
 namespace GL {
 
+enum class Sample_Count { _1, _2, _4, _8, _16, _32, count };
+extern const char* Sample_Count_Names[(int)Sample_Count::count];
+
+struct MSAA {
+    Sample_Count samples = Sample_Count::_4;
+    int n_options();
+    int n_samples();
+};
+
 void setup();
 void shutdown();
 std::string version();
@@ -32,14 +41,14 @@ using TexID = GLuint;
 class Tex2D {
 public:
     Tex2D();
-    Tex2D(const Tex2D &src) = delete;
-    Tex2D(Tex2D &&src);
+    Tex2D(const Tex2D& src) = delete;
+    Tex2D(Tex2D&& src);
     ~Tex2D();
 
-    void operator=(const Tex2D &src) = delete;
-    void operator=(Tex2D &&src);
+    void operator=(const Tex2D& src) = delete;
+    void operator=(Tex2D&& src);
 
-    void image(int w, int h, unsigned char *img);
+    void image(int w, int h, unsigned char* img);
     TexID get_id() const;
     void bind(int idx = 0) const;
 
@@ -57,23 +66,25 @@ public:
     };
 
     Mesh();
-    Mesh(std::vector<Vert> &&vertices, std::vector<Index> &&indices);
-    Mesh(const Mesh &src) = delete;
-    Mesh(Mesh &&src);
+    Mesh(std::vector<Vert>&& vertices, std::vector<Index>&& indices);
+    Mesh(const Mesh& src) = delete;
+    Mesh(Mesh&& src);
     ~Mesh();
 
-    void operator=(const Mesh &src) = delete;
-    void operator=(Mesh &&src);
+    void operator=(const Mesh& src) = delete;
+    void operator=(Mesh&& src);
 
     /// Assumes proper shader is already bound
     void render();
-    void recreate(std::vector<Vert> &&vertices, std::vector<Index> &&indices);
-    std::vector<Vert> &edit_verts();
-    std::vector<Index> &edit_indices();
+
+    void recreate(std::vector<Vert>&& vertices, std::vector<Index>&& indices);
+    std::vector<Vert>& edit_verts();
+    std::vector<Index>& edit_indices();
+    Mesh copy() const;
 
     BBox bbox() const;
-    const std::vector<Vert> &verts() const;
-    const std::vector<Index> &indices() const;
+    const std::vector<Vert>& verts() const;
+    const std::vector<Index>& indices() const;
     GLuint tris() const;
 
 private:
@@ -94,13 +105,13 @@ private:
 
 class Instances {
 public:
-    Instances(GL::Mesh &&mesh);
-    Instances(const Instances &src) = delete;
-    Instances(Instances &&src);
+    Instances(GL::Mesh&& mesh);
+    Instances(const Instances& src) = delete;
+    Instances(Instances&& src);
     ~Instances();
 
-    void operator=(const Instances &src) = delete;
-    void operator=(Instances &&src);
+    void operator=(const Instances& src) = delete;
+    void operator=(Instances&& src);
 
     struct Info {
         GLuint id;
@@ -108,9 +119,10 @@ public:
     };
 
     void render();
-    size_t add(const Mat4 &transform, GLuint id = 0);
-    Info &get(size_t idx);
-    void clear();
+    size_t add(const Mat4& transform, GLuint id = 0);
+    Info& get(size_t idx);
+    void clear(size_t n = 0);
+    const Mesh& mesh() const;
 
 private:
     void create();
@@ -120,7 +132,7 @@ private:
     GLuint vbo = 0;
     bool dirty = false;
 
-    Mesh mesh;
+    Mesh _mesh;
     std::vector<Info> data;
 };
 
@@ -132,13 +144,13 @@ public:
     };
 
     Lines(float thickness = 1.0f);
-    Lines(std::vector<Vert> &&verts, float thickness = 1.0f);
-    Lines(const Lines &src) = delete;
-    Lines(Lines &&src);
+    Lines(std::vector<Vert>&& verts, float thickness = 1.0f);
+    Lines(const Lines& src) = delete;
+    Lines(Lines&& src);
     ~Lines();
 
-    void operator=(const Lines &src) = delete;
-    void operator=(Lines &&src);
+    void operator=(const Lines& src) = delete;
+    void operator=(Lines&& src);
 
     /// Assumes proper shader is already bound
     void render(bool smooth) const;
@@ -162,17 +174,17 @@ class Shader {
 public:
     Shader();
     Shader(std::string vertex_file, std::string fragment_file);
-    Shader(const Shader &src) = delete;
-    Shader(Shader &&src);
+    Shader(const Shader& src) = delete;
+    Shader(Shader&& src);
     ~Shader();
 
-    void operator=(const Shader &src) = delete;
-    void operator=(Shader &&src);
+    void operator=(const Shader& src) = delete;
+    void operator=(Shader&& src);
 
     void bind() const;
     void load(std::string vertex, std::string fragment);
 
-    void uniform(std::string name, const Mat4 &mat) const;
+    void uniform(std::string name, const Mat4& mat) const;
     void uniform(std::string name, Vec3 vec3) const;
     void uniform(std::string name, Vec2 vec2) const;
     void uniform(std::string name, GLint i) const;
@@ -198,12 +210,12 @@ class Framebuffer {
 public:
     Framebuffer();
     Framebuffer(int outputs, Vec2 dim, int samples = 1, bool depth = true);
-    Framebuffer(const Framebuffer &src) = delete;
-    Framebuffer(Framebuffer &&src);
+    Framebuffer(const Framebuffer& src) = delete;
+    Framebuffer(Framebuffer&& src);
     ~Framebuffer();
 
-    void operator=(const Framebuffer &src) = delete;
-    void operator=(Framebuffer &&src);
+    void operator=(const Framebuffer& src) = delete;
+    void operator=(Framebuffer&& src);
 
     static void bind_screen();
 
@@ -219,11 +231,11 @@ public:
     int bytes() const;
 
     bool can_read_at() const;
-    void read_at(int buf, int x, int y, GLubyte *data) const;
-    void read(int buf, GLubyte *data) const;
+    void read_at(int buf, int x, int y, GLubyte* data) const;
+    void read(int buf, GLubyte* data) const;
 
     void blit_to_screen(int buf, Vec2 dim) const;
-    void blit_to(int buf, const Framebuffer &fb, bool avg = true) const;
+    void blit_to(int buf, const Framebuffer& fb, bool avg = true) const;
 
     void clear(int buf, Vec4 col) const;
     void clear_d() const;
@@ -244,11 +256,11 @@ private:
 
 class Effects {
 public:
-    static void resolve_to_screen(int buf, const Framebuffer &framebuffer);
-    static void resolve_to(int buf, const Framebuffer &from, const Framebuffer &to,
+    static void resolve_to_screen(int buf, const Framebuffer& framebuffer);
+    static void resolve_to(int buf, const Framebuffer& from, const Framebuffer& to,
                            bool avg = true);
 
-    static void outline(const Framebuffer &from, const Framebuffer &to, Vec3 color, Vec2 min,
+    static void outline(const Framebuffer& from, const Framebuffer& to, Vec3 color, Vec2 min,
                         Vec2 max);
 
 private:

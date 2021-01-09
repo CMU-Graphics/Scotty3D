@@ -32,9 +32,10 @@ struct LData {
     std::vector<GL::Lines::Vert> verts;
 };
 
-GL::Mesh merge(Data &&l, Data &&r);
-LData merge(LData &&l, LData &&r);
+GL::Mesh merge(Data&& l, Data&& r);
+LData merge(LData&& l, LData&& r);
 LData circle(Vec3 color, float r, int sides);
+GL::Mesh dedup(Data&& d);
 
 // https://wiki.unity3d.com/index.php/ProceduralPrimitives
 Data cube(float r);

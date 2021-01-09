@@ -19,10 +19,12 @@ struct Spectrum {
         g = _g;
         b = _b;
     }
-    explicit Spectrum(float f) { r = g = b = f; }
+    explicit Spectrum(float f) {
+        r = g = b = f;
+    }
 
-    Spectrum(const Spectrum &) = default;
-    Spectrum &operator=(const Spectrum &) = default;
+    Spectrum(const Spectrum&) = default;
+    Spectrum& operator=(const Spectrum&) = default;
     ~Spectrum() = default;
 
     Spectrum operator+=(Spectrum v) {
@@ -62,25 +64,45 @@ struct Spectrum {
         b = std::pow(b, GAMMA);
     }
 
-    Spectrum operator+(Spectrum v) const { return Spectrum(r + v.r, g + v.g, b + v.b); }
-    Spectrum operator-(Spectrum v) const { return Spectrum(r - v.r, g - v.g, b - v.b); }
-    Spectrum operator*(Spectrum v) const { return Spectrum(r * v.r, g * v.g, b * v.b); }
+    Spectrum operator+(Spectrum v) const {
+        return Spectrum(r + v.r, g + v.g, b + v.b);
+    }
+    Spectrum operator-(Spectrum v) const {
+        return Spectrum(r - v.r, g - v.g, b - v.b);
+    }
+    Spectrum operator*(Spectrum v) const {
+        return Spectrum(r * v.r, g * v.g, b * v.b);
+    }
 
-    Spectrum operator+(float s) const { return Spectrum(r + s, g + s, b + s); }
-    Spectrum operator*(float s) const { return Spectrum(r * s, g * s, b * s); }
-    Spectrum operator/(float s) const { return Spectrum(r / s, g / s, b / s); }
+    Spectrum operator+(float s) const {
+        return Spectrum(r + s, g + s, b + s);
+    }
+    Spectrum operator*(float s) const {
+        return Spectrum(r * s, g * s, b * s);
+    }
+    Spectrum operator/(float s) const {
+        return Spectrum(r / s, g / s, b / s);
+    }
 
-    bool operator==(Spectrum v) const { return r == v.r && g == v.g && b == v.b; }
-    bool operator!=(Spectrum v) const { return r != v.r || g != v.g || b != v.b; }
+    bool operator==(Spectrum v) const {
+        return r == v.r && g == v.g && b == v.b;
+    }
+    bool operator!=(Spectrum v) const {
+        return r != v.r || g != v.g || b != v.b;
+    }
 
-    float luma() const { return 0.2126f * r + 0.7152f * g + 0.0722f * b; }
+    float luma() const {
+        return 0.2126f * r + 0.7152f * g + 0.0722f * b;
+    }
 
     bool valid() const {
         return !(std::isinf(r) || std::isinf(g) || std::isinf(b) || std::isnan(r) ||
                  std::isnan(g) || std::isnan(b));
     }
 
-    Vec3 to_vec() const { return Vec3(r, g, b); }
+    Vec3 to_vec() const {
+        return Vec3(r, g, b);
+    }
 
     union {
         struct {
@@ -92,10 +114,14 @@ struct Spectrum {
     };
 };
 
-inline Spectrum operator+(float s, Spectrum v) { return Spectrum(v.r + s, v.g + s, v.b + s); }
-inline Spectrum operator*(float s, Spectrum v) { return Spectrum(v.r * s, v.g * s, v.b * s); }
+inline Spectrum operator+(float s, Spectrum v) {
+    return Spectrum(v.r + s, v.g + s, v.b + s);
+}
+inline Spectrum operator*(float s, Spectrum v) {
+    return Spectrum(v.r * s, v.g * s, v.b * s);
+}
 
-inline std::ostream &operator<<(std::ostream &out, Spectrum v) {
+inline std::ostream& operator<<(std::ostream& out, Spectrum v) {
     out << "Spectrum{" << v.r << "," << v.g << "," << v.b << "}";
     return out;
 }

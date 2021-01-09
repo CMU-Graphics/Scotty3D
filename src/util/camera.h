@@ -48,6 +48,10 @@ public:
     void set_ar(float ar);
     void set_ar(Vec2 dim);
     float get_ar() const;
+    void set_ap(float ap);
+    float get_ap() const;
+    void set_dist(float dist);
+    float get_dist() const;
     void set_fov(float fov);
     float get_fov() const;
     float get_h_fov() const;
@@ -58,13 +62,17 @@ private:
 
     /// Camera parameters
     Vec3 position, looking_at;
+    /// FOV is in degrees
     float vert_fov, aspect_ratio;
+    /// Current camera rotation
     Quat rot;
 
     /// For updating position & looking_at
     float radius, near_plane;
     /// For mouse control
     float orbit_sens, move_sens, radius_sens;
+    /// Lens parameters
+    float aperture, focal_dist;
 
     /// Cached view matrices
     Mat4 view, iview;

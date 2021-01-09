@@ -12,7 +12,7 @@ Vec3 reflect(Vec3 dir) {
     return Vec3();
 }
 
-Vec3 refract(Vec3 out_dir, float index_of_refraction, bool &was_internal) {
+Vec3 refract(Vec3 out_dir, float index_of_refraction, bool& was_internal) {
 
     // TODO (PathTracer): Task 6
     // Use Snell's Law to refract out_dir through the surface

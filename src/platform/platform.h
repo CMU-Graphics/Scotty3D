@@ -11,7 +11,7 @@ public:
     Platform();
     ~Platform();
 
-    void loop(App &app);
+    void loop(App& app);
 
     Vec2 window_draw();
     Vec2 window_size();
@@ -27,7 +27,7 @@ public:
 
     static void remove_console();
     static int console_width();
-    static void strcpy(char *dest, const char *src, size_t limit);
+    static void strcpy(char* dest, const char* src, size_t limit);
 
 private:
     float prev_dpi = 0.0f;
@@ -39,7 +39,7 @@ private:
     void begin_frame();
     void complete_frame();
 
-    SDL_Window *window = nullptr;
+    SDL_Window* window = nullptr;
     SDL_GLContext gl_context = nullptr;
-    const Uint8 *keybuf = nullptr;
+    const Uint8* keybuf = nullptr;
 };

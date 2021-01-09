@@ -23,16 +23,16 @@ namespace PT {
 
 class Pathtracer {
 public:
-    Pathtracer(Gui::Widget_Render &gui, Vec2 screen_dim);
+    Pathtracer(Gui::Widget_Render& gui, Vec2 screen_dim);
     ~Pathtracer();
 
     void set_sizes(size_t w, size_t h, size_t pixel_samples, size_t area_samples, size_t depth);
 
-    const HDR_Image &get_output();
-    const GL::Tex2D &get_output_texture(float exposure);
-    size_t visualize_bvh(GL::Lines &lines, GL::Lines &active, size_t level);
+    const HDR_Image& get_output();
+    const GL::Tex2D& get_output_texture(float exposure);
+    size_t visualize_bvh(GL::Lines& lines, GL::Lines& active, size_t level);
 
-    void begin_render(Scene &scene, const Camera &camera);
+    void begin_render(Scene& scene, const Camera& camera);
     void cancel();
     bool in_progress() const;
     float progress() const;
@@ -40,24 +40,26 @@ public:
 
 private:
     // Internal
-    void build_scene(Scene &scene);
-    void build_lights(Scene &scene, std::vector<Object> &objs);
+    void build_scene(Scene& scene);
+    void build_lights(Scene& scene, std::vector<Object>& objs);
     void do_trace(size_t samples);
-    void accumulate(const HDR_Image &sample);
+    void accumulate(const HDR_Image& sample);
     bool tonemap();
 
-    Gui::Widget_Render &gui;
+    Gui::Widget_Render& gui;
     unsigned long long render_time, build_time;
     Thread_Pool thread_pool;
+    bool cancel_flag = false;
 
     HDR_Image accumulator;
     std::mutex accumulator_mut;
-    std::atomic<size_t> accumulator_samples, total_epochs, completed_epochs;
+    size_t total_epochs, accumulator_samples;
+    std::atomic<size_t> completed_epochs;
 
     /// Relevant to student
     Spectrum trace_pixel(size_t x, size_t y);
-    Spectrum trace_ray(const Ray &ray);
-    void log_ray(const Ray &ray, float t, Spectrum color = Spectrum{1.0f});
+    Spectrum trace_ray(const Ray& ray);
+    void log_ray(const Ray& ray, float t, Spectrum color = Spectrum{1.0f});
 
     BVH<Object> scene;
     std::vector<Light> lights;

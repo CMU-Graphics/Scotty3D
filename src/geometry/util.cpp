@@ -12,27 +12,25 @@ GL::Mesh cyl_mesh(float radius, float height, int sides, bool cap) {
 GL::Mesh arrow_mesh(float rbase, float rtip, float height) {
     Gen::Data base = Gen::cone(rbase, rbase, 0.75f * height, 10, true);
     Gen::Data tip = Gen::cone(rtip, 0.001f, 0.25f * height, 10, true);
-    for (auto &v : tip.verts)
-        v.pos.y += 0.7f;
+    for(auto& v : tip.verts) v.pos.y += 0.7f;
     return Gen::merge(std::move(base), std::move(tip));
 }
 
 GL::Mesh scale_mesh() {
     Gen::Data base = Gen::cone(0.03f, 0.03f, 0.7f, 10, true);
     Gen::Data tip = Gen::cube(0.1f);
-    for (auto &v : tip.verts)
-        v.pos.y += 0.7f;
+    for(auto& v : tip.verts) v.pos.y += 0.7f;
     return Gen::merge(std::move(base), std::move(tip));
 }
 
 GL::Mesh cone_mesh(float bradius, float tradius, float height, int sides, bool cap) {
     Gen::Data cone = Gen::cone(bradius, tradius, height, sides, cap);
-    return GL::Mesh(std::move(cone.verts), std::move(cone.elems));
+    return Gen::dedup({std::move(cone.verts), std::move(cone.elems)});
 }
 
 GL::Mesh torus_mesh(float iradius, float oradius, int segments, int sides) {
     Gen::Data torus = Gen::torus(iradius, oradius, segments, sides);
-    return GL::Mesh(std::move(torus.verts), std::move(torus.elems));
+    return Gen::dedup({std::move(torus.verts), std::move(torus.elems)});
 }
 
 GL::Mesh cube_mesh(float r) {
@@ -64,17 +62,14 @@ GL::Mesh capsule_mesh(float h, float r) {
 
     Gen::Data bottom = Gen::uv_hemisphere(r);
     Gen::Data top = Gen::uv_hemisphere(r);
-    for (auto &v : top.verts)
-        v.pos.y = -v.pos.y + h;
+    for(auto& v : top.verts) v.pos.y = -v.pos.y + h;
     Gen::Data cyl = Gen::cone(r, r, h, 64, false);
 
     GL::Mesh::Index cyl_off = (GL::Mesh::Index)bottom.verts.size();
     GL::Mesh::Index top_off = cyl_off + (GL::Mesh::Index)cyl.verts.size();
 
-    for (auto &i : cyl.elems)
-        i += cyl_off;
-    for (auto &i : top.elems)
-        i += top_off;
+    for(auto& i : cyl.elems) i += cyl_off;
+    for(auto& i : top.elems) i += top_off;
 
     bottom.verts.insert(bottom.verts.end(), cyl.verts.begin(), cyl.verts.end());
     bottom.elems.insert(bottom.elems.end(), cyl.elems.begin(), cyl.elems.end());
@@ -98,11 +93,10 @@ GL::Lines spotlight_mesh(Vec3 color, float inner, float outer) {
     Gen::LData iring = Gen::circle(color, ri, steps);
     Gen::LData oring = Gen::circle(color, ro, steps);
     Gen::LData rings = Gen::merge(std::move(iring), std::move(oring));
-    for (auto &v : rings.verts)
-        v.pos.y += 5.0f;
+    for(auto& v : rings.verts) v.pos.y += 5.0f;
 
     float t = 0.0f;
-    for (int i = 0; i < steps; i += steps / 4) {
+    for(int i = 0; i < steps; i += steps / 4) {
         Vec3 point = ro * Vec3(std::sin(t), 0.0f, std::cos(t));
         rings.verts.push_back({{}, color});
         rings.verts.push_back({Vec3(point.x, 5.0f, point.z), color});
@@ -113,15 +107,40 @@ GL::Lines spotlight_mesh(Vec3 color, float inner, float outer) {
 
 namespace Gen {
 
-GL::Mesh merge(Data &&l, Data &&r) {
-    for (auto &i : r.elems)
-        i += (GL::Mesh::Index)l.verts.size();
+GL::Mesh dedup(Data&& d) {
+
+    std::vector<GL::Mesh::Vert> verts;
+    std::vector<GL::Mesh::Index> elems;
+
+    // normals be damned
+    std::map<Vec3, GL::Mesh::Index> v_to_idx;
+
+    for(size_t i = 0; i < d.elems.size(); i++) {
+        GL::Mesh::Index idx = d.elems[i];
+        GL::Mesh::Vert v = d.verts[idx];
+        auto entry = v_to_idx.find(v.pos);
+        GL::Mesh::Index new_idx;
+        if(entry == v_to_idx.end()) {
+            new_idx = (GL::Mesh::Index)verts.size();
+            v_to_idx.insert({v.pos, new_idx});
+            verts.push_back(v);
+        } else {
+            new_idx = entry->second;
+        }
+        elems.push_back(new_idx);
+    }
+
+    return GL::Mesh(std::move(verts), std::move(elems));
+}
+
+GL::Mesh merge(Data&& l, Data&& r) {
+    for(auto& i : r.elems) i += (GL::Mesh::Index)l.verts.size();
     l.verts.insert(l.verts.end(), r.verts.begin(), r.verts.end());
     l.elems.insert(l.elems.end(), r.elems.begin(), r.elems.end());
     return GL::Mesh(std::move(l.verts), std::move(l.elems));
 }
 
-LData merge(LData &&l, LData &&r) {
+LData merge(LData&& l, LData&& r) {
     l.verts.insert(l.verts.end(), r.verts.begin(), r.verts.end());
     return std::move(l);
 }
@@ -131,13 +150,13 @@ LData circle(Vec3 color, float r, int sides) {
     std::vector<Vec3> points;
     float t = 0.0f;
     float step = (2.0f * PI_F) / (sides + 1);
-    for (int i = 0; i < sides; i++) {
+    for(int i = 0; i < sides; i++) {
         points.push_back(r * Vec3(std::sin(t), 0.0f, std::cos(t)));
         t += step;
     }
 
     std::vector<GL::Lines::Vert> verts;
-    for (size_t i = 0; i < points.size(); i++) {
+    for(size_t i = 0; i < points.size(); i++) {
         verts.push_back({points[i], color});
         verts.push_back({points[(i + 1) % points.size()], color});
     }
@@ -176,19 +195,19 @@ Data cone(float bradius, float tradius, float height, int sides, bool caps) {
     size_t vert = 0;
 
     vertices[vert++] = Vec3(0.0f, 0.0f, 0.0f);
-    while (vert <= n_sides) {
+    while(vert <= n_sides) {
         float rad = (float)vert / n_sides * _2pi;
         vertices[vert] = Vec3(std::cos(rad) * bradius, 0.0f, std::sin(rad) * bradius);
         vert++;
     }
     vertices[vert++] = Vec3(0.0f, height, 0.0f);
-    while (vert <= n_sides * 2 + 1) {
+    while(vert <= n_sides * 2 + 1) {
         float rad = (float)(vert - n_sides - 1) / n_sides * _2pi;
         vertices[vert] = Vec3(std::cos(rad) * tradius, height, std::sin(rad) * tradius);
         vert++;
     }
     size_t v = 0;
-    while (vert <= vertices.size() - 4) {
+    while(vert <= vertices.size() - 4) {
         float rad = (float)v / n_sides * _2pi;
         vertices[vert] = Vec3(std::cos(rad) * tradius, height, std::sin(rad) * tradius);
         vertices[vert + 1] = Vec3(std::cos(rad) * bradius, 0.0f, std::sin(rad) * bradius);
@@ -200,15 +219,15 @@ Data cone(float bradius, float tradius, float height, int sides, bool caps) {
 
     std::vector<Vec3> normals(vertices.size());
     vert = 0;
-    while (vert <= n_sides) {
+    while(vert <= n_sides) {
         normals[vert++] = Vec3(0.0f, -1.0f, 0.0f);
     }
-    while (vert <= n_sides * 2 + 1) {
+    while(vert <= n_sides * 2 + 1) {
         normals[vert++] = Vec3(0.0f, 1.0f, 0.0f);
     }
 
     v = 0;
-    while (vert <= vertices.size() - 4) {
+    while(vert <= vertices.size() - 4) {
         float rad = (float)v / n_sides * _2pi;
         float cos = std::cos(rad);
         float sin = std::sin(rad);
@@ -225,8 +244,8 @@ Data cone(float bradius, float tradius, float height, int sides, bool caps) {
 
     GL::Mesh::Index tri = 0;
     size_t i = 0;
-    while (tri < n_sides - 1) {
-        if (caps) {
+    while(tri < n_sides - 1) {
+        if(caps) {
             triangles[i] = 0;
             triangles[i + 1] = tri + 1;
             triangles[i + 2] = tri + 2;
@@ -234,7 +253,7 @@ Data cone(float bradius, float tradius, float height, int sides, bool caps) {
         tri++;
         i += 3;
     }
-    if (caps) {
+    if(caps) {
         triangles[i] = 0;
         triangles[i + 1] = tri + 1;
         triangles[i + 2] = 1;
@@ -242,8 +261,8 @@ Data cone(float bradius, float tradius, float height, int sides, bool caps) {
     tri++;
     i += 3;
 
-    while (tri < n_sides * 2) {
-        if (caps) {
+    while(tri < n_sides * 2) {
+        if(caps) {
             triangles[i] = tri + 2;
             triangles[i + 1] = tri + 1;
             triangles[i + 2] = (GLuint)n_cap;
@@ -251,7 +270,7 @@ Data cone(float bradius, float tradius, float height, int sides, bool caps) {
         tri++;
         i += 3;
     }
-    if (caps) {
+    if(caps) {
         triangles[i] = (GLuint)n_cap + 1;
         triangles[i + 1] = tri + 1;
         triangles[i + 2] = (GLuint)n_cap;
@@ -260,7 +279,7 @@ Data cone(float bradius, float tradius, float height, int sides, bool caps) {
     i += 3;
     tri++;
 
-    while (tri <= n_tris) {
+    while(tri <= n_tris) {
         triangles[i] = tri + 2;
         triangles[i + 1] = tri + 1;
         triangles[i + 2] = tri + 0;
@@ -274,7 +293,7 @@ Data cone(float bradius, float tradius, float height, int sides, bool caps) {
     }
 
     std::vector<GL::Mesh::Vert> verts;
-    for (size_t j = 0; j < vertices.size(); j++) {
+    for(size_t j = 0; j < vertices.size(); j++) {
         verts.push_back({vertices[j], normals[j], 0});
     }
     return {verts, triangles};
@@ -287,14 +306,14 @@ Data torus(float iradius, float oradius, int segments, int sides) {
     iradius = oradius - iradius;
 
     std::vector<Vec3> vertices((n_rad_sides + 1) * (n_sides + 1));
-    for (int seg = 0; seg <= n_rad_sides; seg++) {
+    for(int seg = 0; seg <= n_rad_sides; seg++) {
 
         int cur_seg = seg == n_rad_sides ? 0 : seg;
 
         float t1 = (float)cur_seg / n_rad_sides * _2pi;
         Vec3 r1(std::cos(t1) * oradius, 0.0f, std::sin(t1) * oradius);
 
-        for (int side = 0; side <= n_sides; side++) {
+        for(int side = 0; side <= n_sides; side++) {
 
             int cur_side = side == n_sides ? 0 : side;
             float t2 = (float)cur_side / n_sides * _2pi;
@@ -306,13 +325,13 @@ Data torus(float iradius, float oradius, int segments, int sides) {
     }
 
     std::vector<Vec3> normals(vertices.size());
-    for (int seg = 0; seg <= n_rad_sides; seg++) {
+    for(int seg = 0; seg <= n_rad_sides; seg++) {
 
         int cur_seg = seg == n_rad_sides ? 0 : seg;
         float t1 = (float)cur_seg / n_rad_sides * _2pi;
         Vec3 r1(std::cos(t1) * oradius, 0.0f, std::sin(t1) * oradius);
 
-        for (int side = 0; side <= n_sides; side++) {
+        for(int side = 0; side <= n_sides; side++) {
             normals[side + seg * (n_sides + 1)] =
                 (vertices[side + seg * (n_sides + 1)] - r1).unit();
         }
@@ -324,13 +343,13 @@ Data torus(float iradius, float oradius, int segments, int sides) {
     std::vector<GL::Mesh::Index> triangles(n_idx);
 
     size_t i = 0;
-    for (int seg = 0; seg <= n_rad_sides; seg++) {
-        for (int side = 0; side <= n_sides - 1; side++) {
+    for(int seg = 0; seg <= n_rad_sides; seg++) {
+        for(int side = 0; side <= n_sides - 1; side++) {
 
             int current = side + seg * (n_sides + 1);
             int next = side + (seg < (n_rad_sides) ? (seg + 1) * (n_sides + 1) : 0);
 
-            if (i < triangles.size() - 6) {
+            if(i < triangles.size() - 6) {
                 triangles[i++] = current;
                 triangles[i++] = next;
                 triangles[i++] = next + 1;
@@ -342,7 +361,7 @@ Data torus(float iradius, float oradius, int segments, int sides) {
     }
 
     std::vector<GL::Mesh::Vert> verts;
-    for (size_t j = 0; j < vertices.size(); j++) {
+    for(size_t j = 0; j < vertices.size(); j++) {
         verts.push_back({vertices[j], normals[j], 0});
     }
     return {verts, triangles};
@@ -357,12 +376,12 @@ Data uv_hemisphere(float radius) {
     float _2pi = _pi * 2.0f;
 
     vertices[0] = Vec3{0.0f, radius, 0.0f};
-    for (int lat = 0; lat < nbLat; lat++) {
+    for(int lat = 0; lat < nbLat; lat++) {
         float a1 = _pi * (float)(lat + 1) / (nbLat + 1);
         float sin1 = std::sin(a1);
         float cos1 = std::cos(a1);
 
-        for (int lon = 0; lon <= nbLong; lon++) {
+        for(int lon = 0; lon <= nbLong; lon++) {
             float a2 = _2pi * (float)(lon == nbLong ? 0 : lon) / nbLong;
             float sin2 = std::sin(a2);
             float cos2 = std::cos(a2);
@@ -373,8 +392,7 @@ Data uv_hemisphere(float radius) {
     vertices[vertices.size() - 1] = Vec3{0.0f, -radius, 0.0f};
 
     std::vector<Vec3> normals(vertices.size());
-    for (size_t n = 0; n < vertices.size(); n++)
-        normals[n] = vertices[n].unit();
+    for(size_t n = 0; n < vertices.size(); n++) normals[n] = vertices[n].unit();
 
     int nbFaces = (int)vertices.size();
     int nbTriangles = nbFaces * 2;
@@ -382,8 +400,8 @@ Data uv_hemisphere(float radius) {
     std::vector<GL::Mesh::Index> triangles(nbIndexes);
 
     int i = 0;
-    for (int lat = (nbLat - 1) / 2; lat < nbLat - 1; lat++) {
-        for (int lon = 0; lon < nbLong; lon++) {
+    for(int lat = (nbLat - 1) / 2; lat < nbLat - 1; lat++) {
+        for(int lon = 0; lon < nbLong; lon++) {
             int current = lon + lat * (nbLong + 1) + 1;
             int next = current + nbLong + 1;
 
@@ -397,14 +415,14 @@ Data uv_hemisphere(float radius) {
         }
     }
 
-    for (int lon = 0; lon < nbLong; lon++) {
+    for(int lon = 0; lon < nbLong; lon++) {
         triangles[i++] = (int)vertices.size() - 1;
         triangles[i++] = (int)vertices.size() - (lon + 2) - 1;
         triangles[i++] = (int)vertices.size() - (lon + 1) - 1;
     }
 
     std::vector<GL::Mesh::Vert> verts;
-    for (size_t j = 0; j < vertices.size(); j++) {
+    for(size_t j = 0; j < vertices.size(); j++) {
         verts.push_back({vertices[j], normals[j], 0});
     }
     triangles.resize(i);
@@ -416,15 +434,15 @@ Data ico_sphere(float radius, int level) {
         int v1, v2, v3;
     };
 
-    auto middle_point = [&](int p1, int p2, std::vector<Vec3> &vertices,
-                            std::map<int64_t, size_t> &cache, float radius) -> size_t {
+    auto middle_point = [&](int p1, int p2, std::vector<Vec3>& vertices,
+                            std::map<int64_t, size_t>& cache, float radius) -> size_t {
         bool firstIsSmaller = p1 < p2;
         int64_t smallerIndex = firstIsSmaller ? p1 : p2;
         int64_t greaterIndex = firstIsSmaller ? p2 : p1;
         int64_t key = (smallerIndex << 32ll) + greaterIndex;
 
         auto entry = cache.find(key);
-        if (entry != cache.end()) {
+        if(entry != cache.end()) {
             return entry->second;
         }
 
@@ -476,9 +494,9 @@ Data ico_sphere(float radius, int level) {
     faces.push_back(TriIdx{8, 6, 7});
     faces.push_back(TriIdx{9, 8, 1});
 
-    for (int i = 0; i < level; i++) {
+    for(int i = 0; i < level; i++) {
         std::vector<TriIdx> faces2;
-        for (auto tri : faces) {
+        for(auto tri : faces) {
             int a = (int)middle_point(tri.v1, tri.v2, vertices, middlePointIndexCache, radius);
             int b = (int)middle_point(tri.v2, tri.v3, vertices, middlePointIndexCache, radius);
             int c = (int)middle_point(tri.v3, tri.v1, vertices, middlePointIndexCache, radius);
@@ -491,18 +509,17 @@ Data ico_sphere(float radius, int level) {
     }
 
     std::vector<GL::Mesh::Index> triangles;
-    for (size_t i = 0; i < faces.size(); i++) {
+    for(size_t i = 0; i < faces.size(); i++) {
         triangles.push_back(faces[i].v1);
         triangles.push_back(faces[i].v2);
         triangles.push_back(faces[i].v3);
     }
 
     std::vector<Vec3> normals(vertices.size());
-    for (size_t i = 0; i < normals.size(); i++)
-        normals[i] = vertices[i].unit();
+    for(size_t i = 0; i < normals.size(); i++) normals[i] = vertices[i].unit();
 
     std::vector<GL::Mesh::Vert> verts;
-    for (size_t i = 0; i < vertices.size(); i++) {
+    for(size_t i = 0; i < vertices.size(); i++) {
         verts.push_back({vertices[i], normals[i], 0});
     }
     return {verts, triangles};

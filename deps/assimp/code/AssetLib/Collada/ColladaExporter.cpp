@@ -556,6 +556,7 @@ void ColladaExporter::WriteSpotLight(const aiLight *const light) {
 void ColladaExporter::WriteAmbienttLight(const aiLight *const light) {
 
     const aiColor3D &color = light->mColorAmbient;
+    const aiColor3D &colord = light->mColorDiffuse;
     mOutput << startstr << "<ambient>" << endstr;
     PushTag();
 
@@ -568,6 +569,10 @@ void ColladaExporter::WriteAmbienttLight(const aiLight *const light) {
     mOutput << startstr << "<color sid=\"color\">"
             << color.r << " " << color.g << " " << color.b
             << "</color>" << endstr;
+    if(colord.r > 0.0f) {
+        mOutput << startstr << "<pps>"
+                << colord.r << "</pps>" << endstr;
+    }
     mOutput << startstr << "<constant_attenuation>"
             << light->mAttenuationConstant
             << "</constant_attenuation>" << endstr;

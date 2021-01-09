@@ -67,7 +67,7 @@ void Widgets::generate_lines(Vec3 pos) {
         Vec3 color = Color::axis((Axis)axis);
         lines.add(start, end, color);
     };
-    if (drag_plane) {
+    if(drag_plane) {
         add_axis(((int)axis + 1) % 3);
         add_axis(((int)axis + 2) % 3);
     } else {
@@ -77,28 +77,24 @@ void Widgets::generate_lines(Vec3 pos) {
 
 bool Widgets::action_button(Widget_Type act, std::string name, bool wrap) {
     bool is_active = act == active;
-    if (is_active)
-        ImGui::PushStyleColor(ImGuiCol_Button, ImGui::GetColorU32(ImGuiCol_ButtonActive));
+    if(is_active) ImGui::PushStyleColor(ImGuiCol_Button, ImGui::GetColorU32(ImGuiCol_ButtonActive));
     bool clicked = wrap ? Manager::wrap_button(name) : ImGui::Button(name.c_str());
-    if (is_active)
-        ImGui::PopStyleColor();
-    if (clicked)
-        active = act;
+    if(is_active) ImGui::PopStyleColor();
+    if(clicked) active = act;
     return clicked;
 };
 
-void Widgets::render(const Mat4 &view, Vec3 pos, float scl) {
+void Widgets::render(const Mat4& view, Vec3 pos, float scl) {
 
-    Renderer &r = Renderer::get();
+    Renderer& r = Renderer::get();
     r.reset_depth();
 
     Vec3 scale(scl);
     r.lines(lines, view, Mat4::I, 0.5f);
 
-    if (dragging && (active == Widget_Type::move || active == Widget_Type::scale))
-        return;
+    if(dragging && (active == Widget_Type::move || active == Widget_Type::scale)) return;
 
-    if (active == Widget_Type::move) {
+    if(active == Widget_Type::move) {
 
         x_mov.pose.scale = scale;
         x_mov.pose.pos = pos + Vec3(0.15f * scl, 0.0f, 0.0f);
@@ -124,25 +120,25 @@ void Widgets::render(const Mat4 &view, Vec3 pos, float scl) {
         xz_mov.pose.pos = pos + Vec3(0.45f * scl, 0.0f, 0.45f * scl);
         xz_mov.render(view, true);
 
-    } else if (active == Widget_Type::rotate) {
+    } else if(active == Widget_Type::rotate) {
 
-        if (!dragging || axis == Axis::X) {
+        if(!dragging || axis == Axis::X) {
             x_rot.pose.scale = scale;
             x_rot.pose.pos = pos;
             x_rot.render(view, true);
         }
-        if (!dragging || axis == Axis::Y) {
+        if(!dragging || axis == Axis::Y) {
             y_rot.pose.scale = scale;
             y_rot.pose.pos = pos;
             y_rot.render(view, true);
         }
-        if (!dragging || axis == Axis::Z) {
+        if(!dragging || axis == Axis::Z) {
             z_rot.pose.scale = scale;
             z_rot.pose.pos = pos;
             z_rot.render(view, true);
         }
 
-    } else if (active == Widget_Type::scale) {
+    } else if(active == Widget_Type::scale) {
 
         x_scl.pose.scale = scale;
         x_scl.pose.pos = pos + Vec3(0.15f * scl, 0.0f, 0.0f);
@@ -158,13 +154,13 @@ void Widgets::render(const Mat4 &view, Vec3 pos, float scl) {
     }
 }
 
-Pose Widgets::apply_action(const Pose &pose) {
+Pose Widgets::apply_action(const Pose& pose) {
 
     Pose result = pose;
     Vec3 vaxis;
     vaxis[(int)axis] = 1.0f;
 
-    switch (active) {
+    switch(active) {
     case Widget_Type::move: {
         result.pos = pose.pos + drag_end - drag_start;
     } break;
@@ -185,14 +181,13 @@ Pose Widgets::apply_action(const Pose &pose) {
         Vec2 off = bevel_start - bevel_end;
         result.pos = 2.0f * Vec3(off.x, -off.y, 0.0f);
     } break;
-    default:
-        assert(false);
+    default: assert(false);
     }
 
     return result;
 }
 
-bool Widgets::to_axis(Vec3 obj_pos, Vec3 cam_pos, Vec3 dir, Vec3 &hit) {
+bool Widgets::to_axis(Vec3 obj_pos, Vec3 cam_pos, Vec3 dir, Vec3& hit) {
 
     Vec3 axis1;
     axis1[(int)axis] = 1.0f;
@@ -209,11 +204,11 @@ bool Widgets::to_axis(Vec3 obj_pos, Vec3 cam_pos, Vec3 dir, Vec3 &hit) {
     Vec3 hit1, hit2;
     bool hl = l.hit(select, hit1);
     bool hr = r.hit(select, hit2);
-    if (!hl && !hr)
+    if(!hl && !hr)
         return false;
-    else if (!hl)
+    else if(!hl)
         hit = hit2;
-    else if (!hr)
+    else if(!hr)
         hit = hit1;
     else
         hit = (hit1 - cam_pos).norm() > (hit2 - cam_pos).norm() ? hit2 : hit1;
@@ -222,16 +217,20 @@ bool Widgets::to_axis(Vec3 obj_pos, Vec3 cam_pos, Vec3 dir, Vec3 &hit) {
     return hit.valid();
 }
 
-bool Widgets::to_plane(Vec3 obj_pos, Vec3 cam_pos, Vec3 dir, Vec3 norm, Vec3 &hit) {
+bool Widgets::to_plane(Vec3 obj_pos, Vec3 cam_pos, Vec3 dir, Vec3 norm, Vec3& hit) {
 
     Line look(cam_pos, dir);
     Plane p(obj_pos, norm);
     return p.hit(look, hit);
 }
 
-bool Widgets::is_dragging() { return dragging; }
+bool Widgets::is_dragging() {
+    return dragging;
+}
 
-bool Widgets::want_drag() { return start_dragging; }
+bool Widgets::want_drag() {
+    return start_dragging;
+}
 
 void Widgets::start_drag(Vec3 pos, Vec3 cam, Vec2 spos, Vec3 dir) {
 
@@ -242,9 +241,9 @@ void Widgets::start_drag(Vec3 pos, Vec3 cam, Vec2 spos, Vec3 dir) {
     Vec3 norm;
     norm[(int)axis] = 1.0f;
 
-    if (active == Widget_Type::rotate) {
+    if(active == Widget_Type::rotate) {
 
-        if (to_plane(pos, cam, dir, norm, hit)) {
+        if(to_plane(pos, cam, dir, norm, hit)) {
             drag_start = (hit - pos).unit();
             drag_end = Vec3{0.0f};
         }
@@ -253,26 +252,24 @@ void Widgets::start_drag(Vec3 pos, Vec3 cam, Vec2 spos, Vec3 dir) {
 
         bool good;
 
-        if (drag_plane)
+        if(drag_plane)
             good = to_plane(pos, cam, dir, norm, hit);
         else
             good = to_axis(pos, cam, dir, hit);
 
-        if (!good)
-            return;
+        if(!good) return;
 
-        if (active == Widget_Type::bevel) {
+        if(active == Widget_Type::bevel) {
             bevel_start = bevel_end = spos;
         }
-        if (active == Widget_Type::move) {
+        if(active == Widget_Type::move) {
             drag_start = drag_end = hit;
         } else {
             drag_start = hit;
             drag_end = Vec3{1.0f};
         }
 
-        if (active != Widget_Type::bevel)
-            generate_lines(pos);
+        if(active != Widget_Type::bevel) generate_lines(pos);
     }
 }
 
@@ -290,14 +287,13 @@ void Widgets::drag_to(Vec3 pos, Vec3 cam, Vec2 spos, Vec3 dir, bool scale_invert
     Vec3 norm;
     norm[(int)axis] = 1.0f;
 
-    if (active == Widget_Type::bevel) {
+    if(active == Widget_Type::bevel) {
 
         bevel_end = spos;
 
-    } else if (active == Widget_Type::rotate) {
+    } else if(active == Widget_Type::rotate) {
 
-        if (!to_plane(pos, cam, dir, norm, hit))
-            return;
+        if(!to_plane(pos, cam, dir, norm, hit)) return;
 
         Vec3 ang = (hit - pos).unit();
         float sgn = sign(cross(drag_start, ang)[(int)axis]);
@@ -308,24 +304,23 @@ void Widgets::drag_to(Vec3 pos, Vec3 cam, Vec2 spos, Vec3 dir, bool scale_invert
 
         bool good;
 
-        if (drag_plane)
+        if(drag_plane)
             good = to_plane(pos, cam, dir, norm, hit);
         else
             good = to_axis(pos, cam, dir, hit);
 
-        if (!good)
-            return;
+        if(!good) return;
 
-        if (active == Widget_Type::move) {
+        if(active == Widget_Type::move) {
             drag_end = hit;
-        } else if (active == Widget_Type::scale) {
+        } else if(active == Widget_Type::scale) {
             drag_end = Vec3{1.0f};
             drag_end[(int)axis] = (hit - pos).norm() / (drag_start - pos).norm();
         } else
             assert(false);
     }
 
-    if (scale_invert && active == Widget_Type::scale) {
+    if(scale_invert && active == Widget_Type::scale) {
         drag_end[(int)axis] *= sign(dot(hit - pos, drag_start - pos));
     }
 }
@@ -335,55 +330,55 @@ void Widgets::select(Scene_ID id) {
     start_dragging = true;
     drag_plane = false;
 
-    switch (id) {
-    case (Scene_ID)Widget_IDs::x_mov: {
+    switch(id) {
+    case(Scene_ID)Widget_IDs::x_mov: {
         active = Widget_Type::move;
         axis = Axis::X;
     } break;
-    case (Scene_ID)Widget_IDs::y_mov: {
+    case(Scene_ID)Widget_IDs::y_mov: {
         active = Widget_Type::move;
         axis = Axis::Y;
     } break;
-    case (Scene_ID)Widget_IDs::z_mov: {
+    case(Scene_ID)Widget_IDs::z_mov: {
         active = Widget_Type::move;
         axis = Axis::Z;
     } break;
-    case (Scene_ID)Widget_IDs::xy_mov: {
+    case(Scene_ID)Widget_IDs::xy_mov: {
         active = Widget_Type::move;
         axis = Axis::Z;
         drag_plane = true;
     } break;
-    case (Scene_ID)Widget_IDs::yz_mov: {
+    case(Scene_ID)Widget_IDs::yz_mov: {
         active = Widget_Type::move;
         axis = Axis::X;
         drag_plane = true;
     } break;
-    case (Scene_ID)Widget_IDs::xz_mov: {
+    case(Scene_ID)Widget_IDs::xz_mov: {
         active = Widget_Type::move;
         axis = Axis::Y;
         drag_plane = true;
     } break;
-    case (Scene_ID)Widget_IDs::x_rot: {
+    case(Scene_ID)Widget_IDs::x_rot: {
         active = Widget_Type::rotate;
         axis = Axis::X;
     } break;
-    case (Scene_ID)Widget_IDs::y_rot: {
+    case(Scene_ID)Widget_IDs::y_rot: {
         active = Widget_Type::rotate;
         axis = Axis::Y;
     } break;
-    case (Scene_ID)Widget_IDs::z_rot: {
+    case(Scene_ID)Widget_IDs::z_rot: {
         active = Widget_Type::rotate;
         axis = Axis::Z;
     } break;
-    case (Scene_ID)Widget_IDs::x_scl: {
+    case(Scene_ID)Widget_IDs::x_scl: {
         active = Widget_Type::scale;
         axis = Axis::X;
     } break;
-    case (Scene_ID)Widget_IDs::y_scl: {
+    case(Scene_ID)Widget_IDs::y_scl: {
         active = Widget_Type::scale;
         axis = Axis::Y;
     } break;
-    case (Scene_ID)Widget_IDs::z_scl: {
+    case(Scene_ID)Widget_IDs::z_scl: {
         active = Widget_Type::scale;
         axis = Axis::Z;
     } break;
@@ -393,22 +388,19 @@ void Widgets::select(Scene_ID id) {
     }
 }
 
-void Widget_Camera::ar(Camera &user_cam, float _ar) {
+void Widget_Camera::ar(Camera& user_cam, float _ar) {
     cam_ar = _ar;
     update_cameras(user_cam);
 }
 
-bool Widget_Camera::UI(Undo &undo, Camera &user_cam) {
+bool Widget_Camera::UI(Undo& undo, Camera& user_cam) {
 
     bool update_cam = false;
     bool do_undo = false;
 
-    static Camera old = render_cam;
-    static float old_ar, old_fov;
-
     ImGui::Text("Camera Settings");
-    if (moving_camera) {
-        if (ImGui::Button("Confirm Move")) {
+    if(moving_camera) {
+        if(ImGui::Button("Confirm Move")) {
             moving_camera = false;
             old = render_cam;
             render_cam = user_cam;
@@ -418,20 +410,20 @@ bool Widget_Camera::UI(Undo &undo, Camera &user_cam) {
             do_undo = true;
         }
         ImGui::SameLine();
-        if (ImGui::Button("Cancel Move")) {
+        if(ImGui::Button("Cancel Move")) {
             moving_camera = false;
             user_cam = saved_cam;
             user_cam.set_ar(screen_dim);
             user_cam.set_fov(90.0f);
         }
     } else {
-        if (ImGui::Button("Free Move")) {
+        if(ImGui::Button("Free Move")) {
             moving_camera = true;
             user_cam = render_cam;
             saved_cam = render_cam;
         }
         ImGui::SameLine();
-        if (ImGui::Button("Move to View")) {
+        if(ImGui::Button("Move to View")) {
             old = render_cam;
             render_cam = user_cam;
             update_cam = true;
@@ -440,65 +432,86 @@ bool Widget_Camera::UI(Undo &undo, Camera &user_cam) {
             cam_ar = user_cam.get_ar();
         }
     }
-    if (ImGui::Button("Reset")) {
+    if(ImGui::Button("Reset")) {
         old = render_cam;
-        render_cam.reset();
+        cam_fov = 90.0f;
+        cam_ar = 1.7778f;
+        cam_ap = 0.0f;
+        cam_dist = 1.0f;
         update_cam = true;
         do_undo = true;
-        undo.update_camera(*this, old);
     }
 
-    update_cam |= ImGui::DragFloat("Aspect Ratio", &cam_ar, 0.1f, 0.1f, 10.0f, "%.2f");
+    update_cam |= ImGui::SliderFloat("Aspect Ratio", &cam_ar, 0.1f, 10.0f, "%.2f");
 
-    if (ImGui::IsItemActivated()) {
+    if(ImGui::IsItemActivated()) {
         old = render_cam;
         old_ar = cam_ar;
     }
-    if (ImGui::IsItemDeactivated() && old_ar != cam_ar)
-        do_undo = true;
+    if(ImGui::IsItemDeactivated() && old_ar != cam_ar) do_undo = true;
 
-    update_cam |= ImGui::DragFloat("FOV", &cam_fov, 1.0f, 10.0f, 160.0f, "%.2f");
+    update_cam |= ImGui::SliderFloat("FOV", &cam_fov, 10.0f, 160.0f, "%.2f");
 
-    if (ImGui::IsItemActivated()) {
+    if(ImGui::IsItemActivated()) {
         old = render_cam;
         old_fov = cam_fov;
     }
-    if (ImGui::IsItemDeactivated() && old_fov != cam_fov)
-        do_undo = true;
+    if(ImGui::IsItemDeactivated() && old_fov != cam_fov) do_undo = true;
+
+    update_cam |= ImGui::SliderFloat("Aperture", &cam_ap, 0.0f, 0.2f, "%.3f");
+    if(ImGui::IsItemActivated()) {
+        old = render_cam;
+        old_ap = cam_ap;
+    }
+    if(ImGui::IsItemDeactivated() && old_ap != cam_ap) do_undo = true;
+
+    update_cam |= ImGui::SliderFloat("Focal Distance", &cam_dist, 0.2f, 10.0f, "%.2f");
+    if(ImGui::IsItemActivated()) {
+        old = render_cam;
+        old_dist = cam_dist;
+    }
+    if(ImGui::IsItemDeactivated() && old_dist != cam_dist) do_undo = true;
 
     cam_ar = clamp(cam_ar, 0.1f, 10.0f);
     cam_fov = clamp(cam_fov, 10.0f, 160.0f);
+    cam_ap = clamp(cam_ap, 0.0f, 1.0f);
+    cam_dist = clamp(cam_dist, 0.01f, 100.0f);
 
-    if (update_cam)
-        update_cameras(user_cam);
-    if (do_undo)
-        undo.update_camera(*this, old);
+    if(update_cam) update_cameras(user_cam);
+    if(do_undo) undo.update_camera(*this, old);
 
     return update_cam;
 }
 
-void Widget_Camera::update_cameras(Camera &user_cam) {
+void Widget_Camera::update_cameras(Camera& user_cam) {
     render_cam.set_ar(cam_ar);
     render_cam.set_fov(cam_fov);
-    if (moving_camera) {
+    render_cam.set_ap(cam_ap);
+    render_cam.set_dist(cam_dist);
+    if(moving_camera) {
         user_cam.set_ar(cam_ar);
         user_cam.set_fov(cam_fov);
+        user_cam.set_ap(cam_fov);
+        user_cam.set_dist(cam_dist);
     }
     generate_cage();
 }
 
-void Widget_Camera::load(Vec3 center, Vec3 pos, float ar, float vfov) {
-    render_cam.look_at(center, pos);
-    render_cam.set_ar(ar);
-    render_cam.set_fov(vfov);
-    cam_fov = vfov;
-    cam_ar = ar;
+void Widget_Camera::load(Camera c) {
+    render_cam.look_at(c.center(), c.pos());
+    render_cam.set_ar(c.get_ar());
+    render_cam.set_fov(c.get_fov());
+    render_cam.set_ap(c.get_ap());
+    render_cam.set_dist(c.get_dist());
+    cam_fov = c.get_fov();
+    cam_ar = c.get_ar();
+    cam_ap = c.get_ap();
+    cam_dist = c.get_dist();
     generate_cage();
 }
 
-void Widget_Camera::render(const Mat4 &view) {
-    if (!moving_camera)
-        Renderer::get().lines(cam_cage, view);
+void Widget_Camera::render(const Mat4& view) {
+    if(!moving_camera) Renderer::get().lines(cam_cage, view);
 }
 
 void Widget_Camera::generate_cage() {
@@ -509,18 +522,28 @@ void Widget_Camera::generate_cage() {
     float h = 2.0f * std::tan(Radians(fov) / 2.0f);
     float w = ar * h;
 
-    Vec3 pos = render_cam.pos();
     Mat4 iview = render_cam.get_view().inverse();
 
-    Vec3 tr = iview * Vec3(0.5f * w, 0.5f * h, -1.0f).unit();
-    Vec3 tl = iview * Vec3(-0.5f * w, 0.5f * h, -1.0f).unit();
-    Vec3 br = iview * Vec3(0.5f * w, -0.5f * h, -1.0f).unit();
-    Vec3 bl = iview * Vec3(-0.5f * w, -0.5f * h, -1.0f).unit();
+    Vec3 tr = iview * (Vec3(0.5f * w, 0.5f * h, -1.0f) * cam_dist);
+    Vec3 tl = iview * (Vec3(-0.5f * w, 0.5f * h, -1.0f) * cam_dist);
+    Vec3 br = iview * (Vec3(0.5f * w, -0.5f * h, -1.0f) * cam_dist);
+    Vec3 bl = iview * (Vec3(-0.5f * w, -0.5f * h, -1.0f) * cam_dist);
 
-    cam_cage.add(pos, tr, Gui::Color::black);
-    cam_cage.add(pos, tl, Gui::Color::black);
-    cam_cage.add(pos, br, Gui::Color::black);
-    cam_cage.add(pos, bl, Gui::Color::black);
+    Vec3 ftr = iview * Vec3(0.5f * cam_ap, 0.5f * cam_ap, 0.0f);
+    Vec3 ftl = iview * Vec3(-0.5f * cam_ap, 0.5f * cam_ap, 0.0f);
+    Vec3 fbr = iview * Vec3(0.5f * cam_ap, -0.5f * cam_ap, 0.0f);
+    Vec3 fbl = iview * Vec3(-0.5f * cam_ap, -0.5f * cam_ap, 0.0f);
+
+    cam_cage.add(ftl, ftr, Gui::Color::black);
+    cam_cage.add(ftr, fbr, Gui::Color::black);
+    cam_cage.add(fbr, fbl, Gui::Color::black);
+    cam_cage.add(fbl, ftl, Gui::Color::black);
+
+    cam_cage.add(ftr, tr, Gui::Color::black);
+    cam_cage.add(ftl, tl, Gui::Color::black);
+    cam_cage.add(fbr, br, Gui::Color::black);
+    cam_cage.add(fbl, bl, Gui::Color::black);
+
     cam_cage.add(bl, tl, Gui::Color::black);
     cam_cage.add(tl, tr, Gui::Color::black);
     cam_cage.add(tr, br, Gui::Color::black);
@@ -537,33 +560,34 @@ void Widget_Render::open() {
     render_window_focus = true;
 }
 
-void Widget_Render::log_ray(const Ray &ray, float t, Spectrum color) {
+void Widget_Render::log_ray(const Ray& ray, float t, Spectrum color) {
     std::lock_guard<std::mutex> lock(log_mut);
     ray_log.add(ray.point, ray.at(t), Vec3(color.r, color.g, color.b));
 }
 
-void Widget_Render::begin(Scene &scene, Widget_Camera &cam, Camera &user_cam) {
+void Widget_Render::begin(Scene& scene, Widget_Camera& cam, Camera& user_cam) {
 
-    if (render_window_focus) {
+    if(render_window_focus) {
         ImGui::SetNextWindowFocus();
         render_window_focus = false;
     }
     ImGui::SetNextWindowSize({675.0f, 625.0f}, ImGuiCond_Once);
     ImGui::Begin("Render Image", &render_window, ImGuiWindowFlags_NoCollapse);
 
-    static const char *method_names[] = {"Rasterize", "Path Trace"};
+    static const char* method_names[] = {"Rasterize", "Path Trace"};
     ImGui::Combo("Method", &method, method_names, 2);
 
     ImGui::InputInt("Width", &out_w, 1, 100);
     ImGui::InputInt("Height", &out_h, 1, 100);
-    ImGui::InputInt("Samples", &out_samples, 1, 100);
 
-    if (method == 1) {
+    if(method == 1) {
+        ImGui::InputInt("Samples", &out_samples, 1, 100);
         ImGui::InputInt("Area Light Samples", &out_area_samples, 1, 100);
         ImGui::InputInt("Max Ray Depth", &out_depth, 1, 32);
         ImGui::SliderFloat("Exposure", &exposure, 0.01f, 10.0f, "%.2f", 2.5f);
     } else {
-        out_samples = std::min(out_samples, 32);
+        ImGui::Combo("Samples", (int*)&msaa.samples, GL::Sample_Count_Names, msaa.n_options());
+        out_samples = msaa.n_samples();
     }
 
     out_w = std::max(1, out_w);
@@ -572,31 +596,32 @@ void Widget_Render::begin(Scene &scene, Widget_Camera &cam, Camera &user_cam) {
     out_area_samples = std::max(1, out_area_samples);
     out_depth = std::max(1, out_depth);
 
-    if (ImGui::Button("Set Width via AR")) {
+    if(ImGui::Button("Set Width via AR")) {
         out_w = (size_t)std::ceil(cam.get_ar() * out_h);
     }
     ImGui::SameLine();
-    if (ImGui::Button("Set AR via W/H")) {
+    if(ImGui::Button("Set AR via W/H")) {
         cam.ar(user_cam, (float)out_w / (float)out_h);
     }
 }
 
-std::string Widget_Render::step(Animate &animate, Scene &scene) {
+std::string Widget_Render::step(Animate& animate, Scene& scene) {
 
-    if (animating) {
+    if(animating) {
 
-        if (next_frame == max_frame) {
+        if(next_frame == max_frame) {
             animating = false;
             return {};
         }
-        if (folder.empty()) {
+        if(folder.empty()) {
             animating = false;
             return "No output folder!";
         }
 
         Camera cam = animate.set_time(scene, (float)next_frame);
+        animate.step_sim(scene);
 
-        if (method == 0) {
+        if(method == 0) {
             std::vector<unsigned char> data;
 
             Renderer::get().save(scene, cam, out_w, out_h, out_samples);
@@ -604,11 +629,15 @@ std::string Widget_Render::step(Animate &animate, Scene &scene) {
 
             std::stringstream str;
             str << std::setfill('0') << std::setw(4) << next_frame;
+#ifdef _WIN32
             std::string path = folder + "\\" + str.str() + ".png";
+#else
+            std::string path = folder + "/" + str.str() + ".png";
+#endif
 
             stbi_flip_vertically_on_write(true);
-            if (!stbi_write_png(path.c_str(), (int)out_w, (int)out_h, 4, data.data(),
-                                (int)out_w * 4)) {
+            if(!stbi_write_png(path.c_str(), (int)out_w, (int)out_h, 4, data.data(),
+                               (int)out_w * 4)) {
                 animating = false;
                 return "Failed to write output!";
             }
@@ -616,22 +645,26 @@ std::string Widget_Render::step(Animate &animate, Scene &scene) {
             next_frame++;
         } else {
 
-            if (init) {
+            if(init) {
                 pathtracer.begin_render(scene, cam);
                 init = false;
             }
 
-            if (!pathtracer.in_progress()) {
+            if(!pathtracer.in_progress()) {
                 std::vector<unsigned char> data;
 
                 pathtracer.get_output().tonemap_to(data, exposure);
                 std::stringstream str;
                 str << std::setfill('0') << std::setw(4) << next_frame;
+#ifdef _WIN32
                 std::string path = folder + "\\" + str.str() + ".png";
+#else
+                std::string path = folder + "/" + str.str() + ".png";
+#endif
 
                 stbi_flip_vertically_on_write(false);
-                if (!stbi_write_png(path.c_str(), (int)out_w, (int)out_h, 4, data.data(),
-                                    (int)out_w * 4)) {
+                if(!stbi_write_png(path.c_str(), (int)out_w, (int)out_h, 4, data.data(),
+                                   (int)out_w * 4)) {
                     animating = false;
                     return "Failed to write output!";
                 }
@@ -644,17 +677,16 @@ std::string Widget_Render::step(Animate &animate, Scene &scene) {
     return {};
 }
 
-void Widget_Render::animate(Scene &scene, Widget_Camera &cam, Camera &user_cam, int last_frame) {
+void Widget_Render::animate(Scene& scene, Widget_Camera& cam, Camera& user_cam, int last_frame) {
 
-    if (!render_window)
-        return;
+    if(!render_window) return;
 
     begin(scene, cam, user_cam);
 
-    if (ImGui::Button("Output Folder")) {
-        char *path = nullptr;
+    if(ImGui::Button("Output Folder")) {
+        char* path = nullptr;
         NFD_OpenDirectoryDialog(nullptr, nullptr, &path);
-        if (path) {
+        if(path) {
             Platform::strcpy(output_path, path, sizeof(output_path));
             free(path);
         }
@@ -665,15 +697,15 @@ void Widget_Render::animate(Scene &scene, Widget_Camera &cam, Camera &user_cam, 
     ImGui::Separator();
     ImGui::Text("Render");
 
-    if (animating) {
+    if(animating) {
 
-        if (ImGui::Button("Cancel")) {
+        if(ImGui::Button("Cancel")) {
             pathtracer.cancel();
             animating = false;
         }
 
         ImGui::SameLine();
-        if (method == 1) {
+        if(method == 1) {
             ImGui::ProgressBar(((float)next_frame + pathtracer.progress()) / (max_frame + 1));
         } else {
             ImGui::ProgressBar((float)next_frame / (max_frame + 1));
@@ -681,12 +713,12 @@ void Widget_Render::animate(Scene &scene, Widget_Camera &cam, Camera &user_cam, 
 
     } else {
 
-        if (ImGui::Button("Start Render")) {
+        if(ImGui::Button("Start Render")) {
             animating = true;
             max_frame = last_frame;
             next_frame = 0;
             folder = std::string(output_path);
-            if (method == 1) {
+            if(method == 1) {
                 init = true;
                 ray_log.clear();
                 pathtracer.set_sizes(out_w, out_h, out_samples, out_area_samples, out_depth);
@@ -698,7 +730,7 @@ void Widget_Render::animate(Scene &scene, Widget_Camera &cam, Camera &user_cam, 
     float w = std::min(avail, (float)out_w);
     float h = (w / out_w) * out_h;
 
-    if (method == 1) {
+    if(method == 1) {
         ImGui::Image((ImTextureID)(long long)pathtracer.get_output_texture(exposure).get_id(),
                      {w, h});
     } else {
@@ -709,26 +741,25 @@ void Widget_Render::animate(Scene &scene, Widget_Camera &cam, Camera &user_cam, 
     ImGui::End();
 }
 
-static bool postfix(const std::string &path, const std::string &type) {
-    if (path.length() >= type.length())
+static bool postfix(const std::string& path, const std::string& type) {
+    if(path.length() >= type.length())
         return path.compare(path.length() - type.length(), type.length(), type) == 0;
     return false;
 }
 
-bool Widget_Render::UI(Scene &scene, Widget_Camera &cam, Camera &user_cam, std::string &err) {
+bool Widget_Render::UI(Scene& scene, Widget_Camera& cam, Camera& user_cam, std::string& err) {
 
     bool ret = false;
-    if (!render_window)
-        return ret;
+    if(!render_window) return ret;
 
     begin(scene, cam, user_cam);
 
     ImGui::Separator();
     ImGui::Text("Render");
 
-    if (pathtracer.in_progress()) {
+    if(pathtracer.in_progress()) {
 
-        if (ImGui::Button("Cancel")) {
+        if(ImGui::Button("Cancel")) {
             pathtracer.cancel();
             has_rendered = false;
         }
@@ -738,9 +769,9 @@ bool Widget_Render::UI(Scene &scene, Widget_Camera &cam, Camera &user_cam, std::
 
     } else {
 
-        if (ImGui::Button("Start Render")) {
+        if(ImGui::Button("Start Render")) {
 
-            if (method == 1) {
+            if(method == 1) {
                 has_rendered = true;
                 ret = true;
                 ray_log.clear();
@@ -753,19 +784,19 @@ bool Widget_Render::UI(Scene &scene, Widget_Camera &cam, Camera &user_cam, std::
     }
 
     ImGui::SameLine();
-    if (ImGui::Button("Save Image")) {
-        char *path = nullptr;
+    if(ImGui::Button("Save Image")) {
+        char* path = nullptr;
         NFD_SaveDialog("png", nullptr, &path);
-        if (path) {
+        if(path) {
 
             std::string spath(path);
-            if (!postfix(spath, ".png")) {
+            if(!postfix(spath, ".png")) {
                 spath += ".png";
             }
 
             std::vector<unsigned char> data;
 
-            if (method == 1) {
+            if(method == 1) {
                 pathtracer.get_output().tonemap_to(data, exposure);
                 stbi_flip_vertically_on_write(false);
             } else {
@@ -773,7 +804,8 @@ bool Widget_Render::UI(Scene &scene, Widget_Camera &cam, Camera &user_cam, std::
                 stbi_flip_vertically_on_write(true);
             }
 
-            if (!stbi_write_png(spath.c_str(), (int)out_w, (int)out_h, 4, data.data(), (int)out_w * 4)) {
+            if(!stbi_write_png(spath.c_str(), (int)out_w, (int)out_h, 4, data.data(),
+                               (int)out_w * 4)) {
                 err = "Failed to write png!";
             }
             free(path);
@@ -784,11 +816,11 @@ bool Widget_Render::UI(Scene &scene, Widget_Camera &cam, Camera &user_cam, std::
     float w = std::min(avail, (float)out_w);
     float h = (w / out_w) * out_h;
 
-    if (method == 1) {
+    if(method == 1) {
         ImGui::Image((ImTextureID)(long long)pathtracer.get_output_texture(exposure).get_id(),
                      {w, h});
 
-        if (!pathtracer.in_progress() && has_rendered) {
+        if(!pathtracer.in_progress() && has_rendered) {
             auto [build, render] = pathtracer.completion_time();
             ImGui::Text("Scene built in %.2fs, rendered in %.2fs.", build, render);
         }
@@ -801,7 +833,7 @@ bool Widget_Render::UI(Scene &scene, Widget_Camera &cam, Camera &user_cam, std::
     return ret;
 }
 
-std::string Widget_Render::headless(Animate &animate, Scene &scene, const Camera &cam,
+std::string Widget_Render::headless(Animate& animate, Scene& scene, const Camera& cam,
                                     std::string output, bool a, int w, int h, int s, int ls, int d,
                                     float exp) {
 
@@ -822,24 +854,21 @@ std::string Widget_Render::headless(Animate &animate, Scene &scene, const Camera
         std::cout << "Progress: [";
 
         int width = std::min(Platform::console_width() - 30, 50);
-        if (width) {
+        if(width) {
             int bar = (int)(width * f);
-            for (int i = 0; i < bar; i++)
-                std::cout << "-";
-            for (int i = bar; i < width; i++)
-                std::cout << " ";
+            for(int i = 0; i < bar; i++) std::cout << "-";
+            for(int i = bar; i < width; i++) std::cout << " ";
             std::cout << "] ";
         }
 
         float percent = 100.0f * f;
-        if (percent < 10.0f)
-            std::cout << "0";
+        if(percent < 10.0f) std::cout << "0";
         std::cout << percent << "%\r";
         std::cout.flush();
     };
 
     std::cout << std::fixed << std::setw(2) << std::setprecision(2) << std::setfill('0');
-    if (a) {
+    if(a) {
 
         method = 1;
         init = true;
@@ -847,10 +876,9 @@ std::string Widget_Render::headless(Animate &animate, Scene &scene, const Camera
         max_frame = animate.n_frames();
         next_frame = 0;
         folder = output;
-        while (next_frame < max_frame) {
+        while(next_frame < max_frame) {
             std::string err = step(animate, scene);
-            if (!err.empty())
-                return err;
+            if(!err.empty()) return err;
             print_progress(((float)next_frame + pathtracer.progress()) / (max_frame + 1));
             std::this_thread::sleep_for(std::chrono::milliseconds(250));
         }
@@ -859,7 +887,7 @@ std::string Widget_Render::headless(Animate &animate, Scene &scene, const Camera
     } else {
 
         pathtracer.begin_render(scene, cam);
-        while (pathtracer.in_progress()) {
+        while(pathtracer.in_progress()) {
             print_progress(pathtracer.progress());
             std::this_thread::sleep_for(std::chrono::milliseconds(250));
         }
@@ -867,7 +895,7 @@ std::string Widget_Render::headless(Animate &animate, Scene &scene, const Camera
 
         std::vector<unsigned char> data;
         pathtracer.get_output().tonemap_to(data, exp);
-        if (!stbi_write_png(output.c_str(), w, h, 4, data.data(), w * 4)) {
+        if(!stbi_write_png(output.c_str(), w, h, 4, data.data(), w * 4)) {
             return "Failed to write output!";
         }
     }
@@ -875,7 +903,7 @@ std::string Widget_Render::headless(Animate &animate, Scene &scene, const Camera
     return {};
 }
 
-void Widget_Render::render_log(const Mat4 &view) const {
+void Widget_Render::render_log(const Mat4& view) const {
     std::lock_guard<std::mutex> lock(log_mut);
     Renderer::get().lines(ray_log, view);
 }

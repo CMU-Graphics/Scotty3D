@@ -15,9 +15,13 @@ float unit() {
     return d(rng);
 }
 
-int integer(int min, int max) { return (int)lerp((float)min, (float)max, unit()); }
+int integer(int min, int max) {
+    return (int)lerp((float)min, (float)max, unit());
+}
 
-bool coin_flip(float p) { return unit() < p; }
+bool coin_flip(float p) {
+    return unit() < p;
+}
 
 void seed() {
     std::random_device r;

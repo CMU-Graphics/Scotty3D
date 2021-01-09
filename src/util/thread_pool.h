@@ -19,8 +19,8 @@ public:
     void wait();
     void clear();
 
-    template <class F, class... Args>
-    auto enqueue(F &&f, Args &&...args)
+    template<class F, class... Args>
+    auto enqueue(F&& f, Args&&... args)
         -> std::future<typename std::invoke_result<F, Args...>::type> {
 
         using return_type = typename std::invoke_result<F, Args...>::type;

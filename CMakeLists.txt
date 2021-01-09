@@ -4,10 +4,10 @@ cmake_minimum_required(VERSION 3.17)
 # define project
 
 project(Scotty3D VERSION 1.1
-                 DESCRIPTION "CMU15462: Computer Graphics"
+                 DESCRIPTION "CMU 15-462/662 - Computer Graphics"
                  LANGUAGES CXX)
 
-set(SCOTTY3D_BUILD_REF false)
+set(SCOTTY3D_BUILD_REF true)
 
 if(SCOTTY3D_BUILD_REF)
     add_definitions(-DSCOTTY3D_BUILD_REF)
@@ -28,6 +28,8 @@ set(SOURCES_SCOTTY3D_GUI
                     "src/gui/widgets.h"
                     "src/gui/rig.cpp"
                     "src/gui/rig.h"
+                    "src/gui/simulate.cpp"
+                    "src/gui/simulate.h"
                     "src/gui/render.cpp"
                     "src/gui/render.h")
 set(SOURCES_SCOTTY3D_GEOM
@@ -35,7 +37,8 @@ set(SOURCES_SCOTTY3D_GEOM
                     "src/geometry/halfedge.h"
                     "src/geometry/util.cpp"
                     "src/geometry/util.h"
-                    "src/geometry/spline.h")
+                    "src/geometry/spline.h"
+                    "src/geometry/spline.inl")
 set(SOURCES_SCOTTY3D_RAYS
                     "src/rays/pathtracer.cpp"
                     "src/rays/pathtracer.h"
@@ -76,11 +79,12 @@ set(SOURCES_SCOTTY3D_SCENE
                     "src/scene/scene.h"
                     "src/scene/pose.cpp"
                     "src/scene/pose.h"
-                    "src/scene/skeleton.h"
                     "src/scene/light.cpp"
                     "src/scene/light.h"
                     "src/scene/skeleton.cpp"
                     "src/scene/skeleton.h"
+                    "src/scene/particles.cpp"
+                    "src/scene/particles.h"
                     "src/scene/material.cpp"
                     "src/scene/material.h"
                     "src/scene/object.cpp"
@@ -107,6 +111,7 @@ if(SCOTTY3D_BUILD_REF)
                     "src/reference/shapes.cpp"
                     "src/reference/bsdf.cpp"
                     "src/reference/bbox.cpp"
+                    "src/reference/particles.cpp"
                     "src/reference/bvh.inl"
                     "src/reference/spline.inl"
                     "src/reference/skeleton.cpp"
@@ -120,6 +125,7 @@ else()
                     "src/student/samplers.cpp"
                     "src/student/shapes.cpp"
                     "src/student/bsdf.cpp"
+                    "src/student/particles.cpp"
                     "src/student/bbox.cpp"
                     "src/student/debug.h"
                     "src/student/debug.cpp"

@@ -12,22 +12,22 @@
 #include "pose.h"
 
 enum class Light_Type : int { directional, sphere, hemisphere, point, spot, rectangle, count };
-extern const char *Light_Type_Names[(int)Light_Type::count];
+extern const char* Light_Type_Names[(int)Light_Type::count];
 
 class Scene_Light {
 public:
     Scene_Light(Light_Type type, Scene_ID id, Pose p, std::string n = {});
-    Scene_Light(const Scene_Light &src) = delete;
-    Scene_Light(Scene_Light &&src);
+    Scene_Light(const Scene_Light& src) = delete;
+    Scene_Light(Scene_Light&& src);
     ~Scene_Light() = default;
 
-    void operator=(const Scene_Light &src) = delete;
-    Scene_Light &operator=(Scene_Light &&src) = default;
+    void operator=(const Scene_Light& src) = delete;
+    Scene_Light& operator=(Scene_Light&& src) = default;
 
-    Scene_ID id() const { return _id; }
+    Scene_ID id() const;
     BBox bbox() const;
 
-    void render(const Mat4 &view, bool depth_only = false, bool posed = true);
+    void render(const Mat4& view, bool depth_only = false, bool posed = true);
     void dirty();
 
     Spectrum radiance() const;
@@ -37,7 +37,7 @@ public:
     std::string emissive_loaded() const;
     HDR_Image emissive_copy() const;
 
-    const GL::Tex2D &emissive_texture() const;
+    const GL::Tex2D& emissive_texture() const;
     void emissive_clear();
     bool is_env() const;
 
@@ -53,7 +53,7 @@ public:
     };
 
     struct Anim_Light {
-        void at(float t, Options &o) const;
+        void at(float t, Options& o) const;
         void set(float t, Options o);
         Splines<Spectrum, float, Vec2, Vec2> splines;
     };
@@ -73,4 +73,4 @@ private:
     HDR_Image _emissive;
 };
 
-bool operator!=(const Scene_Light::Options &l, const Scene_Light::Options &r);
+bool operator!=(const Scene_Light::Options& l, const Scene_Light::Options& r);

@@ -90,10 +90,8 @@
 
     Finally, some surfaces have "boundary loops," e.g., a pair of pants has
     three boundaries: one at the waist, and two at the ankles.  These boundaries
-    are represented by special faces in our halfedge mesh---in fact, rather than
-    being stored in the usual list of faces (Halfedge_Mesh::faces), they are
-    stored in a separae list of boundary loops (Halfedge_Mesh::boundaries).  Each
-    face (boundary or regular) also stored a flag Face::_isBoundary that
+    are represented by special faces in our halfedge mesh. Each
+    face (boundary or regular) also stored a flag Face::boundary that
     indicates whether or not it is a boundary.  This value can be queried via the
     public method Face::is_boundary() (again: encapsulation!)  So for instance, if
     I wanted to know the area of all polygons that touch a given vertex, I might
@@ -131,8 +129,8 @@
 
 #include <list>
 #include <optional>
-#include <string>
 #include <set>
+#include <string>
 #include <variant>
 #include <vector>
 
@@ -190,7 +188,7 @@ public:
     // Student Local Operations | student/meshedit.cpp
     //////////////////////////////////////////////////////////////////////////////////////////
 
-    // Note: if you erase elements in these methods, they will not be erased from the 
+    // Note: if you erase elements in these methods, they will not be erased from the
     // element lists until do_erase or validate are called. This is to facilitate checking
     // for dangling references to elements that will be erased.
     // The rest of the codebase will automatically call validate() after each op,
@@ -251,21 +249,21 @@ public:
         Computes vertex positions for a face that was just created by beveling a vertex,
         but not yet confirmed.
     */
-    void bevel_vertex_positions(const std::vector<Vec3> &start_positions, FaceRef face,
+    void bevel_vertex_positions(const std::vector<Vec3>& start_positions, FaceRef face,
                                 float tangent_offset);
 
     /*
         Computes vertex positions for a face that was just created by beveling an edge,
         but not yet confirmed.
     */
-    void bevel_edge_positions(const std::vector<Vec3> &start_positions, FaceRef face,
+    void bevel_edge_positions(const std::vector<Vec3>& start_positions, FaceRef face,
                               float tangent_offset);
 
     /*
         Computes vertex positions for a face that was just created by beveling a face,
         but not yet confirmed.
     */
-    void bevel_face_positions(const std::vector<Vec3> &start_positions, FaceRef face,
+    void bevel_face_positions(const std::vector<Vec3>& start_positions, FaceRef face,
                               float tangent_offset, float normal_offset);
 
     /*
@@ -330,8 +328,12 @@ public:
     class Vertex {
     public:
         // Returns a halfedge incident from the vertex
-        HalfedgeRef &halfedge() { return _halfedge; }
-        HalfedgeCRef halfedge() const { return _halfedge; }
+        HalfedgeRef& halfedge() {
+            return _halfedge;
+        }
+        HalfedgeCRef halfedge() const {
+            return _halfedge;
+        }
 
         // Returns whether the vertex is on a boundary loop
         bool on_boundary() const;
@@ -344,13 +346,16 @@ public:
         // Computes the centroid of the loop of the vertex
         Vec3 neighborhood_center() const;
         // Returns an id unique to this vertex
-        unsigned int id() const { return _id; }
+        unsigned int id() const {
+            return _id;
+        }
 
         // The vertex position
         Vec3 pos;
 
     private:
-        Vertex(unsigned int id) : _id(id) {}
+        Vertex(unsigned int id) : _id(id) {
+        }
         Vec3 new_pos;
         bool is_new = false;
         unsigned int _id = 0;
@@ -361,8 +366,12 @@ public:
     class Edge {
     public:
         // Returns one of the two halfedges associated with this edge
-        HalfedgeRef &halfedge() { return _halfedge; }
-        HalfedgeCRef halfedge() const { return _halfedge; }
+        HalfedgeRef& halfedge() {
+            return _halfedge;
+        }
+        HalfedgeCRef halfedge() const {
+            return _halfedge;
+        }
 
         // Returns whether this edge is contained in a boundary loop
         bool on_boundary() const;
@@ -373,10 +382,13 @@ public:
         // Returns the length of the edge
         float length() const;
         // Returns an id unique to this edge
-        unsigned int id() const { return _id; }
+        unsigned int id() const {
+            return _id;
+        }
 
     private:
-        Edge(unsigned int id) : _id(id) {}
+        Edge(unsigned int id) : _id(id) {
+        }
         Vec3 new_pos;
         bool is_new = false;
         unsigned int _id = 0;
@@ -387,11 +399,17 @@ public:
     class Face {
     public:
         // Returns some halfedge contained within this face
-        HalfedgeRef &halfedge() { return _halfedge; }
-        HalfedgeCRef halfedge() const { return _halfedge; }
+        HalfedgeRef& halfedge() {
+            return _halfedge;
+        }
+        HalfedgeCRef halfedge() const {
+            return _halfedge;
+        }
 
         // Returns whether this is a boundary face
-        bool is_boundary() const { return boundary; }
+        bool is_boundary() const {
+            return boundary;
+        }
         // Returns the centroid of this face
         Vec3 center() const;
         // Returns an area weighted face normal
@@ -399,10 +417,13 @@ public:
         // Returns the number of vertices/edges in this face
         unsigned int degree() const;
         // Returns an id unique to this face
-        unsigned int id() const { return _id; }
+        unsigned int id() const {
+            return _id;
+        }
 
     private:
-        Face(unsigned int id, bool is_boundary = false) : _id(id), boundary(is_boundary) {}
+        Face(unsigned int id, bool is_boundary) : _id(id), boundary(is_boundary) {
+        }
         Vec3 new_pos;
         unsigned int _id = 0;
         HalfedgeRef _halfedge;
@@ -413,30 +434,54 @@ public:
     class Halfedge {
     public:
         // Retrives the twin halfedge
-        HalfedgeRef &twin() { return _twin; }
-        HalfedgeCRef twin() const { return _twin; }
+        HalfedgeRef& twin() {
+            return _twin;
+        }
+        HalfedgeCRef twin() const {
+            return _twin;
+        }
 
         // Retrieves the next halfedge
-        HalfedgeRef &next() { return _next; }
-        HalfedgeCRef next() const { return _next; }
+        HalfedgeRef& next() {
+            return _next;
+        }
+        HalfedgeCRef next() const {
+            return _next;
+        }
 
         // Retrieves the associated vertex
-        VertexRef &vertex() { return _vertex; }
-        VertexCRef vertex() const { return _vertex; }
+        VertexRef& vertex() {
+            return _vertex;
+        }
+        VertexCRef vertex() const {
+            return _vertex;
+        }
 
         // Retrieves the associated edge
-        EdgeRef &edge() { return _edge; }
-        EdgeCRef edge() const { return _edge; }
+        EdgeRef& edge() {
+            return _edge;
+        }
+        EdgeCRef edge() const {
+            return _edge;
+        }
 
         // Retrieves the associated face
-        FaceRef &face() { return _face; }
-        FaceCRef face() const { return _face; }
+        FaceRef& face() {
+            return _face;
+        }
+        FaceCRef face() const {
+            return _face;
+        }
 
         // Returns an id unique to this halfedge
-        unsigned int id() const { return _id; }
+        unsigned int id() const {
+            return _id;
+        }
 
         // Returns whether this edge is inside a boundary face
-        bool is_boundary() const { return _face->is_boundary(); }
+        bool is_boundary() const {
+            return _face->is_boundary();
+        }
 
         // Convenience function for setting all members of the halfedge
         void set_neighbors(HalfedgeRef next, HalfedgeRef twin, VertexRef vertex, EdgeRef edge,
@@ -449,7 +494,8 @@ public:
         }
 
     private:
-        Halfedge(unsigned int id) : _id(id) {}
+        Halfedge(unsigned int id) : _id(id) {
+        }
         unsigned int _id = 0;
         HalfedgeRef _twin, _next;
         VertexRef _vertex;
@@ -467,23 +513,38 @@ public:
         do this without causing any problems? For instance, if you delete the current element, will
         you be able to iterate to the next element?  Etc.
 
-        Note: the elements are not actually deleted until validate() is called in order to facilitate
-        checking for dangling references.
+        Note: the elements are not actually deleted until validate() is called in order to
+       facilitate checking for dangling references.
     */
-    void erase(VertexRef v) { verased.insert(v); }
-    void erase(EdgeRef e) { eerased.insert(e); }
-    void erase(FaceRef f) { ferased.insert(f); }
-    void erase(HalfedgeRef h) { herased.insert(h); }
+    void erase(VertexRef v) {
+        verased.insert(v);
+    }
+    void erase(EdgeRef e) {
+        eerased.insert(e);
+    }
+    void erase(FaceRef f) {
+        ferased.insert(f);
+    }
+    void erase(HalfedgeRef h) {
+        herased.insert(h);
+    }
 
     /*
         These methods allocate new mesh elements, returning a pointer (i.e., iterator) to the
         new element. (These methods cannot have const versions, because they modify the mesh!)
     */
-    HalfedgeRef new_halfedge() { return halfedges.insert(halfedges.end(), Halfedge(next_id++)); }
-    VertexRef new_vertex() { return vertices.insert(vertices.end(), Vertex(next_id++)); }
-    EdgeRef new_edge() { return edges.insert(edges.end(), Edge(next_id++)); }
-    FaceRef new_face() { return faces.insert(faces.end(), Face(next_id++, false)); }
-    FaceRef new_boundary() { return boundaries.insert(boundaries.end(), Face(next_id++, true)); }
+    HalfedgeRef new_halfedge() {
+        return halfedges.insert(halfedges.end(), Halfedge(next_id++));
+    }
+    VertexRef new_vertex() {
+        return vertices.insert(vertices.end(), Vertex(next_id++));
+    }
+    EdgeRef new_edge() {
+        return edges.insert(edges.end(), Edge(next_id++));
+    }
+    FaceRef new_face(bool boundary = false) {
+        return faces.insert(faces.end(), Face(next_id++, boundary));
+    }
 
     /*
         These methods return iterators to the beginning and end of the lists of
@@ -502,38 +563,77 @@ public:
 
         rather than VertexRef.
     */
-    HalfedgeRef halfedges_begin() { return halfedges.begin(); }
-    HalfedgeCRef halfedges_begin() const { return halfedges.begin(); }
-    HalfedgeRef halfedges_end() { return halfedges.end(); }
-    HalfedgeCRef halfedges_end() const { return halfedges.end(); }
-    VertexRef vertices_begin() { return vertices.begin(); }
-    VertexCRef vertices_begin() const { return vertices.begin(); }
-    VertexRef vertices_end() { return vertices.end(); }
-    VertexCRef vertices_end() const { return vertices.end(); }
-    EdgeRef edges_begin() { return edges.begin(); }
-    EdgeCRef edges_begin() const { return edges.begin(); }
-    EdgeRef edges_end() { return edges.end(); }
-    EdgeCRef edges_end() const { return edges.end(); }
-    FaceRef faces_begin() { return faces.begin(); }
-    FaceCRef faces_begin() const { return faces.begin(); }
-    FaceRef faces_end() { return faces.end(); }
-    FaceCRef faces_end() const { return faces.end(); }
-    FaceRef boundaries_begin() { return boundaries.begin(); }
-    FaceCRef boundaries_begin() const { return boundaries.begin(); }
-    FaceRef boundaries_end() { return boundaries.end(); }
-    FaceCRef boundaries_end() const { return boundaries.end(); }
+    HalfedgeRef halfedges_begin() {
+        return halfedges.begin();
+    }
+    HalfedgeCRef halfedges_begin() const {
+        return halfedges.begin();
+    }
+    HalfedgeRef halfedges_end() {
+        return halfedges.end();
+    }
+    HalfedgeCRef halfedges_end() const {
+        return halfedges.end();
+    }
+    VertexRef vertices_begin() {
+        return vertices.begin();
+    }
+    VertexCRef vertices_begin() const {
+        return vertices.begin();
+    }
+    VertexRef vertices_end() {
+        return vertices.end();
+    }
+    VertexCRef vertices_end() const {
+        return vertices.end();
+    }
+    EdgeRef edges_begin() {
+        return edges.begin();
+    }
+    EdgeCRef edges_begin() const {
+        return edges.begin();
+    }
+    EdgeRef edges_end() {
+        return edges.end();
+    }
+    EdgeCRef edges_end() const {
+        return edges.end();
+    }
+    FaceRef faces_begin() {
+        return faces.begin();
+    }
+    FaceCRef faces_begin() const {
+        return faces.begin();
+    }
+    FaceRef faces_end() {
+        return faces.end();
+    }
+    FaceCRef faces_end() const {
+        return faces.end();
+    }
 
     /*
         This return simple statistics about the current mesh.
     */
-    Size n_vertices() const { return vertices.size(); };
-    Size n_edges() const { return edges.size(); };
-    Size n_faces() const { return faces.size(); };
-    Size n_boundaries() const { return boundaries.size(); };
-    Size n_halfedges() const { return halfedges.size(); };
+    Size n_vertices() const {
+        return vertices.size();
+    };
+    Size n_edges() const {
+        return edges.size();
+    };
+    Size n_faces() const {
+        return faces.size();
+    };
+    Size n_halfedges() const {
+        return halfedges.size();
+    };
+
+    bool has_boundary() const;
+    Size n_boundaries() const;
 
     /// Check if half-edge mesh is valid
-    std::string validate();
+    std::optional<std::pair<ElementRef, std::string>> validate();
+    std::optional<std::pair<ElementRef, std::string>> warnings();
 
     //////////////////////////////////////////////////////////////////////////////////////////
     // End methods students should use, begin internal methods - you don't need to use these
@@ -541,38 +641,42 @@ public:
 
     // Various ways of constructing meshes
     Halfedge_Mesh();
-    Halfedge_Mesh(const GL::Mesh &mesh);
-    Halfedge_Mesh(const std::vector<std::vector<Index>> &polygons, const std::vector<Vec3> &verts);
-    Halfedge_Mesh(const Halfedge_Mesh &src) = delete;
-    Halfedge_Mesh(Halfedge_Mesh &&src) = default;
+    Halfedge_Mesh(const GL::Mesh& mesh);
+    Halfedge_Mesh(const std::vector<std::vector<Index>>& polygons, const std::vector<Vec3>& verts);
+    Halfedge_Mesh(const Halfedge_Mesh& src) = delete;
+    Halfedge_Mesh(Halfedge_Mesh&& src) = default;
     ~Halfedge_Mesh() = default;
 
     // Various ways of copying meshes
-    void operator=(const Halfedge_Mesh &src) = delete;
-    Halfedge_Mesh &operator=(Halfedge_Mesh &&src) = default;
-    void copy_to(Halfedge_Mesh &mesh);
-    ElementRef copy_to(Halfedge_Mesh &mesh, unsigned int eid);
+    void operator=(const Halfedge_Mesh& src) = delete;
+    Halfedge_Mesh& operator=(Halfedge_Mesh&& src) = default;
+    void copy_to(Halfedge_Mesh& mesh);
+    ElementRef copy_to(Halfedge_Mesh& mesh, unsigned int eid);
 
     /// Clear mesh of all elements.
     void clear();
     /// Creates new sub-divided mesh with provided scheme
     bool subdivide(SubD strategy);
     /// Export to renderable vertex-index mesh. Indexes the mesh.
-    void to_mesh(GL::Mesh &mesh, bool split_faces) const;
+    void to_mesh(GL::Mesh& mesh, bool split_faces) const;
     /// Create mesh from polygon list
-    std::string from_poly(const std::vector<std::vector<Index>> &polygons,
-                          const std::vector<Vec3> &verts);
+    std::string from_poly(const std::vector<std::vector<Index>>& polygons,
+                          const std::vector<Vec3>& verts);
     /// Create mesh from renderable triangle mesh (beware of connectivity, does not de-duplicate
     /// vertices)
-    std::string from_mesh(const GL::Mesh &mesh);
+    std::string from_mesh(const GL::Mesh& mesh);
 
     /// WARNING: erased elements stay in the element lists until do_erase()
     /// or validate() are called
     void do_erase();
 
     void mark_dirty();
-    bool flipped() const { return flip_orientation; }
-    void flip() { flip_orientation = !flip_orientation; };
+    bool flipped() const {
+        return flip_orientation;
+    }
+    void flip() {
+        flip_orientation = !flip_orientation;
+    };
     bool render_dirty_flag = false;
 
     Vec3 normal_of(ElementRef elem);
@@ -582,10 +686,9 @@ public:
 private:
     std::list<Vertex> vertices;
     std::list<Edge> edges;
-    std::list<Face> faces, boundaries;
+    std::list<Face> faces;
     std::list<Halfedge> halfedges;
-    
-    bool check_finite() const;
+
     unsigned int next_id;
     bool flip_orientation = false;
 
@@ -600,28 +703,28 @@ private:
     Here we just say that one iterator comes before another if the address of the
     object it points to is smaller. (You should not have to worry about this!)
 */
-inline bool operator<(const Halfedge_Mesh::HalfedgeRef &i, const Halfedge_Mesh::HalfedgeRef &j) {
+inline bool operator<(const Halfedge_Mesh::HalfedgeRef& i, const Halfedge_Mesh::HalfedgeRef& j) {
     return &*i < &*j;
 }
-inline bool operator<(const Halfedge_Mesh::VertexRef &i, const Halfedge_Mesh::VertexRef &j) {
+inline bool operator<(const Halfedge_Mesh::VertexRef& i, const Halfedge_Mesh::VertexRef& j) {
     return &*i < &*j;
 }
-inline bool operator<(const Halfedge_Mesh::EdgeRef &i, const Halfedge_Mesh::EdgeRef &j) {
+inline bool operator<(const Halfedge_Mesh::EdgeRef& i, const Halfedge_Mesh::EdgeRef& j) {
     return &*i < &*j;
 }
-inline bool operator<(const Halfedge_Mesh::FaceRef &i, const Halfedge_Mesh::FaceRef &j) {
+inline bool operator<(const Halfedge_Mesh::FaceRef& i, const Halfedge_Mesh::FaceRef& j) {
     return &*i < &*j;
 }
-inline bool operator<(const Halfedge_Mesh::HalfedgeCRef &i, const Halfedge_Mesh::HalfedgeCRef &j) {
+inline bool operator<(const Halfedge_Mesh::HalfedgeCRef& i, const Halfedge_Mesh::HalfedgeCRef& j) {
     return &*i < &*j;
 }
-inline bool operator<(const Halfedge_Mesh::VertexCRef &i, const Halfedge_Mesh::VertexCRef &j) {
+inline bool operator<(const Halfedge_Mesh::VertexCRef& i, const Halfedge_Mesh::VertexCRef& j) {
     return &*i < &*j;
 }
-inline bool operator<(const Halfedge_Mesh::EdgeCRef &i, const Halfedge_Mesh::EdgeCRef &j) {
+inline bool operator<(const Halfedge_Mesh::EdgeCRef& i, const Halfedge_Mesh::EdgeCRef& j) {
     return &*i < &*j;
 }
-inline bool operator<(const Halfedge_Mesh::FaceCRef &i, const Halfedge_Mesh::FaceCRef &j) {
+inline bool operator<(const Halfedge_Mesh::FaceCRef& i, const Halfedge_Mesh::FaceCRef& j) {
     return &*i < &*j;
 }
 
@@ -630,49 +733,49 @@ inline bool operator<(const Halfedge_Mesh::FaceCRef &i, const Halfedge_Mesh::Fac
     Here we simply hash the unique ID of the element.
 */
 namespace std {
-template <> struct hash<Halfedge_Mesh::VertexRef> {
+template<> struct hash<Halfedge_Mesh::VertexRef> {
     uint64_t operator()(Halfedge_Mesh::VertexRef key) const {
         static const std::hash<unsigned int> h;
         return h(key->id());
     }
 };
-template <> struct hash<Halfedge_Mesh::EdgeRef> {
+template<> struct hash<Halfedge_Mesh::EdgeRef> {
     uint64_t operator()(Halfedge_Mesh::EdgeRef key) const {
         static const std::hash<unsigned int> h;
         return h(key->id());
     }
 };
-template <> struct hash<Halfedge_Mesh::FaceRef> {
+template<> struct hash<Halfedge_Mesh::FaceRef> {
     uint64_t operator()(Halfedge_Mesh::FaceRef key) const {
         static const std::hash<unsigned int> h;
         return h(key->id());
     }
 };
-template <> struct hash<Halfedge_Mesh::HalfedgeRef> {
+template<> struct hash<Halfedge_Mesh::HalfedgeRef> {
     uint64_t operator()(Halfedge_Mesh::HalfedgeRef key) const {
         static const std::hash<unsigned int> h;
         return h(key->id());
     }
 };
-template <> struct hash<Halfedge_Mesh::VertexCRef> {
+template<> struct hash<Halfedge_Mesh::VertexCRef> {
     uint64_t operator()(Halfedge_Mesh::VertexCRef key) const {
         static const std::hash<unsigned int> h;
         return h(key->id());
     }
 };
-template <> struct hash<Halfedge_Mesh::EdgeCRef> {
+template<> struct hash<Halfedge_Mesh::EdgeCRef> {
     uint64_t operator()(Halfedge_Mesh::EdgeCRef key) const {
         static const std::hash<unsigned int> h;
         return h(key->id());
     }
 };
-template <> struct hash<Halfedge_Mesh::FaceCRef> {
+template<> struct hash<Halfedge_Mesh::FaceCRef> {
     uint64_t operator()(Halfedge_Mesh::FaceCRef key) const {
         static const std::hash<unsigned int> h;
         return h(key->id());
     }
 };
-template <> struct hash<Halfedge_Mesh::HalfedgeCRef> {
+template<> struct hash<Halfedge_Mesh::HalfedgeCRef> {
     uint64_t operator()(Halfedge_Mesh::HalfedgeCRef key) const {
         static const std::hash<unsigned int> h;
         return h(key->id());

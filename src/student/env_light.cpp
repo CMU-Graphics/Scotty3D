@@ -42,8 +42,7 @@ Light_Sample Env_Hemisphere::sample() const {
 }
 
 Spectrum Env_Hemisphere::sample_direction(Vec3 dir) const {
-    if (dir.y > 0.0f)
-        return radiance;
+    if(dir.y > 0.0f) return radiance;
     return {};
 }
 
@@ -55,6 +54,8 @@ Light_Sample Env_Sphere::sample() const {
     return ret;
 }
 
-Spectrum Env_Sphere::sample_direction(Vec3) const { return radiance; }
+Spectrum Env_Sphere::sample_direction(Vec3) const {
+    return radiance;
+}
 
 } // namespace PT
