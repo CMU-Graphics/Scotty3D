@@ -7,7 +7,7 @@ project(Scotty3D VERSION 1.1
                  DESCRIPTION "CMU 15-462/662 - Computer Graphics"
                  LANGUAGES CXX)
 
-set(SCOTTY3D_BUILD_REF true)
+set(SCOTTY3D_BUILD_REF false)
 
 if(SCOTTY3D_BUILD_REF)
     add_definitions(-DSCOTTY3D_BUILD_REF)
