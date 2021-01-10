@@ -90,7 +90,12 @@ void Renderer::save(Scene& scene, const Camera& cam, int w, int h, int s) {
             Scene_Light& light = item.get<Scene_Light>();
             if(!light.is_env()) return;
         }
-        item.render(view);
+
+        if(item.is<Scene_Particles>()) {
+            item.get<Scene_Particles>().render(view, false, true, true);
+        } else {
+            item.render(view);
+        }
     });
 
     save_buffer.blit_to(0, save_output, true);

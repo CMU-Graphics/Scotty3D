@@ -233,21 +233,23 @@ size_t Pathtracer::visualize_bvh(GL::Lines& lines, GL::Lines& active, size_t dep
     return scene.visualize(lines, active, depth, Mat4::I);
 }
 
-void Pathtracer::begin_render(Scene& layout_scene, const Camera& cam) {
+void Pathtracer::begin_render(Scene& layout_scene, const Camera& cam, bool add_samples) {
 
     size_t n_threads = std::thread::hardware_concurrency();
     size_t samples_per_epoch = std::max(size_t(1), n_samples / (n_threads * 10));
 
     cancel();
-
-    accumulator.clear({});
     total_epochs = n_samples / samples_per_epoch + !!(n_samples % samples_per_epoch);
 
-    build_time = SDL_GetPerformanceCounter();
-    build_scene(layout_scene);
+    if(!add_samples) {
+        accumulator.clear({});
+        accumulator_samples = 0;
+        build_time = SDL_GetPerformanceCounter();
+        build_scene(layout_scene);
+        build_time = SDL_GetPerformanceCounter() - build_time;
+    }
     render_time = SDL_GetPerformanceCounter();
-    build_time = render_time - build_time;
-
+    
     camera = cam;
 
     for(size_t s = 0; s < n_samples; s += samples_per_epoch) {
@@ -266,12 +268,11 @@ void Pathtracer::begin_render(Scene& layout_scene, const Camera& cam) {
 void Pathtracer::cancel() {
     cancel_flag = true;
     thread_pool.clear();
-    render_time = 0;
-    build_time = 0;
-    accumulator_samples = 0;
     completed_epochs = 0;
     total_epochs = 0;
     cancel_flag = false;
+    build_time = 0;
+    render_time = SDL_GetPerformanceCounter() - render_time;
 }
 
 const HDR_Image& Pathtracer::get_output() {

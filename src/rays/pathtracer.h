@@ -32,7 +32,7 @@ public:
     const GL::Tex2D& get_output_texture(float exposure);
     size_t visualize_bvh(GL::Lines& lines, GL::Lines& active, size_t level);
 
-    void begin_render(Scene& scene, const Camera& camera);
+    void begin_render(Scene& scene, const Camera& camera, bool add_samples = false);
     void cancel();
     bool in_progress() const;
     float progress() const;

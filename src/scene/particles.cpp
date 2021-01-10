@@ -50,7 +50,7 @@ const GL::Mesh& Scene_Particles::mesh() const {
     return particle_instances.mesh();
 }
 
-void Scene_Particles::render(const Mat4& view, bool depth_only, bool posed) {
+void Scene_Particles::render(const Mat4& view, bool depth_only, bool posed, bool particles_only) {
 
     Renderer& renderer = Renderer::get();
 
@@ -62,7 +62,10 @@ void Scene_Particles::render(const Mat4& view, bool depth_only, bool posed) {
     opts.solid_color = true;
     opts.depth_only = depth_only;
     opts.color = opt.color.to_vec();
-    renderer.mesh(arrow, opts);
+
+    if(!particles_only) {
+        renderer.mesh(arrow, opts);
+    }
 
     if(opt.enabled && !depth_only) {
         opts.modelview = view;

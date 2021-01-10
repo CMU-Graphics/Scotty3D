@@ -761,7 +761,6 @@ bool Widget_Render::UI(Scene& scene, Widget_Camera& cam, Camera& user_cam, std::
 
         if(ImGui::Button("Cancel")) {
             pathtracer.cancel();
-            has_rendered = false;
         }
 
         ImGui::SameLine();
@@ -809,6 +808,13 @@ bool Widget_Render::UI(Scene& scene, Widget_Camera& cam, Camera& user_cam, std::
                 err = "Failed to write png!";
             }
             free(path);
+        }
+    }
+
+    if(method == 1 && has_rendered) {
+        ImGui::SameLine();
+        if(ImGui::Button("Add Samples")) {
+            pathtracer.begin_render(scene, cam.get(), true);
         }
     }
 
