@@ -1,5 +1,5 @@
 theme: just-the-docs
-#baseurl: /Scotty3D
+baseurl: /Scotty3D
 plugins:
   - jekyll-sitemap
 #logo: "/assets/test_cow.jpeg"
