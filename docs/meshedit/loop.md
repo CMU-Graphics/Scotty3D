@@ -2,6 +2,8 @@
 layout: default
 title: "Loop Subdivision"
 permalink: /meshedit/global/loop/
+parent: Global Operations
+grand_parent: "A2: MeshEdit"
 ---
 
 # Loop Subdivision
@@ -49,16 +51,16 @@ Although this routine looks straightforward, it can very easily crash! The reaso
     int n = mesh.n_edges();
     EdgeRef e = mesh.edges_begin();
     for (int i = 0; i < n; i++) {
-    
+
       // get the next edge NOW!
       EdgeRef nextEdge = e;
       nextEdge++;
-    
+
       // now, even if splitting the edge deletes it...
       if (some condition is met) {
         mesh.split_edge(e);
       }
-    
+
       // ...we still have a valid reference to the next edge.
       e = nextEdge;
     }

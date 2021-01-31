@@ -2,6 +2,8 @@
 layout: default
 title: "Simplification"
 permalink: /meshedit/global/simplify/
+parent: Global Operations
+grand_parent: "A2: MeshEdit"
 ---
 
 # Simplification
@@ -16,7 +18,7 @@ The basic idea is to iteratively collapse edges until we reach the desired numbe
 
 More precisely, we can write the distance d of a point _x_ to a plane with normal _N_ passing through a point _p_ as dist(_x_) = dot(_N_, _x_ - _p_)
 
-![plane normal diagram](plane_normal.png)
+<center><img src="plane_normal.png" style="height:360px"></center>
 
 In other words, we measure the extent of the vector from _p_ to _x_ along the normal direction. This quantity gives us a value that is either _positive_ (above the plane), or _negative_ (below the plane). Suppose that _x_ has coordinates (_x_,_y_,_z_), _N_ has coordinates (_a_,_b_,_c_), and let _d_(_x_) = -dot(_N_, _p_), then in _homogeneous_ coordinates, the distance to the plane is just
 
@@ -24,7 +26,7 @@ dot(_u_, _v_)
 
 where _u_ = (_x_,_y_,_z_,_1_) and _v_ = (_a_,_b_,_c_,_d_). When we're measuring the quality of an approximation, we don't care whether we're above or below the surface; just how _far away_ we are from the original surface. Therefore, we're going to consider the _square_ of the distance, which we can write in homogeneous coordinates as
 
-![homogeneous coordinates](homogeneous_coord.png)
+<center><img src="homogeneous_coord.png" style="height:40px"></center>
 
 where T denotes the transpose of a vector. The term _vv_^T is an [outer product](https://en.wikipedia.org/wiki/Outer_product) of the vector _v_ with itself, which gives us a symmetric matrix _K_ = _vv_^T. In components, this matrix would look like
 
@@ -37,13 +39,12 @@ but in Scotty3D it can be constructed by simply calling the method `outer( Vec4,
 
 The matrix _K_ tells us something about the distance to a plane. We can also get some idea of how far we are from a _vertex_ by considering the sum of the squared distances to the planes passing through all triangles that touch that vertex. In other words, we will say that the distance to a small neighborhood around the vertex i can be approximated by the sum of the quadrics on the incident faces ijk:
 
-![Vertex K sum](K_sum.png)
-
-![Vertex normals](vert_normals.png)
+<center><img src="K_sum.png" style="height:100px"></center>
+<center><img src="vert_normals.png" style="height:360px"></center>
 
 Likewise, the distance to an _edge_ ij will be approximated by the sum of the quadrics at its two endpoints:
 
-![Edge K sum](edge_k_sum.png)
+<center><img src="edge_k_sum.png" style="height:50px"></center>
 
 The sums above should then be easy to compute -- you can just add up the `Mat4` objects around a vertex or along an edge using the usual "+" operator. You do not need to write an explicit loop over the 16 entries of the matrix.
 
@@ -59,11 +60,11 @@ _Ax_ = _b_
 
 where A is the upper-left 3x3 block of K, and b is _minus_ the upper-right 3x1 column. In other words, the entries of A are just
 
-![K_A_block](K_A_block.png)
+<center><img src="K_A_block.png" style="height:100px"></center>
 
 and the entries of b are
 
-![b_vec](b_vec.png)
+<center><img src="b_vec.png" style="height:100px"></center>
 
 The cost associated with this solution can be found by plugging _x_ back into our original expression, i.e., the cost is just
 
@@ -75,7 +76,7 @@ where _K_ is the quadric associated with the edge. Fortunately, _you do not need
     Vec3 b;  // computed by extracting minus the upper-right 3x1 column from the same matrix
     Vec3 x = A.inverse() * b; // solve Ax = b for x by hitting both sides with the inverse of A
 
-However, A might not always be invertible: consider the case where the mesh is composed of points all on the same plane. In this case, you need to select an optimal point along the original edge. Please read [Garland's paper](http://reports-archive.adm.cs.cmu.edu/anon/1999/CMU-CS-99-105.pdf) on page 62 section 3.5 for more details. 
+However, A might not always be invertible: consider the case where the mesh is composed of points all on the same plane. In this case, you need to select an optimal point along the original edge. Please read [Garland's paper](http://reports-archive.adm.cs.cmu.edu/anon/1999/CMU-CS-99-105.pdf) on page 62 section 3.5 for more details.
 
 If you're a bit lost at this point, don't worry! There are a lot of details to go through, and we'll summarize everything again in the implementation section. The main idea to keep in mind right now is:
 
@@ -91,22 +92,22 @@ The one final thing we want to think about is performance. At each iteration, we
     class Edge_Record {
     public:
         Edge_Record() {}
-        Edge_Record(std::unordered_map<Halfedge_Mesh::VertexRef, Mat4>& vertex_quadrics, 
+        Edge_Record(std::unordered_map<Halfedge_Mesh::VertexRef, Mat4>& vertex_quadrics,
                     Halfedge_Mesh::EdgeRef e) : edge(e) {
 
             // The second constructor takes a dictionary mapping vertices
             // to quadric error matrices and an edge reference. It then
             // computes the sum of the quadrics at the two endpoints
-            // and solves for the optimal midpoint position as measured 
+            // and solves for the optimal midpoint position as measured
             // by this quadric. It also stores the value of this quadric
             // as the "score" used by the priority queue.
         }
-    
+
         EdgeRef edge; // the edge referred to by this record
-    
+
         Vec3 optimal; // the optimal point, if we were
                       // to collapse this edge next
-    
+
         float cost; // the cost associated with collapsing this edge,
                     // which is very (very!) roughly something like
                     // the distance we'll deviate from the original
@@ -134,8 +135,8 @@ More documentation is provided inline in `student/meshedit.cpp`.
 
 Though conceptually sophisticated, quadric error simplification is actually not too hard to implement. It basically boils down to two methods:
 
-    Edge_Record::Edge_Record(std::unordered_map<Halfedge_Mesh::VertexRef, Mat4>& vertex_quadrics, EdgeIter e);            
-    Halfedge_Mesh::simplify(); 
+    Edge_Record::Edge_Record(std::unordered_map<Halfedge_Mesh::VertexRef, Mat4>& vertex_quadrics, EdgeIter e);
+    Halfedge_Mesh::simplify();
 
 As discussed above, the edge record initializer should:
 
@@ -147,7 +148,7 @@ As discussed above, the edge record initializer should:
 
 The downsampling routine can then be implemented by following this basic recipe:
 
-1.  Compute quadrics for each face by simply writing the plane equation for that face in homogeneous coordinates, and building the corresponding quadric matrix using `outer()`. This matrix should be stored in the yet-unmentioned dictionary `face_quadrics`. 
+1.  Compute quadrics for each face by simply writing the plane equation for that face in homogeneous coordinates, and building the corresponding quadric matrix using `outer()`. This matrix should be stored in the yet-unmentioned dictionary `face_quadrics`.
 2.  Compute an initial quadric for each vertex by adding up the quadrics at all the faces touching that vertex. This matrix should be stored in `vertex_quadrics`. (Note that these quadrics must be updated as edges are collapsed.)
 3.  For each edge, create an `Edge_Record`, insert it into the `edge_records` dictionary, and add it to one global `PQueue<Edge_Record>` queue.
 4.  Until a target number of triangles is reached, collapse the best/cheapest edge (as determined by the priority queue) and set the quadric at the new vertex to the sum of the quadrics at the endpoints of the original edge. You will also have to update the cost of any edge connected to this vertex.
@@ -168,4 +169,5 @@ Steps 4 and 7 are highlighted because it is easy to get these steps wrong. For i
 
 A working implementation should look something like the examples below. You may find it easiest to implement this algorithm in stages. For instance, _first_ get the edge collapses working, using just the edge midpoint rather than the optimal point, _then_ worry about solving for the point that minimizes quadric error.
 
-![Quadric error simplification examples](quad_example.png)
+<!--![Quadric error simplification examples](quad_example.png)-->
+<center><img src="quad_example.png" style="height:480px"></center>

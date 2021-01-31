@@ -1,10 +1,15 @@
 ---
 layout: default
-title: "(Task 6) Materials"
+title: (Task 6) Materials
 permalink: /pathtracer/materials
+parent: "A3: Pathtracer"
+has_children: true
+has_toc: false
 ---
 
 # (Task 6) Materials
+
+<center><img src="bsdf_diagrams.png" style="height:200px"></center>
 
 Now that you have implemented the ability to sample more complex light paths, it's finally time to add support for more types of materials (other than the fully Lambertian material that you have implemented in Task 5). In this task you will add support for two types of materials: a perfect mirror and glass (a material featuring both specular reflection and transmittance) in `student/bsdf.cpp`.
 
@@ -20,8 +25,7 @@ There are also two helper functions in the BSDF class in `student/bsdf.cpp` that
 * `Vec3 refract(Vec3 out_dir, float index_of_refraction, bool& was_internal)` returns the ray that results from refracting the ray in `out_dir` about the surface according to [Snell's Law](http://15462.courses.cs.cmu.edu/fall2015/lecture/reflection/slide_032). The surface's index of refraction is given by the argument `index_of_refraction`. Your implementation should assume that if the ray in `out_dir` **is entering the surface** (that is, if `cos(out_dir, N=[0,1,0]) > 0`) then the ray is currently in vacuum (index of refraction = 1.0). If `cos(out_dir, N=[0,1,0]) < 0` then your code should assume the ray is leaving the surface and entering vacuum. **In the case of total internal reflection, you should set `*was_internal` to `true`.**
 
 * Note that in `reflect` and `refract`, both the `out_dir` and the returned in-direction are pointing away from the intersection point of the ray and the surface, as illustrated in this picture below.
-![rays_dir](rays_dir.png)
-
+<center><img src="rays_dir.png" style="height:420px"></center>
 ## Step 1
 
 Implement the class `BSDF_Mirror` which represents a material with perfect specular reflection (a perfect mirror). You should Implement `BSDF_Mirror::sample`, `BSDF_Mirror::evaluate`, and `reflect`. **(Hint: what should the pdf sampled by  `BSDF_Mirror::sample` be? What should the reflectance function `BSDF_Mirror::evalute` be?)**
@@ -65,5 +69,5 @@ We described the BRDF for perfect specular reflection in class, however we did n
 
 When you are done, you will be able to render images like these:
 
-![cornell_classic](new_results/32k_large.png)
+<center><img src="new_results/32k_large.png"></center>
 

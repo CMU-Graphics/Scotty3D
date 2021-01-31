@@ -1,7 +1,10 @@
 ---
 layout: default
-title: "User Guide"
+title: User Guide
 permalink: /guide/
+nav_order: 4
+has_children: true
+has_toc: false
 ---
 
 # User Guide
@@ -10,8 +13,8 @@ permalink: /guide/
 
 The basic paradigm in Scotty3D is that there are six different _modes_, each
 of which lets you perform certain class of actions. For instance, in `Model` mode, you
-can perform actions associated with modeling, such as moving mesh elements and performing global mesh operations. 
-When in `Animate` mode, you can perform actions associated with animation. Etc. 
+can perform actions associated with modeling, such as moving mesh elements and performing global mesh operations.
+When in `Animate` mode, you can perform actions associated with animation. Etc.
 Within a given mode, you can
 switch between actions by hitting the appropriate key; keyboard commands are
 listed below for each mode. Note that the input scheme may change depending on
@@ -23,7 +26,7 @@ are are detailed in the left sidebar. Note that some actions are only available 
 
 ## Global Navigation
 
-In all modes, you can move the camera around and select scene elements. Information about your selection will be shown in the left sidebar. 
+In all modes, you can move the camera around and select scene elements. Information about your selection will be shown in the left sidebar.
 
 The camera can be manipulated in three ways:
 - Rotate: holding shift, left-clicking, and dragging will orbit the camera about the scene. Holding middle click and dragging has the same effect.
@@ -33,19 +36,8 @@ The camera can be manipulated in three ways:
 ## Global Preferences
 
 You can open the preferences window from the edit option in the menu bar.
-- Multisampling: this controls how many samples are used for MSAA when rendering scene objects in the Scotty3D interface. If your computer struggles to render complex scenes, try changing this to `1`. 
+- Multisampling: this controls how many samples are used for MSAA when rendering scene objects in the Scotty3D interface. If your computer struggles to render complex scenes, try changing this to `1`.
 
 ## Global Undo
 
 As is typical, all operations on scene objects, meshes, etc. are un and re-doable using Control/Command-Z to undo and Control/Command-Y to redo. These actions are also available from the `Edit` option in the menu bar.
-
-## Specific Modes
-
-- [Layout](layout)
-- [Model](model)
-- [Render](render)
-- [Rig](rig)
-- [Animate](animate)
-- [Simulate](simulate)
-
-

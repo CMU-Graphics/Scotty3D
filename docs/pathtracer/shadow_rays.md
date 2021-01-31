@@ -1,7 +1,8 @@
 ---
 layout: default
-title: "(Task 4) Shadow Rays"
+title: (Task 4) Shadow Rays
 permalink: /pathtracer/shadow_rays
+parent: "A3: Pathtracer"
 ---
 
 # (Task 4) Shadow Rays
@@ -26,7 +27,7 @@ Your job is to implement the logic needed to compute whether hit point is in sha
 * You will find it useful to debug your shadow code using the `DirectionalLight` since it produces hard shadows that are easy to reason about.
 * You would want to comment out the line `Spectrum radiance_out = Spectrum(0.5f);` and initialize the `radiance_out` to a more reasonable value. Hint: is there supposed to have any amount of light before we even start considering each light sample?
 
-At this point you should be able to render very striking images. 
+At this point you should be able to render very striking images.
 
 ## Sample results:
 
@@ -34,27 +35,27 @@ At this point, you can add all kinds of lights among the options you have when y
 
 The head of Peter Schröder rendered with hemishphere lighting.
 
-![shadow_area](new_results/shadow_peter.png)
+<center><img src="new_results/shadow_peter.png" style="height:240px"></center>
 
 A sphere and a cube with hemishphere lighting
 
-![shadow_hemisphere](new_results/cube_sphere_hemisphere.png)
+<center><img src="new_results/cube_sphere_hemisphere.png" style="height:240px"></center>
 
-Hex and cube under diretional lighting
+Hex and cube under directional lighting
 
-![ref1](new_results/ref1.png)
+<center><img src="new_results/ref1.png" style="height:240px"></center>
 
 Bunny on a plane under point light
 
-![ref1](new_results/ref2.png)
+<center><img src="new_results/ref2.png" style="height:400px"></center>
 
 Spot on a sphere under diretional lighting
 
-![ref1](new_results/ref3.png)
+<center><img src="new_results/ref3.png" style="height:240px"></center>
 
 
 Spot on a sphere under hemisphere lighting
 
-![ref1](new_results/ref4.png)
+<center><img src="new_results/ref4.png" style="height:240px"></center>
 
 

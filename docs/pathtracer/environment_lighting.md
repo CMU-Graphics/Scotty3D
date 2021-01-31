@@ -1,7 +1,10 @@
 ---
 layout: default
-title: "(Task 7) Environment Lighting"
+title: (Task 7) Environment Lighting
+parent: "A3: Pathtracer"
 permalink: /pathtracer/environment_lighting
+has_children: true
+has_toc: false
 ---
 
 # (Task 7) Environment Lighting
@@ -35,7 +38,7 @@ For more HDRIs for creative environment maps, check out [HDRIHAVEN](https://hdri
 
 Much like light in the real world, most of the energy provided by an environment light source is concentrated in the directions toward bright light sources. **Therefore, it makes sense to bias selection of sampled directions towards the directions for which incoming radiance is the greatest.** In this final task you will implement an importance sampling scheme for environment lights. For environment lights with large variation in incoming light intensities, good importance sampling will significantly improve the quality of renderings.
 
-The basic idea is that you will assign a probability to each pixel in the environment map based on the total flux passing through the solid angle it represents. 
+The basic idea is that you will assign a probability to each pixel in the environment map based on the total flux passing through the solid angle it represents.
 
 A pixel with coordinate <img src="environment_eq1.png" width ="45"> subtends an area <img src="environment_eq2.png" width = "80"> on the unit sphere (where <img src="environment_eq3.png" width = "20"> and <img src="environment_eq4.png" width = "20"> the angles subtended by each pixel -- as determined by the resolution of the texture). Thus, the flux through a pixel is proportional to <img src="environment_eq5.png" width = "45">. (We only care about the relative flux through each pixel to create a distribution.)
 
@@ -64,12 +67,12 @@ Given the marginal distribution for <img src="environment_eq9.png" width ="10"> 
 
 ennis.exr with 32 spp
 
-![ennis](new_results/ennis32importance.png) 
+![ennis](new_results/ennis32importance.png)
 
 uffiz.exr with 32 spp
 
-![uffiz](new_results/uffiz32importance.png) 
+![uffiz](new_results/uffiz32importance.png)
 
 field.exr with 1024 spp
 
-![ennis](new_results/field1024importance.png) 
+![ennis](new_results/field1024importance.png)

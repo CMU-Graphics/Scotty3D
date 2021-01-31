@@ -1,12 +1,13 @@
 ---
 layout: default
 title: "Layout"
-permalink: /guide/layout/
+permalink: /guide/layout_mode/
+parent: User Guide
 ---
 
 # Layout
 
-This is the main scene editing mode in Scotty3D, and does not contain tasks for the student to implement. 
+This is the main scene editing mode in Scotty3D, and does not contain tasks for the student to implement.
 This mode allows you to load full scenes from disk, create or load new objects, export your scene (COLLADA format), and edit transformations that place each object into your scene.
 
 ## Creating Objects
@@ -32,9 +33,9 @@ Scotty3D only supports exporting scenes to COLLADA.
 
 ## Managing Objects
 
-Left clicking on or enabling the check box of your object under `Select an Object` will select it. Information about that object's transformation will appear under `Edit Object` beneath the "Select an Object" options. 
+Left clicking on or enabling the check box of your object under `Select an Object` will select it. Information about that object's transformation will appear under `Edit Object` beneath the "Select an Object" options.
 
-Under `Edit Object`, you may directly edit the values of the object's position, rotation (X->Y->Z Euler angles), and scale. Note that clicking and dragging on the values will smoothly scale them, and Control/Command-clicking on the value will let you edit it as text. 
+Under `Edit Object`, you may directly edit the values of the object's position, rotation (X->Y->Z Euler angles), and scale. Note that clicking and dragging on the values will smoothly scale them, and Control/Command-clicking on the value will let you edit it as text.
 
 You can also edit the transformation using the `Move`, `Rotate`, and `Scale` tools. One of these options is always active. This determines the transformation widgets that appear at the origin of the object model.
 - `Move`: click and drag on the red (X), green (Y), or blue (Z) arrow to move the object along the X/Y/Z axis. Click and drag on the red (YZ), green (XZ), or blue (XY) squares to move the object in the YZ/XZ/XY plane.
@@ -54,4 +55,4 @@ Finally, you may remove the object from the scene by pressing `Delete` or hittin
 
 ## Demo
 
-<video src="{{ site.baseurl }}/guide/layout.mp4" controls preload muted loop style="max-width: 100%; margin: 0 auto;"></video>
+<video src="{{ site.baseurl }}/guide/layout_mode/layout.mp4" controls preload muted loop style="max-width: 100%; margin: 0 auto;"></video>

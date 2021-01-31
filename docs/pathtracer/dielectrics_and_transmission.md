@@ -1,6 +1,8 @@
 ---
 layout: default
-title: "Dielectrics and Transmission"
+title: Dielectrics and Transmission
+parent: (Task 6) Materials
+grand_parent: "A3: Pathtracer"
 permalink: /pathtracer/dielectrics_and_transmission
 ---
 

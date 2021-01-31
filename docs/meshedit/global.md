@@ -1,7 +1,11 @@
 ---
 layout: default
-title: "MeshEdit Overview"
+title: "Global Operations"
 permalink: /meshedit/global/
+parent: "A2: MeshEdit"
+has_children: true
+has_toc: false
+nav_order: 2
 ---
 
 # Global Mesh Operations

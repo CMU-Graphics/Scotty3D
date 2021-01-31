@@ -1,7 +1,8 @@
 ---
 layout: default
-title: "Visualization of normals"
+title: Visualization of normals
 permalink: /pathtracer/visualization_of_normals
+parent: "A3: Pathtracer"
 ---
 
 # Visualization of normals
@@ -12,10 +13,5 @@ You can set the `bool normal_colors` to true in `student/debug.h` to check if th
 
 Here are some reference results:
 
-![normalviz](new_results/cbox_normal.png)
-
-![normalviz](new_results/norm1.png)
-
-![normalviz](new_results/norm2.png)
-
-![normalviz](new_results/norm3.png)
+<img src="new_results/cbox_normal.png" style="height:200px"> <img src="new_results/norm1.png" style="height:200px">
+<img src="new_results/norm2.png" style="height:194px"> <img src="new_results/norm3.png" style="height:194px">

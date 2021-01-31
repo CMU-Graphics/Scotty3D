@@ -1,7 +1,11 @@
 ---
 layout: default
-title: "Local Ops"
+title: Local Operations
 permalink: /meshedit/local/
+parent: "A2: MeshEdit"
+has_children: true
+has_toc: false
+nav_order: 1
 ---
 
 # Local Mesh Operations
@@ -17,11 +21,11 @@ A good recipe for ensuring that all pointers are still valid after a local remes
 
 The reason for setting all the pointers (and not just the ones that changed) is that it is very easy to miss a pointer, causing your code to crash.
 
-#### Interface with global mesh operations
+### Interface with global mesh operations
 
-To facilitate user interaction, as well as global mesh processing operations (described below), local mesh operations should return the following values when possible. However, should it happen that the specified values are not available, or that the operation should not work on the given input, we need a way to signify the failure case. To do so, each local operation actually returns a ``std::optional`` value parameterized on the type of element it returns. For example, ``Halfedge_Mesh::erase_vertex`` returns a ``std::optional<Halfedge_Mesh::Face>``.  An ``optional`` can hold a value of the specified type, or, similarly to a pointer, a null value (``std::nullopt``). See ``student/meshedit.cpp`` for specific examples. 
+To facilitate user interaction, as well as global mesh processing operations (described below), local mesh operations should return the following values when possible. However, should it happen that the specified values are not available, or that the operation should not work on the given input, we need a way to signify the failure case. To do so, each local operation actually returns a ``std::optional`` value parameterized on the type of element it returns. For example, ``Halfedge_Mesh::erase_vertex`` returns a ``std::optional<Halfedge_Mesh::Face>``.  An ``optional`` can hold a value of the specified type, or, similarly to a pointer, a null value (``std::nullopt``). See ``student/meshedit.cpp`` for specific examples.
 
-Also, remember that in any case, _the program should not crash!_ So for instance, you should never return a pointer to an element that was deleted. 
+Also, remember that in any case, _the program should not crash!_ So for instance, you should never return a pointer to an element that was deleted.
 
 See the [User Guide](/Scotty3D/guide/model) for demonstrations of each local operation.
 

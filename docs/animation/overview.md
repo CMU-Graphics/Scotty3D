@@ -1,7 +1,10 @@
 ---
 layout: default
-title: "Animation Overview"
+title: "A4: Animation"
 permalink: /animation/
+nav_order: 7
+has_children: true
+has_toc: false
 ---
 
 # Animation Overview
@@ -10,12 +13,12 @@ There are four primary components that must be implemented to support Animation 
 
 **A4.0**
 
-- [(Task 1) Spline Interpolation](splines.md)
-- [(Task 2) Skeleton Kinematics](skeleton_kinematics.md)
+- [(Task 1) Spline Interpolation](splines)
+- [(Task 2) Skeleton Kinematics](skeleton_kinematics)
 
 **A4.5**
-- [(Task 3) Linear Blend Skinning](skinning.md)
-- [(Task 4) Particle Simulation]() (coming soon)
+- [(Task 3) Linear Blend Skinning](skinning)
+- [(Task 4) Particle Simulation](particles)
 
 Each task is described at the linked page.
 

@@ -1,17 +1,19 @@
 ---
 layout: default
-title: "Local Ops: Beveling"
-permalink: /meshedit/bevel/
+title: "Bevelling"
+permalink: /meshedit/local/bevel/
+parent: "Local Operations"
+grand_parent: "A2: MeshEdit"
 ---
 
-# Beveling 
+# Beveling
 
 Here we provide some additional detail about the bevel operations and their implementation in Scotty3D. Each bevel operation has two components:
 
 1.  a method that modifies the _connectivity_ of the mesh, creating new beveled elements, and
 2.  a method the updates the _geometry_ of the mesh, insetting and offseting the new vertices according to user input.
 
-The methods that update the connectivity are `HalfedgeMesh::bevel_vertex`, `halfedgeMesh::bevel_edge`, and `HalfedgeMesh::bevel_face`. The methods that update geometry are `HalfedgeMesh::bevel_vertex_positions`, `HalfedgeMesh::bevel_edge_positions`, and `HalfedgeMesh::bevel_face_positions`. 
+The methods that update the connectivity are `HalfedgeMesh::bevel_vertex`, `halfedgeMesh::bevel_edge`, and `HalfedgeMesh::bevel_face`. The methods that update geometry are `HalfedgeMesh::bevel_vertex_positions`, `HalfedgeMesh::bevel_edge_positions`, and `HalfedgeMesh::bevel_face_positions`.
 
 The methods for updating connectivity can be implemented following the general strategy outlined in [edge flip tutorial](edge_flip). **Note that the methods that update geometry will be called repeatedly for the same bevel, in order to adjust positions according to user mouse input. See the gif in the [User Guide](../guide/model).**
 
@@ -31,13 +33,13 @@ Also note that we provide code to gather the halfedges contained in the beveled 
 
 The reason for storing `new_halfedges` and `start_positions` in an array is that it makes it easy to access positions "to the left" and "to the right" of a given vertex. For instance, suppose we want to figure out the offset from the corner of a polygon. We might want to compute some geometric quantity involving the three vertex positions `start_positions[i-1]`, `start_positions[i]`, and `start_positions[i+1]` (as well as `inset`), then set the new vertex position `new_halfedges[i]->vertex()->pos` to this new value:
 
-![BevelIndexing](bevel_indexing.png)
+<center><img src="bevel_diagram.png"></center>
 
 A useful trick here is _modular arithmetic_: since we really have a "loop" of vertices, we want to make sure that indexing the next element (+1) and the previous element (-1) properly "wraps around." This can be achieved via code like
 
     // Get the number of vertices in the new polygon
     int N = (int)hs.size();
-    
+
     // Assuming we're looking at vertex i, compute the indices
     // of the next and previous elements in the list using
     // modular arithmetic---note that to get the previous index,
@@ -47,7 +49,7 @@ A useful trick here is _modular arithmetic_: since we really have a "loop" of ve
     int a = (i+N-1) % N;
     int b = i;
     int c = (i+1) % N;
-    
+
     // Get the actual 3D vertex coordinates at these vertices
     Vec3 pa = start_positions[a];
     Vec3 pb = start_positions[b];

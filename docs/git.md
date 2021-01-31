@@ -1,8 +1,10 @@
 ---
 layout: default
 title: "GitHub Setup"
+nav_order: 2
 permalink: /git/
 ---
+# Github Setup
 
 Please do not use a public github fork of this repository! We do not want solutions to be public. You should work in your own private repo.
 We recommended creating a mirrored private repository with multiple remotes. The following steps go over how to achieve this.
@@ -20,7 +22,7 @@ The easiest (but not recommended) way is to download a zip from GitHub and make 
     - When you clone a git repository, the default remote is named 'origin' and set to the URL you cloned from.
     - We will set the `origin` of our local clone to point to `MyScotty3D.git`, but also have a remote called `sourcerepo` for the public `Scotty3D` repository.
 
-4. Now go back to your clone of Scotty3D. This is how we add the private remote: 
+4. Now go back to your clone of Scotty3D. This is how we add the private remote:
     - Since we cloned from the `CMU-Graphics/Scotty3D.git` repository, the current value of `origin` should be `https://github.com/CMU-Graphics/Scotty3D.git`
         - You can check this using `git remote -v`, which should show:
             ```
@@ -37,7 +39,7 @@ The easiest (but not recommended) way is to download a zip from GitHub and make 
 5. Congratulations! you have successfully _mirrored_ a git repository with all past commits intact. Let's see a case where this becomes very useful: we start doing an assignment and commit regularly to our private repo (our `origin`). Then the 15-462 staff push some new changes to the Scotty3D skeleton code. We now want to pull the changes from our `sourcerepo`. But, we don't want to mess up the changes we've added to our private copy. Here's where git comes to the rescue:
     - First commit all current changes to your `origin`
     - Run `git pull sourcerepo master` - this pulls all the changes from `sourcerepo` into your local folder
-    - If there are files that differ in your `origin` and in the `sourcerepo`, git will attempt to automatically merge the changes. Git may create a "merge" commit for this. 
+    - If there are files that differ in your `origin` and in the `sourcerepo`, git will attempt to automatically merge the changes. Git may create a "merge" commit for this.
     - Unfortunately, there may be merge conflicts. Git will handle as many merges as it can, and then will then tell you which files have conflicts that need manual resolution. You can resolve those conflicts in your text editor and create a new commit to complete the `merge` process.
     - After you have completed the merge, you now have all the updates locally. Push to your private origin to include the changes there too:
         - `git push origin master`

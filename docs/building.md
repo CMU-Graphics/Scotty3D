@@ -1,6 +1,7 @@
 ---
 layout: default
 title: "Building Scotty3D"
+nav_order: 3
 permalink: /build/
 ---
 
@@ -12,7 +13,7 @@ To get a copy of the codebase, see [Git Setup](git).
 
 Note: the first build on any platform will be very slow, as it must compile most dependencies. Subsequent builds will only need to re-compile your edited Scotty3D code.
 
-### Linux 
+### Linux
 
 The following packages (ubuntu/debian) are required, as well as CMake and either gcc or clang:
 ```
@@ -29,7 +30,7 @@ Finally, to build the project:
 ```
 mkdir build
 cd build
-cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo .. 
+cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo ..
 make -j4
 ```
 
@@ -46,7 +47,7 @@ The windows build is easiest to set up using the Visual Studio compiler (for now
 
 You can download CMake for windows [here](https://cmake.org/download/).
 
-Once the Visual Studio compiler (MSVC) is installed, you can access it by running "Developer Command Prompt for VS 2019," which opens a terminal with the utilities in scope. The compiler is called ``cl``. You can also import these utilities in any terminal session by running the script installed at ``C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvars64.bat``. 
+Once the Visual Studio compiler (MSVC) is installed, you can access it by running "Developer Command Prompt for VS 2019," which opens a terminal with the utilities in scope. The compiler is called ``cl``. You can also import these utilities in any terminal session by running the script installed at ``C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvars64.bat``.
 
 We also provide a simple script, ``build_win.bat``, that will automatically import the compiler and build the project. You should be able to simply run it in the project root to build. ``Scotty3D.exe`` will be generated under ``build/RelWithDebInfo/``.
 
@@ -73,7 +74,7 @@ To build the project:
 ```
 mkdir build
 cd build
-cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo .. 
+cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo ..
 make -j4
 ```
 

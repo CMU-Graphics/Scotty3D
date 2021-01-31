@@ -1,12 +1,20 @@
-
+---
+layout: default
+title: Home
+nav_order: 1
+---
+<!--![15-462 F20 Renders](results/me_f20.png)-->
+<!--![15-462 F20 Renders](results/pt_f20_2.png)-->
+![15-462 F20 Renders](results/me_f20_crop.png)
 # Scotty3D
 
 Welcome to Scotty3D! This 3D graphics software package includes components for interactive mesh
 editing, realistic path tracing, and dynamic animation. Implementing functionality in each of these areas
 constitutes the majority of the coursework for 15-462/662 (Computer Graphics) at Carnegie Mellon University
 
+
 These pages describe how to set up and use Scotty3D. Start here!
-- [Git Setup](git): create a private git mirror that can pull changes from Scotty3D. 
+- [Git Setup](git): create a private git mirror that can pull changes from Scotty3D.
 - [Building Scotty3D](build): build and run Scotty3D on various platforms.
 - [User Guide](guide): learn the intended functionality for end users.
 
@@ -48,18 +56,18 @@ solution that meets a few fundamental criteria:
 *   [Failing gracefully](https://en.wikipedia.org/wiki/Fault_tolerance) is
 preferable to failing utterly---for instance, if a rare corner case is difficult
 to handle, it is far better to simply refuse to perform the operation than to
-let the program crash! 
+let the program crash!
 *   Your implementation should follow the [principle of least
 surprise](https://en.wikipedia.org/wiki/Principle_of_least_astonishment). A user
 should be able to expect that things behave more or less as they are described
-in the User Guide. 
+in the User Guide.
 *   You should not use an algorithm whose performance is [asymptotically
 worse](https://en.wikipedia.org/wiki/Asymptotic_computational_complexity) just
 because it makes your code easier to write (for instance, using [bubble
 sort](https://en.wikipedia.org/wiki/Bubble_sort) rather than [merge
-sort](https://en.wikipedia.org/wiki/Merge_sort) on large data sets). 
+sort](https://en.wikipedia.org/wiki/Merge_sort) on large data sets).
 *   That being said, when it comes to performance, [premature optimization is
-the root of all evil!](https://en.wikipedia.org/wiki/Program_optimization#When_to_optimize) The only way to know whether an optimization matters is to [measure performance](https://en.wikipedia.org/wiki/Profiling_(computer_programming)), and understand [bottlenecks](https://en.wikipedia.org/wiki/Program_optimization#Bottlenecks). 
+the root of all evil!](https://en.wikipedia.org/wiki/Program_optimization#When_to_optimize) The only way to know whether an optimization matters is to [measure performance](https://en.wikipedia.org/wiki/Profiling_(computer_programming)), and understand [bottlenecks](https://en.wikipedia.org/wiki/Program_optimization#Bottlenecks).
 *   Finally, you should take pride in your craft. Beautiful things just tend to work better.
 
 Just to reiterate the main point above:
@@ -75,5 +83,5 @@ good design choices with you, and you should also feel free to discuss these
 choices with your classmates. Practically speaking, it is ok for routines to
 simply show an error if they encounter a rare and difficult corner case---as long as it
 does not interfere with successful operation of the program (i.e., if it does
-not crash or yield bizarre behavior). Your main goal here above all else should be 
+not crash or yield bizarre behavior). Your main goal here above all else should be
 to develop _effective tool for modeling, rendering, and animation_.

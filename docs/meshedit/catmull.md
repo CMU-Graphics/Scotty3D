@@ -1,6 +1,8 @@
 ---
 layout: default
 title: "Catmull-Clark Subdivision"
+parent: Global Operations
+grand_parent: "A2: MeshEdit"
 permalink: /meshedit/global/catmull/
 ---
 
@@ -12,9 +14,11 @@ The only difference between Catmull-Clark and [linear](../linear) subdivision is
 
 1.  setting the new vertex position at each face f to the average of all its original vertices (exactly as in linear subdivision),
 2.  setting the new vertex position at each edge e to the average of the new face positions (from step 1) and the original endpoint positions, and
-3.  setting the new vertex position at each vertex v to the weighted sum 
+3.  setting the new vertex position at each vertex v to the weighted sum
 
-![catmull clark positions](catmull_clark_positions.png)
+
+<center><img src="catmull_clark_positions.png" style="height:80px"></center>
+
 
 where _n_ is the degree of vertex _v_ (i.e., the number of faces containing _v_), and
 

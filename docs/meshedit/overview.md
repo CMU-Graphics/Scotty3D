@@ -1,7 +1,10 @@
 ---
 layout: default
-title: "MeshEdit Overview"
+title: "A2: MeshEdit"
 permalink: /meshedit/
+nav_order: 5
+has_children: true
+has_toc: false
 ---
 
 # MeshEdit Overview
@@ -14,8 +17,8 @@ The following sections contain guidelines for implementing the functionality of 
 
 - [Halfedge Mesh](halfedge)
 - [Local Mesh Operations](local)
-  - [Tutorial: Edge Flip](edge_flip)
-  - [Beveling](bevel)
+  - [Tutorial: Edge Flip](local/edge_flip)
+  - [Beveling](local/bevel)
 - [Global Mesh Operations](global)
   - [Triangulation](global/triangulate)
   - [Linear Subdivision](global/linear)

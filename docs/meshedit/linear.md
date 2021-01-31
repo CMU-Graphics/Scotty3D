@@ -2,6 +2,8 @@
 layout: default
 title: "Linear Subdivision"
 permalink: /meshedit/global/linear/
+parent: "Global Operations"
+grand_parent: "A2: MeshEdit"
 ---
 
 # Linear Subdivision
@@ -18,11 +20,11 @@ Given these lists, `Halfedge_Mesh::from_poly` will take care of allocating halfe
 
 Both linear and Catmull-Clark subdivision schemes will handle general _n_-gons (i.e., polygons with _n_ sides) rather than, say, quads only or triangles only. Each _n_-gon (including but not limited to quadrilaterals) will be split into _n_ quadrilaterals according to the following template:
 
-![subdivide quad](subdivide_quad.png)
+<center><img src="subdivide_quad.png" style="height:220px"></center>
 
 The high-level procedure is outlined in greater detail in `student/meshedit.cpp`.
 
-##### Vertex Positions
+### Vertex Positions
 
 For global linear or Catmull-Clark subdivision, the strategy for assigning new vertex positions may at first appear a bit strange: in addition to updating positions at vertices, we will also calculate vertex positions associated with the _edges_ and _faces_ of the original mesh. Storing new vertex positions on edges and faces will make it extremely convenient to generate the polygons in our new mesh, since we can still use the halfedge data structure to decide which four positions get connected up to form a quadrilateral. In particular, each quad in the new mesh will consist of:
 
@@ -38,11 +40,11 @@ For linear subdivision, the rules for computing new vertex positions are very si
 
 These values should be assigned to the members `Face::new_pos`, `Edge::new_pos`, and `Vertex::new_pos`, respectively. For instance, `f->new_pos = Vec3( x, y, z );` will assign the coordinates (x,y,z) to the new vertex associated with face `f`. The general strategy for assigning these new positions is to iterate over all vertices, then all edges, then all faces, assigning appropriate values to `new_pos`. **Note:** you _must_ copy the original vertex position `Vertex::pos` to the new vertex position `Vertex::new_pos`; these values will not be used automatically.
 
-This step should be implemented in the method `Halfedge_Mesh::linear_subdivide_positions` in `student/meshedit.cpp`. 
+This step should be implemented in the method `Halfedge_Mesh::linear_subdivide_positions` in `student/meshedit.cpp`.
 
 Steps 2 and 3 are already implemented by `Halfedge_Mesh::subdivide` in `geometry/halfedge.cpp`. For your understanding, an explanation of how these are implemented is provided below:
 
-##### Polygons
+### Polygons
 
 Recall that in linear and Catmull-Clark subdivision _all polygons are subdivided simultaneously_. In other words, if we focus on the whole mesh (rather than a single polygon), then we are globally
 

@@ -1,23 +1,26 @@
 ---
 layout: default
-title: "PathTracer Overview"
+title: "A3: Pathtracer"
 permalink: /pathtracer/
+nav_order: 6
+has_children: true
+has_toc: false
 ---
 
 # PathTracer Overview
 
 PathTracer is (as the name suggests) a simple path tracer that can render scenes with global illumination. The first part of the assignment will focus on providing an efficient implementation of **ray-scene geometry queries**. In the second half of the assignment you will **add the ability to simulate how light bounces around the scene**, which will allow your renderer to synthesize much higher-quality images. Much like in MeshEdit, input scenes are defined in COLLADA files, so you can create your own scenes to render using Scotty3D or other free software like [Blender](https://www.blender.org/).
 
-![CBsphere](new_results/32k_large.png)
+<center><img src="raytracing_diagram.png" style="height:240px"></center>
 
 Implementing the functionality of PathTracer is split in to 7 tasks, and here are the instructions for each of them:
-- [(Task 1) Generating Camera Rays](camera_rays.md)
-- [(Task 2) Intersecting Objects](intersecting_objects.md)
-- [(Task 3) Bounding Volume Hierarchy](bounding_volume_hierarchy.md)
-- [(Task 4) Shadow Rays](shadow_rays.md)
-- [(Task 5) Path Tracing](path_tracing.md)
-- [(Task 6) Materials](materials.md)
-- [(Task 7) Environment Lighting](environment_lighting.md)
+- [(Task 1) Generating Camera Rays](camera_rays)
+- [(Task 2) Intersecting Objects](intersecting_objects)
+- [(Task 3) Bounding Volume Hierarchy](bounding_volume_hierarchy)
+- [(Task 4) Shadow Rays](shadow_rays)
+- [(Task 5) Path Tracing](path_tracing)
+- [(Task 6) Materials](materials)
+- [(Task 7) Environment Lighting](environment_lighting)
 
 The files that you will work with for PathTracer are all under `src/student` directory. Some of the particularly important ones are outlined below. Methods that we expect you to implement are marked with "TODO (PathTracer)", which you may search for.
 

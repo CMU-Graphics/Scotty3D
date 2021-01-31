@@ -1,7 +1,8 @@
 ---
 layout: default
-title: "rig"
-permalink: /guide/rig/
+title: "Rig"
+permalink: /guide/rigging_mode/
+parent: User Guide
 ---
 
 # Rig
@@ -18,7 +19,7 @@ If you want to branch off at a joint, simply click on the joint to branch off of
 To view a rigged example, see `media/human.dae` example and select the object in the Rig tab to view its joints.
 Once you've implemented forward kinematics the skeleton should be setup like so:
 
-![rigged-human](./rigging_mode/guide-rigging-human.png)
+![rigged-human](guide-rigging-human.png)
 
 
 
@@ -28,14 +29,14 @@ Each joint has an associated `Radius`  which controls the part of the mesh influ
 
 <video src="{{ site.baseurl }}/guide/rigging_mode/guide-rigging-2.mov" controls preload muted loop style="max-width: 100%; margin: 0 auto;"></video>
 
-Note that rigging only uses extents of the bone for skeleton setup, joint pose does not influence the skeleton. Once rigging is done, the object can be posed by changing joint rotations in the [animate](../animate) mode. 
+Note that rigging only uses extents of the bone for skeleton setup, joint pose does not influence the skeleton. Once rigging is done, the object can be posed by changing joint rotations in the [animate](../animate_mode) mode.
 
 
 ## Inverse Kinematics
-Instead of computing the positions of the bones from the joint poses (forward kinematics), in inverse kinematics, joint positions are computed from target positions. 
+Instead of computing the positions of the bones from the joint poses (forward kinematics), in inverse kinematics, joint positions are computed from target positions.
 To associate a target position with a joint, select `Add IK` and edit the target position. Multiple target positions can be associated with the same joint but targets need to be explicitly enabled using the checkbox.
 
-In the [animate](../animate) mode, once inverse kinematics is implemented, joint rotation(pose) is updated based on the enabled IK handles.
+In the [animate](../animate_mode) mode, once inverse kinematics is implemented, joint rotation(pose) is updated based on the enabled IK handles.
 
 <video src="{{ site.baseurl }}/guide/rigging_mode/guide-ik.mp4" controls preload muted loop style="max-width: 100%; margin: 0 auto;"></video>
 
