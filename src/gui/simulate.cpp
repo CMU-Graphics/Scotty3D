@@ -143,13 +143,7 @@ Mode Simulate::UIsidebar(Manager& manager, Scene& scene, Undo& undo, Widgets& wi
 
     update_bvh(scene, undo);
 
-    ImGui::Text("Simulation Settings");
-
-    if(ImGui::Button("Generate BVH")) {
-        clear_particles(scene);
-        build_scene(scene);
-    }
-    if(ImGui::CollapsingHeader("New Emitter")) {
+    if(ImGui::CollapsingHeader("Add New Emitter")) {
         ImGui::PushID(0);
 
         static Scene_Particles::Options gui_opt;
@@ -163,6 +157,7 @@ Mode Simulate::UIsidebar(Manager& manager, Scene& scene, Undo& undo, Widgets& wi
                          std::numeric_limits<float>::max(), "%.2f");
         ImGui::DragFloat("Particles/Sec", &gui_opt.pps, 1.0f, 1.0f,
                          std::numeric_limits<float>::max(), "%.2f");
+        ImGui::Checkbox("Enabled", &gui_opt.enabled);
 
         int n_types = (int)Solid_Type::count;
         if(!scene.has_obj()) {
@@ -212,11 +207,18 @@ Mode Simulate::UIsidebar(Manager& manager, Scene& scene, Undo& undo, Widgets& wi
             particles.opt.scale = gui_opt.scale;
             particles.opt.lifetime = gui_opt.lifetime;
             particles.opt.pps = gui_opt.pps;
+            particles.opt.enabled = gui_opt.enabled;
             undo.add_particles(std::move(particles));
         }
 
         ImGui::PopID();
     }
+
+    if(ImGui::Button("Generate BVH")) {
+        clear_particles(scene);
+        build_scene(scene);
+    }
+
     return mode;
 }
 
