@@ -1,9 +1,0 @@
-- title: Home
-  url: /
-  sublinks:
-    - title: Meshedit
-      url: /meshedit
-    - title: Pathtracer
-      url: /pathtracer
-    - title: Animation
-      url: /animation
