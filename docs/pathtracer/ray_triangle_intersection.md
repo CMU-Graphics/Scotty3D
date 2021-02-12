@@ -18,4 +18,4 @@ intersection point, for ray-triangle intersection.
 
 A few final notes and thoughts:
 
-If the denominator _dot((e1 x d), e2)_ is zero, what does that mean about the relationship of the ray and the triangle? Can a triangle with this area be hit by a ray? Given _u_ and _v_, how do you know if the ray hits the triangle? Don't forget that the intersection point on the ray should be within the ray's `time_bound`.
+If the denominator _dot((e1 x d), e2)_ is zero, what does that mean about the relationship of the ray and the triangle? Can a triangle with this area be hit by a ray? Given _u_ and _v_, how do you know if the ray hits the triangle? Don't forget that the intersection point on the ray should be within the ray's `dist_bounds`.

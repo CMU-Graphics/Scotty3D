@@ -19,15 +19,19 @@ Shadows occur when another scene object blocks light emitted from scene light so
 
 Your job is to implement the logic needed to compute whether hit point is in shadow with respect to the current light source sample. Below are a few notes:
 
-* In the starter code, when we call `light.sample(hit.position)`, it returns us a `Light_sample sample` at the hit point . (You might want to take a look at `rays/light.h` for the definition of `struct Light_sample` and `class light`.) A `Light_sample` contains fields `radiance`, `pdf`, `direction`, and `distance`. In particular, `sample.direction` is the direction from the hit point to the light source, and `sample.distance` is the distance from the hit point to the light source.
+* In the starter code, when we call `light.sample(hit.position)`, it returns us a `Light_Sample` at the hit point . (You might want to take a look at `rays/light.h` for the definition of `struct Light_Sample` and `class light`.) A `Light_Sample` contains fields `radiance`, `pdf`, `direction`, and `distance`. In particular, `sample.direction` is the direction from the hit point to the light source, and `sample.distance` is the distance from the hit point to the light source.
 
-* A common ray tracing pitfall is for the "shadow ray" shot into the scene to accidentally hit the same objecr as `r` (the surface is erroneously determined to be occluded because the shadow ray is determined to hit the surface!). We recommend that you make sure the origin of the shadow ray is offset from the surface to avoid these erroneous "self-intersections". For example, consider setting the origin of the shadow ray to be `hit.position + epsilon * sample.direction` instead of simply `hit.position`. `EPS_F` is defined in for this purpose(see `lib/mathlib.h`).
+* A common ray tracing pitfall is for the "shadow ray" shot into the scene to accidentally hit the same object as the original ray. That is, the surface is erroneously determined to be occluded because the shadow ray hits itself! To fix this, you can set the minimum valid intersection distance (`dist_bound.x`) to a small positive value, for example `EPS_F`. `EPS_F` is defined in for this purpose(see `lib/mathlib.h`).
 
-* Another common pitfall is forgetting that it doesn't matter if the shadow ray hits any scene geometry after reaching the light. Note that the light's distance from the hit point is given by `sample.distance`. Also note that `Ray` has a member called `time_bound`...
+* Another common pitfall is forgetting that it doesn't matter if the shadow ray hits any scene geometry after reaching the light. Note that the light's distance from the hit point is given by `sample.distance`, and you can again limit the distance we check for intersections with `dist_bound`. Also consider the fact that using the _exact_ distance bound can have the same issues as shadow self-intersections.
+
 * You will find it useful to debug your shadow code using the `DirectionalLight` since it produces hard shadows that are easy to reason about.
-* You would want to comment out the line `Spectrum radiance_out = Spectrum(0.5f);` and initialize the `radiance_out` to a more reasonable value. Hint: is there supposed to have any amount of light before we even start considering each light sample?
+
+* You must comment out the line `Spectrum radiance_out = Spectrum(0.5f);` and initialize the `radiance_out` to a more reasonable value. Hint: is there supposed to have any amount of light before we even start considering each light sample?
 
 At this point you should be able to render very striking images.
+
+If you've got shadow rays working and want a moderate performance boost, you can modify your BVH traversal for shadow rays (and only shadow rays) to return immediately upon any valid hit. This is sufficient because we don't actually need the closest hit to see if the shadow ray is occluded - just whether there was any valid hit at all.
 
 ## Sample results:
 
