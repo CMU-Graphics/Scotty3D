@@ -643,16 +643,18 @@ static void load_node(Scene& scobj, std::vector<std::string>& errors,
                     for(unsigned int k = 0; k < root_node->mNumChildren; k++)
                         build_tree(root, root_node->mChildren[k]);
                 }
+
+                new_obj.set_skel_dirty();
             }
         }
 
-        std::string m0 = std::string(node->mName.C_Str()) + "-MAT_ANIM_NODE0";
+        std::string m0 = std::string(node->mName.C_Str()) + "-" + MAT_ANIM0;
         aiNode* m0_node = scene->mRootNode->FindNode(aiString(m0));
         if(m0_node) {
             node_to_obj[m0_node] = new_obj.id();
         }
 
-        std::string m1 = std::string(node->mName.C_Str()) + "-MAT_ANIM_NODE1";
+        std::string m1 = std::string(node->mName.C_Str()) + "-" + MAT_ANIM1;
         aiNode* m1_node = scene->mRootNode->FindNode(aiString(m1));
         if(m1_node) {
             node_to_obj[m1_node] = new_obj.id();
