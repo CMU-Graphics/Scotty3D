@@ -73,6 +73,8 @@ void Undo::del_bone(Scene_ID id, Joint* j) {
 
     Scene_Object& obj = scene.get_obj(id);
     obj.armature.erase(j);
+    gui.get_rig().invalidate(j);
+    gui.get_animate().invalidate(j);
     obj.set_skel_dirty();
 
     action(
@@ -94,6 +96,8 @@ void Undo::del_handle(Scene_ID id, Skeleton::IK_Handle* j) {
 
     Scene_Object& obj = scene.get_obj(id);
     obj.armature.erase(j);
+    gui.get_rig().invalidate(j);
+    gui.get_animate().invalidate(j);
     obj.set_skel_dirty();
 
     action(
