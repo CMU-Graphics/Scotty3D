@@ -15,7 +15,7 @@ Here we provide some additional detail about the bevel operations and their impl
 
 The methods that update the connectivity are `HalfedgeMesh::bevel_vertex`, `halfedgeMesh::bevel_edge`, and `HalfedgeMesh::bevel_face`. The methods that update geometry are `HalfedgeMesh::bevel_vertex_positions`, `HalfedgeMesh::bevel_edge_positions`, and `HalfedgeMesh::bevel_face_positions`.
 
-The methods for updating connectivity can be implemented following the general strategy outlined in [edge flip tutorial](edge_flip). **Note that the methods that update geometry will be called repeatedly for the same bevel, in order to adjust positions according to user mouse input. See the gif in the [User Guide](../guide/model).**
+The methods for updating connectivity can be implemented following the general strategy outlined in [edge flip tutorial](edge_flip). **Note that the methods that update geometry will be called repeatedly for the same bevel, in order to adjust positions according to user mouse input. See the gif in the [User Guide](../guide/model_mode).**
 
 To update the _geometry_ of a beveled element, you are provided with the following data:
 
