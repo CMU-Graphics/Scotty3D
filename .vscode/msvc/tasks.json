@@ -7,13 +7,13 @@
             "label": "Configure",
             "type": "shell",
             "group": "build",
-            "command": "./build_win.bat configure",
+            "command": "build_win.bat configure",
             "problemMatcher": []    
         },
         {
             "label": "Build Release",
             "type": "shell",
-            "command": "./build_win.bat RelWithDebInfo",
+            "command": "build_win.bat RelWithDebInfo",
             "args": [],
             "group": "build",
             "problemMatcher": "$msCompile"
@@ -21,7 +21,7 @@
         {
             "label": "Build Debug",
             "type": "shell",
-            "command": "./build_win.bat Debug",
+            "command": "build_win.bat Debug",
             "args": [],
             "group": "build",
             "problemMatcher": "$msCompile"
