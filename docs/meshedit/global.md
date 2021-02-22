@@ -10,7 +10,7 @@ nav_order: 2
 
 # Global Mesh Operations
 
-In addition to local operations on mesh connectivity, Scotty3D provides several global remeshing operations (as outlined in the [User Guide](/Scotty3D/guide/model)). Two different mechanisms are used to implement global operations:
+In addition to local operations on mesh connectivity, Scotty3D provides several global remeshing operations (as outlined in the [User Guide](/Scotty3D/guide/model_mode)). Two different mechanisms are used to implement global operations:
 
 *   _Repeated application of local operations._ Some mesh operations are most easily expressed by applying local operations (edge flips, etc.) to a sequence of mesh elements until the target output is achieved. A good example is [mesh simplification](simplify), which is a greedy algorithm that collapses one edge at a time.
 *   _Global replacement of the mesh._ Other mesh operations are better expressed by temporarily storing new mesh elements in a simpler mesh data structure (e.g., an indexed list of faces) and completely re-building the halfedge data structure from this data. A good example is [Catmull-Clark subdivision](catmull), where every polygon must be simultaneously split into quadrilaterals.

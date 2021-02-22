@@ -8,7 +8,7 @@ grand_parent: "A2: MeshEdit"
 
 # Linear Subdivision
 
-For an in-practice example, see the [User Guide](/Scotty3D/guide/model).
+For an in-practice example, see the [User Guide](/Scotty3D/guide/model_mode).
 
 Unlike most other global remeshing operations, linear (and Catmull-Clark) subdivision will proceed by completely replacing the original halfedge mesh with a new one. The high-level procedure is:
 

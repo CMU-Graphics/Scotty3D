@@ -8,7 +8,7 @@ grand_parent: "A2: MeshEdit"
 
 # Loop Subdivision
 
-For an in-practice example, see the [User Guide](/Scotty3D/guide/model).
+For an in-practice example, see the [User Guide](/Scotty3D/guide/model_mode).
 
 Loop subdivision (named after [Charles Loop](http://charlesloop.com/)) is a standard approximating subdivision scheme for triangle meshes. At a high level, it consists of two basic steps:
 

@@ -27,7 +27,7 @@ To facilitate user interaction, as well as global mesh processing operations (de
 
 Also, remember that in any case, _the program should not crash!_ So for instance, you should never return a pointer to an element that was deleted.
 
-See the [User Guide](/Scotty3D/guide/model) for demonstrations of each local operation.
+See the [User Guide](/Scotty3D/guide/model_mode) for demonstrations of each local operation.
 
 *   `Halfedge_Mesh::flip_edge` - should return the edge that was flipped
 
