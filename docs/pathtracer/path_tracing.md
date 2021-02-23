@@ -35,7 +35,7 @@ Note:
 
 ---
 
-After correctly implementing path tracing, your renderer should be able to make a beautifully lit picture of the Cornell Box. Below is the rendering result of 1024 sample per pixel.
+After correctly implementing path tracing, your renderer should be able to make a beautifully lit picture of the Cornell Box. However, the provided `cbox.dae` is Glass material, but you have only implemented Lambertian. Therefore, you need to firstly modify the material of `cbox.dae` (probably using Scotty3D panels) to Lambertian before rendering. Below is the rendering result of 1024 sample per pixel.
 
 ![cornell_lambertian](new_results/lambertian.png)
 
