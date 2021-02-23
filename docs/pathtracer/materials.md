@@ -67,7 +67,7 @@ Alternatively, you may compute <img src="dielectric_eq8.png" width="18">  using 
 We described the BRDF for perfect specular reflection in class, however we did not discuss the distribution function for transmitted light. Since refraction "spreads" or "condenses" a beam, unlike perfect reflection, the radiance along the ray changes due to a refraction event. In your assignment you should use Snell's Law to compute the direction of refraction rays, and use the following distribution function to compute the radiance of transmitted rays. We refer you guys to Pharr, Jakob, and and Humphries's book [Physically Based Rendering](http://www.pbr-book.org/) for a derivation based on Snell's Law and the relation <img src="dielectric_eq10.png" width="150">. (But you are more than welcome to attempt a derivation on your own!)
 
 
-When you are done, you will be able to render images like these:
+When you are done, you will be able to render images like this one, the Cornell Box with a metal and glass sphere (`cbox.dae`):
 
 <center><img src="new_results/32k_large.png"></center>
 
