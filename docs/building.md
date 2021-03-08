@@ -9,7 +9,7 @@ permalink: /build/
 
 ![Ubuntu Build Status](https://github.com/CMU-Graphics/Scotty3D/workflows/Ubuntu/badge.svg) ![MacOS Build Status](https://github.com/CMU-Graphics/Scotty3D/workflows/MacOS/badge.svg) ![Windows Build Status](https://github.com/CMU-Graphics/Scotty3D/workflows/Windows/badge.svg)
 
-To get a copy of the codebase, see [Git Setup](git).
+To get a copy of the codebase, see [Git Setup](/Scotty3D/git).
 
 Note: the first build on any platform will be very slow, as it must compile most dependencies. Subsequent builds will only need to re-compile your edited Scotty3D code.
 
