@@ -17,7 +17,7 @@
     the value it holds need not be allocated elsewhere, and it provides an API that
     forces the user to check if it is null before using the value.
 
-    In your implementaiton, if you have successfully performed the operation, you can
+    In your implementation, if you have successfully performed the operation, you can
     simply return the required reference:
 
             ... collapse the edge ...
