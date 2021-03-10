@@ -914,9 +914,8 @@ void Manager::UIsavefirst(Scene& scene, Undo& undo) {
 
     Vec2 center = window_dim / 2.0f;
     ImGui::SetNextWindowPos(Vec2{center.x, center.y}, 0, Vec2{0.5f, 0.5f});
-    ImGui::SetNextWindowSize(Vec2{150.0f, 50.0f});
     ImGui::Begin("Save Changes?", &save_first_shown,
-                 ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoResize);
+                 ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_AlwaysAutoResize);
     if(ImGui::Button("Yes")) {
         save_first_shown = false;
         after_save(save_scene(scene, undo));
