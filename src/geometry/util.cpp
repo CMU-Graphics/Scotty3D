@@ -28,6 +28,11 @@ GL::Mesh cone_mesh(float bradius, float tradius, float height, int sides, bool c
     return Gen::dedup({std::move(cone.verts), std::move(cone.elems)});
 }
 
+GL::Mesh cyl_mesh_disjoint(float radius, float height, int sides) {
+    Gen::Data cone = Gen::cone(radius, radius, height, sides, false);
+    return GL::Mesh(std::move(cone.verts), std::move(cone.elems));
+}
+
 GL::Mesh torus_mesh(float iradius, float oradius, int segments, int sides) {
     Gen::Data torus = Gen::torus(iradius, oradius, segments, sides);
     return Gen::dedup({std::move(torus.verts), std::move(torus.elems)});

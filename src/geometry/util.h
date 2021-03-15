@@ -11,6 +11,7 @@ GL::Mesh cube_mesh(float radius);
 GL::Mesh square_mesh(float radius);
 GL::Mesh quad_mesh(float x, float y);
 GL::Mesh cyl_mesh(float radius, float height, int sides = 12, bool cap = true);
+GL::Mesh cyl_mesh_disjoint(float radius, float height, int sides = 12);
 GL::Mesh torus_mesh(float iradius, float oradius, int segments = 48, int sides = 24);
 GL::Mesh sphere_mesh(float r, int subdivsions);
 GL::Mesh hemi_mesh(float r);

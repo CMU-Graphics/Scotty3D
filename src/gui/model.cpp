@@ -13,7 +13,7 @@
 namespace Gui {
 
 Model::Model()
-    : spheres(Util::sphere_mesh(0.05f, 1)), cylinders(Util::cyl_mesh(0.05f, 1.0f)),
+    : spheres(Util::sphere_mesh(0.05f, 1)), cylinders(Util::cyl_mesh_disjoint(0.05f, 1.0f)),
       arrows(Util::arrow_mesh(0.05f, 0.1f, 1.0f)) {
 }
 
