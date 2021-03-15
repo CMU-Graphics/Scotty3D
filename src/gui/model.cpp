@@ -404,38 +404,27 @@ void Model::rebuild() {
 bool Model::begin_bevel(std::string& err) {
 
     auto sel = selected_element();
-    if(sel.has_value()) {
-        if(std::holds_alternative<Halfedge_Mesh::HalfedgeRef>(*sel)) {
-            return false;
-        }
-    }
+    if(!sel.has_value()) return false;
 
     my_mesh->copy_to(old_mesh);
 
-    Halfedge_Mesh::FaceRef new_face;
-    std::visit(overloaded{[&](Halfedge_Mesh::VertexRef vert) {
-                              auto res = my_mesh->bevel_vertex(vert);
-                              if(res.has_value()) {
-                                  new_face = *res;
-                                  beveling = Bevel::vert;
-                              }
+    auto new_face = std::visit(overloaded{[&](Halfedge_Mesh::VertexRef vert) {
+                              beveling = Bevel::vert;
+                              return my_mesh->bevel_vertex(vert);
                           },
                           [&](Halfedge_Mesh::EdgeRef edge) {
-                              auto res = my_mesh->bevel_edge(edge);
-                              if(res.has_value()) {
-                                  new_face = *res;
-                                  beveling = Bevel::edge;
-                              }
+                              beveling = Bevel::edge;
+                              return my_mesh->bevel_edge(edge);
                           },
                           [&](Halfedge_Mesh::FaceRef face) {
-                              auto res = my_mesh->bevel_face(face);
-                              if(res.has_value()) {
-                                  new_face = *res;
-                                  beveling = Bevel::face;
-                              }
+                              beveling = Bevel::face;
+                              return my_mesh->bevel_face(face);
                           },
-                          [&](auto) {}},
+                          [&](auto) -> std::optional<Halfedge_Mesh::FaceRef> { return std::nullopt; }},
                *sel);
+
+    if(!new_face.has_value()) return false;
+    Halfedge_Mesh::FaceRef face = new_face.value();
 
     err = validate();
     if(!err.empty()) {
@@ -446,15 +435,15 @@ bool Model::begin_bevel(std::string& err) {
     } else {
 
         my_mesh->render_dirty_flag = true;
-        set_selected(new_face);
+        set_selected(face);
 
         trans_begin = {};
-        auto h = new_face->halfedge();
-        trans_begin.center = new_face->center();
+        auto h = face->halfedge();
+        trans_begin.center = face->center();
         do {
             trans_begin.verts.push_back(h->vertex()->pos);
             h = h->next();
-        } while(h != new_face->halfedge());
+        } while(h != face->halfedge());
 
         return true;
     }
