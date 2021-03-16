@@ -66,30 +66,30 @@ If your edge operation requires new elements, now is the time to allocate them. 
 Next, update the pointers for all the mesh elements that are affected by the edge operation. Be exhaustive! In other words, go ahead and specify every pointer for every element, even if it did not change. Once things are working correctly, you can always optimize by removing unnecessary assignments. But get it working correctly first! Correctness is more important than efficiency.
 
     // HALFEDGES
-    h0->next() = h1;
+    h0->next() = h5;
     h0->twin() = h3;
-    h0->vertex() = v2;
+    h0->vertex() = v3;
     h0->edge() = e0;
     h0->face() = f0;
-    h1->next() = h2;
-    h1->twin() = h7;
-    h1->vertex() = v3;
-    h1->edge() = e3;
+    h1->next() = h0;
+    h1->twin() = h6;
+    h1->vertex() = v1;
+    h1->edge() = e4;
     h1->face() = f0;
     // ...you fill in the rest!...
 
     // ...and don't forget about the "outside" elements!...
     h9->next() = h9->next(); // didn't change, but set it anyway!
-    h9->twin() = h4;
+    h9->twin() = h5;
     h9->vertex() = v1;
     h9->edge() = e1;
     h9->face() = h9->face(); // didn't change, but set it anyway!
 
     // VERTICES
-    v0->halfedge() = h2;
-    v1->halfedge() = h5;
-    v2->halfedge() = h4;
-    v3->halfedge() = h3;
+    v0->halfedge() = h4;
+    v1->halfedge() = h1;
+    v2->halfedge() = h5;
+    v3->halfedge() = h2;
 
     // EDGES
     e0->halfedge() = h0; //...you fill in the rest!...
