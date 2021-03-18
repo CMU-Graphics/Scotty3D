@@ -253,7 +253,7 @@ void Model::edge_viz(Halfedge_Mesh::EdgeRef e, Mat4& transform) {
     float v0s = vert_sizes[v_0->id()], v1s = vert_sizes[v_1->id()];
     float s = 0.5f * std::min(v0s, v1s);
 
-    if(dir.y == 1.0f || dir.y == -1.0f) {
+    if(1.0f - std::abs(dir.y) < EPS_F) {
         l *= sign(dir.y);
         transform = Mat4{Vec4{s, 0.0f, 0.0f, 0.0f}, Vec4{0.0f, l, 0.0f, 0.0f},
                          Vec4{0.0f, 0.0f, s, 0.0f}, Vec4{v0, 1.0f}};
