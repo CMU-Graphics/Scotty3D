@@ -568,10 +568,11 @@ bool Halfedge_Mesh::subdivide(SubD strategy) {
         verts[idx] = e->new_pos;
         layout[e->id()] = idx;
     }
-    for(FaceRef f = faces_begin(); f != faces_end(); f++, idx++) {
+    for(FaceRef f = faces_begin(); f != faces_end(); f++) {
         if(f->is_boundary()) continue;
         verts[idx] = f->new_pos;
         layout[f->id()] = idx;
+        idx++;
     }
 
     for(auto f = faces_begin(); f != faces_end(); f++) {
