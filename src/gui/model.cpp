@@ -382,6 +382,7 @@ void Model::rebuild() {
     cylinders.clear();
     for(auto e = mesh.edges_begin(); e != mesh.edges_end(); e++) {
 
+        if(e->halfedge()->is_boundary() && e->halfedge()->twin()->is_boundary()) continue;
         Mat4 transform;
         edge_viz(e, transform);
         id_to_info[e->id()] = {e, cylinders.add(transform, e->id())};
