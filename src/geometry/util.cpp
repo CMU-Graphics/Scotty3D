@@ -200,24 +200,32 @@ Data cone(float bradius, float tradius, float height, int sides, bool caps) {
     size_t vert = 0;
 
     vertices[vert++] = Vec3(0.0f, 0.0f, 0.0f);
+
+    float t = 0.0f;
+    float step = _2pi / n_sides;
+    
     while(vert <= n_sides) {
-        float rad = (float)vert / n_sides * _2pi;
-        vertices[vert] = Vec3(std::cos(rad) * bradius, 0.0f, std::sin(rad) * bradius);
+        vertices[vert] = Vec3(std::cos(t) * bradius, 0.0f, std::sin(t) * bradius);
         vert++;
+        t += step;
     }
+
     vertices[vert++] = Vec3(0.0f, height, 0.0f);
+    t = 0.0f;
     while(vert <= n_sides * 2 + 1) {
-        float rad = (float)(vert - n_sides - 1) / n_sides * _2pi;
-        vertices[vert] = Vec3(std::cos(rad) * tradius, height, std::sin(rad) * tradius);
+        vertices[vert] = Vec3(std::cos(t) * tradius, height, std::sin(t) * tradius);
         vert++;
+        t += step;
     }
+    
     size_t v = 0;
+    t = 0.0f;
     while(vert <= vertices.size() - 4) {
-        float rad = (float)v / n_sides * _2pi;
-        vertices[vert] = Vec3(std::cos(rad) * tradius, height, std::sin(rad) * tradius);
-        vertices[vert + 1] = Vec3(std::cos(rad) * bradius, 0.0f, std::sin(rad) * bradius);
+        vertices[vert] = Vec3(std::cos(t) * tradius, height, std::sin(t) * tradius);
+        vertices[vert + 1] = Vec3(std::cos(t) * bradius, 0.0f, std::sin(t) * bradius);
         vert += 2;
         v++;
+        t += step;
     }
     vertices[vert] = vertices[n_sides * 2 + 2];
     vertices[vert + 1] = vertices[n_sides * 2 + 3];
