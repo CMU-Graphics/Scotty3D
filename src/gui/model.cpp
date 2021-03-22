@@ -381,8 +381,17 @@ void Model::rebuild() {
     // Create cylinder for each edge
     cylinders.clear();
     for(auto e = mesh.edges_begin(); e != mesh.edges_end(); e++) {
+        
+        // We don't want to render edges between two boundary faces, since the boundaries
+        // should look contiguous
+        if(e->halfedge()->is_boundary() && e->halfedge()->twin()->is_boundary()) {
 
-        if(e->halfedge()->is_boundary() && e->halfedge()->twin()->is_boundary()) continue;
+            // Unless both surrounding boundaries are the same face, in which case we should
+            // render this edge to show that the next vertex is connected
+            if(e->halfedge()->face() != e->halfedge()->twin()->face()) 
+                continue;
+        }
+
         Mat4 transform;
         edge_viz(e, transform);
         id_to_info[e->id()] = {e, cylinders.add(transform, e->id())};
