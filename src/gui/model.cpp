@@ -253,7 +253,7 @@ void Model::edge_viz(Halfedge_Mesh::EdgeRef e, Mat4& transform) {
     float v0s = vert_sizes[v_0->id()], v1s = vert_sizes[v_1->id()];
     float s = 0.5f * std::min(v0s, v1s);
 
-    if(dir.y == 1.0f || dir.y == -1.0f) {
+    if(1.0f - std::abs(dir.y) < EPS_F) {
         l *= sign(dir.y);
         transform = Mat4{Vec4{s, 0.0f, 0.0f, 0.0f}, Vec4{0.0f, l, 0.0f, 0.0f},
                          Vec4{0.0f, 0.0f, s, 0.0f}, Vec4{v0, 1.0f}};
@@ -381,6 +381,16 @@ void Model::rebuild() {
     // Create cylinder for each edge
     cylinders.clear();
     for(auto e = mesh.edges_begin(); e != mesh.edges_end(); e++) {
+        
+        // We don't want to render edges between two boundary faces, since the boundaries
+        // should look contiguous
+        if(e->halfedge()->is_boundary() && e->halfedge()->twin()->is_boundary()) {
+
+            // Unless both surrounding boundaries are the same face, in which case we should
+            // render this edge to show that the next vertex is connected
+            if(e->halfedge()->face() != e->halfedge()->twin()->face()) 
+                continue;
+        }
 
         Mat4 transform;
         edge_viz(e, transform);

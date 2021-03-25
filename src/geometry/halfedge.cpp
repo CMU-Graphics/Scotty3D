@@ -557,7 +557,7 @@ bool Halfedge_Mesh::subdivide(SubD strategy) {
     Index idx = 0;
     size_t nV = vertices.size();
     size_t nE = edges.size();
-    size_t nF = faces.size();
+    size_t nF = faces.size() - n_boundaries();
     verts.resize(nV + nE + nF);
 
     for(VertexRef v = vertices_begin(); v != vertices_end(); v++, idx++) {
@@ -568,12 +568,15 @@ bool Halfedge_Mesh::subdivide(SubD strategy) {
         verts[idx] = e->new_pos;
         layout[e->id()] = idx;
     }
-    for(FaceRef f = faces_begin(); f != faces_end(); f++, idx++) {
+    for(FaceRef f = faces_begin(); f != faces_end(); f++) {
+        if(f->is_boundary()) continue;
         verts[idx] = f->new_pos;
         layout[f->id()] = idx;
+        idx++;
     }
 
     for(auto f = faces_begin(); f != faces_end(); f++) {
+        if(f->is_boundary()) continue;
         Index i = layout[f->id()];
         HalfedgeRef h = f->halfedge();
         do {
