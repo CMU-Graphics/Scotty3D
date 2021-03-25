@@ -9,9 +9,9 @@ has_toc: false
 
 # (Task 2) Intersecting Objects
 
-Now that your ray tracer generates camera rays, we need to be able to answer the core query in ray tracing: "does this ray hit this object?" Here, you will start by implementing ray-object intersection routines against the two types of objects in the starter code: triangles and spheres. Later, we will use a BVH to accelerate these queries, but for now we consider an intersection test against a single object.
+Now that your ray tracer generates camera rays, we need to be able to answer the core query in ray tracing: "does this ray hit this object?" Here, you will start by implementing ray-object intersection routines against the two types of objects in the starter code: **triangles** and **spheres**.
 
-First, take a look at the `rays/object.h` for the interface of `Object` class. An `Object` can be **either** a `Tri_Mesh`, a `Shape`, a BVH(which you will implement in Task 3), or a list of `Objects`. Right now, we are only dealing with `Tri_Mesh`'s case and `Shape`'s case, and their interfaces are in `rays/tri_mesh.h`  and `rays/shapes.h`, respectively. `Tri_Mesh` contains a BVH of `Triangle`, and in this task you will be working with the `Triangle` class. For `Shape`, you are going to work with `Sphere`s, which is the major type of `Shape` in Scotty 3D.
+First, take a look at `rays/object.h` for the interface of the `Object` class. An `Object` can be **either** a `Tri_Mesh`, a `Shape`, a BVH(which you will implement in Task 3), or a list of `Objects`. Right now, we are only dealing with `Tri_Mesh`'s case and `Shape`'s case, and their interfaces are in `rays/tri_mesh.h`  and `rays/shapes.h`, respectively. `Tri_Mesh` contains a BVH of `Triangle`, and in this task you will be working with the `Triangle` class. For `Shape`, you are going to work with `Sphere`s, which is the major type of `Shape` in Scotty 3D.
 
 Now, you need to implement the `hit` routine for both `Triangle` and `Sphere`. `hit` takes in a ray, and returns a `Trace` structure, which contains information on whether the ray hits the object and if hits, the information describing the surface at the point of the hit. See `rays/trace.h` for the definition of `Trace`.
 
@@ -27,7 +27,7 @@ One important detail of the ray structure is that `dist_bounds` is a mutable fie
 
 ---
 
-### **Step 1: Intersecting Triangles**
+## Step 1: `Triangle::hit`
 
 The first intersect routine that the `hit` routines for the triangle mesh in `student/tri_mesh.cpp`.
 
@@ -46,16 +46,21 @@ There are two important details you should be aware of about intersection:
 
 Once you've successfully implemented triangle intersection, you will be able to render many of the scenes in the media directory. However, your ray tracer will be very slow!
 
-**While you are working with `student/tri_mesh.cpp`, you should implement `Triangle::bbox` as well, which are important for task 3.**
+**Tip:** While you are working with `student/tri_mesh.cpp`, you can choose to implement `Triangle::bbox` as well (pretty straightforward to do), which is needed for task 3.
 
-### **Step 2: Intersecting Spheres**
+## Step 2: `Sphere::hit`
 
-You also need to implement the `hit` routines for the `Sphere` class in `student/sphapes.cpp`. Remember that your intersection tests should respect the ray's `dist_bound`. Because spheres always represent closed surfaces, you should not flip back-facing normals you did with triangles.
+You also need to implement the `hit` routines for the `Sphere` class in `student/shapes.cpp`. Remember that your intersection tests should respect the ray's `dist_bound`. Because spheres always represent closed surfaces, you should not flip back-facing normals you did with triangles.
 
-Note: take care **not** to use the `Vec3::normalize()` method when computing your
+**Tip 1:** take care **NOT** to use the `Vec3::normalize()` method when computing your
 normal vector. You should instead use `Vec3::unit()`, since `Vec3::normalize()`
 will actually change the `Vec3` calling object rather than returning a
 normalized version.
+
+
+**Tip 2:** A common mistake is to forget to check the case where the first
+interesection time t1 is out of bounds but the second interesection time t2 is
+(in which case you should return t2).
 
 ---
 

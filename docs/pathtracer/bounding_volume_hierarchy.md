@@ -7,6 +7,9 @@ parent: "A3: Pathtracer"
 
 # (Task 3) Bounding Volume Hierarchy
 
+### Walkthrough Video
+<iframe width="750" height="500" src="Task3_BVH.mp4" frameborder="0" allowfullscreen></iframe>
+
 
 In this task you will implement a bounding volume hierarchy that accelerates ray-scene intersection. Most of this work will be in `student/bvh.inl`. Note that this file has an unusual extension (`.inl` = inline) because it is an implementation file for a template class. This means `bvh.h` must `#include` it, so all code that sees `bvh.h` will also see `bvh.inl`.
 
@@ -25,21 +28,26 @@ The starter code constructs a valid BVH, but it is a trivial BVH with a single n
 Finally, note that the BVH visualizer will start drawing from `BVH::root_idx`, so be sure to set this to the proper index (probably 0 or `nodes.size() - 1`, depending on your implementation) when you build the BVH.
 
 
-## Step 0: Bounding Box Calculation
+## Step 0: Bounding Box Calculation & Intersection
 
-Implement `BBox::hit` in `student/bbox.cpp`.
-Also if you haven't already, implement `Triangle::bbox` in `student/tri_mesh.cpp` (`Triangle::bbox` should be fairly straightforward). We recommend checking out this [Scratchapixel article](https://www.scratchapixel.com/lessons/3d-basic-rendering/minimal-ray-tracer-rendering-simple-shapes/ray-box-intersection).
+Implement `BBox::hit` in `student/bbox.cpp` and `Triangle::bbox` in `student/tri_mesh.cpp` (if you haven't already from Task 2).
+
+We recommend checking out this [Scratchapixel article](https://www.scratchapixel.com/lessons/3d-basic-rendering/minimal-ray-tracer-rendering-simple-shapes/ray-box-intersection) for implementing bounding box intersections.
 
 ## Step 1: BVH Construction
 
-Your job is to construct a `BVH` using the [Surface Area Heuristic](http://15462.courses.cs.cmu.edu/fall2017/lecture/acceleratingqueries/slide_025) discussed in class. Tree construction would occur when the BVH object is constructed. Below is the pseudocode by which your BVH construction procedure should generally follow (copied from lecture slides).
+Your job is to construct a `BVH` in `void BVH<Primitive>::build` in
+`student/bvh.inl`
+using the [Surface Area Heuristic](http://15462.courses.cs.cmu.edu/fall2017/lecture/acceleratingqueries/slide_025) discussed in class. Tree construction would occur when the BVH object is constructed. Below is the pseudocode by which your BVH construction procedure should generally follow (copied from lecture slides).
+
+**Note:** You may find that this task is one of the most time consuming parts of A3, especially since this part of the documentation is intentionally sparse.
 
 <center><img src="BVH_construction_pseudocode.png"></center>
 
 
 ## Step 2: Ray-BVH Intersection
 
-Implement the ray-BVH intersection routine `Trace BVH<Primitive>::hit(const Ray& ray)`. You may wish to consider the node visit order optimizations we discussed in class. Once complete, your renderer should be able to render all of the test scenes in a reasonable amount of time. [Visualization of normals](visualization_of_normals.md) may help with debugging.
+Implement the ray-BVH intersection routine `Trace BVH<Primitive>::hit(const Ray& ray)` in `student/bvh.inl`. You may wish to consider the node visit order optimizations we discussed in class. Once complete, your renderer should be able to render all of the test scenes in a reasonable amount of time. [Visualization of normals](visualization_of_normals.md) may help with debugging.
 
 <center><img src="ray_bvh_pseudocode.png"></center>
 

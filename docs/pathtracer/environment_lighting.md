@@ -3,11 +3,14 @@ layout: default
 title: (Task 7) Environment Lighting
 parent: "A3: Pathtracer"
 permalink: /pathtracer/environment_lighting
-has_children: true
+has_children: false
 has_toc: false
 ---
 
 # (Task 7) Environment Lighting
+
+### Walkthrough Video
+<iframe width="750" height="500" src="Task7_EnvMap.mp4" frameborder="0" allowfullscreen></iframe>
 
 The final task of this assignment will be to implement a new type of light source: an infinite environment light. An environment light is a light that supplies incident radiance (really, the light intensity dPhi/dOmega) from all directions on the sphere. Rather than using a predefined collection of explicit lights, an environment light is a capture of the actual incoming light from some real-world scene; rendering using environment lighting can be quite striking.
 
@@ -17,7 +20,7 @@ The intensity of incoming light from each direction is defined by a texture map 
 
 In this task you need to implement the `Env_Map::sample` and `Env_Map::sample_direction` method in `student/env_light.cpp`. You'll start with uniform direction sampling to get things working, and then move to a more advanced implementation that uses **importance sampling** to significantly reduce variance in rendered images.
 
-## Step 1: Uniform sampling
+## Step 1: Uniformly sampling the environment map
 To get things working, your first implementation of `Env_Map::sample` will be quite simple. You should generate a random direction on the sphere (**with uniform (1/4pi) probability with respect to solid angle**), convert this direction to coordinates (phi, theta) and then look up the appropriate radiance value in the texture map using **bilinear interpolation** (note: we recommend you begin with bilinear interpolation to keep things simple.)
 
 
@@ -44,16 +47,8 @@ A pixel with coordinate <img src="environment_eq1.png" width ="45"> subtends an 
 
 **Summing the fluxes for all pixels, then normalizing the values so that they sum to one, yields a discrete probability distribution for picking a pixel based on flux through its corresponding solid angle on the sphere.**
 
-The question is now how to sample from this 2D discrete probability distribution. We recommend the following process which reduces the problem to drawing samples from two 1D distributions, each time using the inversion method discussed in class:
-
-* Given <img src="environment_eq6.png" width ="45"> the probability distribution for all pixels, compute the marginal probability distribution <img src="environment_eq7.png" width ="100"> for selecting a value from each row of pixels.
-
-* Given for any pixel, compute the conditional probability <img src="environment_eq8.png" width ="100">.
-
-Given the marginal distribution for <img src="environment_eq9.png" width ="10"> and the conditional distributions <img src="environment_eq10.png" width ="45"> for environment map rows, it is easy to select a pixel as follows:
-
-1. Use the inversion method to first select a "row" of the environment map according to <img src="environment_eq11.png" width ="35">.
-2. Given this row, use the inversion method to select a pixel in the row according to <img src="environment_eq12.png" width ="45">.
+To sample this 2D discrete probability distribution, we recommend treating the image as a single vector (row-major), where
+the CDF of a pixel is the sum of the PDFs of the pixels before it. You can then use inversion sampling with this vector to sample a pixel from this 2D discrete probability distribuion.
 
 **Here are a few tips:**
 
