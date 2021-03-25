@@ -1695,9 +1695,9 @@ std::string Scene::write(std::string file, const Camera& render_cam,
                 const Scene_Light::Anim_Light& light = item.get<Scene_Light>().lanim;
 
                 write_anim(name, light.splines, [&light](float t) -> std::tuple<Vec3, Quat, Vec3> {
-                    auto [spec, inten, angle, size] = light.splines.at(t);
+                    auto [spec, inten, angle, s] = light.splines.at(t);
                     return {Vec3{spec.r, spec.g, spec.b}, Quat::euler(Vec3{angle.x, 0.0f, angle.y}),
-                            Vec3{inten, size.x, size.y} + Vec3{1.0f}};
+                            Vec3{inten, s.x, s.y} + Vec3{1.0f}};
                 });
 
             } else if(item.is<Scene_Particles>()) {

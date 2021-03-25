@@ -224,6 +224,10 @@ public:
     std::optional<EdgeRef> flip_edge(EdgeRef e);
 
     /*
+        Bisect an edge, returning a pointer to the inserted midpoint vertex
+    */
+   std::optional<VertexRef> bisect_edge(EdgeRef e);
+    /*
         Split an edge, returning a pointer to the inserted midpoint vertex; the
         halfedge of this vertex should refer to one of the edges in the original
         mesh
@@ -246,11 +250,28 @@ public:
     std::optional<FaceRef> bevel_face(FaceRef f);
 
     /*
+        Insets a vertex into the given face, returning a pointer to the new center vertex
+    */
+    std::optional<VertexRef> insert_vertex(FaceRef f);
+
+    /*
+        Bevels a vertex and inserts a vertex into the new vertex, returning a pointer to that vertex
+    */
+    std::optional<VertexRef> extrude_vertex(VertexRef v);
+
+    /*
         Computes vertex positions for a face that was just created by beveling a vertex,
         but not yet confirmed.
     */
     void bevel_vertex_positions(const std::vector<Vec3>& start_positions, FaceRef face,
                                 float tangent_offset);
+
+    /*
+        Computes vertex positions for the temporary face just created by extruding a vertex,
+        at confirmed positions.
+    */
+    void extrude_vertex_positions(const Vec3 start_positions, FaceRef face);
+    void extrude_vertex_pos(const std::vector<Vec3>& start_positions, VertexRef v, float normal_offset);
 
     /*
         Computes vertex positions for a face that was just created by beveling an edge,
@@ -284,6 +305,11 @@ public:
         Splits all non-triangular faces into triangles.
     */
     void triangulate();
+
+    /*
+        Splits all faces into quadrangles.
+    */
+    void quadrangulate();
 
     /*
         Compute new vertex positions for a mesh that splits each polygon

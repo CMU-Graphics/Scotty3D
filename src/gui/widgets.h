@@ -13,7 +13,7 @@ class Animate;
 
 enum class Axis { X, Y, Z };
 
-enum class Widget_Type { move, rotate, scale, bevel, count };
+enum class Widget_Type { move, rotate, scale, bevel, count, extrude };
 static const int n_Widget_Types = (int)Widget_Type::count;
 
 enum class Widget_IDs : Scene_ID {
