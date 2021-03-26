@@ -235,6 +235,11 @@ public:
     std::optional<VertexRef> split_edge(EdgeRef e);
 
     /*
+        Insets a new face within the given face
+    */
+    std::optional<FaceRef> inset_face(FaceRef f);
+
+    /*
         Creates a face in place of the vertex, returning a pointer to the new face
     */
     std::optional<FaceRef> bevel_vertex(VertexRef v);
@@ -306,10 +311,6 @@ public:
     */
     void triangulate();
 
-    /*
-        Splits all faces into quadrangles.
-    */
-    void quadrangulate();
 
     /*
         Compute new vertex positions for a mesh that splits each polygon
