@@ -61,8 +61,6 @@ inset (i.e., shunken or expanded) by a user-controllable amount.
 
 <video src="{{ site.baseurl }}/guide/model_mode/vertex_bevel.mp4" controls preload muted loop style="max-width: 100%; margin: 0 auto;"></video>
 
-  - Vertex Extrude: The selected vertex _v_ is beveled, a new vertex _v'_ is inserted at the resulting face, and the new vertex _v'_ is offset in its normal direction by a user-controllable amount.
-
 - Edge Bevel: The selected edge _e_ is replaced by a face _f_ whose
 vertices are connected to the edges originally incident on the endpoints of _e_.
 The new face is inset and offset by some user-controllable amount, as with the
@@ -76,10 +74,6 @@ original vertices of _f_. The new face is inset and offset by some
 user-controllable amount.
 
 <video src="{{ site.baseurl }}/guide/model_mode/face_bevel.mp4" controls preload muted loop style="max-width: 100%; margin: 0 auto;"></video>
-  
-  - Face Extrude: The new face _g_ is inset and offset in only the normal direction by some user-controllable amount.
-  
-  - Face Inset: The new face _g_ is inset by a constant tangential amount proportional to the distance from a vertex of _f_ to the center of _f_ (we use 1/3 in the example).
 
 ### Local Connectivity Editing
 
@@ -114,8 +108,6 @@ _v_.
 
 <video src="{{ site.baseurl }}/guide/model_mode/collapse_face.mp4" controls preload muted loop style="max-width: 100%; margin: 0 auto;"></video>
 
-- Vertex Insert: A new vertex is inserted into the center of the selected face _f_ and _f_ is split up into _n_ triangles, where _n_ is the degree of _f_.
-
 - Edge Flip: The selected edge _e_ is "rotated" around the face, in the
 sense that each endpoint moves to the next vertex (in counter-clockwise order)
 along the boundary of the two polygons containing _e_.
@@ -127,8 +119,6 @@ selected edge _e_ is split at its midpoint, and the new vertex _v_ is connected
 to the two opposite vertices (or one in the case of a surface with boundary).
 
 <video src="{{ site.baseurl }}/guide/model_mode/edge_split.mp4" controls preload muted loop style="max-width: 100%; margin: 0 auto;"></video>
-
-- Edge Bisect: The selected edge _e_ is split at its midpoint, without bisecting the adjacent faces as in Edge Split.
 
 ### Global Mesh Processing
 

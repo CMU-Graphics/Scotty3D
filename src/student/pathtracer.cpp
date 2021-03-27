@@ -10,10 +10,6 @@ Spectrum Pathtracer::trace_pixel(size_t x, size_t y) {
 
     Vec2 xy((float)x, (float)y);
     Vec2 wh((float)out_w, (float)out_h);
-    Spectrum res(0,0,0);
-    Samplers::Rect::Uniform get_sample;
-    float pdf = 0.0f;
-    float &pdref = pdf;
 
     // TODO (PathTracer): Task 1
 
@@ -24,20 +20,9 @@ Spectrum Pathtracer::trace_pixel(size_t x, size_t y) {
     // Tip: you may want to use log_ray for debugging
 
     // This currently generates a ray at the bottom left of the pixel every time.
-    for(int i = 0; i < n_samples; i++) {
-        Vec2 offsets = get_sample.sample(pdref);
-        float x2 = (xy.x + offsets.x)/wh.x;
-        float y2 = (xy.y + offsets.y)/wh.y;
-        Ray r = camera.generate_ray(Vec2 (x2, y2));
-        if (RNG::coin_flip(0.0005f)) log_ray(r, 10.0f);
-        res += trace_ray(r);
-    }
 
-    //Ray out = camera.generate_ray(xy / wh);
-    //if(RNG::coin_flip(0.0005f)) log_ray(out, 10.0f);
-    //return trace_ray(out);
-    res *= 1.0f/n_samples;
-    return res;
+    Ray out = camera.generate_ray(xy / wh);
+    return trace_ray(out);
 }
 
 Spectrum Pathtracer::trace_ray(const Ray& ray) {
@@ -76,7 +61,7 @@ Spectrum Pathtracer::trace_ray(const Ray& ray) {
     // The starter code sets radiance_out to (0.5,0.5,0.5) so that you can test your geometry
     // queries before you implement path tracing. You should change this to (0,0,0) and accumulate
     // the direct and indirect lighting computed below.
-    Spectrum radiance_out = Spectrum(0.0f);
+    Spectrum radiance_out = Spectrum(0.5f);
     {
         auto sample_light = [&](const auto& light) {
             // If the light is discrete (e.g. a point light), then we only need
@@ -106,15 +91,12 @@ Spectrum Pathtracer::trace_ray(const Ray& ray) {
                 // arbitrary length, it will hit the light it was cast at. Therefore, you should
                 // modify the time_bounds of your shadow ray to account for this. Using EPS_F is
                 // recommended.
-                Ray shadow (hit.position + EPS_F * hit.normal, sample.direction);
-                shadow.dist_bounds = Vec2 (EPS_F, sample.distance / sample.direction.norm() - EPS_F);
+
                 // Note: that along with the typical cos_theta, pdf factors, we divide by samples.
                 // This is because we're  doing another monte-carlo estimate of the lighting from
                 // area lights.
-                if(!scene.hit(shadow).hit) {
-                    radiance_out +=
-                        (cos_theta / (samples * sample.pdf)) * sample.radiance * attenuation;
-                }
+                radiance_out +=
+                    (cos_theta / (samples * sample.pdf)) * sample.radiance * attenuation;
             }
         };
 

@@ -1,0 +1,31 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Configure",
+            "type": "shell",
+            "group": "build",
+            "command": "build_win.bat configure",
+            "problemMatcher": []    
+        },
+        {
+            "label": "Build Release",
+            "type": "shell",
+            "command": "build_win.bat RelWithDebInfo",
+            "args": [],
+            "group": "build",
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "Build Debug",
+            "type": "shell",
+            "command": "build_win.bat Debug",
+            "args": [],
+            "group": "build",
+            "problemMatcher": "$msCompile"
+        }
+    ]
+}
+    
