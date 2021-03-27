@@ -11,8 +11,10 @@ Vec2 Rect::Uniform::sample(float& pdf) const {
     // Generate a uniformly random point on a rectangle of size size.x * size.y
     // Tip: RNG::unit()
 
-    pdf = 1.0f; // the PDF should integrate to 1 over the whole rectangle
-    return Vec2();
+    pdf = 1.0f / (size.x * size.y); // the PDF should integrate to 1 over the whole rectangle
+    float x = RNG::unit() * size.x;
+    float y = RNG::unit() * size.y;
+    return Vec2(x, y);
 }
 
 Vec3 Hemisphere::Cosine::sample(float& pdf) const {
