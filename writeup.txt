@@ -1,0 +1,56 @@
+AndrewID: svsalem
+
+Local Operations:
+
+    EdgeFlip - Fully implemented.
+
+    EdgeCollapse - Fully implemented.
+
+    EdgeSplit - Fully implemented.
+
+    FaceBevel - Fully implemented.
+
+Global Operations:
+
+    Linear Subdivision - Fully implemented.
+
+    Catmull-Clark Subdivision - Fully implemented.
+
+    Triangulation - Fully implemented.
+
+    Loop Subdivision - Fully implemented.
+
+Extra Credit:
+
+    EdgeBevel - Fully implemented.
+    
+    EraseVertex - Fully implemented.
+    
+    EraseEdge - Fully implemented.
+    
+    FaceCollapse - Fully implemented.
+
+    Simplification - Fully implemented.
+
+    Isotropic Remesh - This makes me cri; Partially implemented.
+
+    -------------
+
+    BisectEdge - (Custom Function) Fully implemented.
+
+    InsertVertex - (Custom Function) Fully implemented.
+
+    ExtrudeFace - (Custom Function) Fully implemented.
+
+    ExtrudeVertex - (Custom Function) Fully implemented.
+
+    InsetFace - (Custom Function) Fully implemented.
+
+
+
+    Feedback/Improvements:
+
+    Some of the functions have very specific edge cases that are hard to think of,
+    such as collapse edge. Maybe some indication of things to look out for/case on 
+    when writing such functions (maybe in the docs?) would be helpful, and might have 
+    saved a lot of time trying to debug my isotropic remesh.
