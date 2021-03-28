@@ -75,11 +75,11 @@ as a ring of faces around _g_, such that the vertices of _g_ connect to the
 original vertices of _f_. The new face is inset and offset by some
 user-controllable amount.
 
-<video src="{{ site.baseurl }}/guide/model_mode/face_bevel.mp4" controls preload muted loop style="max-width: 100%; margin: 0 auto;"></video>
-
     - Face Extrude: The selected face _f_ is replaced by a new face _g_ as in Face Bevel, and _g_ is offset only in the normal direction by some user-controllable amount.
 
     - Face Inset: The selected face _f_ is replaced by a new face _g_ as in Face Bevel, but its vertices are only offset in the tangent direction by a constant factor (we use 1/3 in the example).
+    
+<video src="{{ site.baseurl }}/guide/model_mode/face_bevel.mp4" controls preload muted loop style="max-width: 100%; margin: 0 auto;"></video>
 
 ### Local Connectivity Editing
 
