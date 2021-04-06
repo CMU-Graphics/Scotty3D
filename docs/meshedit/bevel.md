@@ -13,7 +13,9 @@ Here we provide some additional detail about the bevel operations and their impl
 1.  a method that modifies the _connectivity_ of the mesh, creating new beveled elements, and
 2.  a method the updates the _geometry_ of the mesh, insetting and offseting the new vertices according to user input.
 
-The methods that update the connectivity are `HalfedgeMesh::bevel_vertex`, `halfedgeMesh::bevel_edge`, and `HalfedgeMesh::bevel_face`. The methods that update geometry are `HalfedgeMesh::bevel_vertex_positions`, `HalfedgeMesh::bevel_edge_positions`, and `HalfedgeMesh::bevel_face_positions`.
+The methods that update the connectivity are `HalfedgeMesh::bevel_vertex`, `halfedgeMesh::bevel_edge`, and `HalfedgeMesh::bevel_face`. The methods that update geometry are `HalfedgeMesh::bevel_vertex_positions`, `HalfedgeMesh::extrude_vertex_position`, `HalfedgeMesh::bevel_edge_positions`, and `HalfedgeMesh::bevel_face_positions`.
+
+`HalfedgeMesh::extrude_vertex` will update both connectivity and geometry, as it should first perform a flat bevel on the vertex, and then insert a vertex into the new face.
 
 The methods for updating connectivity can be implemented following the general strategy outlined in [edge flip tutorial](edge_flip). **Note that the methods that update geometry will be called repeatedly for the same bevel, in order to adjust positions according to user mouse input. See the gif in the [User Guide](/Scotty3D/guide/model_mode).**
 

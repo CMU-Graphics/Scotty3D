@@ -219,6 +219,11 @@ public:
     std::optional<VertexRef> collapse_face(FaceRef f);
 
     /*
+        Insets a vertex into the given face, returning a pointer to the new center vertex
+    */
+    std::optional<VertexRef> insert_vertex(FaceRef f);
+
+    /*
         Flip an edge, returning a pointer to the flipped edge
     */
     std::optional<EdgeRef> flip_edge(EdgeRef e);
@@ -229,6 +234,11 @@ public:
         mesh
     */
     std::optional<VertexRef> split_edge(EdgeRef e);
+
+    /*
+        Bisect an edge, returning a pointer to the inserted midpoint vertex
+    */
+    std::optional<VertexRef> bisect_edge(EdgeRef e);
 
     /*
         Creates a face in place of the vertex, returning a pointer to the new face
@@ -246,11 +256,27 @@ public:
     std::optional<FaceRef> bevel_face(FaceRef f);
 
     /*
+        Insets a vertex into the given face, returning a pointer to the new center vertex
+    */
+    std::optional<VertexRef> insert_vertex(FaceRef f);
+
+    /*
+        Bevels a vertex and inserts a vertex into the new face, returning a pointer to that vertex
+    */
+    std::optional<VertexRef> extrude_vertex(VertexRef v);
+
+    /*
         Computes vertex positions for a face that was just created by beveling a vertex,
         but not yet confirmed.
     */
     void bevel_vertex_positions(const std::vector<Vec3>& start_positions, FaceRef face,
                                 float tangent_offset);
+
+    /*
+        Computes vertex position for the new extruded vertex created
+        in the center of the temporary beveled face.
+    */
+    void extrude_vertex_position(const Vec3& start_positions, VertexRef v, float normal_offset);
 
     /*
         Computes vertex positions for a face that was just created by beveling an edge,

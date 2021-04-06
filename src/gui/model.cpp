@@ -1,6 +1,7 @@
 
 #include <algorithm>
 #include <imgui/imgui.h>
+#include <iostream>
 
 #include "manager.h"
 #include "model.h"
@@ -107,6 +108,9 @@ void Model::apply_transform(Widgets& widgets) {
                        if(action == Widget_Type::move) {
                            vert->pos = abs_pos;
                        }
+                       if(action == Widget_Type::extrude) {
+                           my_mesh->extrude_vertex_position(trans_begin.verts[0], vert, delta.pos.x);
+                       }
                        update_vertex(vert);
                    },
 
@@ -168,6 +172,12 @@ void Model::apply_transform(Widgets& widgets) {
                                my_mesh->bevel_edge_positions(trans_begin.verts, face, delta.pos.x);
                            } else {
                                my_mesh->bevel_face_positions(trans_begin.verts, face, delta.pos.x,
+                                                             delta.pos.y);
+                           }
+                       } else if(action == Widget_Type::extrude) {
+
+                           if(beveling == Bevel::face) {
+                               my_mesh->bevel_face_positions(trans_begin.verts, face, 0.0f,
                                                              delta.pos.y);
                            }
                        }
@@ -253,7 +263,7 @@ void Model::edge_viz(Halfedge_Mesh::EdgeRef e, Mat4& transform) {
     float v0s = vert_sizes[v_0->id()], v1s = vert_sizes[v_1->id()];
     float s = 0.5f * std::min(v0s, v1s);
 
-    if(1.0f - std::abs(dir.y) < EPS_F) {
+    if(dir.y == 1.0f || dir.y == -1.0f) {
         l *= sign(dir.y);
         transform = Mat4{Vec4{s, 0.0f, 0.0f, 0.0f}, Vec4{0.0f, l, 0.0f, 0.0f},
                          Vec4{0.0f, 0.0f, s, 0.0f}, Vec4{v0, 1.0f}};
@@ -381,16 +391,6 @@ void Model::rebuild() {
     // Create cylinder for each edge
     cylinders.clear();
     for(auto e = mesh.edges_begin(); e != mesh.edges_end(); e++) {
-        
-        // We don't want to render edges between two boundary faces, since the boundaries
-        // should look contiguous
-        if(e->halfedge()->is_boundary() && e->halfedge()->twin()->is_boundary()) {
-
-            // Unless both surrounding boundaries are the same face, in which case we should
-            // render this edge to show that the next vertex is connected
-            if(e->halfedge()->face() != e->halfedge()->twin()->face()) 
-                continue;
-        }
 
         Mat4 transform;
         edge_viz(e, transform);
@@ -459,6 +459,74 @@ bool Model::begin_bevel(std::string& err) {
     }
 }
 
+bool Model::begin_extrude(std::string& err) {
+
+    auto sel = selected_element();
+    if(!sel.has_value()) return false;
+    std::optional<Halfedge_Mesh::ElementRef> ref, ref2;
+    Halfedge_Mesh::FaceRef f;
+    my_mesh->copy_to(old_mesh);
+    auto new_obj = std::visit(overloaded{[&](Halfedge_Mesh::FaceRef face) {
+                              beveling = Bevel::face;
+                              ref2 = my_mesh->bevel_face(face);
+                              return ref2;
+                              
+                              
+                          },
+                          [&](Halfedge_Mesh::VertexRef vert) {
+                              beveling = Bevel::vert;
+                              ref2 = my_mesh->extrude_vertex(vert);
+                              return ref2;
+                              
+                          },
+                          [&](auto) -> std::optional<Halfedge_Mesh::ElementRef> { return std::nullopt; }},
+               *sel);
+
+    if(!new_obj.has_value()) return false;
+    Halfedge_Mesh::ElementRef elem = new_obj.value();
+    return std::visit(overloaded{[&](Halfedge_Mesh::VertexRef vert) {
+                            err = validate();
+                            if(!err.empty()) {
+                                *my_mesh = std::move(old_mesh);
+                                return false;
+                            } else {
+                                my_mesh->render_dirty_flag = true;
+                                set_selected(vert);
+                                trans_begin = {};
+                                trans_begin.verts.push_back(vert->pos);
+                                return true;
+                            }
+                        },
+                        [&](Halfedge_Mesh::FaceRef face) {
+                            err = validate();
+                            if(!err.empty()) {
+
+                                *my_mesh = std::move(old_mesh);
+                                return false;
+
+                            } else {
+
+                                my_mesh->render_dirty_flag = true;
+                                set_selected(face);
+
+                                trans_begin = {};
+                                auto h = face->halfedge();
+                                trans_begin.center = face->center();
+                                do {
+                                    trans_begin.verts.push_back(h->vertex()->pos);
+                                    h = h->next();
+                                } while(h != face->halfedge());
+
+                                return true;
+                            }
+                        },
+                        [&](auto) -> bool { return false; }},
+                elem);
+    
+    
+    
+}
+
 bool Model::keydown(Widgets& widgets, SDL_Keysym key, Camera& cam) {
 
     auto sel = selected_element();
@@ -486,6 +554,7 @@ bool Model::keydown(Widgets& widgets, SDL_Keysym key, Camera& cam) {
 
     switch(key.sym) {
     case SDLK_b: widgets.active = Widget_Type::bevel; return true;
+    case SDLK_e: widgets.active = Widget_Type::extrude; return true;
     case SDLK_c: zoom_to(*sel, cam); return true;
     case SDLK_h: {
         std::visit(
@@ -676,6 +745,7 @@ std::string Model::UIsidebar(Undo& undo, Widgets& widgets, Scene_Maybe obj_opt, 
             widgets.action_button(Widget_Type::rotate, "Rotate [r]");
             widgets.action_button(Widget_Type::scale, "Scale [s]");
             widgets.action_button(Widget_Type::bevel, "Bevel [b]");
+            widgets.action_button(Widget_Type::extrude, "Extrude [e]");
 
             std::string err = std::visit(
                 overloaded{
@@ -723,6 +793,14 @@ std::string Model::UIsidebar(Undo& undo, Widgets& widgets, Scene_Maybe obj_opt, 
                                     return m.split_edge(std::get<Halfedge_Mesh::EdgeRef>(edge));
                                 });
                         }
+                        if(Manager::wrap_button("Bisect")) {
+                            mesh.copy_to(before);
+                            return update_mesh(
+                                undo, obj, std::move(before), edge,
+                                [](Halfedge_Mesh& m, Halfedge_Mesh::ElementRef edge) {
+                                    return m.bisect_edge(std::get<Halfedge_Mesh::EdgeRef>(edge));
+                                });
+                        }
                         return {};
                     },
                     [&](Halfedge_Mesh::FaceRef face) -> std::string {
@@ -732,6 +810,14 @@ std::string Model::UIsidebar(Undo& undo, Widgets& widgets, Scene_Maybe obj_opt, 
                                 undo, obj, std::move(before), face,
                                 [](Halfedge_Mesh& m, Halfedge_Mesh::ElementRef face) {
                                     return m.collapse_face(std::get<Halfedge_Mesh::FaceRef>(face));
+                                });
+                        }
+                        if(ImGui::Button("Insert Vertex")) {
+                            mesh.copy_to(before);
+                            return update_mesh(
+                                undo, obj, std::move(before), face,
+                                [](Halfedge_Mesh& m, Halfedge_Mesh::ElementRef face) {
+                                    return m.insert_vertex(std::get<Halfedge_Mesh::FaceRef>(face));
                                 });
                         }
                         return {};
@@ -944,6 +1030,28 @@ std::string Model::select(Widgets& widgets, Scene_ID click, Vec3 cam, Vec2 spos,
             apply_transform(widgets);
         }
 
+    } else if(click && widgets.active == Widget_Type::extrude && click == selected_elem_id) {
+
+        std::string err;
+        if(!begin_extrude(err)) {
+            widgets.end_drag();
+            return err;
+        } else {
+            std::visit(overloaded{[&](Halfedge_Mesh::VertexRef vert) {
+                             widgets.start_drag(Halfedge_Mesh::center_of(vert), cam, spos, dir);
+                             apply_transform(widgets);
+                             
+                          },
+                          [&](Halfedge_Mesh::FaceRef face) {
+                              widgets.start_drag(Halfedge_Mesh::center_of(face), cam, spos,
+                               dir);
+                              apply_transform(widgets);
+                          },
+                          [](auto) { std::cout << std::endl; }},
+               selected_element().value());
+            
+        }
+
     } else if(!widgets.is_dragging() && click >= n_Widget_IDs) {
         selected_elem_id = (unsigned int)click;
     }
@@ -952,7 +1060,7 @@ std::string Model::select(Widgets& widgets, Scene_ID click, Vec3 cam, Vec2 spos,
         auto e = selected_element();
         if(e.has_value() && !std::holds_alternative<Halfedge_Mesh::HalfedgeRef>(*e)) {
             widgets.start_drag(Halfedge_Mesh::center_of(*e), cam, spos, dir);
-            if(widgets.active != Widget_Type::bevel) {
+            if(widgets.active != Widget_Type::bevel && widgets.active != Widget_Type::extrude) {
                 begin_transform();
             }
         }

@@ -37,6 +37,10 @@ See the [User Guide](/Scotty3D/guide/model_mode) for demonstrations of each loca
 
 ![](split_edge.svg)
 
+*   `Halfedge_Mesh::bisect_edge` - should bisect the edge and return the inserted vertex
+
+![](bisect_edge.svg)
+
 *   `Halfedge_Mesh::collapse_edge` - should return the new vertex, corresponding to the collapsed edge
 
 ![](collapse_edge.svg)
@@ -44,6 +48,10 @@ See the [User Guide](/Scotty3D/guide/model_mode) for demonstrations of each loca
 *   `Halfedge_Mesh::collapse_face` - should return the new vertex, corresponding to the collapsed face
 
 ![](collapse_face.svg)
+
+*   `Halfedge_Mesh::insert_vertex` - should return the newly inserted vertex
+
+![](insert_vertex.svg)
 
 *   `Halfedge_Mesh::erase_vertex` - should return the new face, corresponding to the faces originally containing the vertex
 
@@ -61,7 +69,10 @@ See the [User Guide](/Scotty3D/guide/model_mode) for demonstrations of each loca
 
 ![](bevel_edge.svg)
 
-*   `Halfedge_Mesh::bevel_face` - should return the new, inset face
+*   `Halfedge_Mesh::bevel_face` / `Halfedge_Mesh::extrude_face` / `Halfedge_Mesh::inset_face` - should return the new, inset face. 
 
 ![](bevel_face.svg)
 
+*   `Halfedge_Mesh::extrude_vertex` - should return the new vertex
+
+![](extrude_vertex.svg)
