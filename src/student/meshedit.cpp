@@ -307,6 +307,13 @@ void Halfedge_Mesh::bevel_face_positions(const std::vector<Vec3>& start_position
     (void)normal_offset;
 }
 
+std::optional<Halfedge_Mesh::FaceRef> Halfedge_Mesh::inset_face(Halfedge_Mesh::FaceRef f) {
+    
+    // hint: use bevel_face positions as a helper function here
+    (void)f;
+    return std::nullopt;
+}
+
 /*
     Splits all non-triangular faces into triangles.
 */

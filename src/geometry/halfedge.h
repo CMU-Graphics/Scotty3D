@@ -256,6 +256,11 @@ public:
     std::optional<FaceRef> bevel_face(FaceRef f);
 
     /*
+        Insets a face into the given face, but performs a flat operation.
+    */
+    std::optional<FaceRef> inset_face(FaceRef f);
+
+    /*
         Insets a vertex into the given face, returning a pointer to the new center vertex
     */
     std::optional<VertexRef> insert_vertex(FaceRef f);

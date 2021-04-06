@@ -823,6 +823,14 @@ std::string Model::UIsidebar(Undo& undo, Widgets& widgets, Scene_Maybe obj_opt, 
                                     return m.collapse_face(std::get<Halfedge_Mesh::FaceRef>(face));
                                 });
                         }
+                        if(ImGui::Button("Inset")) {
+                            mesh.copy_to(before);
+                            return update_mesh(
+                                undo, obj, std::move(before), face,
+                                [](Halfedge_Mesh& m, Halfedge_Mesh::ElementRef face) {
+                                    return m.inset_face(std::get<Halfedge_Mesh::FaceRef>(face));
+                                });
+                        }
                         if(ImGui::Button("Insert Vertex")) {
                             mesh.copy_to(before);
                             return update_mesh(
