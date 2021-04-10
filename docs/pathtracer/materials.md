@@ -18,7 +18,7 @@ Now that you have implemented the ability to sample more complex light paths, it
 
 **Note:** In the BSDF diagrams and documentation below, both the `out_dir` and the returned in-direction are pointing away from the intersection point of the ray and the surface, as illustrated in this picture below. This is so that it is easy to define the angles with respect to the surface normal.
 
-Also, remember that in pathtracing, we are tracing _backwards_, from the scene to the camera, which is why the output of these BSDF diagrams (and hence your BSDF functions) correspond with the input rays of the pathtracing procedure.
+Also, remember that in pathtracing, we are tracing _backwards_, from the camera to the scene, which is why the output of these BSDF diagrams (and hence your BSDF functions) correspond with the input rays of the pathtracing procedure.
 <center><img src="rays_dir.png" style="height:420px"></center>
 
 To get started take a look at the BSDF interface in `rays/bsdf.h`. There are a number of key methods you should understand in `BSDF class`:
