@@ -18,7 +18,7 @@ To add an emitter, open the dropdown menu, adjust desired parameters, and press 
 - Scale: the scale factor to apply to the particle mesh when rendering particles.
 - Lifetime: how long (in seconds) each particle should live before it is deleted.
 - Particles/Sec: how many particles should be generated per second. The total amount of live particles is hence `lifetime * particles_per_second`.
-- Particle: choose the shape of each particle.  If mesh objects are present in the scene, they will also show up here, allowing the creation of particles with custom shapes.
+- Particle: choose the shape of each particle.  If mesh objects are present in the scene, they will also show up here, allowing the creation of particles with custom shapes!
 - Enabled: whether to immediately enable the emitter 
 
 Once an enabled emitter is added to the scene (and animation task 4: particle simulation is implemented), particles will start generating and following trajectories based on the emitter parameters. Particles should collide with scene objects. When moving existing objects that particles interact with, the simulation will not be updated until the movement is completed. 
