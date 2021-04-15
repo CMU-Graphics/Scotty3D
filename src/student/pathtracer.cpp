@@ -118,7 +118,7 @@ Spectrum Pathtracer::trace_ray(const Ray& ray) {
     // ray depending on surface type) using bsdf.sample()
 
     // (3) Compute the throughput of the recursive ray. This should be the current ray's
-    // throughput scaled by the BSDF attenuation, cos(theta), and BSDF sample PDF.
+    // throughput scaled by the BSDF attenuation, cos(theta), and inverse BSDF sample PDF.
     // Potentially terminate the path using Russian roulette as a function of the new throughput.
     // Note that allowing the termination probability to approach 1 may cause extra speckling.
 

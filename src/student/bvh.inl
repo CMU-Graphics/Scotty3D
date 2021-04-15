@@ -77,6 +77,8 @@ template<typename Primitive> BVH<Primitive> BVH<Primitive>::copy() const {
 }
 
 template<typename Primitive> bool BVH<Primitive>::Node::is_leaf() const {
+
+    // A node is a leaf if l == r, since all interior nodes must have distinct children
     return l == r;
 }
 
@@ -145,7 +147,7 @@ size_t BVH<Primitive>::visualize(GL::Lines& lines, GL::Lines& active, size_t lev
         edge(Vec3{max.x, min.y, min.z}, Vec3{max.x, max.y, min.z});
         edge(Vec3{max.x, min.y, min.z}, Vec3{max.x, min.y, max.z});
 
-        if(node.l && node.r) {
+        if(!node.is_leaf()) {
             tstack.push({node.l, lvl + 1});
             tstack.push({node.r, lvl + 1});
         } else {

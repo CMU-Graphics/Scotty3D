@@ -31,9 +31,11 @@ public:
 
 private:
     class Node {
+        
         BBox bbox;
         size_t start, size, l, r;
 
+        // A node is a leaf if l == r, since all interior nodes must have distinct children
         bool is_leaf() const;
         friend class BVH<Primitive>;
     };

@@ -191,7 +191,7 @@ set_target_properties(Scotty3D PROPERTIES
                       CXX_EXTENSIONS OFF)
 
 if(MSVC)
-    target_compile_options(Scotty3D PRIVATE /W4 /WX /wd4201 /wd4840 /wd4100 /fp:fast)
+    target_compile_options(Scotty3D PRIVATE /MP /W4 /WX /wd4201 /wd4840 /wd4100 /fp:fast)
 else()
     target_compile_options(Scotty3D PRIVATE -Wall -Wextra -Werror -Wno-reorder -Wno-unused-parameter)
 endif()
