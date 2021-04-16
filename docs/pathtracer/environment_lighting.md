@@ -71,3 +71,7 @@ uffiz.exr with 32 spp
 field.exr with 32 spp
 
 ![ennis](new_results/field32importance.png)
+
+field.exr with 1024 spp
+
+![ennis](new_results/field1024imp.png)
