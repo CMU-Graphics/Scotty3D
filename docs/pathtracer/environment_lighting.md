@@ -66,7 +66,7 @@ ennis.exr with 32 spp
 
 uffiz.exr with 32 spp
 
-![uffiz](new_results/uffiz32importance.png)
+![uffiz](new_results/uffizi32importance.png)
 
 field.exr with 32 spp
 
