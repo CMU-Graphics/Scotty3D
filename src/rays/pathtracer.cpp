@@ -122,6 +122,15 @@ void Pathtracer::build_scene(Scene& layout_scene) {
             case Material_Type::diffuse_light: {
                 materials.push_back(BSDF(BSDF_Diffuse(obj.material.emissive())));
             } break;
+            case Material_Type::phong: {
+                materials.push_back(BSDF(BSDF_Phong(opt.albedo, opt.intensity)));
+            } break;
+            case Material_Type::blinn: {
+                materials.push_back(BSDF(BSDF_Blinn(opt.albedo, opt.intensity)));
+            } break;
+            case Material_Type::retro: {
+                materials.push_back(BSDF(BSDF_Retro(opt.reflectance, opt.intensity)));
+            } break;
             default: return;
             }
 

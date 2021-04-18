@@ -123,4 +123,39 @@ Spectrum BSDF_Refract::evaluate(Vec3 out_dir, Vec3 in_dir) const {
     return {};
 }
 
+BSDF_Sample BSDF_Phong::sample(Vec3 out_dir) const {
+    BSDF_Sample ret;
+    ret.attenuation = Spectrum();
+    ret.direction = Vec3();
+    ret.pdf = 0.0f;
+    return ret;
+}
+
+Spectrum BSDF_Phong::evaluate(Vec3 out_dir, Vec3 in_dir) const {
+    return {};
+}
+
+BSDF_Sample BSDF_Blinn::sample(Vec3 out_dir) const {
+    BSDF_Sample ret;
+    ret.attenuation = Spectrum();
+    ret.direction = Vec3();
+    ret.pdf = 0.0f;
+    return ret;
+}
+
+Spectrum BSDF_Blinn::evaluate(Vec3 out_dir, Vec3 in_dir) const {
+    return {};
+}
+
+BSDF_Sample BSDF_Retro::sample(Vec3 out_dir) const {
+    BSDF_Sample ret;
+    ret.attenuation = Spectrum();
+    ret.direction = Vec3();
+    ret.pdf = 0.0f;
+    return ret;
+}
+
+Spectrum BSDF_Retro::evaluate(Vec3 out_dir, Vec3 in_dir) const {
+    return {};
+}
 } // namespace PT

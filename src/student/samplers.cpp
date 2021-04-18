@@ -22,6 +22,11 @@ Vec3 Hemisphere::Cosine::sample(float& pdf) const {
     return Vec3();
 }
 
+Vec3 Hemisphere::Cosine_Power::sample(float& pdf) const {
+
+    return Vec3();
+}
+
 Vec3 Sphere::Uniform::sample(float& pdf) const {
 
     // TODO (PathTracer): Task 7

@@ -305,6 +305,27 @@ void Manager::material_edit_gui(Undo& undo, Scene_ID obj_id, Material& material)
                          "%.2f");
         activate();
     } break;
+    case Material_Type::phong: {
+        ImGui::ColorEdit3("Albedo", opt.albedo.data);
+        activate();
+        ImGui::DragFloat("Glossiness", &opt.intensity, 0.1f, 1.f, std::numeric_limits<float>::max(),
+                        "%.2f");
+        activate();
+    } break;
+    case Material_Type::blinn: {
+        ImGui::ColorEdit3("Albedo", opt.albedo.data);
+        activate();
+        ImGui::DragFloat("Glossiness", &opt.intensity, 0.1f, 1.f, std::numeric_limits<float>::max(),
+                        "%.2f");
+        activate();
+    } break;
+    case Material_Type::retro: {
+        ImGui::ColorEdit3("Reflectance", opt.reflectance.data);
+        activate();
+        ImGui::DragFloat("Glossiness", &opt.intensity, 0.1f, 1.f, std::numeric_limits<float>::max(),
+                        "%.2f");
+        activate();
+    } break;
     default: break;
     }
 

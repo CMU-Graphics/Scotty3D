@@ -85,6 +85,42 @@ struct BSDF_Diffuse {
     Samplers::Hemisphere::Uniform sampler;
 };
 
+struct BSDF_Phong {
+
+    BSDF_Phong(Spectrum albedo, float glossiness) : albedo(albedo), glossiness(glossiness) {
+    }
+
+    BSDF_Sample sample(Vec3 out_dir) const;
+    Spectrum evaluate(Vec3 out_dir, Vec3 in_dir) const;
+
+    Spectrum albedo;
+    float glossiness;
+};
+
+struct BSDF_Blinn {
+
+    BSDF_Blinn(Spectrum albedo, float glossiness) : albedo(albedo), glossiness(glossiness) {
+    }
+
+    BSDF_Sample sample(Vec3 out_dir) const;
+    Spectrum evaluate(Vec3 out_dir, Vec3 in_dir) const;
+
+    Spectrum albedo;
+    float glossiness;
+};
+
+struct BSDF_Retro {
+
+    BSDF_Retro(Spectrum reflectance, float glossiness) : reflectance(reflectance), glossiness(glossiness) {
+    }
+
+    BSDF_Sample sample(Vec3 out_dir) const;
+    Spectrum evaluate(Vec3 out_dir, Vec3 in_dir) const;
+
+    Spectrum reflectance;
+    float glossiness;
+};
+
 class BSDF {
 public:
     BSDF(BSDF_Lambertian&& b) : underlying(std::move(b)) {
@@ -96,6 +132,12 @@ public:
     BSDF(BSDF_Diffuse&& b) : underlying(std::move(b)) {
     }
     BSDF(BSDF_Refract&& b) : underlying(std::move(b)) {
+    }
+    BSDF(BSDF_Phong&& b) : underlying(std::move(b)) {
+    }
+    BSDF(BSDF_Blinn&& b) : underlying(std::move(b)) {
+    }
+    BSDF(BSDF_Retro&& b) : underlying(std::move(b)) {
     }
 
     BSDF(const BSDF& src) = delete;
@@ -119,7 +161,10 @@ public:
                                      [](const BSDF_Mirror&) { return true; },
                                      [](const BSDF_Glass&) { return true; },
                                      [](const BSDF_Diffuse&) { return false; },
-                                     [](const BSDF_Refract&) { return true; }},
+                                     [](const BSDF_Refract&) { return true; },
+                                     [](const BSDF_Phong&) { return true; },
+                                     [](const BSDF_Blinn&) { return true; },
+                                     [](const BSDF_Retro&) { return true; }},
                           underlying);
     }
 
@@ -128,12 +173,15 @@ public:
                                      [](const BSDF_Mirror&) { return false; },
                                      [](const BSDF_Glass&) { return true; },
                                      [](const BSDF_Diffuse&) { return false; },
-                                     [](const BSDF_Refract&) { return true; }},
+                                     [](const BSDF_Refract&) { return true; },
+                                     [](const BSDF_Phong&) { return true; },
+                                     [](const BSDF_Blinn&) { return true; },
+                                     [](const BSDF_Retro&) { return true; }},
                           underlying);
     }
 
 private:
-    std::variant<BSDF_Lambertian, BSDF_Mirror, BSDF_Glass, BSDF_Diffuse, BSDF_Refract> underlying;
+    std::variant<BSDF_Lambertian, BSDF_Mirror, BSDF_Glass, BSDF_Diffuse, BSDF_Refract, BSDF_Phong, BSDF_Blinn, BSDF_Retro> underlying;
 };
 
 Vec3 reflect(Vec3 dir);

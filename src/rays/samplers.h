@@ -51,6 +51,11 @@ struct Cosine {
     Cosine() = default;
     Vec3 sample(float& pdf) const;
 };
+
+struct Cosine_Power {
+    Cosine_Power(float exponent);
+    Vec3 sample(float& pdf) const;
+};
 } // namespace Hemisphere
 
 namespace Sphere {

@@ -4,7 +4,7 @@
 #include "../geometry/spline.h"
 #include "../lib/spectrum.h"
 
-enum class Material_Type : int { lambertian, mirror, refract, glass, diffuse_light, count };
+enum class Material_Type : int { lambertian, mirror, refract, glass, diffuse_light, phong, blinn, retro, count };
 extern const char* Material_Type_Names[(int)Material_Type::count];
 
 class Material {

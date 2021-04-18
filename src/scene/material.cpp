@@ -2,7 +2,7 @@
 #include "material.h"
 
 const char* Material_Type_Names[(int)Material_Type::count] = {"Lambertian", "Mirror", "Refract",
-                                                              "Glass", "Diffuse Light"};
+                                                              "Glass", "Diffuse Light", "Phong", "Blinn-Phong", "Retroreflective"};
 
 bool operator!=(const Material::Options& l, const Material::Options& r) {
     return l.albedo != r.albedo || l.emissive != r.emissive || l.ior != r.ior ||
@@ -25,6 +25,15 @@ Vec3 Material::layout_color() const {
     } break;
     case Material_Type::diffuse_light: {
         color = opt.emissive.to_vec();
+    } break;
+    case Material_Type::phong: {
+        color = opt.albedo.to_vec();
+    } break;
+    case Material_Type::blinn: {
+        color = opt.albedo.to_vec();
+    } break;
+    case Material_Type::retro: {
+        color = opt.reflectance.to_vec();
     } break;
     default: break;
     }
