@@ -410,6 +410,24 @@ void Animate::timeline(Manager& manager, Undo& undo, Scene& scene, Scene_Maybe o
     ImGui::Text("Keyframe:");
     ImGui::SameLine();
 
+    auto all_keys = [](Scene_Item& item) {
+        Anim_Pose animation = item.animation();
+        std::set<float> keys = animation.splines.keys();
+        if(item.is<Scene_Light>()) {
+            std::set<float> more_keys = item.get<Scene_Light>().lanim.splines.keys();
+            keys.insert(more_keys.begin(), more_keys.end());
+        }
+        if(item.is<Scene_Object>()) {
+            std::set<float> more_keys = item.get<Scene_Object>().armature.keys();
+            keys.insert(more_keys.begin(), more_keys.end());
+        }
+        if(item.is<Scene_Particles>()) {
+            std::set<float> more_keys = item.get<Scene_Particles>().panim.splines.keys();
+            keys.insert(more_keys.begin(), more_keys.end());
+        }
+        return keys;
+    };
+
     auto set_item = [&, this](Scene_Item& item) {
         if(item.is<Scene_Object>()) {
             undo.anim_object(item.id(), (float)current_frame);
@@ -474,30 +492,34 @@ void Animate::timeline(Manager& manager, Undo& undo, Scene& scene, Scene_Maybe o
 
     ImGui::SameLine();
     if(ImGui::Button("Move Left") && current_frame > 0) {
-        if(camera_selected) {
+        if(camera_selected && anim_camera.splines.has((float)current_frame)) {
             undo.anim_clear_camera(anim_camera, (float)current_frame);
             current_frame--;
             undo.anim_camera(anim_camera, (float)current_frame, ui_camera.get());
             camera_spline();
-        } else if(select) {
+            undo.bundle_last(2);
+        } else if(select && all_keys(*select).count((float)current_frame)) {
             clear_item(*select);
             current_frame--;
             set_item(*select);
+            undo.bundle_last(2);
         }
         frame_changed = true;
     }
 
     ImGui::SameLine();
     if(ImGui::Button("Move Right") && current_frame < max_frame-1) {
-        if(camera_selected) {
+        if(camera_selected && anim_camera.splines.has((float)current_frame)) {
             undo.anim_clear_camera(anim_camera, (float)current_frame);
             current_frame++;
             undo.anim_camera(anim_camera, (float)current_frame, ui_camera.get());
             camera_spline();
-        } else if(select) {
+            undo.bundle_last(2);
+        } else if(select && all_keys(*select).count((float)current_frame)) {
             clear_item(*select);
             current_frame++;
             set_item(*select);
+            undo.bundle_last(2);
         }
         frame_changed = true;
     }
@@ -590,21 +612,7 @@ void Animate::timeline(Manager& manager, Undo& undo, Scene& scene, Scene_Maybe o
 
         ImGui::PushID(item.id());
 
-        Anim_Pose animation = item.animation();
-        std::set<float> keys = animation.splines.keys();
-        if(item.is<Scene_Light>()) {
-            std::set<float> more_keys = item.get<Scene_Light>().lanim.splines.keys();
-            keys.insert(more_keys.begin(), more_keys.end());
-        }
-        if(item.is<Scene_Object>()) {
-            std::set<float> more_keys = item.get<Scene_Object>().armature.keys();
-            keys.insert(more_keys.begin(), more_keys.end());
-        }
-        if(item.is<Scene_Particles>()) {
-            std::set<float> more_keys = item.get<Scene_Particles>().panim.splines.keys();
-            keys.insert(more_keys.begin(), more_keys.end());
-        }
-
+        auto keys = all_keys(item);
         for(float f : keys) {
             int frame = (int)std::round(f);
             if(frame >= 0 && frame < max_frame) frames[frame] = true;
