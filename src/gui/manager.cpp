@@ -231,7 +231,7 @@ void Manager::particles_edit_gui(Undo& undo, Scene_Particles& particles) {
     activate();
     ImGui::SliderFloat("Angle", &opt.angle, 0.0f, 180.0f, "%.2f");
     activate();
-    ImGui::DragFloat("Scale", &opt.scale, 0.01f, 0.0f, std::numeric_limits<float>::max(), "%.2f");
+    ImGui::DragFloat("Scale", &opt.scale, 0.01f, 0.01f, std::numeric_limits<float>::max(), "%.2f");
     activate();
     ImGui::DragFloat("Lifetime", &opt.lifetime, 0.01f, 0.0f, std::numeric_limits<float>::max(),
                      "%.2f");
