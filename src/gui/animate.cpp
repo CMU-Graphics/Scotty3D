@@ -472,6 +472,36 @@ void Animate::timeline(Manager& manager, Undo& undo, Scene& scene, Scene_Maybe o
         undo.bundle_last(undo.n_actions() - n);
     }
 
+    ImGui::SameLine();
+    if(ImGui::Button("Move Left") && current_frame > 0) {
+        if(camera_selected) {
+            undo.anim_clear_camera(anim_camera, (float)current_frame);
+            current_frame--;
+            undo.anim_camera(anim_camera, (float)current_frame, ui_camera.get());
+            camera_spline();
+        } else if(select) {
+            clear_item(*select);
+            current_frame--;
+            set_item(*select);
+        }
+        frame_changed = true;
+    }
+
+    ImGui::SameLine();
+    if(ImGui::Button("Move Right") && current_frame < max_frame-1) {
+        if(camera_selected) {
+            undo.anim_clear_camera(anim_camera, (float)current_frame);
+            current_frame++;
+            undo.anim_camera(anim_camera, (float)current_frame, ui_camera.get());
+            camera_spline();
+        } else if(select) {
+            clear_item(*select);
+            current_frame++;
+            set_item(*select);
+        }
+        frame_changed = true;
+    }
+
     ImGui::Separator();
     ImGui::Dummy({74.0f, 1.0f});
     ImGui::SameLine();
