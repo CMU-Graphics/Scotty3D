@@ -158,4 +158,16 @@ BSDF_Sample BSDF_Retro::sample(Vec3 out_dir) const {
 Spectrum BSDF_Retro::evaluate(Vec3 out_dir, Vec3 in_dir) const {
     return {};
 }
+
+BSDF_Sample BSDF_Metal::sample(Vec3 out_dir) const {
+    BSDF_Sample ret;
+    ret.attenuation = Spectrum();
+    ret.direction = Vec3();
+    ret.pdf = 0.0f;
+    return ret;
+}
+
+Spectrum BSDF_Metal::evaluate(Vec3 out_dir, Vec3 in_dir) const {
+    return {};
+}
 } // namespace PT

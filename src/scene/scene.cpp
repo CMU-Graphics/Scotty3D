@@ -513,6 +513,8 @@ static Material::Options load_material(aiMaterial* ai_mat, float& was_sphere) {
         mat.type = Material_Type::blinn;
     } else if(type.find("retro") != std::string::npos) {
         mat.type = Material_Type::retro;
+    } else if(type.find("metal") != std::string::npos) {
+        mat.type = Material_Type::metal;
     } else {
         mat = Material::Options();
     }
@@ -1092,6 +1094,9 @@ static void write_material(aiMaterial* ai_mat, const Material::Options& opt, flo
     } break;
     case Material_Type::retro: {
         mat_name = "retro";
+    } break;
+    case Material_Type::metal: {
+        mat_name = "metal";
     } break;
     default: break;
     }

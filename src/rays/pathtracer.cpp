@@ -131,6 +131,9 @@ void Pathtracer::build_scene(Scene& layout_scene) {
             case Material_Type::retro: {
                 materials.push_back(BSDF(BSDF_Retro(opt.reflectance, opt.intensity)));
             } break;
+            case Material_Type::metal: {
+                materials.push_back(BSDF(BSDF_Metal(opt.reflectance, opt.intensity)));
+            } break;
             default: return;
             }
 
