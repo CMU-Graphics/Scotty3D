@@ -385,12 +385,12 @@ void Widgets::drag_to(Vec3 pos, Vec3 cam, Vec2 spos, Vec3 dir, bool scale_invert
             drag_end = Vec3{1.0f};
             drag_end[(int)axis] = (hit - pos).norm() / (drag_start - pos).norm();
         } else if(active == Widget_Type::scale) {
-            drag_end = Vec3((hit - pos).norm() / (drag_start - pos).norm());
+            drag_end = Vec3((hit - pos).norm());
         } else
             assert(false);
     }
 
-    if(scale_invert && active == Widget_Type::scale) {
+    if(scale_invert && active == Widget_Type::scale && !trip_scl) {
         drag_end[(int)axis] *= sign(dot(hit - pos, drag_start - pos));
     } 
 }
