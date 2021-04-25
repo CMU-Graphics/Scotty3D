@@ -41,6 +41,7 @@ Widgets::Widgets() : lines(1.0f) {
     y_scl = Scene_Object((Scene_ID)Widget_IDs::y_scl, {}, Util::scale_mesh());
     z_scl = Scene_Object((Scene_ID)Widget_IDs::z_scl, Pose::rotated(Vec3{90.0f, 0.0f, 0.0f}),
                          Util::scale_mesh());
+    xyz_scl = Scene_Object((Scene_ID)Widget_IDs::xyz_scl, Pose::moved(Vec3(1.f)), Util::cube_mesh(0.15f));
 
 #define setcolor(o, c) o.material.opt.albedo = Spectrum((c).x, (c).y, (c).z);
     setcolor(x_mov, Color::red);
@@ -55,6 +56,7 @@ Widgets::Widgets() : lines(1.0f) {
     setcolor(x_scl, Color::red);
     setcolor(y_scl, Color::green);
     setcolor(z_scl, Color::blue);
+    setcolor(xyz_scl, Color::yellow);
 #undef setcolor
 }
 
@@ -70,6 +72,10 @@ void Widgets::generate_lines(Vec3 pos) {
     if(drag_plane) {
         add_axis(((int)axis + 1) % 3);
         add_axis(((int)axis + 2) % 3);
+    } else if(trip_scl) {
+        add_axis((int)axis);
+        add_axis(((int)axis+1)%3);
+        add_axis(((int)axis+2)%3);
     } else {
         add_axis((int)axis);
     }
@@ -149,8 +155,12 @@ void Widgets::render(const Mat4& view, Vec3 pos, float scl) {
         y_scl.render(view, true);
 
         z_scl.pose.scale = scale;
-        z_scl.pose.pos = pos + Vec3(0.0f, 0.0f, 0.15f * scl);
+        z_scl.pose.pos = pos;
         z_scl.render(view, true);
+
+        xyz_scl.pose.scale = scale;
+        xyz_scl.pose.pos = pos + Vec3(0.15f*scl, 0.15f*scl, 0.15f*scl);
+        xyz_scl.render(view, true);
     }
 }
 
@@ -170,12 +180,22 @@ Pose Widgets::apply_action(const Pose& pose) {
         result.euler = combined.to_euler();
     } break;
     case Widget_Type::scale: {
-        result.scale = Vec3{1.0f};
-        result.scale[(int)axis] = drag_end[(int)axis];
-        Mat4 rot = pose.rotation_mat();
-        Mat4 trans =
-            Mat4::transpose(rot) * Mat4::scale(result.scale) * rot * Mat4::scale(pose.scale);
-        result.scale = Vec3(trans[0][0], trans[1][1], trans[2][2]);
+        if(!trip_scl){
+            result.scale = Vec3{1.0f};
+            result.scale[(int)axis] = drag_end[(int)axis];
+            Mat4 rot = pose.rotation_mat();
+            Mat4 trans =
+                Mat4::transpose(rot) * Mat4::scale(result.scale) * rot * Mat4::scale(pose.scale);
+            result.scale = Vec3(trans[0][0], trans[1][1], trans[2][2]);
+        } else {
+            result.scale = Vec3{1.0f};
+            result.scale = drag_end;
+            Mat4 rot = pose.rotation_mat();
+            Mat4 trans =
+                Mat4::transpose(rot) * Mat4::scale(result.scale) * rot * Mat4::scale(pose.scale);
+            result.scale = Vec3(trans[0][0], trans[1][1], trans[2][2]);
+        }
+        
     } break;
     case Widget_Type::bevel: {
         Vec2 off = bevel_start - bevel_end;
@@ -221,6 +241,42 @@ bool Widgets::to_axis(Vec3 obj_pos, Vec3 cam_pos, Vec3 dir, Vec3& hit) {
     return hit.valid();
 }
 
+bool Widgets::to_axis3(Vec3 obj_pos, Vec3 cam_pos, Vec3 dir, Vec3& hit) {
+
+    Vec3 axis1;
+    axis1[(int)axis] = 1.0f;
+    Vec3 axis2;
+    axis2[((int)axis + 1) % 3] = 1.0f;
+    Vec3 axis3;
+    axis3[((int)axis + 2) % 3] = 1.0f;
+
+    Line select(cam_pos, dir);
+    Line target(obj_pos, axis1);
+    Plane l(obj_pos, axis2);
+    Plane r(obj_pos, axis3);
+    Plane j(obj_pos, axis1);
+
+    Vec3 hit1, hit2, hit3;
+    bool hl = l.hit(select, hit1);
+    bool hr = r.hit(select, hit2);
+    bool hj = j.hit(select, hit3);
+    if(!hl && !hr && !hj)
+        return false;
+    else if(!hl && !hj)
+        hit = hit2;
+    else if(!hr && !hj)
+        hit = hit1;
+    else if(!hl && !hr)
+        hit = hit3;
+    else {
+        Vec3 temp = (hit1 - cam_pos).norm() > (hit2 - cam_pos).norm() ? hit2 : hit1;
+        hit = (temp - cam_pos).norm() > (hit3 - cam_pos).norm() ? hit3 : temp;
+    }
+
+    hit = target.closest(hit);
+    return hit.valid();
+}
+
 bool Widgets::to_plane(Vec3 obj_pos, Vec3 cam_pos, Vec3 dir, Vec3 norm, Vec3& hit) {
 
     Line look(cam_pos, dir);
@@ -258,6 +314,8 @@ void Widgets::start_drag(Vec3 pos, Vec3 cam, Vec2 spos, Vec3 dir) {
 
         if(drag_plane)
             good = to_plane(pos, cam, dir, norm, hit);
+        else if(trip_scl)
+            good = to_axis3(pos, cam, dir, hit);
         else
             good = to_axis(pos, cam, dir, hit);
 
@@ -286,6 +344,7 @@ void Widgets::end_drag() {
     bevel_start = bevel_end = {};
     dragging = false;
     drag_plane = false;
+    trip_scl = false;
 }
 
 void Widgets::drag_to(Vec3 pos, Vec3 cam, Vec2 spos, Vec3 dir, bool scale_invert) {
@@ -313,6 +372,8 @@ void Widgets::drag_to(Vec3 pos, Vec3 cam, Vec2 spos, Vec3 dir, bool scale_invert
 
         if(drag_plane)
             good = to_plane(pos, cam, dir, norm, hit);
+        else if(trip_scl)
+            good = to_axis3(pos, cam, dir, hit);
         else
             good = to_axis(pos, cam, dir, hit);
 
@@ -320,22 +381,25 @@ void Widgets::drag_to(Vec3 pos, Vec3 cam, Vec2 spos, Vec3 dir, bool scale_invert
 
         if(active == Widget_Type::move) {
             drag_end = hit;
-        } else if(active == Widget_Type::scale) {
+        } else if(active == Widget_Type::scale && !trip_scl) {
             drag_end = Vec3{1.0f};
             drag_end[(int)axis] = (hit - pos).norm() / (drag_start - pos).norm();
+        } else if(active == Widget_Type::scale) {
+            drag_end = Vec3((hit - pos).norm() / (drag_start - pos).norm());
         } else
             assert(false);
     }
 
     if(scale_invert && active == Widget_Type::scale) {
         drag_end[(int)axis] *= sign(dot(hit - pos, drag_start - pos));
-    }
+    } 
 }
 
 void Widgets::select(Scene_ID id) {
 
     start_dragging = true;
     drag_plane = false;
+    trip_scl = false;
 
     switch(id) {
     case(Scene_ID)Widget_IDs::x_mov: {
@@ -388,6 +452,11 @@ void Widgets::select(Scene_ID id) {
     case(Scene_ID)Widget_IDs::z_scl: {
         active = Widget_Type::scale;
         axis = Axis::Z;
+    } break;
+    case(Scene_ID)Widget_IDs::xyz_scl: {
+        active = Widget_Type::scale;
+        axis = Axis::X;
+        trip_scl = true;
     } break;
     default: {
         start_dragging = false;

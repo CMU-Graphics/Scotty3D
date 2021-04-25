@@ -30,6 +30,7 @@ enum class Widget_IDs : Scene_ID {
     x_scl,
     y_scl,
     z_scl,
+    xyz_scl,
     count
 };
 static const int n_Widget_IDs = (int)Widget_IDs::count;
@@ -148,6 +149,7 @@ public:
 private:
     void generate_lines(Vec3 pos);
     bool to_axis(Vec3 obj_pos, Vec3 cam_pos, Vec3 dir, Vec3& hit);
+    bool to_axis3(Vec3 obj_pos, Vec3 cam_pos, Vec3 dir, Vec3& hit);
     bool to_plane(Vec3 obj_pos, Vec3 cam_pos, Vec3 dir, Vec3 norm, Vec3& hit);
 
     // interface data
@@ -155,6 +157,7 @@ private:
     Vec3 drag_start, drag_end;
     Vec2 bevel_start, bevel_end;
     bool dragging = false, drag_plane = false;
+    bool trip_scl = false;
     bool start_dragging = false;
 
     // render data
@@ -163,6 +166,7 @@ private:
     Scene_Object xy_mov, yz_mov, xz_mov;
     Scene_Object x_rot, y_rot, z_rot;
     Scene_Object x_scl, z_scl, y_scl;
+    Scene_Object xyz_scl;
 };
 
 } // namespace Gui
