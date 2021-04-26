@@ -972,7 +972,8 @@ std::string Scene::load(Scene::Load_Opts loader, Undo& undo, Gui::Manager& gui, 
 
         if(anim->mDuration > 0.0f) {
             gui.get_animate().set((int)std::ceil(anim->mDuration),
-                                  (int)std::round(anim->mTicksPerSecond));
+                                  (int)std::round(anim->mTicksPerSecond), loader.new_scene);
+            
         }
     }
     gui.get_animate().refresh(*this);

@@ -742,6 +742,8 @@ void Undo::redo() {
 
 void Undo::bundle_last(size_t n) {
 
+    if(!n) return;
+
     std::vector<std::unique_ptr<Action_Base>> undo_pack;
     for(size_t i = 0; i < n; i++) {
         undo_pack.push_back(std::move(undos.top()));

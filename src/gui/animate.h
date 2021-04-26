@@ -57,7 +57,7 @@ public:
     const Anim_Camera& camera() const;
     Anim_Camera& camera();
     Camera current_camera() const;
-    void set(int n_frames, int fps);
+    void set(int n_frames, int fps, bool replace);
     void set_max(int frames);
     void invalidate(Skeleton::IK_Handle* handle);
     void invalidate(Joint* handle);

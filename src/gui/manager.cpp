@@ -531,7 +531,14 @@ void Manager::UIsidebar(Scene& scene, Undo& undo, float menu_height, Camera& cam
         ImGui::Text("Edit Scene");
         if(ImGui::Button("Open Scene")) load_scene(scene, undo, true);
         if(wrap_button("Export Scene")) write_scene(scene);
-        if(wrap_button("Settings")) settings_shown = true;
+        if(wrap_button("Clear")) {
+            std::vector<Scene_ID> ids;
+            scene.for_items([&](Scene_Item& item) { 
+                ids.push_back(item.id()); 
+            });
+            for(auto id : ids) undo.del_obj(id);
+            undo.bundle_last(ids.size());
+        }
 
         if(ImGui::Button("Import Objects")) {
             load_scene(scene, undo, false);
@@ -544,6 +551,7 @@ void Manager::UIsidebar(Scene& scene, Undo& undo, float menu_height, Camera& cam
             new_light_window = true;
             new_light_focus = true;
         }
+        
         ImGui::Separator();
     }
 
