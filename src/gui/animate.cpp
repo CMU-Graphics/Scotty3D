@@ -697,9 +697,14 @@ void Animate::set_max(int frames) {
     current_frame = std::min(current_frame, max_frame - 1);
 }
 
-void Animate::set(int n_frames, int fps) {
-    max_frame = n_frames;
-    frame_rate = fps;
+void Animate::set(int n_frames, int fps, bool replace) {
+    if(replace) {
+        max_frame = n_frames;
+        frame_rate = fps;
+    } else {
+        max_frame = std::max(n_frames, max_frame);
+        frame_rate = std::min(frame_rate, fps);
+    }
     current_frame = std::min(current_frame, max_frame - 1);
 }
 
