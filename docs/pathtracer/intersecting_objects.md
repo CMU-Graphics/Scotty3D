@@ -50,7 +50,7 @@ Once you've successfully implemented triangle intersection, you will be able to 
 
 ## Step 2: `Sphere::hit`
 
-You also need to implement the `hit` routines for the `Sphere` class in `student/shapes.cpp`. Remember that your intersection tests should respect the ray's `dist_bound`. Because spheres always represent closed surfaces, you should not flip back-facing normals you did with triangles.
+You also need to implement the `hit` routines for the `Sphere` class in `student/shapes.cpp`. Remember that your intersection tests should respect the ray's `dist_bound`, and that normals should be out-facing.
 
 **Tip 1:** take care **NOT** to use the `Vec3::normalize()` method when computing your
 normal vector. You should instead use `Vec3::unit()`, since `Vec3::normalize()`
