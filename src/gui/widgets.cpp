@@ -181,15 +181,16 @@ Pose Widgets::apply_action(const Pose& pose) {
     } break;
     case Widget_Type::scale: {
         if(univ_scl) {
-            result.scale = drag_end;
+            result.scale = drag_end * pose.scale;
         } else {
             result.scale = Vec3{1.0f};
             result.scale[(int)axis] = drag_end[(int)axis];
+            Mat4 rot = pose.rotation_mat();
+            Mat4 trans = 
+                Mat4::transpose(rot) * Mat4::scale(result.scale) * rot * Mat4::scale(pose.scale);
+            result.scale = Vec3(trans[0][0], trans[1][1], trans[2][2]);
         }
-        Mat4 rot = pose.rotation_mat();
-        Mat4 trans = 
-            Mat4::transpose(rot) * Mat4::scale(result.scale) * rot * Mat4::scale(pose.scale);
-        result.scale = Vec3(trans[0][0], trans[1][1], trans[2][2]);
+        
     } break;
     case Widget_Type::bevel: {
         Vec2 off = bevel_start - bevel_end;
