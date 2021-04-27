@@ -41,6 +41,7 @@ Widgets::Widgets() : lines(1.0f) {
     y_scl = Scene_Object((Scene_ID)Widget_IDs::y_scl, {}, Util::scale_mesh());
     z_scl = Scene_Object((Scene_ID)Widget_IDs::z_scl, Pose::rotated(Vec3{90.0f, 0.0f, 0.0f}),
                          Util::scale_mesh());
+    xyz_scl = Scene_Object((Scene_ID)Widget_IDs::xyz_scl, {}, Util::cube_mesh(0.15f));
 
 #define setcolor(o, c) o.material.opt.albedo = Spectrum((c).x, (c).y, (c).z);
     setcolor(x_mov, Color::red);
@@ -55,6 +56,7 @@ Widgets::Widgets() : lines(1.0f) {
     setcolor(x_scl, Color::red);
     setcolor(y_scl, Color::green);
     setcolor(z_scl, Color::blue);
+    setcolor(xyz_scl, Color::yellow);
 #undef setcolor
 }
 
@@ -70,6 +72,10 @@ void Widgets::generate_lines(Vec3 pos) {
     if(drag_plane) {
         add_axis(((int)axis + 1) % 3);
         add_axis(((int)axis + 2) % 3);
+    } else if(univ_scl) {
+        add_axis(0);
+        add_axis(1);
+        add_axis(2);
     } else {
         add_axis((int)axis);
     }
@@ -151,6 +157,10 @@ void Widgets::render(const Mat4& view, Vec3 pos, float scl) {
         z_scl.pose.scale = scale;
         z_scl.pose.pos = pos + Vec3(0.0f, 0.0f, 0.15f * scl);
         z_scl.render(view, true);
+        
+        xyz_scl.pose.scale = scale;
+        xyz_scl.pose.pos = pos;
+        xyz_scl.render(view, true);
     }
 }
 
@@ -170,12 +180,17 @@ Pose Widgets::apply_action(const Pose& pose) {
         result.euler = combined.to_euler();
     } break;
     case Widget_Type::scale: {
-        result.scale = Vec3{1.0f};
-        result.scale[(int)axis] = drag_end[(int)axis];
-        Mat4 rot = pose.rotation_mat();
-        Mat4 trans =
-            Mat4::transpose(rot) * Mat4::scale(result.scale) * rot * Mat4::scale(pose.scale);
-        result.scale = Vec3(trans[0][0], trans[1][1], trans[2][2]);
+        if(univ_scl) {
+            result.scale = drag_end * pose.scale;
+        } else {
+            result.scale = Vec3{1.0f};
+            result.scale[(int)axis] = drag_end[(int)axis];
+            Mat4 rot = pose.rotation_mat();
+            Mat4 trans = 
+                Mat4::transpose(rot) * Mat4::scale(result.scale) * rot * Mat4::scale(pose.scale);
+            result.scale = Vec3(trans[0][0], trans[1][1], trans[2][2]);
+        }
+        
     } break;
     case Widget_Type::bevel: {
         Vec2 off = bevel_start - bevel_end;
@@ -217,6 +232,35 @@ bool Widgets::to_axis(Vec3 obj_pos, Vec3 cam_pos, Vec3 dir, Vec3& hit) {
     return hit.valid();
 }
 
+bool Widgets::to_axis3(Vec3 obj_pos, Vec3 cam_pos, Vec3 dir, Vec3& hit) {
+
+    Vec3 axis1{1.0f, 0.0f, 0.0f};
+    Vec3 axis2{0.0f, 1.0f, 0.0f};
+    Vec3 axis3{0.0f, 0.0f, 1.0f};
+
+    Line select(cam_pos, dir);
+    Line target(obj_pos, axis1);
+    
+    Plane k(obj_pos, axis1);
+    Plane l(obj_pos, axis2);
+    Plane r(obj_pos, axis3);
+
+    Vec3 hit1, hit2, hit3;
+    bool hk = k.hit(select, hit1);
+    bool hl = l.hit(select, hit2);
+    bool hr = r.hit(select, hit3);
+
+    if(!hl && !hr && !hk) return false;
+
+    Vec3 close{FLT_MAX};
+    if(hk && (hit1 - cam_pos).norm() < (close - cam_pos).norm()) close = hit1;
+    if(hl && (hit2 - cam_pos).norm() < (close - cam_pos).norm()) close = hit2;
+    if(hr && (hit3 - cam_pos).norm() < (close - cam_pos).norm()) close = hit3;
+
+    hit = close;
+    return hit.valid();
+}
+
 bool Widgets::to_plane(Vec3 obj_pos, Vec3 cam_pos, Vec3 dir, Vec3 norm, Vec3& hit) {
 
     Line look(cam_pos, dir);
@@ -254,15 +298,16 @@ void Widgets::start_drag(Vec3 pos, Vec3 cam, Vec2 spos, Vec3 dir) {
 
         if(drag_plane)
             good = to_plane(pos, cam, dir, norm, hit);
-        else
+        else if(univ_scl)
+            good = to_axis3(pos, cam, dir, hit);
+        else    
             good = to_axis(pos, cam, dir, hit);
 
         if(!good) return;
 
         if(active == Widget_Type::bevel) {
             bevel_start = bevel_end = spos;
-        }
-        if(active == Widget_Type::move) {
+        } else if(active == Widget_Type::move) {
             drag_start = drag_end = hit;
         } else {
             drag_start = hit;
@@ -279,6 +324,7 @@ void Widgets::end_drag() {
     bevel_start = bevel_end = {};
     dragging = false;
     drag_plane = false;
+    univ_scl = false;
 }
 
 void Widgets::drag_to(Vec3 pos, Vec3 cam, Vec2 spos, Vec3 dir, bool scale_invert) {
@@ -306,6 +352,8 @@ void Widgets::drag_to(Vec3 pos, Vec3 cam, Vec2 spos, Vec3 dir, bool scale_invert
 
         if(drag_plane)
             good = to_plane(pos, cam, dir, norm, hit);
+        else if(univ_scl)
+            good = to_axis3(pos, cam, dir, hit);
         else
             good = to_axis(pos, cam, dir, hit);
 
@@ -313,6 +361,9 @@ void Widgets::drag_to(Vec3 pos, Vec3 cam, Vec2 spos, Vec3 dir, bool scale_invert
 
         if(active == Widget_Type::move) {
             drag_end = hit;
+        } else if(univ_scl && active == Widget_Type::scale) {
+            float f = (hit - pos).norm() / (drag_start - pos).norm();
+            drag_end = Vec3(std::sqrt(f));
         } else if(active == Widget_Type::scale) {
             drag_end = Vec3{1.0f};
             drag_end[(int)axis] = (hit - pos).norm() / (drag_start - pos).norm();
@@ -320,7 +371,7 @@ void Widgets::drag_to(Vec3 pos, Vec3 cam, Vec2 spos, Vec3 dir, bool scale_invert
             assert(false);
     }
 
-    if(scale_invert && active == Widget_Type::scale) {
+    if(scale_invert && active == Widget_Type::scale && !univ_scl) {
         drag_end[(int)axis] *= sign(dot(hit - pos, drag_start - pos));
     }
 }
@@ -329,6 +380,7 @@ void Widgets::select(Scene_ID id) {
 
     start_dragging = true;
     drag_plane = false;
+    univ_scl = false;
 
     switch(id) {
     case(Scene_ID)Widget_IDs::x_mov: {
@@ -381,6 +433,11 @@ void Widgets::select(Scene_ID id) {
     case(Scene_ID)Widget_IDs::z_scl: {
         active = Widget_Type::scale;
         axis = Axis::Z;
+    } break;
+    case(Scene_ID)Widget_IDs::xyz_scl: {
+        active = Widget_Type::scale;
+        axis = Axis::X;
+        univ_scl = true;
     } break;
     default: {
         start_dragging = false;
