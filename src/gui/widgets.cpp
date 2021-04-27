@@ -41,7 +41,7 @@ Widgets::Widgets() : lines(1.0f) {
     y_scl = Scene_Object((Scene_ID)Widget_IDs::y_scl, {}, Util::scale_mesh());
     z_scl = Scene_Object((Scene_ID)Widget_IDs::z_scl, Pose::rotated(Vec3{90.0f, 0.0f, 0.0f}),
                          Util::scale_mesh());
-    xyz_scl = Scene_Object((Scene_ID)Widget_IDs::xyz_scl, Pose::moved(Vec3{1.0f}), Util::cube_mesh(0.15f));
+    xyz_scl = Scene_Object((Scene_ID)Widget_IDs::xyz_scl, {}, Util::cube_mesh(0.15f));
 
 #define setcolor(o, c) o.material.opt.albedo = Spectrum((c).x, (c).y, (c).z);
     setcolor(x_mov, Color::red);
@@ -73,9 +73,9 @@ void Widgets::generate_lines(Vec3 pos) {
         add_axis(((int)axis + 1) % 3);
         add_axis(((int)axis + 2) % 3);
     } else if(univ_scl) {
-        add_axis((int)axis);
-        add_axis(((int)axis)+1)%3);
-        add_axis(((int)axis)+2)%3);
+        add_axis(0);
+        add_axis(1);
+        add_axis(2);
     } else {
         add_axis((int)axis);
     }
@@ -159,7 +159,7 @@ void Widgets::render(const Mat4& view, Vec3 pos, float scl) {
         z_scl.render(view, true);
         
         xyz_scl.pose.scale = scale;
-        xyz_scl.pose.pos = pos + Vec3(0.15f*scl, 0.15f*scl, 0.15f*scl);
+        xyz_scl.pose.pos = pos;
         xyz_scl.render(view, true);
     }
 }
@@ -234,36 +234,30 @@ bool Widgets::to_axis(Vec3 obj_pos, Vec3 cam_pos, Vec3 dir, Vec3& hit) {
 
 bool Widgets::to_axis3(Vec3 obj_pos, Vec3 cam_pos, Vec3 dir, Vec3& hit) {
 
-    Vec3 axis1;
-    axis1[(int)axis] = 1.0f;
-    Vec3 axis2;
-    axis2[((int)axis + 1) % 3] = 1.0f;
-    Vec3 axis3;
-    axis3[((int)axis + 2) % 3] = 1.0f;
+    Vec3 axis1{1.0f, 0.0f, 0.0f};
+    Vec3 axis2{0.0f, 1.0f, 0.0f};
+    Vec3 axis3{0.0f, 0.0f, 1.0f};
 
     Line select(cam_pos, dir);
     Line target(obj_pos, axis1);
+    
+    Plane k(obj_pos, axis1);
     Plane l(obj_pos, axis2);
     Plane r(obj_pos, axis3);
-    Plane k(obj_pos, axis);
 
     Vec3 hit1, hit2, hit3;
-    bool hl = l.hit(select, hit1);
-    bool hr = r.hit(select, hit2);
-    bool hk = k.hit(select, hit3);
-    if(!hl && !hr && !hk)
-        return false;
-    else if(!hl && !hk)
-        hit = hit2;
-    else if(!hr && !hk)
-        hit = hit1;
-    else if(!hl && !hr)
-        hit = hit3;
-    else {
-        Vec3 temp = (hit1 - cam_pos).norm() > (hit2 - cam_pos).norm() ? hit2 : hit1;
-        hit = (temp - cam_pos).norm() > (hit3 - cam_pos).norm() ? hit3 : temp;
-    }
-    hit = target.closest(hit);
+    bool hk = k.hit(select, hit1);
+    bool hl = l.hit(select, hit2);
+    bool hr = r.hit(select, hit3);
+
+    if(!hl && !hr && !hk) return false;
+
+    Vec3 close{FLT_MAX};
+    if(hk && (hit1 - cam_pos).norm() < (close - cam_pos).norm()) close = hit1;
+    if(hl && (hit2 - cam_pos).norm() < (close - cam_pos).norm()) close = hit2;
+    if(hr && (hit3 - cam_pos).norm() < (close - cam_pos).norm()) close = hit3;
+
+    hit = close;
     return hit.valid();
 }
 
@@ -306,15 +300,14 @@ void Widgets::start_drag(Vec3 pos, Vec3 cam, Vec2 spos, Vec3 dir) {
             good = to_plane(pos, cam, dir, norm, hit);
         else if(univ_scl)
             good = to_axis3(pos, cam, dir, hit);
-        else
+        else    
             good = to_axis(pos, cam, dir, hit);
 
         if(!good) return;
 
         if(active == Widget_Type::bevel) {
             bevel_start = bevel_end = spos;
-        }
-        if(active == Widget_Type::move) {
+        } else if(active == Widget_Type::move) {
             drag_start = drag_end = hit;
         } else {
             drag_start = hit;
@@ -359,6 +352,8 @@ void Widgets::drag_to(Vec3 pos, Vec3 cam, Vec2 spos, Vec3 dir, bool scale_invert
 
         if(drag_plane)
             good = to_plane(pos, cam, dir, norm, hit);
+        else if(univ_scl)
+            good = to_axis3(pos, cam, dir, hit);
         else
             good = to_axis(pos, cam, dir, hit);
 
@@ -367,7 +362,8 @@ void Widgets::drag_to(Vec3 pos, Vec3 cam, Vec2 spos, Vec3 dir, bool scale_invert
         if(active == Widget_Type::move) {
             drag_end = hit;
         } else if(univ_scl && active == Widget_Type::scale) {
-            drag_end = Vec3((hit - pos).norm());
+            float f = (hit - pos).norm() / (drag_start - pos).norm();
+            drag_end = Vec3(std::sqrt(f));
         } else if(active == Widget_Type::scale) {
             drag_end = Vec3{1.0f};
             drag_end[(int)axis] = (hit - pos).norm() / (drag_start - pos).norm();
