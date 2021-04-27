@@ -23,7 +23,7 @@ When a joint's parent is rotated, that transformation should be propagated down 
 You need to implement these routines in `student/skeleton.cpp` for forward kinematics.
 
 *   `Joint::joint_to_bind`
-    Rreturn a matrix transforming points in the space of this joint
+    Return a matrix transforming points in the space of this joint
     to points in mesh space in bind position  up to the base of this joint (end of its parent joint). You should traverse upwards from this joint's parent all the way up to the root joint and accumulate their transformations.
 *   `Joint::joint_to_posed`
     Return a matrix transforming points in the space of this joint to points in mesh space, taking into account joint poses. Again, you should traverse upwards from this joint's parent to the root joint.
@@ -32,7 +32,7 @@ You need to implement these routines in `student/skeleton.cpp` for forward kinem
 *   `Skeleton::posed_end_of`
     Returns the end position of the joint in world coordinate frame with poses, and you should take into account `Skeleton::base_pos`.
 *   `Skeleton::joint_to_bind`
-    Rreturn a matrix transforming points in the space of this joint
+    Return a matrix transforming points in the space of this joint
     to points in mesh space in bind position but with the base position of the skeleton taken in to account. Hint: use some function that you have implemented wisely!
 *   `Skeleton::joint_to_posed`
     Return a matrix transforming points in the space of this joint to points in mesh space, taking into account joint poses but with the base position of the skeleton taken in to account. Hint: use some function that you have implemented wisely!
