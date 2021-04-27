@@ -507,6 +507,14 @@ static Material::Options load_material(aiMaterial* ai_mat, float& was_sphere) {
         mat.type = Material_Type::glass;
     } else if(type.find("diffuse_light") != std::string::npos) {
         mat.type = Material_Type::diffuse_light;
+    } else if(type.find("phong") != std::string::npos) {
+        mat.type = Material_Type::phong;
+    } else if(type.find("blinn") != std::string::npos) {
+        mat.type = Material_Type::blinn;
+    } else if(type.find("retro") != std::string::npos) {
+        mat.type = Material_Type::retro;
+    } else if(type.find("metal") != std::string::npos) {
+        mat.type = Material_Type::metal;
     } else {
         mat = Material::Options();
     }
@@ -1078,6 +1086,18 @@ static void write_material(aiMaterial* ai_mat, const Material::Options& opt, flo
     } break;
     case Material_Type::diffuse_light: {
         mat_name = "diffuse_light";
+    } break;
+    case Material_Type::phong: {
+        mat_name = "phong";
+    } break;
+    case Material_Type::blinn: {
+        mat_name = "blinn";
+    } break;
+    case Material_Type::retro: {
+        mat_name = "retro";
+    } break;
+    case Material_Type::metal: {
+        mat_name = "metal";
     } break;
     default: break;
     }
@@ -1696,9 +1716,9 @@ std::string Scene::write(std::string file, const Camera& render_cam,
                 const Scene_Light::Anim_Light& light = item.get<Scene_Light>().lanim;
 
                 write_anim(name, light.splines, [&light](float t) -> std::tuple<Vec3, Quat, Vec3> {
-                    auto [spec, inten, angle, size] = light.splines.at(t);
+                    auto [spec, inten, angle, s] = light.splines.at(t);
                     return {Vec3{spec.r, spec.g, spec.b}, Quat::euler(Vec3{angle.x, 0.0f, angle.y}),
-                            Vec3{inten, size.x, size.y} + Vec3{1.0f}};
+                            Vec3{inten, s.x, s.y} + Vec3{1.0f}};
                 });
 
             } else if(item.is<Scene_Particles>()) {

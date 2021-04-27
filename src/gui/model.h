@@ -47,6 +47,7 @@ private:
     void zoom_to(Halfedge_Mesh::ElementRef ref, Camera& cam);
     void begin_transform();
     bool begin_bevel(std::string& err);
+    bool begin_extrude(std::string& err);
     void set_selected(Halfedge_Mesh::ElementRef elem);
     std::optional<std::reference_wrapper<Scene_Object>> set_my_obj(Scene_Maybe obj_opt);
     std::optional<Halfedge_Mesh::ElementRef> selected_element();
