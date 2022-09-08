@@ -1,0 +1,22 @@
+AndrewID: 
+
+Task 1:
+	Fully implemented.
+
+Task 2:
+	Fully implemented.
+
+Task 3:
+	Fully implemented.
+
+Task 4:
+	Fully implemented.
+
+Task 5:
+	Fully implemented.
+
+Task 6:
+	Fully implemented.
+
+Task 7:
+	Fully implemented.

@@ -1,0 +1,10 @@
+.vs/
+imgui.ini
+.vscode/settings.json
+.DS_Store
+Scotty3D*
+maek-cache.json
+objs/
+README-SDL.txt
+SDL2.dll
+nest-libs/

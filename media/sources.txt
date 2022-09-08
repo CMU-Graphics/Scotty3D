@@ -1,0 +1,4 @@
+Sources for models and textures:
+
+textures/wood_cabinet_worn -- https://polyhaven.com/a/wood_cabinet_worn_long
+textures/uv-debug-texture -- created by Jim McCann, released into the public domain
