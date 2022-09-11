@@ -57,7 +57,7 @@ Now, let's see why this setup may be useful: say we start doing an assignment an
   - Windows: Visual Studio 2022
   - MacOS: XCode (latest available)
   - Linux: g++ (latest available)
-2. Install [node](https://node.js) (our build system is written in command-line javascript.)
+2. Install [node](https://nodejs.org) (our build system is written in command-line javascript.)
 3. Clone this repository.
 4. Download and extract the nest-libs as a child of the repository folder:
   - Linux: https://github.com/15-466/nest-libs/releases/download/v0.10/nest-libs-linux-v0.10.tar.gz
