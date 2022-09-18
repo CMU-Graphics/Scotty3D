@@ -450,37 +450,3 @@ template struct Pipeline< PrimitiveType::Lines, Programs::Lambertian, Pipeline_B
 template struct Pipeline< PrimitiveType::Triangles, Programs::Lambertian, Pipeline_Blend_Replace | Pipeline_Depth_Less | Pipeline_Interp_Flat >;
 template struct Pipeline< PrimitiveType::Triangles, Programs::Lambertian, Pipeline_Blend_Replace | Pipeline_Depth_Less | Pipeline_Interp_Screen >;
 template struct Pipeline< PrimitiveType::Triangles, Programs::Lambertian, Pipeline_Blend_Replace | Pipeline_Depth_Less | Pipeline_Interp_Correct >;
-
-#if 0
-
-#define INS( Prim, Prog, Flags ) \
-	template struct Pipeline< Prim, Prog, Flags >;
-
-#define INS_BLEND( Prim, Prog, Flags ) \
-	INS( Prim, Prog, Flags | Pipeline_Blend_Replace ) \
-	INS( Prim, Prog, Flags | Pipeline_Blend_Add ) \
-	INS( Prim, Prog, Flags | Pipeline_Blend_Over ) \
-
-#define INS_DEPTH( Prim, Prog, Flags ) \
-	INS_BLEND( Prim, Prog, Flags | Pipeline_Depth_Always ) \
-	INS_BLEND( Prim, Prog, Flags | Pipeline_Depth_Never ) \
-	INS_BLEND( Prim, Prog, Flags | Pipeline_Depth_Less ) \
-
-#define INS_INTERP( Prim, Prog, Flags ) \
-	INS_DEPTH( Prim, Prog, Flags | Pipeline_Interp_Flat ) \
-	INS_DEPTH( Prim, Prog, Flags | Pipeline_Interp_Screen ) \
-	INS_DEPTH( Prim, Prog, Flags | Pipeline_Interp_Correct ) \
-
-#define INS_WRITE( Prim, Prog ) \
-	INS_INTERP( Prim, Prog, 0 ) \
-	INS_INTERP( Prim, Prog, Pipeline_DepthWriteDisableBit ) \
-	INS_INTERP( Prim, Prog, Pipeline_ColorWriteDisableBit ) \
-	INS_INTERP( Prim, Prog, Pipeline_ColorWriteDisableBit | Pipeline_DepthWriteDisableBit ) \
-
-#define INS_PROG( Prim ) \
-	INS_WRITE( Prim, Programs::Lambertian )
-
-INS_PROG( PrimitiveType::Lines )
-INS_PROG( PrimitiveType::Triangles )
-
-#endif
