@@ -133,7 +133,7 @@ void check_line_covers(std::string const &desc, std::initializer_list< Vec2 > co
 
 //--------------------------------------------------
 //entering/exiting diamond at (1,1):
-// only lines that *enter* the diamond should produce a fragment.
+// only lines that *exit* the diamond should produce a fragment.
 
 
 Test test_a1_task2_diamond_inside("a1.task2.diamond.inside", []() {

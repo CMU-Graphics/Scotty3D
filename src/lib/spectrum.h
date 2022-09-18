@@ -155,3 +155,7 @@ inline std::ostream& operator<<(std::ostream& out, Spectrum v) {
 	out << "Spectrum{" << v.r << "," << v.g << "," << v.b << "}";
 	return out;
 }
+
+inline std::string to_string(Spectrum const &v) {
+	return "[" + std::to_string(v.r) + ", " + std::to_string(v.g) + ", " + std::to_string(v.b) + "]";
+}

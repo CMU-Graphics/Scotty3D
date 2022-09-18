@@ -21,6 +21,9 @@ struct Lambertian {
 		//NOTE: texture is a pointer because copying textures around is slow.
 		//  shade_fragment will crash if it doesn't point to a valid texture!
 
+		//opacity is set for the whole object (since textures don't have alpha):
+		float opacity = 1.0f;
+
 		//light data (used in shade_fragment):
 
 		//a distant directional light:
@@ -77,7 +80,6 @@ struct Lambertian {
 
 	static void shade_fragment(
 			Parameters const &parameters,
-			//TODO: should we have -> Vec3 const &fb_position, //fragment position in the framebuffer
 			std::array< float, FA > const &fa, //interpolated fragment attributes
 			std::array< Vec2, FD > const &fd, //fragment attribute derivatives
 			Spectrum *color_, //output color (must be non-null)
@@ -119,11 +121,65 @@ struct Lambertian {
 			//sky contribution:
 			+ (parameters.sky_energy - parameters.ground_energy) * (0.5f * dot(parameters.sky_direction, normal) + 0.5f) + parameters.ground_energy;
 
-		//color = Spectrum(1.0f, 0.0f, 1.0f) * light; //DEBUG
 		color = parameters.image->evaluate(fa_texcoord, lod) * light;
-		opacity = 1.0f;
+		opacity = parameters.opacity;
 	}
 
 };
+
+
+//The 'Copy' shader copies everything from vertex attributes:
+// (useful for testing!)
+struct Copy {
+	struct Parameters {
+	};
+
+	//vertex attributes layout:
+	enum {
+		VA_PositionX, VA_PositionY, VA_PositionZ, VA_PositionW,
+		VA_ColorR, VA_ColorG, VA_ColorB, VA_ColorA,
+		VA
+	};
+	//fragment attribute layout:
+	enum {
+		FA_ColorR, FA_ColorG, FA_ColorB, FA_ColorA,
+		FA
+	};
+	//request derivatives for first two attributes (the texture coordinates):
+	enum { FD = 2 };
+
+	static void shade_vertex(
+			Parameters const &parameters,
+			std::array< float, VA > const &va, //vertex attributes
+			Vec4 *clip_position_, //output clip position (must be non-null)
+			std::array< float, FA > *fa_ //output attributes to interpolate to fragments (must be non-null)
+			) {
+		auto &clip_position = *clip_position_;
+		auto &fa = *fa_;
+
+		//copy clip position from input (x,y,z,w):
+		clip_position = Vec4( va[VA_PositionX], va[VA_PositionY], va[VA_PositionZ], va[VA_PositionW] );
+
+		//copy color to fragment attributes:
+		fa[FA_ColorR] = va[VA_ColorR]; fa[FA_ColorG] = va[VA_ColorG]; fa[FA_ColorB] = va[VA_ColorB]; fa[FA_ColorA] = va[VA_ColorA];
+	}
+
+	static void shade_fragment(
+			Parameters const &parameters,
+			//TODO: should we have -> Vec3 const &fb_position, //fragment position in the framebuffer
+			std::array< float, FA > const &fa, //interpolated fragment attributes
+			std::array< Vec2, FD > const &fd, //fragment attribute derivatives
+			Spectrum *color_, //output color (must be non-null)
+			float *opacity_ //output opacity (must be non-null)
+			) {
+		auto &color = *color_;
+		auto &opacity = *opacity_;
+
+		color = Spectrum( fa[FA_ColorR], fa[FA_ColorG], fa[FA_ColorB] );
+		opacity = fa[FA_ColorA];
+	}
+
+};
+
 
 }
