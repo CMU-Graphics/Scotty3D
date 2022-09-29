@@ -98,8 +98,9 @@ const gui_objects = [
 	maek.CPP("src/gui/animate.cpp"),
 ];
 const geom_objects = [
-	maek.CPP("src/geometry/halfedge.cpp"),
-	maek.CPP("src/geometry/meshedit.cpp"),
+	maek.CPP("src/geometry/halfedge-utility.cpp"),
+	maek.CPP("src/geometry/halfedge-local.cpp"),
+	maek.CPP("src/geometry/halfedge-global.cpp"),
 	maek.CPP("src/geometry/indexed.cpp"),
 	maek.CPP("src/geometry/util.cpp"),
 	maek.CPP("src/geometry/spline.cpp"),

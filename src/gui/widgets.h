@@ -54,7 +54,7 @@ public:
 	void end_drag();
 	Transform apply_action(const Transform& pose);
 	void start_drag(Vec3 pos, Vec3 cam, Vec2 spos, Vec3 dir);
-	void drag_to(Vec3 pos, Vec3 cam, Vec2 spos, Vec3 dir, bool scale_invert);
+	void drag_to(Vec3 pos, Vec3 cam, Vec2 spos, Vec3 dir, bool scale_invert, float snap = 0.0f);
 
 	bool select(uint32_t id);
 	void render(const Mat4& view, Vec3 pos, float scl);

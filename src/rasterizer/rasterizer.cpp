@@ -308,22 +308,22 @@ struct RasterJob {
 				std::string desc = "Rasterizing instance '" + instance.name + "'"; //DEBUG
 				if (instance.style == DrawStyle::Wireframe) {
 					make_lamb_edges(instance.mesh);
-					desc += " as wireframe (" + std::to_string(instance.mesh->source.n_faces()) + " faces converted to " + std::to_string(instance.mesh->lamb_edges.size()/2) + " lines)"; //DEBUG
+					desc += " as wireframe (" + std::to_string(instance.mesh->source.faces.size()) + " faces converted to " + std::to_string(instance.mesh->lamb_edges.size()/2) + " lines)"; //DEBUG
 					info("%s",desc.c_str()); //DEBUG
 					Lambertian_Lines_Pipeline::run(instance.mesh->lamb_edges, parameters, &framebuffer);
 				} else if (instance.style == DrawStyle::Flat) {
 					make_lamb_triangles(instance.mesh);
-					desc += " as flat triangles (" + std::to_string(instance.mesh->source.n_faces()) + " faces converted to " + std::to_string(instance.mesh->lamb_triangles.size()/3) + " triangles)"; //DEBUG
+					desc += " as flat triangles (" + std::to_string(instance.mesh->source.faces.size()) + " faces converted to " + std::to_string(instance.mesh->lamb_triangles.size()/3) + " triangles)"; //DEBUG
 					info("%s",desc.c_str()); //DEBUG
 					Lambertian_Triangles_Flat_Pipeline::run(instance.mesh->lamb_triangles, parameters, &framebuffer);
 				} else if (instance.style == DrawStyle::Smooth) {
 					make_lamb_triangles(instance.mesh);
-					desc += " as smooth triangles (" + std::to_string(instance.mesh->source.n_faces()) + " faces converted to " + std::to_string(instance.mesh->lamb_triangles.size()/3) + " triangles)"; //DEBUG
+					desc += " as smooth triangles (" + std::to_string(instance.mesh->source.faces.size()) + " faces converted to " + std::to_string(instance.mesh->lamb_triangles.size()/3) + " triangles)"; //DEBUG
 					info("%s",desc.c_str()); //DEBUG
 					Lambertian_Triangles_Smooth_Pipeline::run(instance.mesh->lamb_triangles, parameters, &framebuffer);
 				} else if (instance.style == DrawStyle::Correct) {
 					make_lamb_triangles(instance.mesh);
-					desc += " as perspective-correct triangles (" + std::to_string(instance.mesh->source.n_faces()) + " faces converted to " + std::to_string(instance.mesh->lamb_triangles.size()/3) + " triangles)"; //DEBUG
+					desc += " as perspective-correct triangles (" + std::to_string(instance.mesh->source.faces.size()) + " faces converted to " + std::to_string(instance.mesh->lamb_triangles.size()/3) + " triangles)"; //DEBUG
 					info("%s",desc.c_str()); //DEBUG
 					Lambertian_Triangles_Correct_Pipeline::run(instance.mesh->lamb_triangles, parameters, &framebuffer);
 				} else {

@@ -195,7 +195,7 @@ void Renderer::mesh(GL::Mesh& mesh, Renderer::MeshOpt opt) {
 	mesh_shader.uniform("normal", Mat4::transpose(Mat4::inverse(opt.modelview)));
 	mesh_shader.uniform("solid", opt.solid_color);
 	mesh_shader.uniform("sel_color", opt.sel_color);
-	mesh_shader.uniform("sel_id", opt.sel_id);
+	mesh_shader.uniform("sel_id", opt.active_id);
 	mesh_shader.uniform("hov_color", opt.hov_color);
 	mesh_shader.uniform("hov_id", opt.hov_id);
 	mesh_shader.uniform("err_color", Vec3{1.0f});
@@ -268,8 +268,7 @@ void Renderer::end_outline(BBox box) {
 	box.screen_rect(_proj, min, max);
 
 	Vec2 thickness = Vec2(3.0f / window_dim.x, 3.0f / window_dim.y);
-	GL::Effects::outline(outline_fb, framebuffer, Gui::Color::outline, min - thickness,
-	                     max + thickness);
+	GL::Effects::outline(outline_fb, framebuffer, Gui::Color::outline, min - thickness, max + thickness);
 
 	framebuffer.bind();
 }
@@ -285,7 +284,7 @@ void Renderer::instances(GL::Instances& inst, GL::Mesh& mesh, Renderer::MeshOpt 
 	inst_shader.uniform("modelview", opt.modelview);
 	inst_shader.uniform("solid", opt.solid_color);
 	inst_shader.uniform("sel_color", opt.sel_color);
-	inst_shader.uniform("sel_id", opt.sel_id);
+	inst_shader.uniform("sel_id", opt.active_id);
 	inst_shader.uniform("hov_color", opt.hov_color);
 	inst_shader.uniform("hov_id", opt.hov_id);
 	inst_shader.uniform("err_color", Vec3{1.0f});
@@ -313,15 +312,18 @@ void Renderer::halfedge_editor(Renderer::HalfedgeOpt opt) {
 	auto [spheres, cylinders, arrows] = opt.editor.instances();
 	auto [face_mesh, vert_mesh, edge_mesh, halfedge_mesh] = opt.editor.meshes();
 
-	MeshOpt fopt = MeshOpt();
-	fopt.modelview = opt.modelview;
-	fopt.color = opt.f_color;
-	fopt.per_vert_id = true;
-	fopt.sel_color = Gui::Color::outline;
-	fopt.sel_id = opt.sel_id;
-	fopt.hov_color = Gui::Color::hover;
-	fopt.hov_id = opt.hov_id;
-	Renderer::mesh(face_mesh, fopt);
+	{ //faces:
+		MeshOpt fopt = MeshOpt();
+		fopt.modelview = opt.modelview;
+		fopt.color = opt.f_color;
+		fopt.per_vert_id = true;
+		fopt.sel_color = Gui::Color::active;
+		fopt.sel_ids = opt.sel_ids;
+		fopt.active_id = opt.active_id;
+		fopt.hov_color = Gui::Color::hover;
+		fopt.hov_id = opt.hov_id;
+		Renderer::mesh(face_mesh, fopt);
+	}
 
 	inst_shader.bind();
 	inst_shader.uniform("use_v_id", true);
@@ -329,21 +331,28 @@ void Renderer::halfedge_editor(Renderer::HalfedgeOpt opt) {
 	inst_shader.uniform("solid", false);
 	inst_shader.uniform("proj", _proj);
 	inst_shader.uniform("modelview", opt.modelview);
-	inst_shader.uniform("alpha", fopt.alpha);
-	inst_shader.uniform("sel_color", Gui::Color::outline);
+	inst_shader.uniform("alpha", 1.0f);
+	inst_shader.uniform("sel_color", Gui::Color::active);
 	inst_shader.uniform("hov_color", Gui::Color::hover);
-	inst_shader.uniform("sel_id", fopt.sel_id);
-	inst_shader.uniform("hov_id", fopt.hov_id);
+	inst_shader.uniform("sel_id", opt.active_id);
+	inst_shader.uniform("hov_id", opt.hov_id);
 
 	inst_shader.uniform("err_color", opt.err_color);
 	inst_shader.uniform("err_id", opt.err_id);
 
+	if (!opt.sel_ids.empty()) {
+		inst_shader.uniform("color", Gui::Color::selected);
+		spheres.render(vert_mesh, &opt.sel_ids, nullptr);
+		cylinders.render(edge_mesh, &opt.sel_ids, nullptr);
+		arrows.render(halfedge_mesh, &opt.sel_ids, nullptr);
+	}
+
 	inst_shader.uniform("color", opt.v_color);
-	spheres.render(vert_mesh);
+	spheres.render(vert_mesh, nullptr, &opt.sel_ids);
 	inst_shader.uniform("color", opt.e_color);
-	cylinders.render(edge_mesh);
+	cylinders.render(edge_mesh, nullptr, &opt.sel_ids);
 	inst_shader.uniform("color", opt.he_color);
-	arrows.render(halfedge_mesh);
+	arrows.render(halfedge_mesh, nullptr, &opt.sel_ids);
 }
 
 Renderer::Skeleton_ID_Map Renderer::skeleton(Renderer::SkeletonOpt sopt) {
@@ -403,7 +412,7 @@ Renderer::Skeleton_ID_Map Renderer::skeleton(Renderer::SkeletonOpt sopt) {
 		MeshOpt opt;
 		opt.id = root_id;
 		opt.modelview = sopt.view * Mat4::translate(sopt.skeleton.base) * Mat4::scale(Vec3{0.1f});
-		opt.color = sopt.root_selected ? Gui::Color::outline : Gui::Color::hover;
+		opt.color = sopt.root_selected ? Gui::Color::active : Gui::Color::hover;
 		sphere(opt);
 	}
 
@@ -414,7 +423,7 @@ Renderer::Skeleton_ID_Map Renderer::skeleton(Renderer::SkeletonOpt sopt) {
 		                (sopt.posed ? sopt.skeleton.j_to_posed(b) : sopt.skeleton.j_to_bind(b)) *
 		                Mat4::translate(b->extent) * Mat4::scale(Vec3{b->radius * 0.25f});
 		opt.id = bone_to_id[b];
-		opt.color = sopt.selected_bone.lock() == b ? Gui::Color::outline : Gui::Color::hover;
+		opt.color = sopt.selected_bone.lock() == b ? Gui::Color::active : Gui::Color::hover;
 		sphere(opt);
 	});
 
@@ -427,7 +436,7 @@ Renderer::Skeleton_ID_Map Renderer::skeleton(Renderer::SkeletonOpt sopt) {
 			opt.modelview = sopt.view * Mat4::translate(sopt.skeleton.base + h->target) *
 			                Mat4::scale(Vec3{h->bone.lock()->radius * 0.3f});
 			opt.id = id++;
-			opt.color = sopt.selected_handle.lock() == h ? Gui::Color::outline : Gui::Color::hoverg;
+			opt.color = sopt.selected_handle.lock() == h ? Gui::Color::active : Gui::Color::hoverg;
 			Vec3 j_world =
 				sopt.posed ? sopt.skeleton.end_of_posed(h->bone) : sopt.skeleton.end_of(h->bone);
 			ik_lines.add(h->target + sopt.skeleton.base, j_world,

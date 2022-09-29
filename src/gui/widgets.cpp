@@ -305,7 +305,7 @@ void Widgets::end_drag() {
 	univ_scl = false;
 }
 
-void Widgets::drag_to(Vec3 pos, Vec3 cam, Vec2 spos, Vec3 dir, bool scale_invert) {
+void Widgets::drag_to(Vec3 pos, Vec3 cam, Vec2 spos, Vec3 dir, bool scale_invert, float snap) {
 
 	Vec3 hit;
 	Vec3 norm;
@@ -326,6 +326,9 @@ void Widgets::drag_to(Vec3 pos, Vec3 cam, Vec2 spos, Vec3 dir, bool scale_invert
 		float sgn = sign(cross(drag_start, ang)[axis_u]);
 		drag_end = Vec3{};
 		drag_end[axis_u] = sgn * Degrees(std::acos(dot(drag_start, ang)));
+		if (snap != 0.0f) {
+			drag_end[axis_u] = std::round(drag_end[axis_u] / snap) * snap;
+		}
 
 	} else {
 
@@ -341,6 +344,11 @@ void Widgets::drag_to(Vec3 pos, Vec3 cam, Vec2 spos, Vec3 dir, bool scale_invert
 		if (!good) return;
 
 		if (active == Widget_Type::move) {
+			if (snap != 0.0f) {
+				hit.x = std::round((hit.x - drag_start.x) / snap) * snap + drag_start.x;
+				hit.y = std::round((hit.y - drag_start.y) / snap) * snap + drag_start.y;
+				hit.z = std::round((hit.z - drag_start.z) / snap) * snap + drag_start.z;
+			}
 			drag_end = hit;
 		} else if (univ_scl && active == Widget_Type::scale) {
 			float f = (hit - pos).norm() / (drag_start - pos).norm();

@@ -3,6 +3,7 @@
 #include "../lib/log.h"
 
 #include <fstream>
+#include <unordered_set>
 
 namespace GL {
 
@@ -396,34 +397,58 @@ void Instances::create() {
 	glBindVertexArray(0);
 }
 
-void Instances::render(GL::Mesh& mesh) {
+void Instances::render(GL::Mesh& mesh, std::vector< uint32_t > *include_, std::vector< uint32_t > *exclude_) {
+	assert(!(include_ && exclude_));
+
+	size_t n_draw = data.size();
 
 	if (mesh.dirty) mesh.update();
-	if (dirty) update();
+	if (include_ || exclude_) {
+		std::vector< Info > to_draw;
+		to_draw.reserve(data.size());
+
+		if (include_) {
+			std::unordered_set< uint32_t > include(include_->begin(), include_->end());
+			for (auto const &info : data) {
+				if (include.count(info.id)) to_draw.emplace_back(info);
+			}
+		}
+		if (exclude_) {
+			std::unordered_set< uint32_t > exclude(exclude_->begin(), exclude_->end());
+			for (auto const &info : data) {
+				if (!exclude.count(info.id)) to_draw.emplace_back(info);
+			}
+		}
+
+		if (to_draw.empty()) return;
+
+		glBindVertexArray(vao);
+		glBindBuffer(GL_ARRAY_BUFFER, vbo);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(Info) * to_draw.size(), to_draw.data(), GL_DYNAMIC_DRAW);
+		glBindVertexArray(0);
+		dirty = true; //will need to fix buffer before next draw!
+
+		n_draw = to_draw.size();
+	} else if (dirty) update();
 
 	glBindVertexArray(vao);
 
 	glBindBuffer(GL_ARRAY_BUFFER, mesh.vbo);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.ebo);
 	
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Mesh::Vert),
-	                      reinterpret_cast<GLvoid*>(0));
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Mesh::Vert), reinterpret_cast<GLvoid*>(0));
 	glEnableVertexAttribArray(0);
 
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Mesh::Vert),
-	                      reinterpret_cast<GLvoid*>(sizeof(Vec3)));
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Mesh::Vert), reinterpret_cast<GLvoid*>(sizeof(Vec3)));
 	glEnableVertexAttribArray(1);
 
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Mesh::Vert),
-	                      reinterpret_cast<GLvoid*>(2 * sizeof(Vec3)));
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Mesh::Vert), reinterpret_cast<GLvoid*>(2 * sizeof(Vec3)));
 	glEnableVertexAttribArray(2);
 
-	glVertexAttribIPointer(3, 1, GL_UNSIGNED_INT, sizeof(Mesh::Vert),
-	                       reinterpret_cast<GLvoid*>(2 * sizeof(Vec3) + sizeof(Vec2)));
+	glVertexAttribIPointer(3, 1, GL_UNSIGNED_INT, sizeof(Mesh::Vert), reinterpret_cast<GLvoid*>(2 * sizeof(Vec3) + sizeof(Vec2)));
 	glEnableVertexAttribArray(3);
 
-	glDrawElementsInstanced(GL_TRIANGLES, mesh.n_elem, GL_UNSIGNED_INT, nullptr,
-	                        static_cast<GLsizei>(data.size()));
+	glDrawElementsInstanced(GL_TRIANGLES, mesh.n_elem, GL_UNSIGNED_INT, nullptr, static_cast<GLsizei>(n_draw));
 
 	glBindVertexArray(0);
 }

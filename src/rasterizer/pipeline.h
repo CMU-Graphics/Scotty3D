@@ -143,7 +143,7 @@ struct Pipeline {
 	//(8) transforms fragments via Program::shade_fragment() to produce a color and opacity, stored in a ShadedFragment:
 	using ShadedFragment = ::ShadedFragment;
 
-	//(9) writes color to depth buffer (based on flags)
+	//(9) writes color and/or depth to framebuffer (based on flags)
 
 	//The "run" function wraps the above steps:
 	// vertices: list of vertices to rasterize

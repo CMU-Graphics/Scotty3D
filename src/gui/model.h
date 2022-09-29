@@ -1,7 +1,7 @@
-
 #pragma once
 
 #include "widgets.h"
+#include "modifiers.h"
 
 #include <SDL.h>
 #include <optional>
@@ -11,6 +11,7 @@
 #include "../platform/gl.h"
 #include "../scene/scene.h"
 #include "../util/viewer.h"
+#include "manager.h"
 
 namespace Gui {
 
@@ -28,7 +29,7 @@ public:
 	std::string ui_sidebar(Scene& scene, Undo& undo, Widgets& widgets, View_3D& cam);
 	void render(Widgets& widgets, View_3D& cam);
 
-	void erase_selected(Undo& undo);
+	void dissolve_selected(Undo& undo);
 	std::string end_transform(Undo& undo);
 	void apply_transform(Widgets& widgets);
 	void erase_mesh(const std::string& name);
@@ -36,7 +37,7 @@ public:
 	void clear_select();
 	Vec3 selected_pos();
 	void hover(uint32_t id);
-	std::string select(Widgets& widgets, uint32_t click, Vec3 cam, Vec2 spos, Vec3 dir);
+	std::string select(Widgets& widgets, uint32_t click, Vec3 cam, Vec2 spos, Vec3 dir, Modifiers mods);
 
 	std::tuple<GL::Instances&, GL::Instances&, GL::Instances&> instances();
 	std::tuple<GL::Mesh&, GL::Mesh&, GL::Mesh&, GL::Mesh&> meshes();
@@ -48,15 +49,12 @@ private:
 	void load_old_mesh();
 	void undo_update_mesh(Undo& undo);
 
-	template<typename T> std::string update_mesh(Undo& undo, Halfedge_Mesh::ElementRef ref, T&& op);
-	template<typename T> std::string update_mesh_global(Undo& undo, T&& op);
+	template<typename T> std::string update_mesh(Undo& undo, std::string const &desc, T&& op);
 
 	void zoom_to(Halfedge_Mesh::ElementRef ref, View_3D& cam);
 	void begin_transform();
-	bool begin_bevel(std::string& err);
-	bool begin_extrude(std::string& err);
-	void set_selected(Halfedge_Mesh::ElementRef elem);
-	std::optional<Halfedge_Mesh::ElementRef> selected_element();
+	bool begin_bevel_or_extrude(std::string& err);
+
 	void rebuild();
 
 	void update_vertex(Halfedge_Mesh::VertexRef vert);
@@ -67,12 +65,22 @@ private:
 	              std::vector<GL::Mesh::Index>& idxs, size_t insert_at);
 
 	std::string validate();
-	std::string warn_msg, err_msg;
+	std::string err_msg;
 
-	// This all needs to be updated when the mesh connectivity changes
+	//selection management:
+	// there is a "selected" set and an "active" element.
+	// generally operations apply to the "active" element.
+	// for some operations, the "selected" set also matters.
+	void set_selected(Halfedge_Mesh::ElementRef elem);
+	void select_id(uint32_t id, bool toggle = false);
+	std::optional<Halfedge_Mesh::ElementRef> active_element();
+	std::vector< Halfedge_Mesh::EdgeRef > selected_edges(); //all edges in the selected set. If active element is an edge, it is first.
+	//see also: 'clear_select()' above
+
 	uint32_t screen_err_id = 0;
-	uint32_t screen_selected_elem_id = 0;
 	uint32_t screen_hovered_elem_id = 0;
+	uint32_t screen_active_elem_id = 0;
+	std::set< uint32_t > screen_selected_elem_ids;
 
 	std::string mesh_name;
 	std::variant<std::weak_ptr<Halfedge_Mesh>, std::weak_ptr<Skinned_Mesh>> my_mesh;
@@ -82,6 +90,7 @@ private:
 	Bevel beveling;
 
 	struct Transform_Data {
+		Vec3 normal;
 		std::vector<Vec3> verts;
 		Vec3 center;
 	};
@@ -101,9 +110,8 @@ private:
 
 	// This is a kind of bad design and would be un-necessary if we used
 	// a halfedge implementation with contiguous iterators. For now this map must
-	// be updated (along with the instance data) by build_halfedge whenever
-	// the mesh changes its connectivity. Note that build_halfedge also
-	// re-indexes the mesh elements in the provided half-edge mesh.
+	// be updated (along with the instance data) by rebuild whenever
+	// the mesh changes its connectivity.
 	struct ElemInfo {
 		Halfedge_Mesh::ElementRef ref;
 		size_t instance = 0;

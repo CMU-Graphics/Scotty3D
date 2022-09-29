@@ -8,7 +8,7 @@ Indexed_Mesh Indexed_Mesh::from_halfedge_mesh(Halfedge_Mesh const &halfedge_mesh
 	std::vector<Indexed_Mesh::Index> idxs;
 
 	if (split_or_average == SplitEdges) {
-		for (Halfedge_Mesh::FaceCRef f = halfedge_mesh.faces_begin(); f != halfedge_mesh.faces_end(); f++) {
+		for (Halfedge_Mesh::FaceCRef f = halfedge_mesh.faces.begin(); f != halfedge_mesh.faces.end(); f++) {
 			if (f->boundary) continue;
 
 			//every corner gets its own copy of a vertex:
@@ -35,9 +35,9 @@ Indexed_Mesh Indexed_Mesh::from_halfedge_mesh(Halfedge_Mesh const &halfedge_mesh
 	} else if (split_or_average == AverageData) {
 		std::unordered_map< Halfedge_Mesh::VertexCRef, Index > vref_to_index;
 		std::vector< uint32_t > corners_at_vertex;
-		corners_at_vertex.reserve(halfedge_mesh.n_vertices());
-		verts.reserve(halfedge_mesh.n_vertices());
-		for (Halfedge_Mesh::VertexCRef vertex = halfedge_mesh.vertices_begin(); vertex != halfedge_mesh.vertices_end(); ++vertex) {
+		corners_at_vertex.reserve(halfedge_mesh.vertices.size());
+		verts.reserve(halfedge_mesh.vertices.size());
+		for (Halfedge_Mesh::VertexCRef vertex = halfedge_mesh.vertices.begin(); vertex != halfedge_mesh.vertices.end(); ++vertex) {
 			Vert vert;
 			vert.pos = vertex->position;
 			vert.norm = Vec3(0.0f, 0.0f, 0.0f);
@@ -49,7 +49,7 @@ Indexed_Mesh Indexed_Mesh::from_halfedge_mesh(Halfedge_Mesh const &halfedge_mesh
 			assert(ret.second); //vertex reference is certainly unique
 		}
 
-		for (Halfedge_Mesh::FaceCRef f = halfedge_mesh.faces_begin(); f != halfedge_mesh.faces_end(); f++) {
+		for (Halfedge_Mesh::FaceCRef f = halfedge_mesh.faces.begin(); f != halfedge_mesh.faces.end(); f++) {
 			if (f->boundary) continue;
 
 			std::vector<Index> face_verts;

@@ -93,12 +93,12 @@ std::string Test::mesh_to_string(const Halfedge_Mesh& mesh) {
 	std::unordered_map<uint32_t, uint32_t> vertex_id_to_idx;
 
 	uint32_t i = 0;
-	for (auto v = mesh.vertices_begin(); v != mesh.vertices_end(); ++v) {
+	for (auto v = mesh.vertices.begin(); v != mesh.vertices.end(); ++v) {
 		vertex_id_to_idx[v->id] = i++;
 	}
 
 	ss << "Halfedge_Mesh mesh = Halfedge_Mesh::from_indexed_faces({";
-	for (auto v = mesh.vertices_begin(); v != mesh.vertices_end(); ++v) {
+	for (auto v = mesh.vertices.begin(); v != mesh.vertices.end(); ++v) {
 		auto format = [](float val) -> std::string {
 			std::string ret = std::to_string(val);
 			if (ret.find('.') == std::string::npos) ret = ret + ".0f";
@@ -106,13 +106,13 @@ std::string Test::mesh_to_string(const Halfedge_Mesh& mesh) {
 			return ret;
 		};
 		ss << "Vec3{" << format(v->position.x) << "," << format(v->position.y) << "," << format(v->position.z) << "}";
-		if (v != std::prev(mesh.vertices_end())) {
+		if (v != std::prev(mesh.vertices.end())) {
 			ss << ", ";
 		}
 	}
 	ss << "}, {";
 	bool first = true;
-	for (auto f = mesh.faces_begin(); f != mesh.faces_end(); ++f) {
+	for (auto f = mesh.faces.begin(); f != mesh.faces.end(); ++f) {
 		if (f->boundary) continue;
 		if (!first) ss << ",";
 		first = false;
@@ -181,8 +181,8 @@ void Test::check_linear_time(std::function<void(Halfedge_Mesh&)> op) {
 
 	auto [small_time, large_time] = time_op(_small, _large, op);
 
-	size_t small_total_elements = _small.n_vertices() + _small.n_edges() + _small.n_faces();
-	size_t large_total_elements = _large.n_vertices() + _large.n_edges() + _large.n_faces();
+	size_t small_total_elements = _small.vertices.size() + _small.edges.size() + _small.faces.size();
+	size_t large_total_elements = _large.vertices.size() + _large.edges.size() + _large.faces.size();
 	float ratio =
 		static_cast<float>(large_total_elements) / static_cast<float>(small_total_elements);
 
@@ -226,7 +226,7 @@ void Test::check_log_time(std::function<void(PT::Tri_Mesh&)> op) {
 	constexpr float factor = 5.0f;
 	if (factor * ratio * small_time < large_time) {
 		throw Test::error(
-			"Operation not log-linear time. Small mesh: " + std::to_string(small_time) +
+			"Operation not log time. Small mesh: " + std::to_string(small_time) +
 			"ms vs. Large mesh: " + std::to_string(large_time) + "ms.");
 	}
 }
@@ -272,7 +272,9 @@ double Test::print_empirical_threshold(const std::vector<double>& ref,
 }
 
 bool Test::differs(float a, float b) {
-	return std::abs(a - b) > differs_eps;
+	if (std::isnan(a) && std::isnan(b)) return false;
+	if (std::isnan(a) || std::isnan(b)) return true;
+	return std::abs(a-b) > differs_eps;
 }
 
 bool Test::differs(Vec2 a, Vec2 b) {
@@ -693,7 +695,7 @@ void Test::print_spectrums(const std::vector<Spectrum>& vec) {
 
 bool Test::distant_from(const Halfedge_Mesh& from, const Halfedge_Mesh& to, float scale) {
 
-	for (auto v = to.vertices_begin(); v != to.vertices_end(); ++v) {
+	for (auto v = to.vertices.begin(); v != to.vertices.end(); ++v) {
 
 		// This is highly approximate: we simply scale up the threshold by the mean edge length
 		// incident from this vertex. This should make the distance test roughly scale-independent,
@@ -740,7 +742,7 @@ float Test::closest_distance(const Halfedge_Mesh& from, const Vec3& to) {
 				: dot(nor, p1) * dot(nor, p1) / length2(nor));
 	};
 
-	for (Halfedge_Mesh::FaceCRef face = from.faces_begin(); face != from.faces_end(); ++face) {
+	for (Halfedge_Mesh::FaceCRef face = from.faces.begin(); face != from.faces.end(); ++face) {
 		if (face->boundary) continue;
 		Halfedge_Mesh::HalfedgeCRef h = face->halfedge;
 		Vec3 v1 = h->vertex->position;

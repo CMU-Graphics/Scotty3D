@@ -386,8 +386,8 @@ void Pipeline< p, P, flags >::rasterize_line(
  *
  * Notes on derivatives:
  *  The derivatives are partial derivatives w.r.t. screen locations. That is:
- *    derivatives[i].x = d/dfb_position.x attributes[i].x
- *    derivatives[i].y = d/dfb_position.y attributes[i].y
+ *    derivatives[i].x = d/dfb_position.x attributes[i]
+ *    derivatives[i].y = d/dfb_position.y attributes[i]
  *  You may compute these derivatives analytically or numerically.
  *
  *  See section 8.12.1 "Derivative Functions" of the GLSL 4.20 specification for some inspiration. (*HOWEVER*, the spec is solving a harder problem, and also nothing in the spec is binding on your implementation)

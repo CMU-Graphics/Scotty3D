@@ -145,7 +145,7 @@ struct Copy {
 		FA_ColorR, FA_ColorG, FA_ColorB, FA_ColorA,
 		FA
 	};
-	//request derivatives for first two attributes (the texture coordinates):
+	//request derivatives for first two attributes (ColorR, ColorG):
 	enum { FD = 2 };
 
 	static void shade_vertex(

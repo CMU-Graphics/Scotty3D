@@ -30,7 +30,8 @@ public:
 	uint32_t read_id(Vec2 pos);
 
 	struct MeshOpt {
-		uint32_t id = 0, sel_id = 0, hov_id = 0;
+		std::vector< uint32_t > sel_ids;
+		uint32_t id = 0, active_id = 0, hov_id = 0;
 		Mat4 modelview;
 		Spectrum color, sel_color, hov_color;
 		float alpha = 1.0f;
@@ -51,7 +52,8 @@ public:
 		Spectrum e_color = Spectrum{0.8f};
 		Spectrum he_color = Spectrum{0.6f};
 		Spectrum err_color = Spectrum{1.0f, 0.0f, 0.0f};
-		uint32_t err_id = 0, hov_id = 0, sel_id = 0;
+		std::vector< uint32_t > sel_ids;
+		uint32_t err_id = 0, active_id = 0, hov_id = 0;
 	};
 
 	struct SkeletonOpt {

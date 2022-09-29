@@ -122,7 +122,7 @@ public:
 		Mat4 transform;
 	};
 
-	void render(GL::Mesh& mesh);
+	void render(GL::Mesh& mesh, std::vector< uint32_t > *include = nullptr, std::vector< uint32_t > *exclude = nullptr);
 	size_t add(const Mat4& transform, GLuint id = 0);
 	Info& get(size_t idx);
 	void clear(size_t n = 0);

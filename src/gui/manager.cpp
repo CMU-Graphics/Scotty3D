@@ -95,7 +95,7 @@ bool Manager::keydown(SDL_Keysym key, View_3D& gui_cam) {
 	if (key.sym == SDLK_DELETE) {
 #endif
 		if (mode == Mode::model) {
-			model.erase_selected(undo);
+			model.dissolve_selected(undo);
 		} else if (mode == Mode::rig) {
 			rig.erase_selected(undo);
 		} else {
@@ -1375,34 +1375,34 @@ void Manager::ui_new_object() {
 	SetNextWindowSize(ImVec2(300, 400), ImGuiCond_FirstUseEver);
 	Begin("Create Object", &new_object_shown, ImGuiWindowFlags_NoSavedSettings);
 
-	if (Button("Transform")) set_select(undo.create<Transform>("Transform", Transform{}));
-	if (WrapButton("Shape")) undo.create<Shape>("Shape", Shape{});
-	if (WrapButton("Mesh")) undo.create<Halfedge_Mesh>("Mesh", Halfedge_Mesh{});
-	if (WrapButton("Skinned Mesh")) undo.create<Skinned_Mesh>("Skinned Mesh", Skinned_Mesh{});
-	if (WrapButton("Particles")) undo.create<Particles>("Particles", Particles{});
-	if (WrapButton("Texture")) undo.create<Texture>("Texture", Texture{});
-	if (WrapButton("Material")) undo.create<Material>("Material", Material{scene.get<Texture>(undo.create("Texture", Texture{}))});
-	if (WrapButton("Delta Light")) undo.create<Delta_Light>("Delta Light", Delta_Light{});
-	if (WrapButton("Environment Light"))
-		undo.create<Environment_Light>("Env Light", Environment_Light{});
-	if (WrapButton("Camera")) undo.create<Camera>("Camera", Camera{});
+	auto default_material = [this]() {
+		std::shared_ptr< Material > material = scene.get< Material >("Material").lock();
+		if (!material) {
+			material = scene.get<Material>(undo.create("Material", Material{scene.get<Texture>(undo.create("Texture", Texture{}))})).lock();
+			assert(material);
+		}
+		return material;
+	};
 
-	Separator();
-
-	if (Button("Mesh Instance")) 
-		set_select(undo.create<Instance::Mesh>("Mesh Instance", Instance::Mesh{scene.get<Transform>(undo.create("Transform", Transform{})), 
-																				scene.get<Halfedge_Mesh>(undo.create("Mesh", Halfedge_Mesh{})), 
-																				scene.get<Material>(undo.create("Material", Material{scene.get<Texture>(undo.create("Texture", Texture{}))})), 
-																				Instance::Geometry_Settings{}}));
+	if (Button("Mesh Instance")) {
+		set_select(undo.create<Instance::Mesh>("Mesh Instance",
+			Instance::Mesh{
+				scene.get<Transform>(undo.create("Transform", Transform{})),
+				scene.get<Halfedge_Mesh>(undo.create("Mesh", Halfedge_Mesh::cube(1.0f))),
+				default_material(),
+				Instance::Geometry_Settings{}
+			}
+		));
+	}
 	if (WrapButton("Skinned Mesh Instance"))
 		set_select(undo.create<Instance::Skinned_Mesh>("Skinned Mesh Instance", Instance::Skinned_Mesh{scene.get<Transform>(undo.create("Transform", Transform{})), 
 																										scene.get<Skinned_Mesh>(undo.create("Skinned Mesh", Skinned_Mesh{})), 
-																										scene.get<Material>(undo.create("Material", Material{scene.get<Texture>(undo.create("Texture", Texture{}))})), 
+																										default_material(),
 																										Instance::Geometry_Settings{}}));
 	if (WrapButton("Shape Instance")) 
 		set_select(undo.create<Instance::Shape>("Shape Instance", Instance::Shape{scene.get<Transform>(undo.create("Transform", Transform{})), 
 																					scene.get<Shape>(undo.create("Shape", Shape{})), 
-																					scene.get<Material>(undo.create("Material", Material{scene.get<Texture>(undo.create("Texture", Texture{}))})), 
+																					default_material(),
 																					Instance::Geometry_Settings{}}));
 	if (WrapButton("Delta Light Instance"))
 		set_select(undo.create<Instance::Delta_Light>("Delta Light Instance", Instance::Delta_Light{scene.get<Transform>(undo.create("Transform", Transform{})), 
@@ -1415,12 +1415,25 @@ void Manager::ui_new_object() {
 	if (WrapButton("Particles Instance"))
 		set_select(undo.create<Instance::Particles>("Particles Instance", Instance::Particles{scene.get<Transform>(undo.create("Transform", Transform{})), 
 																								scene.get<Halfedge_Mesh>(undo.create("Mesh", Halfedge_Mesh{})), 
-																								scene.get<Material>(undo.create("Material", Material{scene.get<Texture>(undo.create("Texture", Texture{}))})), 
+																								default_material(),
 																								scene.get<Particles>(undo.create("Particles", Particles{})),
 																								Instance::Simulate_Settings{}}));
 	if (WrapButton("Camera Instance")) 
 		set_select(undo.create<Instance::Camera>("Camera Instance", Instance::Camera{scene.get<Transform>(undo.create("Transform", Transform{})), 
 																						scene.get<Camera>(undo.create("Camera", Camera{}))}));
+
+	Separator();
+
+	if (Button("Transform")) set_select(undo.create<Transform>("Transform", Transform{}));
+	if (WrapButton("Shape")) undo.create<Shape>("Shape", Shape{});
+	if (WrapButton("Mesh")) undo.create<Halfedge_Mesh>("Mesh", Halfedge_Mesh{});
+	if (WrapButton("Skinned Mesh")) undo.create<Skinned_Mesh>("Skinned Mesh", Skinned_Mesh{});
+	if (WrapButton("Particles")) undo.create<Particles>("Particles", Particles{});
+	if (WrapButton("Texture")) undo.create<Texture>("Texture", Texture{});
+	if (WrapButton("Material")) undo.create<Material>("Material", Material{scene.get<Texture>(undo.create("Texture", Texture{}))});
+	if (WrapButton("Delta Light")) undo.create<Delta_Light>("Delta Light", Delta_Light{});
+	if (WrapButton("Environment Light")) undo.create<Environment_Light>("Env Light", Environment_Light{});
+	if (WrapButton("Camera")) undo.create<Camera>("Camera", Camera{});
 
 	End();
 }
@@ -1578,11 +1591,20 @@ void Manager::end_drag() {
 	widgets.end_drag();
 }
 
-void Manager::drag_to(Vec3 cam, Vec2 spos, Vec3 dir) {
+void Manager::drag_to(Vec3 cam, Vec2 spos, Vec3 dir, Modifiers mods) {
 
 	if (!widgets.is_dragging()) return;
 
 	std::optional<Vec3> pos;
+	float snap = 0.0f;
+
+	if (mods & SnapBit) {
+		if (widgets.active == Widget_Type::rotate) {
+			snap = 15.0f;
+		} else if (widgets.active == Widget_Type::move) {
+			snap = 1.0f;
+		}
+	}
 
 	switch (mode) {
 	case Mode::layout:
@@ -1609,7 +1631,7 @@ void Manager::drag_to(Vec3 cam, Vec2 spos, Vec3 dir) {
 	}
 
 	if (pos.has_value()) {
-		widgets.drag_to(pos.value(), cam, spos, dir, mode == Mode::model);
+		widgets.drag_to(pos.value(), cam, spos, dir, mode == Mode::model, snap);
 	}
 
 	switch (mode) {
@@ -1691,7 +1713,7 @@ void Manager::clear_select() {
 	}
 }
 
-bool Manager::select(uint32_t id, Vec3 cam, Vec2 spos, Vec3 dir) {
+bool Manager::select(uint32_t id, Vec3 cam, Vec2 spos, Vec3 dir, Modifiers mods) {
 
 	bool dragging = widgets.select(id);
 
@@ -1718,7 +1740,7 @@ bool Manager::select(uint32_t id, Vec3 cam, Vec2 spos, Vec3 dir) {
 		}
 	} break;
 	case Mode::model: {
-		set_error(model.select(widgets, id, cam, spos, dir));
+		set_error(model.select(widgets, id, cam, spos, dir, mods));
 	} break;
 	case Mode::rig: {
 		rig.select(scene, widgets, undo, id, cam, spos, dir);
@@ -2014,7 +2036,7 @@ std::weak_ptr<Transform> Manager::render_instances(Mat4 view, bool gui) {
 	return ret;
 }
 
-void Manager::hover(uint32_t id, Vec3 cam, Vec2 spos, Vec3 dir) {
+void Manager::hover(uint32_t id, Vec3 cam, Vec2 spos, Vec3 dir, Modifiers mods) {
 	if (mode == Mode::model) {
 		model.hover(id);
 	} else if (mode == Mode::rig) {

@@ -704,7 +704,7 @@ Scene Scene::load(std::istream& from) {
 		//allocate halfedges and set data:
 		for (uint32_t i = loaded.halfedges_begin; i != loaded.halfedges_end; ++i) {
 			s3ds::Halfedge const &he = halfedges[i];
-			Halfedge_Mesh::HalfedgeRef halfedge = mesh->new_halfedge();
+			Halfedge_Mesh::HalfedgeRef halfedge = mesh->emplace_halfedge();
 			halfedge->corner_uv = Vec2(he.corner_uv[0], he.corner_uv[1]);
 			halfedge->corner_normal = Vec3(he.corner_normal[0], he.corner_normal[1], he.corner_normal[2]);
 			halfedge_refs.emplace_back(halfedge);
@@ -734,7 +734,7 @@ Scene Scene::load(std::istream& from) {
 		CHECK_RANGE("Halfedge_Mesh", vertices, loaded.vertices_begin, loaded.vertices_end);
 		for (uint32_t i = loaded.vertices_begin; i != loaded.vertices_end; ++i) {
 			auto const &lv = vertices[i];
-			Halfedge_Mesh::VertexRef vertex = mesh->new_vertex();
+			Halfedge_Mesh::VertexRef vertex = mesh->emplace_vertex();
 			if (lv.halfedge < loaded.halfedges_begin || lv.halfedge >= loaded.halfedges_end) throw std::runtime_error(file_info() + std::string(Thing) + " has a vertex with an out-of-range halfedge pointer.");
 			vertex->halfedge = halfedge_refs[lv.halfedge - loaded.halfedges_begin];
 			vertex->position = Vec3(lv.position[0], lv.position[1], lv.position[2]);
@@ -743,7 +743,7 @@ Scene Scene::load(std::istream& from) {
 			//circulate and set all vertex pointers:
 			Halfedge_Mesh::HalfedgeRef h = vertex->halfedge;
 			do {
-				 if (h->vertex != mesh->vertices_end()) throw std::runtime_error(file_info() + std::string(Thing) + " has two vertices that claim the same halfedge.");
+				 if (h->vertex != mesh->vertices.end()) throw std::runtime_error(file_info() + std::string(Thing) + " has two vertices that claim the same halfedge.");
 				h->vertex = vertex;
 				h = h->twin->next;
 			} while (h != vertex->halfedge);
@@ -755,7 +755,7 @@ Scene Scene::load(std::istream& from) {
 		CHECK_RANGE("Halfedge_Mesh", edges, loaded.edges_begin, loaded.edges_end);
 		for (uint32_t i = loaded.edges_begin; i != loaded.edges_end; ++i) {
 			s3ds::Edge const &le = edges[i];
-			Halfedge_Mesh::EdgeRef edge = mesh->new_edge();
+			Halfedge_Mesh::EdgeRef edge = mesh->emplace_edge();
 			if (le.halfedge < loaded.halfedges_begin || le.halfedge >= loaded.halfedges_end) throw std::runtime_error(file_info() + std::string(Thing) + " has an edge with an out-of-range halfedge pointer.");
 			edge->halfedge = halfedge_refs[le.halfedge - loaded.halfedges_begin];
 			edge->sharp = (le.sharp_flag == s3ds::Edge::Sharp);
@@ -764,7 +764,7 @@ Scene Scene::load(std::istream& from) {
 			// (yes, it's not much of a circulation but writing it this way keeps things consistent)
 			Halfedge_Mesh::HalfedgeRef h = edge->halfedge;
 			do {
-				if (h->edge != mesh->edges_end()) throw std::runtime_error(file_info() + std::string(Thing) + " has two edges that claim the same halfedge.");
+				if (h->edge != mesh->edges.end()) throw std::runtime_error(file_info() + std::string(Thing) + " has two edges that claim the same halfedge.");
 				h->edge = edge;
 				h = h->twin;
 			} while (h != edge->halfedge);
@@ -775,7 +775,7 @@ Scene Scene::load(std::istream& from) {
 		CHECK_RANGE("Halfedge_Mesh", faces, loaded.faces_begin, loaded.faces_end);
 		for (uint32_t i = loaded.faces_begin; i != loaded.faces_end; ++i) {
 			s3ds::Face const &lf = faces[i];
-			Halfedge_Mesh::FaceRef face = mesh->new_face();
+			Halfedge_Mesh::FaceRef face = mesh->emplace_face();
 			if (lf.halfedge < loaded.halfedges_begin || lf.halfedge >= loaded.halfedges_end) throw std::runtime_error(file_info() + std::string(Thing) + " has a face with an out-of-range halfedge pointer.");
 			face->halfedge = halfedge_refs[lf.halfedge - loaded.halfedges_begin];
 			face->boundary = (lf.boundary_flag == s3ds::Face::Boundary);
@@ -783,7 +783,7 @@ Scene Scene::load(std::istream& from) {
 			//circulate and set all face pointers:
 			Halfedge_Mesh::HalfedgeRef h = face->halfedge;
 			do {
-				if (h->face != mesh->faces_end()) throw std::runtime_error(file_info() + std::string(Thing) + " has two faces that claim the same halfedge.");
+				if (h->face != mesh->faces.end()) throw std::runtime_error(file_info() + std::string(Thing) + " has two faces that claim the same halfedge.");
 				h->face = face;
 				h = h->next;
 			} while (h != face->halfedge);
@@ -1470,7 +1470,7 @@ void Scene::save(std::ostream& to) const {
 
 			// -- halfedges --
 			std::unordered_map<Halfedge_Mesh::HalfedgeRef, uint32_t> halfedgeref_to_index;
-			for (auto halfedge = mesh->halfedges_begin(); halfedge != mesh->halfedges_end(); ++halfedge) {
+			for (auto halfedge = mesh->halfedges.begin(); halfedge != mesh->halfedges.end(); ++halfedge) {
 				//index of the next free storage slot:
 				uint32_t i = static_cast<uint32_t>(f_halfedges.size()) + static_cast<uint32_t>(halfedgeref_to_index.size());
 				assert(i%2 == 0); //always added in pairs
@@ -1481,7 +1481,7 @@ void Scene::save(std::ostream& to) const {
 
 			load.halfedges_begin = static_cast<uint32_t>(f_halfedges.size());
 			f_halfedges.resize(f_halfedges.size() + halfedgeref_to_index.size());
-			for (auto halfedge = mesh->halfedges_begin(); halfedge != mesh->halfedges_end(); ++halfedge) {
+			for (auto halfedge = mesh->halfedges.begin(); halfedge != mesh->halfedges.end(); ++halfedge) {
 				s3ds::Halfedge load_halfedge;
 				load_halfedge.corner_uv[0] = halfedge->corner_uv.x;
 				load_halfedge.corner_uv[1] = halfedge->corner_uv.y;
@@ -1497,7 +1497,7 @@ void Scene::save(std::ostream& to) const {
 
 			// -- vertices --
 			load.vertices_begin = static_cast<uint32_t>(f_vertices.size());
-			for (auto vertex = mesh->vertices_begin(); vertex != mesh->vertices_end(); ++vertex) {
+			for (auto vertex = mesh->vertices.begin(); vertex != mesh->vertices.end(); ++vertex) {
 				s3ds::Vertex load_vertex;
 				load_vertex.position[0] = vertex->position.x;
 				load_vertex.position[1] = vertex->position.y;
@@ -1510,7 +1510,7 @@ void Scene::save(std::ostream& to) const {
 
 			// -- edges --
 			load.edges_begin = static_cast<uint32_t>(f_edges.size());
-			for (auto edge = mesh->edges_begin(); edge != mesh->edges_end(); ++edge) {
+			for (auto edge = mesh->edges.begin(); edge != mesh->edges.end(); ++edge) {
 				s3ds::Edge load_edge;
 				load_edge.sharp_flag = edge->sharp ? s3ds::Edge::Sharp : s3ds::Edge::Smooth;
 				load_edge.halfedge = halfedgeref_to_index[edge->halfedge];
@@ -1521,7 +1521,7 @@ void Scene::save(std::ostream& to) const {
 
 			// -- faces --
 			load.faces_begin = static_cast<uint32_t>(f_faces.size());
-			for (auto face = mesh->faces_begin(); face != mesh->faces_end(); ++face) {
+			for (auto face = mesh->faces.begin(); face != mesh->faces.end(); ++face) {
 				s3ds::Face load_face;
 				load_face.boundary_flag = face->boundary ? s3ds::Face::Boundary : s3ds::Face::Surface;
 				load_face.halfedge = halfedgeref_to_index[face->halfedge];
@@ -1546,7 +1546,7 @@ void Scene::save(std::ostream& to) const {
 
 			// -- halfedges --
 			std::unordered_map<Halfedge_Mesh::HalfedgeRef, uint32_t> halfedgeref_to_index;
-			for (auto halfedge = skinned_mesh->mesh.halfedges_begin(); halfedge != skinned_mesh->mesh.halfedges_end(); ++halfedge) {
+			for (auto halfedge = skinned_mesh->mesh.halfedges.begin(); halfedge != skinned_mesh->mesh.halfedges.end(); ++halfedge) {
 				uint32_t i = static_cast<uint32_t>(f_halfedges.size()) + static_cast<uint32_t>(halfedgeref_to_index.size());
 				halfedgeref_to_index.emplace(halfedge, i);
 				halfedgeref_to_index.emplace(halfedge->twin, i^1);
@@ -1554,7 +1554,7 @@ void Scene::save(std::ostream& to) const {
 
 			load.halfedges_begin = static_cast<uint32_t>(f_skinned_halfedges.size());
 			f_skinned_halfedges.resize(f_halfedges.size() + halfedgeref_to_index.size());
-			for (auto halfedge = skinned_mesh->mesh.halfedges_begin(); halfedge != skinned_mesh->mesh.halfedges_end(); ++halfedge) {
+			for (auto halfedge = skinned_mesh->mesh.halfedges.begin(); halfedge != skinned_mesh->mesh.halfedges.end(); ++halfedge) {
 				s3ds::Halfedge load_halfedge;
 				load_halfedge.corner_uv[0] = halfedge->corner_uv.x;
 				load_halfedge.corner_uv[1] = halfedge->corner_uv.y;
@@ -1570,7 +1570,7 @@ void Scene::save(std::ostream& to) const {
 
 			// -- vertices --
 			load.vertices_begin = static_cast<uint32_t>(f_skinned_vertices.size());
-			for (auto vertex = skinned_mesh->mesh.vertices_begin(); vertex != skinned_mesh->mesh.vertices_end(); ++vertex) {
+			for (auto vertex = skinned_mesh->mesh.vertices.begin(); vertex != skinned_mesh->mesh.vertices.end(); ++vertex) {
 				s3ds::Skinned_Vertex load_vertex;
 				load_vertex.position[0] = vertex->position.x;
 				load_vertex.position[1] = vertex->position.y;
@@ -1593,7 +1593,7 @@ void Scene::save(std::ostream& to) const {
 
 			// -- edges --
 			load.edges_begin = static_cast<uint32_t>(f_skinned_edges.size());
-			for (auto edge = skinned_mesh->mesh.edges_begin(); edge != skinned_mesh->mesh.edges_end(); ++edge) {
+			for (auto edge = skinned_mesh->mesh.edges.begin(); edge != skinned_mesh->mesh.edges.end(); ++edge) {
 				s3ds::Edge load_edge;
 				load_edge.sharp_flag = edge->sharp ? s3ds::Edge::Sharp : s3ds::Edge::Smooth;
 				load_edge.halfedge = halfedgeref_to_index[edge->halfedge];
@@ -1604,7 +1604,7 @@ void Scene::save(std::ostream& to) const {
 
 			// -- faces --
 			load.faces_begin = static_cast<uint32_t>(f_skinned_faces.size());
-			for (auto face = skinned_mesh->mesh.faces_begin(); face != skinned_mesh->mesh.faces_end(); ++face) {
+			for (auto face = skinned_mesh->mesh.faces.begin(); face != skinned_mesh->mesh.faces.end(); ++face) {
 				s3ds::Face load_face;
 				load_face.boundary_flag = face->boundary ? s3ds::Face::Boundary : s3ds::Face::Surface;
 				load_face.halfedge = halfedgeref_to_index[face->halfedge];

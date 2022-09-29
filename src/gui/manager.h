@@ -11,6 +11,7 @@
 #include "../scene/scene.h"
 #include "../util/viewer.h"
 
+#include "modifiers.h"
 #include "widgets.h"
 #include "model.h"
 #include "render.h"
@@ -26,7 +27,9 @@ namespace Gui {
 struct Color {
 	RGBv(black, 0, 0, 0);
 	RGBv(white, 255, 255, 255);
-	RGBv(outline, 242, 153, 41);
+	RGBv(outline, 240, 160, 70);
+	RGBv(active, 242, 200, 70);
+	RGBv(selected, 200, 125, 41);
 	RGBv(hover, 102, 102, 204);
 	RGBv(baseplane, 71, 71, 71);
 	RGBv(background, 58, 58, 58);
@@ -53,9 +56,9 @@ public:
 	bool quit();
 
 	// Mouse interactions
-	bool select(uint32_t id, Vec3 cam, Vec2 spos, Vec3 dir);
-	void hover(uint32_t id, Vec3 cam, Vec2 spos, Vec3 dir);
-	void drag_to(Vec3 cam, Vec2 spos, Vec3 dir);
+	bool select(uint32_t id, Vec3 cam, Vec2 spos, Vec3 dir, Modifiers mods);
+	void hover(uint32_t id, Vec3 cam, Vec2 spos, Vec3 dir, Modifiers mods);
+	void drag_to(Vec3 cam, Vec2 spos, Vec3 dir, Modifiers mods);
 	void end_drag();
 	
 	void clear_select();
