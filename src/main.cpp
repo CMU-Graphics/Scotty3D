@@ -57,6 +57,7 @@ int main(int argc, char** argv) {
 	args.add_option("--film-samples",        film_samples, "Override film samples-per-pixel (for pathtracer)");
 	args.add_option("--film-max-ray-depth",  film_max_ray_depth, "Override film max ray depth (for pathtracer)");
 	args.add_option("--film-sample-pattern", film_sample_pattern, "Override film sample pattern (for rasterizer)");
+	args.add_option("--force-dpi", Platform::force_dpi, "Force DPI to a given number (will scale UI).");
 
 	CLI11_PARSE(args, argc, argv);
 

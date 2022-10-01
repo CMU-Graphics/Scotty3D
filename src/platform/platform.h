@@ -30,6 +30,9 @@ public:
 	static uint32_t console_width();
 	static void strcpy(char* dest, const char* src, size_t limit);
 
+
+	inline static float force_dpi = std::numeric_limits< float >::quiet_NaN();
+
 private:
 	float prev_dpi = 0.0f;
 	float prev_scale = 0.0f;

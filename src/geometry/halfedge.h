@@ -304,9 +304,10 @@ public:
 
 		//helpers:
 		//convenience function for setting connectivity
-		void set_neighbors(HalfedgeRef next_, HalfedgeRef twin_, VertexRef vertex_, EdgeRef edge_, FaceRef face_) {
-			next = next_; twin = twin_; vertex = vertex_; edge = edge_; face = face_;
+		void set_tnvef(HalfedgeRef twin_, HalfedgeRef next_, VertexRef vertex_, EdgeRef edge_, FaceRef face_) {
+			twin = twin_; next = next_; vertex = vertex_; edge = edge_; face = face_;
 		}
+
 
 	private:
 		Halfedge(uint32_t id_) : id(id_) { }
@@ -384,6 +385,9 @@ public:
 
 	//furthest vertex distance from origin
 	float radius() const;
+
+	//a multi-line description of the mesh, suitable for debug output (works on invalid meshes)
+	std::string describe() const;
 
 	//--- validation ---
 
@@ -471,6 +475,8 @@ private:
 
 	friend class Test;
 };
+
+
 
 /*
     Some containers need to know how to compare two iterators (std::map)

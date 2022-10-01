@@ -362,7 +362,8 @@ size_t Halfedge_Mesh::n_boundaries() const {
 	return n;
 }
 
-//helper used to get set of pointers into a list (used by validate):
+
+//helper used to get set of pointers into a list (used by validate and describe):
 template< typename T >
 static std::unordered_set< T const * > element_addresses(std::list< T > const &list) {
 	std::unordered_set< T const * > address_set;
@@ -371,6 +372,68 @@ static std::unordered_set< T const * > element_addresses(std::list< T > const &l
 		assert(ret.second);
 	}
 	return address_set;
+}
+
+//description of the mesh suitable for debugging:
+std::string Halfedge_Mesh::describe() const {
+
+	//for checking whether a reference is held in a given list:
+	std::unordered_set< Vertex const * > in_vertices = element_addresses(vertices);
+	std::unordered_set< Edge const * > in_edges = element_addresses(edges);
+	std::unordered_set< Face const * > in_faces = element_addresses(faces);
+	std::unordered_set< Halfedge const * > in_halfedges = element_addresses(halfedges);
+	std::unordered_set< Vertex const * > in_free_vertices = element_addresses(free_vertices);
+	std::unordered_set< Edge const * > in_free_edges = element_addresses(free_edges);
+	std::unordered_set< Face const * > in_free_faces = element_addresses(free_faces);
+	std::unordered_set< Halfedge const * > in_free_halfedges = element_addresses(free_halfedges);
+
+	//helpers for describing things:
+	auto desc_halfedge = [&,this](HalfedgeRef h) -> std::string {
+		if (in_halfedges.count(&*h)) return "h" + std::to_string(h->id);
+		else if (in_free_halfedges.count(&*h)) return "h[freed" + std::to_string(h->id & ~0x80000000u) + "]";
+		else if (h == halfedges.end()) return "hx";
+		else return "h?";
+	};
+	auto desc_vertex = [&,this](VertexRef v) -> std::string {
+		if (in_vertices.count(&*v)) return "v" + std::to_string(v->id);
+		else if (in_free_vertices.count(&*v)) return "v[freed" + std::to_string(v->id & ~0x80000000u) + "]";
+		else if (v == vertices.end()) return "vx";
+		else return "v?";
+	};
+	auto desc_edge = [&,this](EdgeRef e) -> std::string {
+		if (in_edges.count(&*e)) return "e" + std::to_string(e->id);
+		else if (in_free_edges.count(&*e)) return "e[freed" + std::to_string(e->id & ~0x80000000u) + "]";
+		else if (e == edges.end()) return "ex";
+		else return "e?";
+	};
+	auto desc_face = [&,this](FaceRef f) -> std::string {
+		if (in_faces.count(&*f)) return "f" + std::to_string(f->id);
+		else if (in_free_faces.count(&*f)) return "f[freed" + std::to_string(f->id & ~0x80000000u) + "]";
+		else if (f == faces.end()) return "fx";
+		else return "f?";
+	};
+
+
+	std::ostringstream oss;
+	oss << "Mesh with " << halfedges.size() << " halfedges, " << vertices.size() << " vertices, " << edges.size() << " edges, and " << faces.size() << " faces:\n";
+	for (auto const &h : halfedges) {
+		oss << "  [h" << h.id << "] t:" << desc_halfedge(h.twin)
+		    << " n:" << desc_halfedge(h.next)
+		    << " " << desc_vertex(h.vertex)
+		    << " " << desc_edge(h.edge)
+		    << " " << desc_face(h.face) << "\n";
+	}
+	for (auto const &v : vertices) {
+		oss << "  [v" << v.id << "] " << desc_halfedge(v.halfedge) << " @ " << v.position << "\n";
+	}
+	for (auto const &e : edges) {
+		oss << "  [e" << e.id << "] " << desc_halfedge(e.halfedge) << "\n";
+	}
+	for (auto const &f : faces) {
+		oss << "  [f" << f.id << "] " << desc_halfedge(f.halfedge) << "\n";
+	}
+
+	return oss.str();
 }
 
 //helper used to format addresses as strings for display:

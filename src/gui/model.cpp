@@ -321,8 +321,8 @@ std::vector< Halfedge_Mesh::EdgeRef > Model::selected_edges() {
 
 	rebuild();
 
-	auto add = [&,this](uint32_t id) {
-		auto entry = screen_id_to_info.find(screen_active_elem_id);
+	auto add = [&ret,this](uint32_t id) {
+		auto entry = screen_id_to_info.find(id);
 		if (entry != screen_id_to_info.end()) {
 			 if (auto edge = std::get_if< Halfedge_Mesh::EdgeRef >(&entry->second.ref)) {
 			 	ret.emplace_back(*edge);

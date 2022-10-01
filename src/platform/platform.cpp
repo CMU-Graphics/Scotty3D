@@ -129,24 +129,30 @@ void Platform::platform_init() {
 void Platform::set_dpi() {
 
 	float dpi;
-	int32_t index = SDL_GetWindowDisplayIndex(window);
-	if (index < 0) {
-		return;
-	}
-	if (SDL_GetDisplayDPI(index, nullptr, &dpi, nullptr)) {
-		return;
+	if (force_dpi == force_dpi) {
+		dpi = force_dpi;
+	} else {
+		int32_t index = SDL_GetWindowDisplayIndex(window);
+		if (index < 0) {
+			return;
+		}
+		if (SDL_GetDisplayDPI(index, nullptr, &dpi, nullptr)) {
+			return;
+		}
+		#ifdef __APPLE__
+		//on apple, assume window pixels are 96.0f dpi:
+		dpi = 96.0f;
+		#endif
 	}
 	float scale = window_draw().x / window_size().x;
 	if (prev_dpi == dpi && prev_scale == scale) return;
 
+	log("Current scale: %f, dpi: %f (adjust with --force-dpi)\n", scale, dpi);
+
 	ImGuiStyle style;
 	ImGui::StyleColorsDark(&style);
 	style.WindowRounding = 0.0f;
-#ifndef __APPLE__
-	style.ScaleAllSizes(0.8f * dpi / 96.0f);
-#else
-	style.ScaleAllSizes(0.8f);
-#endif
+	style.ScaleAllSizes(0.8f * dpi / 96.0f * scale);
 	ImGui::GetStyle() = style;
 
 	
@@ -155,12 +161,8 @@ void Platform::set_dpi() {
 	config.FontDataOwnedByAtlas = false;
 	IO.IniFilename = nullptr;
 	IO.Fonts->Clear();
-#ifdef __APPLE__
-	IO.Fonts->AddFontFromMemoryTTF(font_ttf, font_ttf_len, 14.0f * scale, &config);
+	IO.Fonts->AddFontFromMemoryTTF(font_ttf, font_ttf_len, 14.0f * dpi / 96.0f * scale, &config);
 	IO.FontGlobalScale = 1.0f / scale;
-#else
-	IO.Fonts->AddFontFromMemoryTTF(font_ttf, font_ttf_len, 14.0f / 96.0f * dpi, &config);
-#endif
 	IO.Fonts->Build();
 	
 	ImGui_ImplOpenGL3_DestroyFontsTexture();

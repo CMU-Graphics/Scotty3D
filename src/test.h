@@ -69,8 +69,17 @@ public:
 	static std::optional<std::string> differs(PT::Trace a, PT::Trace b);
 	static std::optional<std::string> differs(Bone a, Bone b);
 
-	//checks positions+ids but not uvs, normals:
-	static std::optional<std::string> differs(Halfedge_Mesh const &a, Halfedge_Mesh const &b);
+	using CheckExtra = uint8_t;
+	enum : CheckExtra {
+		CheckIdsBit = 0x01,
+		CheckBoneWeightsBit = 0x02,
+		CheckCornerNormalsBit = 0x04,
+		CheckCornerUVsBit = 0x08,
+		CheckSharpBit = 0x10,
+		CheckAllBits = 0xff
+	};
+	//checks position + whatever you pass in check_extra:
+	static std::optional<std::string> differs(Halfedge_Mesh const &a, Halfedge_Mesh const &b, CheckExtra check_extra = CheckIdsBit);
 
 	static void print_matrix(Mat4 matrix);
 	static void print_vec3s(const std::vector<Vec3>& vec);

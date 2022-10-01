@@ -437,7 +437,9 @@ struct Quantized_Vertices {
 };
 
 
-std::optional<std::string> Test::differs(Halfedge_Mesh const &source, Halfedge_Mesh const &target) {
+std::optional<std::string> Test::differs(Halfedge_Mesh const &source, Halfedge_Mesh const &target, CheckExtra check_extra) {
+	//NOTE: check_extra actually ignored for now. Will update!
+
 	constexpr float epsilon = 0.001f;
 
 	using HalfedgeCRef = Halfedge_Mesh::HalfedgeCRef;
