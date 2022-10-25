@@ -12,9 +12,18 @@
 
 namespace Environment_Lights {
 
+//
+// Environment Lights in Scotty3D provide distant lights from a range of directions.
+//
+// Their interface provides:
+//  - sample(rng): sample a direction light might come from
+//  - pdf(dir): report probability density for a given sample direction
+//  - evaluate(dir): report amount of light coming from that direction
+//
+
 class Hemisphere {
 public:
-	Vec3 sample() const;
+	Vec3 sample(RNG &rng) const;
 	Spectrum evaluate(Vec3 dir) const;
 	float pdf(Vec3 dir) const;
 
@@ -31,7 +40,7 @@ public:
 	Sphere() = default;
 	static Sphere make_image(std::weak_ptr<Texture> image_texture);
 
-	Vec3 sample() const;
+	Vec3 sample(RNG &rng) const;
 	Spectrum evaluate(Vec3 dir) const;
 	float pdf(Vec3 dir) const;
 
@@ -48,8 +57,8 @@ public:
 
 class Environment_Light {
 public:
-	Vec3 sample() const {
-		return std::visit([&](auto& l) { return l.sample(); }, light);
+	Vec3 sample(RNG &rng) const {
+		return std::visit([&](auto& l) { return l.sample(rng); }, light);
 	}
 	Spectrum evaluate(Vec3 dir) const {
 		return std::visit([&](auto& l) { return l.evaluate(dir); }, light);

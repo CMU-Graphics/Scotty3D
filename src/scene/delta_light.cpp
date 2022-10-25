@@ -4,8 +4,8 @@
 
 namespace Delta_Lights {
 
-Sample Point::sample(Vec3 p) const {
-	Sample ret;
+Incoming Point::incoming(Vec3 p) const {
+	Incoming ret;
 	ret.direction = -p.unit();
 	ret.distance = p.norm();
 	ret.radiance = color * intensity;
@@ -16,8 +16,8 @@ Spectrum Point::display() const {
 	return color;
 }
 
-Sample Directional::sample(Vec3 p) const {
-	Sample ret;
+Incoming Directional::incoming(Vec3 p) const {
+	Incoming ret;
 	ret.direction = Vec3(0.0f, -1.0f, 0.0f);
 	ret.distance = std::numeric_limits<float>::infinity();
 	ret.radiance = color * intensity;
@@ -28,8 +28,8 @@ Spectrum Directional::display() const {
 	return color;
 }
 
-Sample Spot::sample(Vec3 p) const {
-	Sample ret;
+Incoming Spot::incoming(Vec3 p) const {
+	Incoming ret;
 	float angle = std::atan2(Vec2(p.x, p.z).norm(), p.y);
 	angle = std::abs(Degrees(angle));
 	ret.direction = -p.unit();

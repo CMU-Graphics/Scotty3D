@@ -56,7 +56,7 @@ void Render::ui_sidebar(Manager& manager, Undo& undo, Scene& scene, View_3D& use
 	}
 
 	if (Button("Open Render Window")) {
-		ui_render.open();
+		ui_render.open(scene);
 	}
 }
 

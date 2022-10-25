@@ -71,10 +71,10 @@ typename std::enable_if<std::is_copy_assignable_v<P>, BVH<P>>::type BVH<Primitiv
 	return ret;
 }
 
-template<typename Primitive> Vec3 BVH<Primitive>::sample(Vec3 from) const {
+template<typename Primitive> Vec3 BVH<Primitive>::sample(RNG &rng, Vec3 from) const {
 	if (primitives.empty()) return {};
-	int32_t n = RNG::integer(0, static_cast<int32_t>(primitives.size()));
-	return primitives[n].sample(from);
+	int32_t n = rng.integer(0, static_cast<int32_t>(primitives.size()));
+	return primitives[n].sample(rng, from);
 }
 
 template<typename Primitive>

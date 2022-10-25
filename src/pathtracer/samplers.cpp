@@ -4,12 +4,11 @@
 
 namespace Samplers {
 
-Vec2 Rect::sample() const {
+Vec2 Rect::sample(RNG &rng) const {
+	//A3T1 - step 2 - supersampling
 
-	// TODO (PathTracer): Task 1
-
-    // Generate a uniformly random point on a rectangle of size size.x * size.y
-    // Tip: RNG::unit()
+    // Return a point selected uniformly at random from the rectangle [0,size.x)x[0,size.y)
+    // Useful function: rng.unit()
 
     return Vec2{};
 }
@@ -19,7 +18,7 @@ float Rect::pdf(Vec2 at) const {
 	return 1.0f / (size.x * size.y);
 }
 
-Vec3 Point::sample() const {
+Vec3 Point::sample(RNG &rng) const {
 	return point;
 }
 
@@ -27,9 +26,9 @@ float Point::pdf(Vec3 at) const {
 	return at == point ? 1.0f : 0.0f;
 }
 
-Vec3 Triangle::sample() const {
-	float u = std::sqrt(RNG::unit());
-	float v = RNG::unit();
+Vec3 Triangle::sample(RNG &rng) const {
+	float u = std::sqrt(rng.unit());
+	float v = rng.unit();
 	float a = u * (1.0f - v);
 	float b = u * v;
 	return a * v0 + b * v1 + (1.0f - a - b) * v2;
@@ -45,10 +44,10 @@ float Triangle::pdf(Vec3 at) const {
 	return 1.0f / a;
 }
 
-Vec3 Hemisphere::Uniform::sample() const {
+Vec3 Hemisphere::Uniform::sample(RNG &rng) const {
 
-	float Xi1 = RNG::unit();
-	float Xi2 = RNG::unit();
+	float Xi1 = rng.unit();
+	float Xi2 = rng.unit();
 
 	float theta = std::acos(Xi1);
 	float phi = 2.0f * PI_F * Xi2;
@@ -65,10 +64,10 @@ float Hemisphere::Uniform::pdf(Vec3 dir) const {
 	return 1.0f / (2.0f * PI_F);
 }
 
-Vec3 Hemisphere::Cosine::sample() const {
+Vec3 Hemisphere::Cosine::sample(RNG &rng) const {
 
-	float phi = RNG::unit() * 2.0f * PI_F;
-	float cos_t = std::sqrt(RNG::unit());
+	float phi = rng.unit() * 2.0f * PI_F;
+	float cos_t = std::sqrt(rng.unit());
 
 	float sin_t = std::sqrt(1 - cos_t * cos_t);
 	float x = std::cos(phi) * sin_t;
@@ -83,7 +82,7 @@ float Hemisphere::Cosine::pdf(Vec3 dir) const {
 	return dir.y / PI_F;
 }
 
-Vec3 Sphere::Uniform::sample() const {
+Vec3 Sphere::Uniform::sample(RNG &rng) const {
 
     // TODO (PathTracer): Task 7
 
@@ -109,7 +108,7 @@ Sphere::Image::Image(const HDR_Image& image) {
     h = _h;
 }
 
-Vec3 Sphere::Image::sample() const {
+Vec3 Sphere::Image::sample(RNG &rng) const {
 
 	// TODO (PathTracer): Task 7
 

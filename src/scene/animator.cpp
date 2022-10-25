@@ -102,8 +102,7 @@ template<typename F> static void channels(Particles& val, F&& f) {
 	f("initial_velocity", val.initial_velocity);
 	f("spread_angle", val.spread_angle);
 	f("lifetime", val.lifetime);
-	f("pps", val.pps);
-	f("step_size", val.step_size);
+	f("rate", val.rate);
 }
 
 template<typename F>

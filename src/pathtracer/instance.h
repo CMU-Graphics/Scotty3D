@@ -48,9 +48,9 @@ public:
 		                  geometry);
 	}
 
-	Vec3 sample(Vec3 from) const {
+	Vec3 sample(RNG &rng, Vec3 from) const {
 		if (has_transform) from = iT * from;
-		auto dir = std::visit([&](const auto& g) { return g->sample(from); }, geometry);
+		auto dir = std::visit([&](const auto& g) { return g->sample(rng, from); }, geometry);
 		if (has_transform) dir = T.rotate(dir).unit();
 		return dir;
 	}
@@ -77,9 +77,9 @@ public:
 		has_transform = T != Mat4::I;
 	}
 
-	Delta_Lights::Sample sample(Vec3 from) const {
+	Delta_Lights::Incoming incoming(Vec3 from) const {
 		if (has_transform) from = iT * from;
-		Delta_Lights::Sample ret = light->sample(from);
+		Delta_Lights::Incoming ret = light->incoming(from);
 		if (has_transform) ret.transform(T);
 		return ret;
 	}

@@ -369,7 +369,7 @@ void Animate::ui_timeline(Undo& undo, Animator& animator, Scene& scene,
 
 	SameLine();
 	if (Button("Render")) {
-		ui_render.open();
+		ui_render.open(scene);
 	}
 	ui_render.ui_animate(scene, manager, undo, gui_cam, max_frame);
 

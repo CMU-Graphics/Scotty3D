@@ -402,10 +402,9 @@ void Manager::ui_sidebar(float menu_height, View_3D& gui_cam) {
 			new_object_shown = true;
 			new_object_focus = true;
 		}
-		// Enable only for obj importing
-		// if (Button("Import obj")) {
- 		// 	to_s3d();
- 		// }
+		if (Button("Import obj")) {
+			to_s3d();
+		}
 
 		Separator();
 	}

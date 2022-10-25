@@ -6,6 +6,8 @@
 
 #include "trace.h"
 
+struct RNG;
+
 namespace PT {
 
 template<typename Primitive> class BVH {
@@ -43,7 +45,7 @@ public:
 	std::vector<Primitive> destructure();
 	void clear();
 
-	Vec3 sample(Vec3 from) const;
+	Vec3 sample(RNG &rng, Vec3 from) const;
 	float pdf(Ray ray, const Mat4& T = Mat4::I, const Mat4& iT = Mat4::I) const;
 
 	std::vector<Primitive> primitives;

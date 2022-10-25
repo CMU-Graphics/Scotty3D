@@ -445,8 +445,7 @@ bool Widgets::select(uint32_t id) {
 	return start_dragging;
 }
 
-Widget_Type Widget_Transform::ui(Widget_Type active, Undo& undo,
-                                 std::weak_ptr<Transform> apply_to) {
+Widget_Type Widget_Transform::ui(Widget_Type active, Undo& undo, std::weak_ptr<Transform> apply_to) {
 
 	using namespace ImGui;
 	if (apply_to.expired()) return active;
@@ -886,24 +885,13 @@ void Widget_Particles::ui(Undo& undo, std::weak_ptr<Particles> apply_to) {
 		}
 	};
 
-	activate(DragFloat("Gravity", &particles->gravity, 0.1f), gravity_activated);
-	activate(DragFloat("Scale", &particles->scale, 0.01f, 0.01f, std::numeric_limits<float>::max(),
-	                   "%.2f"),
-	         scale_activated);
-	activate(DragFloat("Initial Velocity", &particles->initial_velocity, 0.1f, 0.0f,
-	                   std::numeric_limits<float>::max(), "%.2f"),
-	         initial_velocity_activated);
-	activate(SliderFloat("Spread Angle", &particles->spread_angle, 0.0f, 180.0f, "%.2f"),
-	         spread_angle_activated);
-	activate(DragFloat("Lifetime", &particles->lifetime, 0.01f, 0.0f,
-	                   std::numeric_limits<float>::max(), "%.2f"),
-	         lifetime_activated);
-	activate(DragFloat("Particles/Sec", &particles->pps, 1.0f, 0.0f,
-	                   std::numeric_limits<float>::max(), "%.2f"),
-	         pps_activated);
-	activate(DragFloat("Timestep", &particles->step_size, 0.001f, 0.0f,
-	                   std::numeric_limits<float>::max(), "%.4f"),
-	         step_size_activated);
+	activate(DragFloat3("Gravity", &particles->gravity.x, 0.1f), gravity_activated);
+	activate(DragFloat("Scale", &particles->scale, 0.01f, 0.01f, std::numeric_limits<float>::max(), "%.2f"), scale_activated);
+	activate(DragFloat("Initial Velocity", &particles->initial_velocity, 0.1f, 0.0f, std::numeric_limits<float>::max(), "%.2f"), initial_velocity_activated);
+	activate(SliderFloat("Spread Angle", &particles->spread_angle, 0.0f, 180.0f, "%.2f"), spread_angle_activated);
+	activate(DragFloat("Lifetime", &particles->lifetime, 0.01f, 0.0f, std::numeric_limits<float>::max(), "%.2f"), lifetime_activated);
+	activate(DragFloat("Particles/Sec", &particles->rate, 1.0f, 0.0f, std::numeric_limits<float>::max(), "%.2f"), pps_activated);
+	activate(DragFloat("Timestep", &particles->step_size, 0.001f, 0.0f, std::numeric_limits<float>::max(), "%.4f"), step_size_activated);
 
 	if (Button("Clear##particles")) {
 		temp_particles.clear();
@@ -1237,9 +1225,20 @@ bool Widget_Render::in_progress() {
 	return pathtracer.in_progress() || (rasterizer && rasterizer->in_progress()) || rendering_animation;
 }
 
-void Widget_Render::open() {
+void Widget_Render::open(Scene &scene) {
 	render_window = true;
 	render_window_focus = true;
+	//auto-select render camera:
+	if (render_cam.expired()) {
+		render_cam.reset();
+		std::string best = "";
+		for (auto& [name, cam] : scene.instances.cameras) {
+			if (render_cam.expired() || name < best) {
+				best = name;
+				render_cam = cam;
+			}
+		}
+	}
 }
 
 void Widget_Render::begin_window(Scene& scene, Undo& undo, Manager& manager, View_3D& gui_cam) {
@@ -1374,12 +1373,13 @@ bool Widget_Render::ui_render(Scene& scene, Manager& manager, Undo& undo, View_3
 	Separator();
 	Text("Render");
 
-	auto report_callback = [&](auto&& report) {
+	auto report_callback = [this](auto&& report) {
 		std::lock_guard<std::mutex> lock(report_mut);
 		if (report.first > percent_done) {
 			percent_done = report.first;
 			display_hdr = std::move(report.second);
 			update_display = true;
+			rebuild_ray_log = true;
 		}
 	};
 
@@ -1395,8 +1395,7 @@ bool Widget_Render::ui_render(Scene& scene, Manager& manager, Undo& undo, View_3
 
 	} else {
 
-		if (Button("Start Render") && !render_cam.expired() &&
-		    !render_cam.lock()->camera.expired()) {
+		if (Button("Start Render") && !render_cam.expired() && !render_cam.lock()->camera.expired()) {
 
 			ret = true;
 			quit = false;
@@ -1407,7 +1406,10 @@ bool Widget_Render::ui_render(Scene& scene, Manager& manager, Undo& undo, View_3
 				has_rendered = true;
 				rebuild_ray_log = true;
 				pathtracer.use_bvh(use_bvh);
-				pathtracer.render(scene, render_cam.lock(), std::move(report_callback), &quit);
+				pathtracer.render(scene, render_cam.lock(), [this, report_callback](PT::Pathtracer::Render_Report &&report){
+					report_callback(std::move(report));
+					rebuild_ray_log = true;
+				}, &quit);
 
 			} else if (method == Method::software_raster) {
 
@@ -1635,11 +1637,10 @@ PT::Pathtracer& Widget_Render::tracer() {
 }
 
 void Widget_Render::render_log(const Mat4& view) {
-	if (!pathtracer.in_progress() && rebuild_ray_log) {
+	if (rebuild_ray_log) {
 		rebuild_ray_log = false;
-		auto& log = pathtracer.get_ray_log();
 		ray_log.clear();
-		for (auto& l : log) {
+		for (auto& l : pathtracer.copy_ray_log()) {
 			ray_log.add(l.ray.point, l.ray.at(l.t), l.color);
 		}
 	}

@@ -16,11 +16,11 @@ public:
 	Sphere(float r = 1.0f) : radius(r) {
 	}
 
-	static Vec2 uv(Vec3 dir);
+	static Vec2 uv(Vec3 dir); //u = longitude, v = latitude, (0,1,0) is north pole
 
 	BBox bbox() const;
 	PT::Trace hit(Ray ray) const;
-	Vec3 sample(Vec3 from) const;
+	Vec3 sample(RNG &rng, Vec3 from) const;
 	float pdf(Ray ray, Mat4 pdf_T = Mat4::I, Mat4 pdf_iT = Mat4::I) const;
 
 	Indexed_Mesh to_mesh() const;
@@ -46,8 +46,8 @@ public:
 		return std::visit([&](auto& s) { return s.hit(ray); }, shape);
 	}
 
-	Vec3 sample(Vec3 from) const {
-		return std::visit([&](auto& s) { return s.sample(from); }, shape);
+	Vec3 sample(RNG &rng, Vec3 from) const {
+		return std::visit([&](auto& s) { return s.sample(rng, from); }, shape);
 	}
 
 	float pdf(Ray ray, Mat4 pdf_T = Mat4::I, Mat4 pdf_iT = Mat4::I) const {

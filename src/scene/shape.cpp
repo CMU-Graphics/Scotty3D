@@ -38,7 +38,7 @@ PT::Trace Sphere::hit(Ray ray) const {
     return ret;
 }
 
-Vec3 Sphere::sample(Vec3 from) const {
+Vec3 Sphere::sample(RNG &rng, Vec3 from) const {
 	die("Sampling sphere area lights is not implemented yet.");
 }
 

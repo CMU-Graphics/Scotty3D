@@ -130,7 +130,7 @@ void Simulate::build_scene(Scene& scene) {
 
 void Simulate::clear_particles(Scene& scene) {
     for(auto& [name, particles] : scene.particles) {
-        particles->clear();
+        particles->reset();
 	}
 }
 

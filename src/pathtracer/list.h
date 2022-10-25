@@ -40,10 +40,10 @@ public:
 		return List<Primitive>(std::move(prim_copy));
 	}
 
-	Vec3 sample(Vec3 from) const {
+	Vec3 sample(RNG &rng, Vec3 from) const {
 		if (prims.empty()) return {};
-		int32_t n = RNG::integer(0, static_cast<int32_t>(prims.size()));
-		return prims[n].sample(from);
+		int32_t n = rng.integer(0, static_cast<int32_t>(prims.size()));
+		return prims[n].sample(rng, from);
 	}
 
 	float pdf(Ray ray, const Mat4& T = Mat4::I, const Mat4& iT = Mat4::I) const {

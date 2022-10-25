@@ -12,53 +12,74 @@ constexpr bool SAMPLE_AREA_LIGHTS = false;
 constexpr bool RENDER_NORMALS = false;
 constexpr bool LOG_CAMERA_RAYS = false;
 constexpr bool LOG_AREA_LIGHT_RAYS = false;
+static thread_local RNG log_rng(0x15462662); //separate RNG for logging a fraction of rays to avoid changing result when logging enabled
 
-Spectrum Pathtracer::sample_direct_lighting_task4(const Shading_Info& hit) {
+Spectrum Pathtracer::sample_direct_lighting_task4(RNG &rng, const Shading_Info& hit) {
+	//A3T4: Pathtracer - direct light sampling (basic sampling)
 
-	// This function computes a Monte Carlo estimate of the _direct_ lighting at our ray
-    // intersection point by sampling both the BSDF and area lights.
+	// This function computes a single-sample Monte Carlo estimate of the _direct_ lighting
+	// at our ray intersection point by sampling the BSDF.
 
-    // Point lights are handled separately, as they cannot be intersected by tracing rays
-    // into the scene.
-    Spectrum radiance = point_lighting(hit);
+	//NOTE: this function and sample_indirect_lighting() perform very similar tasks.
 
-    // TODO (PathTracer): Task 4
+    // Compute exact amount of light coming from delta lights:
+	//  (these don't need to be sampled)
+    Spectrum radiance = sum_delta_lights(hit);
 
-    // For task 4, this function should perform almost the same sampling procedure as
-    // Pathtracer::sample_indirect_lighting(), but instead accumulates the emissive component of
-    // incoming light (the first value returned by Pathtracer::trace()). Note that since we only
-    // want emissive, we can trace a ray with depth = 0.
+	//TODO: ask hit.bsdf to sample an in direction that would scatter out along hit.out_dir
+
+	//TODO: rotate that direction into world coordinates
+
+	//TODO: construct a ray travelling in that direction
+	// NOTE: because we want emitted light only, can use depth = 0 for the ray
+
+	//TODO: trace() the ray to get the emitted light (first part of the return value)
+
+	//TODO: weight properly depending on the probability of the sampled scattering direction and add to radiance
 
 	return radiance;
 }
 
-Spectrum Pathtracer::sample_direct_lighting_task6(const Shading_Info& hit) {
-
+Spectrum Pathtracer::sample_direct_lighting_task6(RNG &rng, const Shading_Info& hit) {
+	//A3T6: Pathtracer - direct light sampling (mixture sampling)
 	// TODO (PathTracer): Task 6
 
     // For task 6, we want to upgrade our direct light sampling procedure to also
     // sample area lights using mixture sampling.
-	Spectrum radiance = point_lighting(hit);
+	Spectrum radiance = sum_delta_lights(hit);
 
 	// Example of using log_ray():
 	if constexpr (LOG_AREA_LIGHT_RAYS) {
-		if (RNG::coin_flip(0.001f)) log_ray(Ray(), 100.0f);
+		if (log_rng.coin_flip(0.001f)) log_ray(Ray(), 100.0f);
 	}
 
 	return radiance;
 }
 
-Spectrum Pathtracer::sample_indirect_lighting(const Shading_Info& hit) {
+Spectrum Pathtracer::sample_indirect_lighting(RNG &rng, const Shading_Info& hit) {
+	//A3T4: path tracing - indirect lighting
 
-	// TODO (PathTracer): Task 4
+	//Compute a single-sample Monte Carlo estimate of the indirect lighting contribution
+	// at a given ray intersection point.
 
-    // This function computes a single-sample Monte Carlo estimate of the _indirect_
-    // lighting at our ray intersection point.
+	//NOTE: this function and sample_direct_lighting_task4() perform very similar tasks.
+
+	//TODO: ask hit.bsdf to sample an in direction that would scatter out along hit.out_dir
+
+	//TODO: rotate that direction into world coordinates
+
+	//TODO: construct a ray travelling in that direction
+	// NOTE: be sure to reduce the ray depth! otherwise infinite recursion is possible
+
+	//TODO: trace() the ray to get the reflected light (the second part of the return value)
+
+	//TODO: weight properly depending on the probability of the sampled scattering direction and set radiance
+
 	Spectrum radiance;
     return radiance;
 }
 
-std::pair<Spectrum, Spectrum> Pathtracer::trace(const Ray& ray) {
+std::pair<Spectrum, Spectrum> Pathtracer::trace(RNG &rng, const Ray& ray) {
 
 	Trace result = scene.hit(ray);
 	if (!result.hit) {
@@ -98,18 +119,15 @@ std::pair<Spectrum, Spectrum> Pathtracer::trace(const Ray& ray) {
 
 	Spectrum direct;
 	if constexpr (SAMPLE_AREA_LIGHTS) {
-		direct = sample_direct_lighting_task6(info);
+		direct = sample_direct_lighting_task6(rng, info);
 	} else {
-		direct = sample_direct_lighting_task4(info);
+		direct = sample_direct_lighting_task4(rng, info);
 	}
 
-	return {emissive, direct + sample_indirect_lighting(info)};
+	return {emissive, direct + sample_indirect_lighting(rng, info)};
 }
 
 Pathtracer::Pathtracer() : thread_pool(std::thread::hardware_concurrency()) {
-	accumulator_samples = 0;
-	total_epochs = 0;
-	completed_epochs = 0;
 }
 
 Pathtracer::~Pathtracer() {
@@ -117,7 +135,7 @@ Pathtracer::~Pathtracer() {
 	thread_pool.stop();
 }
 
-void Pathtracer::build_scene(Scene& scene_, std::shared_ptr<::Instance::Camera> camera) {
+void Pathtracer::build_scene(Scene& scene_) {
 
 	// It would be nice to let the interface be usable here (as with
 	// the path-tracing part), but this would cause too much hassle with
@@ -136,7 +154,6 @@ void Pathtracer::build_scene(Scene& scene_, std::shared_ptr<::Instance::Camera> 
 	materials.clear();
 	meshes.clear();
 	shapes.clear();
-	cameras.clear();
 
 	std::unordered_map<std::shared_ptr<Halfedge_Mesh>, std::string> mesh_names;
 	std::unordered_map<std::shared_ptr<Skinned_Mesh>, std::string> skinned_mesh_names;
@@ -153,8 +170,7 @@ void Pathtracer::build_scene(Scene& scene_, std::shared_ptr<::Instance::Camera> 
 		for (const auto& [name, mesh] : scene_.meshes) {
 			mesh_names[mesh] = name;
 			mesh_futs.emplace_back(thread_pool.enqueue([name = name, mesh = mesh]() {
-				return std::pair{name, Tri_Mesh(Indexed_Mesh::from_halfedge_mesh(
-										   *mesh, Indexed_Mesh::SplitEdges))};
+				return std::pair{name, Tri_Mesh(Indexed_Mesh::from_halfedge_mesh( *mesh, Indexed_Mesh::SplitEdges))};
 			}));
 		}
 
@@ -178,8 +194,7 @@ void Pathtracer::build_scene(Scene& scene_, std::shared_ptr<::Instance::Camera> 
 			textures.emplace(name, std::move(copy));
 		}
 		default_texture_name = scene_.make_unique("default_texture");
-		textures.emplace(default_texture_name,
-		                 std::make_shared<Texture>(Textures::Constant{Spectrum{0.0f}, 1.0f}));
+		textures.emplace(default_texture_name, std::make_shared<Texture>(Textures::Constant{Spectrum{0.0f}, 1.0f}));
 
 		for (const auto& [name, material] : scene_.materials) {
 			material_names[material] = name;
@@ -190,8 +205,7 @@ void Pathtracer::build_scene(Scene& scene_, std::shared_ptr<::Instance::Camera> 
 			materials.emplace(name, std::move(copy));
 		}
 		default_material_name = scene_.make_unique("default_material");
-		materials.emplace(default_material_name, std::make_shared<Material>(Materials::Lambertian{
-													 textures.at(default_texture_name)}));
+		materials.emplace(default_material_name, std::make_shared<Material>(Materials::Lambertian{ textures.at(default_texture_name) }));
 
 		for (const auto& [name, delta_light] : scene_.delta_lights) {
 			delta_light_names[delta_light] = name;
@@ -209,7 +223,8 @@ void Pathtracer::build_scene(Scene& scene_, std::shared_ptr<::Instance::Camera> 
 				if (auto radiance = sphere_map.radiance.lock()) {
 					if (radiance->is<Textures::Image>()) {
 						sphere_map.importance = Samplers::Sphere::Image{
-							std::get<Textures::Image>(radiance->texture).image};
+							std::get<Textures::Image>(radiance->texture).image
+						};
 					}
 				}
 			}
@@ -235,8 +250,7 @@ void Pathtracer::build_scene(Scene& scene_, std::shared_ptr<::Instance::Camera> 
 			auto& material = materials.at(mesh_inst->material.expired()
 			                                  ? default_material_name
 			                                  : material_names.at(mesh_inst->material.lock()));
-			Mat4 T = mesh_inst->transform.expired() ? Mat4::I
-			                                        : mesh_inst->transform.lock()->local_to_world();
+			Mat4 T = mesh_inst->transform.lock()->local_to_world();
 
 			objects.emplace_back(mesh.get(), material.get(), T);
 
@@ -254,8 +268,7 @@ void Pathtracer::build_scene(Scene& scene_, std::shared_ptr<::Instance::Camera> 
 			auto& material = materials.at(mesh_inst->material.expired()
 			                                  ? default_material_name
 			                                  : material_names.at(mesh_inst->material.lock()));
-			Mat4 T = mesh_inst->transform.expired() ? Mat4::I
-			                                        : mesh_inst->transform.lock()->local_to_world();
+			Mat4 T = mesh_inst->transform.lock()->local_to_world();
 
 			objects.emplace_back(mesh.get(), material.get(), T);
 
@@ -273,9 +286,7 @@ void Pathtracer::build_scene(Scene& scene_, std::shared_ptr<::Instance::Camera> 
 			auto& material = materials.at(shape_inst->material.expired()
 			                                  ? default_material_name
 			                                  : material_names.at(shape_inst->material.lock()));
-			Mat4 T = shape_inst->transform.expired()
-			             ? Mat4::I
-			             : shape_inst->transform.lock()->local_to_world();
+			Mat4 T = shape_inst->transform.lock()->local_to_world();
 
 			objects.emplace_back(shape.get(), material.get(), T);
 
@@ -294,8 +305,7 @@ void Pathtracer::build_scene(Scene& scene_, std::shared_ptr<::Instance::Camera> 
 			auto& material = materials.at(part_inst->material.expired()
 			                                  ? default_material_name
 			                                  : material_names.at(part_inst->material.lock()));
-			Mat4 T = part_inst->transform.expired() ? Mat4::I
-			                                        : part_inst->transform.lock()->local_to_world();
+			Mat4 T = part_inst->transform.lock()->local_to_world();
 
 			auto particles = part_inst->particles.lock();
 			for (const auto& p : particles->particles) {
@@ -314,22 +324,12 @@ void Pathtracer::build_scene(Scene& scene_, std::shared_ptr<::Instance::Camera> 
 			if (light_inst->light.expired()) continue;
 
 			auto& light = delta_lights.at(delta_light_names.at(light_inst->light.lock()));
-			Mat4 T = light_inst->transform.expired()
-			             ? Mat4::I
-			             : light_inst->transform.lock()->local_to_world();
+			Mat4 T = light_inst->transform.lock()->local_to_world();
 
 			lights.emplace_back(light.get(), T);
 		}
 
-		{
-			assert(camera);
-			assert(!camera->camera.expired());
-
-			Mat4 T =
-				camera->transform.expired() ? Mat4::I : camera->transform.lock()->local_to_world();
-			cam_param = Camera_Instance{*camera->camera.lock(), T};
-		}
-
+		
 		emissive_objects = List(std::move(area_lights));
 		point_lights = std::move(lights);
 
@@ -341,6 +341,15 @@ void Pathtracer::build_scene(Scene& scene_, std::shared_ptr<::Instance::Camera> 
 	}
 }
 
+void Pathtracer::set_camera(std::shared_ptr<::Instance::Camera> camera_) {
+	assert(camera_);
+	assert(!camera_->camera.expired());
+	assert(!camera_->transform.expired());
+
+	camera_to_world = camera_->transform.lock()->local_to_world();
+	camera = *camera_->camera.lock();
+}
+
 void Pathtracer::use_bvh(bool bvh) {
 	scene_use_bvh = bvh;
 }
@@ -350,58 +359,65 @@ void Pathtracer::log_ray(const Ray& ray, float t, Spectrum color) {
 	ray_log.push_back(Ray_Log{ray, t, color});
 }
 
-void Pathtracer::accumulate(const HDR_Image& sample) {
+void Pathtracer::accumulate(Tile const &tile, const HDR_Image& data) {
 
 	std::lock_guard<std::mutex> lock(accumulator_mut);
 
-	accumulator_samples++;
-	for (uint32_t j = 0; j < cam_param.c.film.height; j++) {
-		for (uint32_t i = 0; i < cam_param.c.film.width; i++) {
-			Spectrum& s = accumulator.at(i, j);
-			const Spectrum& n = sample.at(i, j);
-			s += (n - s) * (1.0f / accumulator_samples);
+	for (uint32_t py = tile.y_begin; py < tile.y_end; ++py) {
+		for (uint32_t px = tile.x_begin; px < tile.x_end; ++px) {
+			uint32_t &samples = accumulator_samples[accumulator.w * py + px];
+			samples += (tile.s_end - tile.s_begin);
+			float weight = (tile.s_end - tile.s_begin) / float(samples);
+
+			Spectrum& s = accumulator.at(px, py);
+			const Spectrum& n = data.at(px, py);
+			s += (n - s) * weight;
 		}
 	}
 }
 
-void Pathtracer::do_trace(uint32_t samples) {
+void Pathtracer::do_trace(RNG &rng, Tile const &tile) {
+	//A3T1 - Step 0: understand this function!
 
-	HDR_Image sample(cam_param.c.film.width, cam_param.c.film.height);
-	for (uint32_t j = 0; j < cam_param.c.film.height; j++) {
-		for (uint32_t i = 0; i < cam_param.c.film.width; i++) {
+	HDR_Image sample(camera.film.width, camera.film.height, Spectrum(0.0f, 0.0f, 0.0f));
+	for (uint32_t py = tile.y_begin; py < tile.y_end; ++py) {
+		for (uint32_t px = tile.x_begin; px < tile.x_end; ++px) {
 
 			uint32_t sampled = 0;
-			for (uint32_t s = 0; s < samples; s++) {
+			for (uint32_t s = tile.s_begin; s < tile.s_end; ++s) {
 
-				auto [ray, pdf] = cam_param.c.generate_ray<Samplers::Rect>(i, j);
-				ray.transform(cam_param.iV);
+				//generate a camera ray for this pixel:
+				auto [ray, pdf] = camera.sample_ray(rng, px, py);
+				ray.transform(camera_to_world);
 
+				//if LOG_CAMERA_RAYS is set, add ray to the debug log with some small probability:
 				if constexpr (LOG_CAMERA_RAYS) {
-					if (RNG::coin_flip(0.00001f)) {
+					if (log_rng.coin_flip(0.00001f)) {
 						log_ray(ray, 10.0f, Spectrum{1.0f});
 					}
 				}
 
-				auto [emissive, light] = trace(ray);
+				//do path tracing:
+				auto [emissive, light] = trace(rng, ray);
 
 				Spectrum p = (emissive + light) / pdf;
 
 				if (p.valid()) {
-					sample.at(i, j) += p;
+					sample.at(px, py) += p;
 					sampled++;
 				}
 
 				if (cancel_flag && *cancel_flag) return;
 			}
 
-			if (sampled > 0) sample.at(i, j) *= (1.0f / sampled);
+			if (sampled > 0) sample.at(px, py) *= (1.0f / sampled);
 		}
 	}
-	accumulate(sample);
+	accumulate(tile, sample);
 }
 
 bool Pathtracer::in_progress() const {
-	return completed_epochs.load() < total_epochs;
+	return traced_tiles.load() < total_tiles;
 }
 
 std::pair<float, float> Pathtracer::completion_time() const {
@@ -412,51 +428,89 @@ uint32_t Pathtracer::visualize_bvh(GL::Lines& lines, GL::Lines& active, uint32_t
 	return scene.visualize(lines, active, depth, Mat4::I);
 }
 
-void Pathtracer::render(Scene& scene_, std::shared_ptr<::Instance::Camera> camera,
-                        std::function<void(Pathtracer::Render_Report)>&& f, bool* quit,
+void Pathtracer::render(Scene& scene_, std::shared_ptr<::Instance::Camera> camera_,
+                        std::function<void(Render_Report &&)>&& f, bool* quit,
                         bool add_samples) {
-
-	assert(camera);
-	assert(!camera->camera.expired());
-	auto cam = camera->camera.lock();
-
-	uint32_t n_samples = cam->film.samples;
-	uint32_t n_threads = std::thread::hardware_concurrency();
-	uint32_t samples_per_epoch = std::max(1u, n_samples / (n_threads * 10));
+	assert(camera_);
+	assert(!camera_->camera.expired());
 
 	cancel();
 	cancel_flag = quit;
 	report_fn = std::move(f);
 
-	total_epochs = n_samples / samples_per_epoch + !!(n_samples % samples_per_epoch);
+	//copy camera to local camera:
+	set_camera(camera_);
 
 	auto [aw, ah] = accumulator.dimension();
-	if (aw != cam->film.width || ah != cam->film.height) {
+	if (aw != camera_->camera.lock()->film.width || ah != camera_->camera.lock()->film.height) {
 		add_samples = false;
 	}
 
 	if (!add_samples) {
-		accumulator = HDR_Image(cam->film.width, cam->film.height, Spectrum(0.0f, 0.0f, 0.0f));
-		accumulator_samples = 0;
 		build_timer.reset();
-		build_scene(scene_, camera);
+		build_scene(scene_);
 		build_timer.pause();
+		accumulator = HDR_Image(camera.film.width, camera.film.height, Spectrum(0.0f, 0.0f, 0.0f));
+		accumulator_samples.assign(camera.film.width * camera.film.height, 0);
 		ray_log.clear();
 	}
 	render_timer.reset();
 
-	for (uint32_t s = 0; s < n_samples; s += samples_per_epoch) {
-		uint32_t samples = (s + samples_per_epoch) > n_samples ? n_samples - s : samples_per_epoch;
-		thread_pool.enqueue([samples, this]() {
-			do_trace(samples);
-			uint32_t completed = completed_epochs++ + 1;
-			if (completed == total_epochs) {
+	//divide image into tiles for rendering:
+	// (feedback will be posted back to the UI after every tile completes)
+	std::vector< Tile > tiles;
+
+	//tune these to your liking:
+	// lower values == quicker feedback but also generally more overhead
+	constexpr uint32_t tile_width = 100;
+	constexpr uint32_t tile_height = 100;
+	constexpr uint32_t tile_samples = 50;
+
+	for (uint32_t y_begin = 0; y_begin < camera.film.height; y_begin += tile_height) {
+		uint32_t y_end = std::min(y_begin + tile_height, camera.film.height);
+		for (uint32_t x_begin = 0; x_begin < camera.film.width; x_begin += tile_width) {
+			uint32_t x_end = std::min(x_begin + tile_width, camera.film.width);
+			for (uint32_t s_begin = 0; s_begin < camera.film.samples; s_begin += tile_samples) {
+				uint32_t s_end = std::min(s_begin + tile_samples, camera.film.samples);
+				tiles.emplace_back(Tile{x_begin, x_end, y_begin, y_end, s_begin, s_end});
+			}
+		}
+	}
+
+	//a bit of flare -- do the tiles in a fancy order:
+	std::stable_sort(tiles.begin(), tiles.end(), [this](Tile const &a, Tile const &b){
+		//do tiles from the inside out:
+		auto distance_from_center = [this](Tile const &t) {
+			return Vec2(
+				0.5f * (t.x_begin + t.x_end) - camera.film.width * 0.5f, 
+				0.5f * (t.y_begin + t.y_end) - camera.film.height * 0.5f
+			).norm();
+		};
+		float da = distance_from_center(a);
+		float db = distance_from_center(b);
+		if (da != db) return da < db;
+		//make sure to do the tiles at the same location in order of s_begin:
+		// (since 'accumulate' uses it for weight computation)
+		return a.s_begin < b.s_begin;
+	});
+
+
+	//actually launch the render jobs:
+	total_tiles = uint32_t(tiles.size());
+	for (auto const &tile : tiles) {
+		//queue up a render job per-tile:
+		thread_pool.enqueue([tile, this]() {
+			RNG rng;
+			do_trace(rng, tile);
+
+			uint32_t traced = traced_tiles.fetch_add(1) + 1;
+			if (traced == total_tiles) {
+				std::lock_guard<std::mutex> lock(accumulator_mut);
 				render_timer.pause();
 				report_fn({1.0f, accumulator.copy()});
-			} else if (completed % std::max(total_epochs / 10, 1u) == 0) {
+			} else {
 				std::lock_guard<std::mutex> lock(accumulator_mut);
-				report_fn({static_cast<float>(completed) / static_cast<float>(total_epochs),
-				           accumulator.copy()});
+				report_fn({traced / float(total_tiles), accumulator.copy()});
 			}
 		});
 	}
@@ -465,39 +519,40 @@ void Pathtracer::render(Scene& scene_, std::shared_ptr<::Instance::Camera> camer
 void Pathtracer::cancel() {
 	if (cancel_flag) *cancel_flag = true;
 	thread_pool.clear();
-	completed_epochs = 0;
-	total_epochs = 0;
+	traced_tiles = 0;
+	total_tiles = 0;
 	if (cancel_flag) *cancel_flag = false;
 	render_timer.pause();
 }
 
-const std::vector<Pathtracer::Ray_Log>& Pathtracer::get_ray_log() const {
+const std::vector<Pathtracer::Ray_Log> Pathtracer::copy_ray_log() {
+	std::lock_guard<std::mutex> lock(ray_log_mut);
 	return ray_log;
 }
 
-Vec3 Pathtracer::sample_area_lights(Vec3 from) {
+Vec3 Pathtracer::sample_area_lights(RNG &rng, Vec3 from) {
 
 	size_t n_emissive = emissive_objects.n_primitives();
 	size_t n_env = env_lights.size();
 
 	auto sample_env_lights = [&]() {
-		int32_t n = RNG::integer(0, static_cast<int32_t>(n_env));
+		int32_t n = rng.integer(0, static_cast<int32_t>(n_env));
 		auto it = env_lights.begin();
 		std::advance(it, n);
-		return it->second->sample();
+		return it->second->sample(rng);
 	};
 
 	if (n_emissive > 0 && n_env > 0) {
-		if (RNG::coin_flip(0.5f)) {
+		if (rng.coin_flip(0.5f)) {
 			return sample_env_lights();
 		} else {
-			return emissive_objects.sample(from);
+			return emissive_objects.sample(rng, from);
 		}
 	}
 	if (n_env > 0) {
 		return sample_env_lights();
 	}
-	return emissive_objects.sample(from);
+	return emissive_objects.sample(rng, from);
 }
 
 float Pathtracer::area_lights_pdf(Vec3 from, Vec3 dir) {
@@ -519,23 +574,23 @@ float Pathtracer::area_lights_pdf(Vec3 from, Vec3 dir) {
 	return n_strategies ? pdf / n_strategies : 0.0f;
 }
 
-Spectrum Pathtracer::point_lighting(const Shading_Info& hit) {
+Spectrum Pathtracer::sum_delta_lights(const Shading_Info& hit) {
 
 	if (hit.bsdf.is_specular()) return {};
 
 	Spectrum radiance;
 	for (auto& light : point_lights) {
-		Delta_Lights::Sample sample = light.sample(hit.pos);
-		Vec3 in_dir = hit.world_to_object.rotate(sample.direction);
+		Delta_Lights::Incoming incoming = light.incoming(hit.pos);
+		Vec3 in_dir = hit.world_to_object.rotate(incoming.direction);
 
 		Spectrum attenuation = hit.bsdf.evaluate(hit.out_dir, in_dir, hit.uv);
 		if (attenuation.luma() == 0.0f) continue;
 
-		Ray shadow_ray(hit.pos, sample.direction, Vec2{EPS_F, sample.distance - EPS_F});
+		Ray shadow_ray(hit.pos, incoming.direction, Vec2{EPS_F, incoming.distance - EPS_F});
 
 		Trace shadow = scene.hit(shadow_ray);
 		if (!shadow.hit) {
-			radiance += attenuation * sample.radiance;
+			radiance += attenuation * incoming.radiance;
 		}
 	}
 

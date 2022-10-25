@@ -6,10 +6,6 @@
 #include <random>
 #include <thread>
 
-namespace RNG {
-
-static thread_local RNG g_rng;
-
 RNG::RNG() {
 	random_seed();
 }
@@ -62,17 +58,3 @@ void RNG::random_seed() {
 uint32_t RNG::get_seed() {
 	return _seed;
 }
-
-float unit() {
-	return g_rng.unit();
-}
-
-int32_t integer(int32_t min, int32_t max) {
-	return g_rng.integer(min, max);
-}
-
-bool coin_flip(float p) {
-	return g_rng.coin_flip(p);
-}
-
-} // namespace RNG

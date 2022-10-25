@@ -45,12 +45,12 @@ Triangle::Triangle(Tri_Mesh_Vert* verts, uint32_t v0, uint32_t v1, uint32_t v2)
 	: v0(v0), v1(v1), v2(v2), vertex_list(verts) {
 }
 
-Vec3 Triangle::sample(Vec3 from) const {
+Vec3 Triangle::sample(RNG &rng, Vec3 from) const {
 	Tri_Mesh_Vert v_0 = vertex_list[v0];
 	Tri_Mesh_Vert v_1 = vertex_list[v1];
 	Tri_Mesh_Vert v_2 = vertex_list[v2];
 	Samplers::Triangle sampler(v_0.position, v_1.position, v_2.position);
-	Vec3 pos = sampler.sample();
+	Vec3 pos = sampler.sample(rng);
 	return (pos - from).unit();
 }
 
@@ -67,8 +67,7 @@ float Triangle::pdf(Ray wray, const Mat4& T, const Mat4& iT) const {
 		Vec3 v_2 = T * vertex_list[v2].position;
 		Samplers::Triangle sampler(v_0, v_1, v_2);
 		float a = sampler.pdf(trace.position);
-		float g =
-			(trace.position - wray.point).norm_squared() / std::abs(dot(trace.normal, wray.dir));
+		float g = (trace.position - wray.point).norm_squared() / std::abs(dot(trace.normal, wray.dir));
 		return a * g;
 	}
 	return 0.0f;
@@ -137,11 +136,11 @@ uint32_t Tri_Mesh::visualize(GL::Lines& lines, GL::Lines& active, uint32_t level
 	return 0u;
 }
 
-Vec3 Tri_Mesh::sample(Vec3 from) const {
+Vec3 Tri_Mesh::sample(RNG &rng, Vec3 from) const {
 	if (use_bvh) {
-		return triangle_bvh.sample(from);
+		return triangle_bvh.sample(rng, from);
 	}
-	return triangle_list.sample(from);
+	return triangle_list.sample(rng, from);
 }
 
 float Tri_Mesh::pdf(Ray ray, const Mat4& T, const Mat4& iT) const {

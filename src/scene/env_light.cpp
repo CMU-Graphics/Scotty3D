@@ -4,8 +4,8 @@
 
 namespace Environment_Lights {
 
-Vec3 Hemisphere::sample() const {
-	return sampler.sample();
+Vec3 Hemisphere::sample(RNG &rng) const {
+	return sampler.sample(rng);
 }
 
 Spectrum Hemisphere::evaluate(Vec3 dir) const {
@@ -21,9 +21,9 @@ void Hemisphere::for_each(const std::function<void(std::weak_ptr<Texture>&)>& f)
 	f(radiance);
 }
 
-Vec3 Sphere::sample() const {
-	if (radiance.lock()->is<Textures::Constant>()) return uniform.sample();
-	return importance.sample();
+Vec3 Sphere::sample(RNG &rng) const {
+	if (radiance.lock()->is<Textures::Constant>()) return uniform.sample(rng);
+	return importance.sample(rng);
 }
 
 Spectrum Sphere::evaluate(Vec3 dir) const {

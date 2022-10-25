@@ -211,7 +211,7 @@ public:
 
 	std::string step_animation(Scene& scene, Animator& animator, Manager& manager);
 
-	void open();
+	void open(Scene &scene);
 	void render_log(const Mat4& view);
 	bool in_progress();
 

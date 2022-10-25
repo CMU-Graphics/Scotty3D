@@ -323,6 +323,7 @@ std::optional<Halfedge_Mesh::FaceRef> Halfedge_Mesh::extrude_face(FaceRef f) {
  *  e: edge to flip
  *
  * if e is a boundary edge, does nothing and returns std::nullopt
+ * if flipping e would create an invalid mesh, does nothing and returns std::nullopt
  *
  * otherwise returns the edge, post-rotation
  *
@@ -460,10 +461,10 @@ void Halfedge_Mesh::bevel_positions(FaceRef face, std::vector<Vec3> const &start
 /*
  * extrude_positions: compute new positions for the vertices of an extruded face
  *  face: the face that was created by the extrude operation
- *  translate: how much to translate the face
- *  shrink: amount to scale the face toward its center point
- *    shrink of zero leaves the face unscaled
- *    positive shrink makes the face smaller
+ *  move: how much to translate the face
+ *  shrink: amount to linearly interpolate vertices in the face toward the face's centroid
+ *    shrink of zero leaves the face where it is
+ *    positive shrink makes the face smaller (at shrink of 1, face is a point)
  *    negative shrink makes the face larger
  *
  * only changes vertex positions (no connectivity changes!)

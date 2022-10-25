@@ -5,32 +5,40 @@
 namespace Materials {
 
 Vec3 reflect(Vec3 dir) {
+	//A3T5 Materials - reflect helper
 
-    // TODO (PathTracer): Task 5
-    // Return reflection of dir about the surface normal (0,1,0).
+    // Return direction to incoming light that would be
+	// reflected out in direction dir from surface
+	// with normal (0,1,0)
+
     return Vec3{};
 }
 
 Vec3 refract(Vec3 out_dir, float index_of_refraction, bool& was_internal) {
+	//A3T5 Materials - refract helper
 
-    // TODO (PathTracer): Task 5
-    // Use Snell's Law to refract out_dir through the surface.
-    // Return the refracted direction. Set was_internal to true if
-    // refraction does not occur due to total internal reflection,
-    // and false otherwise.
+	// Use Snell's Law to refract out_dir through the surface.
+	// Return the refracted direction. Set was_internal to true if
+	// refraction does not occur due to total internal reflection,
+	// and false otherwise.
+
+	// The surface normal is (0,1,0)
+
 	return Vec3{};
 }
 
 float schlick(Vec3 in_dir, float index_of_refraction) {
+	//A3T5 Materials - Schlick's approximation helper
 
-	// TODO (PathTracer): Task 5
-	// Implement Schlick's approximation.
+	// Implement Schlick's approximation of the Fresnel reflection factor.
+
+	// The surface normal is (0,1,0)
+
 	return 0.0f;
 }
 
 Spectrum Lambertian::evaluate(Vec3 out, Vec3 in, Vec2 uv) const {
-
-	// TODO (PathTracer): Task 4
+	//A3T4: Materials - Lambertian BSDF evaluation
 
     // Compute the ratio of reflected/incoming radiance when light from in_dir
     // is reflected through out_dir: albedo * cos(theta).
@@ -38,41 +46,34 @@ Spectrum Lambertian::evaluate(Vec3 out, Vec3 in, Vec2 uv) const {
     return Spectrum{};
 }
 
-Scatter Lambertian::scatter(Vec3 out, Vec2 uv) const {
+Scatter Lambertian::scatter(RNG &rng, Vec3 out, Vec2 uv) const {
+	//A3T4: Materials - Lambertian BSDF scattering
+	//Select a scattered light direction at random from the Lambertian BSDF
 
-	// TODO (PathTracer): Task 4
+	[[maybe_unused]] Samplers::Hemisphere::Cosine sampler; //this will be useful
 
-    // Sample the BSDF distribution using the cosine-weighted hemisphere sampler.
-    // You can use BSDF_Lambertian::evaluate() to compute attenuation.
+	Scatter ret;
+	//TODO: sample the direction the light was scatter from from a cosine-weighted hemisphere distribution:
+	ret.direction = Vec3{};
 
-    Scatter ret;
-    ret.direction = Vec3{};
-    ret.attenuation = Spectrum{};
-    return ret;
+	//TODO: compute the attenuation of the light using Lambertian::evaluate():
+	ret.attenuation = Spectrum{};
+
+	//indicate that this is not a specular reflection:
+	ret.specular = false;
+	return ret;
 }
 
 float Lambertian::pdf(Vec3 out, Vec3 in) const {
-
-	// TODO (PathTracer): Task 4
-
+	//A3T4: Materials - Lambertian BSDF probability density function
     // Compute the PDF for sampling in_dir from the cosine-weighted hemisphere distribution.
+	[[maybe_unused]] Samplers::Hemisphere::Cosine sampler; //this might be handy!
+
     return 0.0f;
 }
 
 Spectrum Lambertian::emission(Vec2 uv) const {
 	return {};
-}
-
-bool Lambertian::is_emissive() const {
-	return false;
-}
-
-bool Lambertian::is_specular() const {
-	return false;
-}
-
-bool Lambertian::is_sided() const {
-	return false;
 }
 
 std::weak_ptr<Texture> Lambertian::display() const {
@@ -87,7 +88,8 @@ Spectrum Mirror::evaluate(Vec3 out, Vec3 in, Vec2 uv) const {
 	return {};
 }
 
-Scatter Mirror::scatter(Vec3 out, Vec2 uv) const {
+Scatter Mirror::scatter(RNG &rng, Vec3 out, Vec2 uv) const {
+	//A3T5: scattering 
 
 	// TODO (PathTracer): Task 5
 
@@ -105,18 +107,6 @@ Spectrum Mirror::emission(Vec2 uv) const {
 	return {};
 }
 
-bool Mirror::is_emissive() const {
-	return false;
-}
-
-bool Mirror::is_specular() const {
-	return true;
-}
-
-bool Mirror::is_sided() const {
-	return false;
-}
-
 std::weak_ptr<Texture> Mirror::display() const {
 	return reflectance;
 }
@@ -129,7 +119,7 @@ Spectrum Refract::evaluate(Vec3 out, Vec3 in, Vec2 uv) const {
 	return {};
 }
 
-Scatter Refract::scatter(Vec3 out, Vec2 uv) const {
+Scatter Refract::scatter(RNG &rng, Vec3 out, Vec2 uv) const {
     // TODO (PathTracer): Task 5
 
     // (1) Compute Fresnel coefficient. Tip: Schlick's approximation.
@@ -177,7 +167,7 @@ Spectrum Glass::evaluate(Vec3 out, Vec3 in, Vec2 uv) const {
 	return {};
 }
 
-Scatter Glass::scatter(Vec3 out, Vec2 uv) const {
+Scatter Glass::scatter(RNG &rng, Vec3 out, Vec2 uv) const {
     // OPTIONAL (PathTracer): Task 5
 
     // When debugging BSDF_Glass, it may be useful to compare to a pure-refraction BSDF
@@ -221,7 +211,7 @@ Spectrum Emissive::evaluate(Vec3 out, Vec3 in, Vec2 uv) const {
 	return {};
 }
 
-Scatter Emissive::scatter(Vec3 out, Vec2 uv) const {
+Scatter Emissive::scatter(RNG &rng, Vec3 out, Vec2 uv) const {
 	Scatter ret;
 	ret.specular = true;
 	ret.direction = {};

@@ -938,12 +938,13 @@ Scene Scene::load(std::istream& from) {
 			check_name("Particle_System", name);
 
 			std::shared_ptr< Particles > particle_system = std::make_shared< Particles >();
-			particle_system->gravity = loaded.gravity;
+			particle_system->gravity = Vec3(0.0f, -loaded.gravity, 0.0f);
 			particle_system->scale = loaded.scale;
 			particle_system->initial_velocity = loaded.initial_velocity;
 			particle_system->spread_angle = loaded.spread_angle;
 			particle_system->lifetime = loaded.lifetime;
-			particle_system->pps = loaded.pps;
+			particle_system->rate = loaded.pps;
+			particle_system->seed = 0x31415926;
 			particle_system->step_size = loaded.step_size;
 
 			CHECK_RANGE("Particles", particles, loaded.particles_begin, loaded.particles_end);
@@ -1700,19 +1701,21 @@ void Scene::save(std::ostream& to) const {
 	std::unordered_map<Particles const*, uint32_t> particles_to_index;
 	// save particle systems
 	{
+		if (!this->particles.empty()) warn("s3d save for particles is out of date! It doesn't save seeds or 3d gravity.");
 		for (auto const& [name, particle_system] : this->particles) {
 			s3ds::Particle_System load;
 			load.name_begin = static_cast<uint32_t>(f_strings.size());
 			std::copy(name.begin(), name.end(), std::back_inserter(f_strings));
 			load.name_end = static_cast<uint32_t>(f_strings.size());
 
-			load.gravity = particle_system->gravity;
+			load.gravity = -particle_system->gravity.y;
 			load.scale = particle_system->scale;
 			load.initial_velocity = particle_system->initial_velocity;
 			load.spread_angle = particle_system->spread_angle;
 			load.lifetime = particle_system->lifetime;
-			load.pps = particle_system->pps;
+			load.pps = particle_system->rate;
 			load.step_size = particle_system->step_size;
+			//(seed isn't saved)
 
 			load.particles_begin = static_cast<uint32_t>(particles.size());
 			for (auto & i : particle_system->particles) {

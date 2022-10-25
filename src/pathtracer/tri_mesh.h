@@ -25,7 +25,8 @@ public:
 		return 0u;
 	}
 
-	Vec3 sample(Vec3 from) const;
+	//sample a vector pointing to the triangle from point 'from':
+	Vec3 sample(RNG &rng, Vec3 from) const;
 	float pdf(Ray ray, const Mat4& T, const Mat4& iT) const;
 
 	Triangle(Tri_Mesh_Vert* verts, uint32_t v0, uint32_t v1, uint32_t v2);
@@ -61,7 +62,8 @@ public:
 
 	size_t n_triangles() const;
 
-	Vec3 sample(Vec3 from) const;
+	//sample a vector pointing to the mesh from point 'from':
+	Vec3 sample(RNG &rng, Vec3 from) const;
 	float pdf(Ray ray, const Mat4& T, const Mat4& iT) const;
 
 private:

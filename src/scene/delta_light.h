@@ -7,13 +7,22 @@
 #include "../geometry/indexed.h"
 #include "../lib/mathlib.h"
 
+struct RNG;
+
 namespace Delta_Lights {
 
-class Sample {
+//
+// Delta_Lights in Scotty3D are lights that come from exactly one
+//  direction or location. (so don't need to be sampled)
+//
+// the incoming(p) function describes the light incoming to
+//  point p from the light
+
+class Incoming {
 public:
-	Spectrum radiance;
-	Vec3 direction;
-	float distance;
+	Spectrum radiance; //radiance along ray from the light
+	Vec3 direction; //direction to the light
+	float distance; //distance to the light
 
 	void transform(const Mat4& T) {
 		direction = T.rotate(direction);
@@ -22,7 +31,7 @@ public:
 
 class Point {
 public:
-	Sample sample(Vec3 p) const;
+	Incoming incoming(Vec3 p) const;
 
 	Spectrum color = Spectrum(1.0f, 1.0f, 1.0f);
 	float intensity = 1.0f;
@@ -32,7 +41,7 @@ public:
 
 class Directional {
 public:
-	Sample sample(Vec3 p) const;
+	Incoming incoming(Vec3 p) const;
 
 	Spectrum color = Spectrum(1.0f, 1.0f, 1.0f);
 	float intensity = 1.0f;
@@ -42,7 +51,7 @@ public:
 
 class Spot {
 public:
-	Sample sample(Vec3 p) const;
+	Incoming incoming(Vec3 p) const;
 
 	Spectrum color = Spectrum(1.0f, 1.0f, 1.0f);
 	float intensity = 1.0f;
@@ -57,8 +66,8 @@ public:
 
 class Delta_Light {
 public:
-	Delta_Lights::Sample sample(Vec3 p) const {
-		return std::visit([&](auto& l) { return l.sample(p); }, light);
+	Delta_Lights::Incoming incoming(Vec3 p) const {
+		return std::visit([&](auto& l) { return l.incoming(p); }, light);
 	}
 
 	Spectrum display() const {

@@ -53,8 +53,8 @@ public:
 		                  underlying);
 	}
 
-	Vec3 sample(Vec3 from) const {
-		return std::visit([&](const auto& o) { return o.sample(from); }, underlying);
+	Vec3 sample(RNG &rng, Vec3 from) const {
+		return std::visit([&](const auto& o) { return o.sample(rng, from); }, underlying);
 	}
 
 	float pdf(Ray ray, Mat4 T = Mat4::I, Mat4 iT = Mat4::I) const {

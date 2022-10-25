@@ -1,25 +1,13 @@
-
 #pragma once
 
 #include "../lib/mathlib.h"
 #include "../platform/gl.h"
 
-// NOTE: renamed util/camera to 3D_Viewer; it will only be used for the gui.
-// these cameras will be used for the scene / renderers [path tracer]
+struct RNG;
 
 class Camera {
 public:
-	template< typename Sampler >
-	std::pair<Ray, float> generate_ray(uint32_t px, uint32_t py) {
-
-		// TODO (PathTracer): Task 1
-		// compute the position of the input sensor sample coordinate on the
-		// canonical sensor plane one unit away from the pinhole.
-		// Tip: Compute the ray direction in camera space and use
-		// the camera transform to transform it back into world space.
-
-    	return {Ray(), 0.0f};
-	}
+	std::pair<Ray, float> sample_ray(RNG &rng, uint32_t px, uint32_t py);
 	GL::Lines to_gl() const;
 	//projection matrix for camera looking down -z axis with y up and x right.
 	// near plane maps to -1, far plane to 1.

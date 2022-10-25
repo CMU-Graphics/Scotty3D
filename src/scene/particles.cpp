@@ -25,11 +25,11 @@ void Particles::advance(const PT::Aggregate& scene, const Mat4& to_world, float 
 	
     if(step_size < EPS_F) return;
 
-    last_update += dt;
+    step_accum += dt;
 
-    while(last_update > step_size) {
+    while(step_accum > step_size) {
         step(scene, to_world, r);
-        last_update -= step_size;
+        step_accum -= step_size;
     }
 }
 
@@ -47,36 +47,50 @@ void Particles::step(const PT::Aggregate& scene, const Mat4& to_world, float r) 
         }
     }
 
-    particle_cooldown -= step_size;
-    float cos = std::cos(Radians(spread_angle) / 2.0f);
+    if(rate > 0.0f) {
 
-    if(pps > 0.0f) {
-        
-        double cooldown = 1.0 / pps;
-        while(particle_cooldown <= 0.0f) {
+		//helpful when emitting particles:
+    	float cos = std::cos(Radians(spread_angle) / 2.0f);
 
-            float z = lerp(cos, 1.0f, RNG::unit());
-            float t = 2 * PI_F * RNG::unit();
-            float d = std::sqrt(1 - z * z);
-            Vec3 dir = initial_velocity * Vec3(d * std::cos(t), z, d * std::sin(t));
+		//will emit particle i when i == time * rate
+		//will emit particle when time * rate hits an integer value.
+		//so need to figure out all integers in [current_step, current_step+1) * step_size * rate
+		//compute the range:
+		double begin_t = current_step * double(step_size) * double(rate);
+		double end_t = (current_step + 1) * double(step_size) * double(rate);
+
+		uint64_t begin_i = uint64_t(std::max(0.0, std::ceil(begin_t)));
+		uint64_t end_i = uint64_t(std::max(0.0, std::ceil(end_t)));
+
+		//iterate all integers in [begin, end):
+		for (uint64_t i = begin_i; i < end_i; ++i) {
+			//spawn particle 'i':
+
+            float z = lerp(cos, 1.0f, rng.unit());
+            float t = 2 * PI_F * rng.unit();
+            float d = std::sqrt(1.0f - z * z);
+            Vec3 dir = Vec3(d * std::cos(t), d * std::sin(t), initial_velocity * z);
 
             Particle p;
             p.velocity = dir;
-            p.age = lifetime;
+            p.age = lifetime; //NOTE: could adjust lifetime based on index
             next.push_back(p);
-
-            particle_cooldown += cooldown;
         }
     }
+
     particles = std::move(next);
+	current_step += 1;
 }
 
-void Particles::clear() {
+void Particles::reset() {
 	particles.clear();
+	step_accum = 0.0f;
+	current_step = 0;
+	rng.seed(seed);
 }
 
 bool operator!=(const Particles& a, const Particles& b) {
 	return a.gravity != b.gravity || a.scale != b.scale ||
 	       a.initial_velocity != b.initial_velocity || a.spread_angle != b.spread_angle ||
-	       a.lifetime != b.lifetime || a.pps != b.pps || a.step_size != b.step_size;
+	       a.lifetime != b.lifetime || a.rate != b.rate || a.step_size != b.step_size || a.seed != b.seed;
 }
