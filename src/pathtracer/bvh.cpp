@@ -23,19 +23,22 @@ struct SAHBucketData {
 
 template<typename Primitive>
 void BVH<Primitive>::build(std::vector<Primitive>&& prims, size_t max_leaf_size) {
+	//A3T3 - build a bvh
 
 	// Keep these
     nodes.clear();
     primitives = std::move(prims);
 
-    // TODO (PathTracer): Task 3
     // Construct a BVH from the given vector of primitives and maximum leaf
     // size configuration.
+
+	//TODO
+
 }
 
 template<typename Primitive> Trace BVH<Primitive>::hit(const Ray& ray) const {
+	//A3T3 - traverse your BVH
 
-    // TODO (PathTracer): Task 3
     // Implement ray - BVH intersection test. A ray intersects
     // with a BVH aggregate if and only if it intersects a primitive in
     // the BVH that is not an aggregate.
@@ -43,6 +46,7 @@ template<typename Primitive> Trace BVH<Primitive>::hit(const Ray& ray) const {
     // The starter code simply iterates through all the primitives.
     // Again, remember you can use hit() on any Primitive value.
 
+	//TODO: replace this code with a more efficient traversal:
     Trace ret;
     for(const Primitive& prim : primitives) {
         Trace hit = prim.hit(ray);

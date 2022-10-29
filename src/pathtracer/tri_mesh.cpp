@@ -7,6 +7,7 @@
 namespace PT {
 
 BBox Triangle::bbox() const {
+	//A3T2 / A3T3
 
 	// TODO (PathTracer): Task 2 or 3
     // Compute the bounding box of the triangle.
@@ -19,6 +20,7 @@ BBox Triangle::bbox() const {
 }
 
 Trace Triangle::hit(const Ray& ray) const {
+	//A3T2
 	
 	// Each vertex contains a postion and surface normal
     Tri_Mesh_Vert v_0 = vertex_list[v0];

@@ -19,6 +19,7 @@ BBox Sphere::bbox() const {
 }
 
 PT::Trace Sphere::hit(Ray ray) const {
+	//A3T2 - sphere hit
 
     // TODO (PathTracer): Task 2
     // Intersect this ray with a sphere of radius Sphere::radius centered at the origin.
