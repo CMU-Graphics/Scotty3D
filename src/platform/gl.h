@@ -36,6 +36,8 @@ void disable(Opt opt);
 
 void color_mask(bool enable);
 
+void depth_range(float n, float r); //depth values [-1,1] map to [near,far] in window coords; default is [0,1]
+
 using TexID = GLuint;
 
 class Tex2D {

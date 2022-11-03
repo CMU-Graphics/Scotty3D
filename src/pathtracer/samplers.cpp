@@ -83,8 +83,7 @@ float Hemisphere::Cosine::pdf(Vec3 dir) const {
 }
 
 Vec3 Sphere::Uniform::sample(RNG &rng) const {
-
-    // TODO (PathTracer): Task 7
+	//A3T7 - sphere sampler
 
     // Generate a uniformly random point on the unit sphere.
     // Tip: start with Hemisphere::Uniform
@@ -97,8 +96,7 @@ float Sphere::Uniform::pdf(Vec3 dir) const {
 }
 
 Sphere::Image::Image(const HDR_Image& image) {
-
-    // TODO (PathTracer): Task 7
+    //A3T7 - image sampler init
 
     // Set up importance sampling data structures for a spherical environment map image.
     // You may make use of the _pdf, _cdf, and total members, or create your own.
@@ -109,8 +107,7 @@ Sphere::Image::Image(const HDR_Image& image) {
 }
 
 Vec3 Sphere::Image::sample(RNG &rng) const {
-
-	// TODO (PathTracer): Task 7
+    //A3T7 - image sampler sampling
 
     // Use your importance sampling data structure to generate a sample direction.
     // Tip: std::upper_bound
@@ -119,8 +116,7 @@ Vec3 Sphere::Image::sample(RNG &rng) const {
 }
 
 float Sphere::Image::pdf(Vec3 dir) const {
-
-	// TODO (PathTracer): Task 7
+    //A3T7 - image sampler pdf
 
     // What is the PDF of this distribution at a particular direction?
 

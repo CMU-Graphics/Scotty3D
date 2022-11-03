@@ -56,6 +56,10 @@ void color_mask(bool enable) {
 	glColorMask(enable, enable, enable, enable);
 }
 
+void depth_range(float n, float f) {
+	glad_glDepthRange(n, f);
+}
+
 std::string version() {
 	return std::string(reinterpret_cast<const char*>(glGetString(GL_VERSION)));
 }
@@ -1393,7 +1397,7 @@ smooth out vec3 f_pos;
 void main() {
 	f_pos = v_pos;
 	vec4 pos = transform * vec4(v_pos, 1.0f);
-	gl_Position = vec4(pos.xy, 0.000000001f, pos.w);
+	gl_Position = pos;
 })";
 const std::string dome_f = R"(
 #version 330 core

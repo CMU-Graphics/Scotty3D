@@ -130,6 +130,7 @@ void Renderer::skydome(const Mat4& rotation, Spectrum color, float cosine, const
 	auto [tw, th] = tex.get_dim();
 	Vec2 itex_size = 1.0f / Vec2(static_cast<float>(tw), static_cast<float>(th));
 
+	GL::depth_range(0.99999f, 1.0f); //hack: should probably just clamp to 1.0 and use EQUAL as the depth test
 	tex.bind();
 	dome_shader.bind();
 	dome_shader.uniform("tex", 0);
@@ -139,16 +140,19 @@ void Renderer::skydome(const Mat4& rotation, Spectrum color, float cosine, const
 	dome_shader.uniform("cosine", cosine);
 	dome_shader.uniform("transform", _proj * rotation);
 	_sphere.render();
+	GL::depth_range(0.0f, 1.0f);
 }
 
 void Renderer::skydome(const Mat4& rotation, Spectrum color, float cosine) {
 
+	GL::depth_range(0.99999f, 1.0f); //hack: should probably just clamp to 1.0 and use EQUAL as the depth test
 	dome_shader.bind();
 	dome_shader.uniform("use_texture", false);
 	dome_shader.uniform("color", color);
 	dome_shader.uniform("cosine", cosine);
 	dome_shader.uniform("transform", _proj * rotation);
 	_sphere.render();
+	GL::depth_range(0.0f, 1.0f);
 }
 
 void Renderer::sphere(MeshOpt opt) {

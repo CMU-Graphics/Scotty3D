@@ -16,7 +16,7 @@ public:
 	Sphere(float r = 1.0f) : radius(r) {
 	}
 
-	static Vec2 uv(Vec3 dir); //u = longitude, v = latitude, (0,1,0) is north pole
+	static Vec2 uv(Vec3 dir); //u = longitude, v = latitude, (0,1,0) is north pole, maps to (*,1). u increases cw starting at +x
 
 	BBox bbox() const;
 	PT::Trace hit(Ray ray) const;

@@ -1,5 +1,6 @@
 
 #include "util.h"
+#include "../scene/shape.h"
 
 #include <map>
 
@@ -536,9 +537,7 @@ Data ico_sphere(float radius, uint32_t level) {
 	std::vector<Vec2> uvs(vertices.size());
 	for (size_t i = 0; i < uvs.size(); i++) {
 		Vec3 dir = vertices[i].unit();
-		float theta = std::atan2(dir.z, dir.x) / (2.0f * PI_F) + 0.5f;
-		float phi = std::acos(dir.y) / PI_F;
-		uvs[i] = Vec2(theta, 1.0f - phi);
+		uvs[i] = Shapes::Sphere::uv(dir);
 	}
 
 	std::vector<Indexed_Mesh::Vert> verts;

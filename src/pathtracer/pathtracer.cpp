@@ -115,7 +115,8 @@ std::pair<Spectrum, Spectrum> Pathtracer::trace(RNG &rng, const Ray& ray) {
 
 	Spectrum emissive = bsdf->emission(info.uv);
 
-	if (ray.depth == 0) return {emissive, {}};
+	//if no recursion was requested, or the material doesn't scatter light (i.e., is Materials::Emissive), don't recurse:
+	if (ray.depth == 0 || bsdf->is_emissive()) return {emissive, {}};
 
 	Spectrum direct;
 	if constexpr (SAMPLE_AREA_LIGHTS) {

@@ -1,6 +1,4 @@
-# (Task 7) Environment Lighting
-
-## Walkthrough
+# `A3T7` Environment Lighting
 
 The final task of this assignment will be to implement a new type of light source: an infinite environment light. An environment light is a light that supplies incident radiance (really, the light intensity $\frac{d\Phi}{d\Omega}$) from all directions on the sphere. Rather than using a predefined collection of explicit lights, an environment light is a capture of the actual incoming light from some real-world scene; rendering using environment lighting can be quite striking.
 
@@ -8,26 +6,27 @@ The intensity of incoming light from each direction is defined by a texture map 
 
 ![envmap_figure](figures/envmap_figure.jpg)
 
-In this task you will implement `Env_Map::sample`, `Env_Map::pdf`, and `Env_Map::evaluate` in `student/env_light.cpp`. You'll start with uniform sampling to get things working, and then move onto a more advanced implementation that uses **importance sampling** to significantly reduce variance in rendered images.
+In this task you will get `Environment_Lights::Sphere` working by implementing `Samplers::Sphere::Uniform` and `Samplers::Sphere::Image` in `src/pathtracer/samplers.cpp`. You'll start with uniform sampling to get things working, and then move onto a more advanced implementation that uses **importance sampling** to significantly reduce variance in rendered images.
 
 Note that for the purposes of this task, (0,0) is actually the **bottom left** of the HDR image, not the **top left**. Think about how this will affect your calculation of the $\theta$ value for a pixel.
 
 ---
 
+## Step 0: Know your customers
+
+First, check out the interface and implementation of `Environment_Lights::Sphere` in `src/scene/env_light.h`/`.cpp`. Particularly, path attention to how it initializes and uses its member `importance` to sample directions from an `HDR_Image`, which it also passes to the constructor of `importance`. (The `HDR_Image` interface may be found in `util/hdr_image.h`.)
+
 ## Step 1: Uniformly sampling the environment map
 
-To get things working, your first implementation of `Env_Map::sample` will be quite simple. First, check out the interface of `Env_Map` in `rays/env_light.h`. For `Env_Map`, the `image` field is a `HDR_Image`, which contains the size and pixels of the environment map. The `HDR_Image` interface may be found in `util/hdr_image.h`.
+Implement `Sphere::Uniform::sample` in `src/pathtracer/samplers.cpp`.
 
-Second, implement the uniform sphere sampler in `student/samplers.cpp`. Implement `Env_Map::sample` using `uniform_sampler` to generate a direction uniformly at random. Implement `Env_Map::pdf` by returning the PDF of a uniform sphere distribution.
+Now make an implementation of `Sphere::Image::sample` and `Sphere::Image::pdf` that call `Sphere::Uniform::sample` and `Sphere::Uniform::pdf`.
 
-Lastly, in `Env_Map::evaluate`, convert the given direction to image coordinates (phi and theta) and look up the appropriate radiance value in the texture map using **bilinear interpolation**.
+This should be sufficient to get environment maps working in the renderer (albeit in a high-variance / slow-convergence way).
 
-Since high dynamic range environment maps can be large files, we have not included them in the Scotty3D repository. You can download a set of sample environment maps [here](http://15462.courses.cs.cmu.edu/fall2015content/misc/asst3_images/asst3_exr_archive.zip).
+Since high dynamic range environment maps can be large files, we have not included them in the Scotty3D repository. You can download a set of sample environment maps [here](http://15462.courses.cs.cmu.edu/fall2015content/misc/asst3_images/asst3_exr_archive.zip) or -- for more interesting environment maps -- check out [poly haven](https://polyhaven.com/hdris).
 
-To use a particular environment map with your scene, select `layout` -> `new light` -> `environment map`-> `add`, and  select your file. For more creative environment maps, check out [Poly Haven](https://polyhaven.com/)
-
-![envmap_gui](images/envmap_gui.png)
-
+To use a particular environment map with your scene, select `layout` -> `Create Object` -> `Environment Light Instance`, then set the underlying `Light` type to `Sphere`, add a new `Texture`, set the texture type to `Image` and, finally, press `Change` and select your file.
 
 ## Step 2: Importance sampling the environment map
 
@@ -41,11 +40,11 @@ A pixel with coordinate $\theta = \theta_0$ subtends an area $\sin\theta d\theta
 
 The question is now how to efficiently get samples from this discrete distribution. To do so, we recommend treating the distribution as a single vector representing the whole image (row-major). In this form, it is easy to compute its CDF: the CDF for each pixel is the sum of the PDFs of all pixels before it. Once you have a CDF, you can use inversion sampling to pick out a particular index and convert it to a pixel and a 3D direction.
 
-The bulk of the importance sampling algorithm will be found as `Samplers::Sphere::Image` in `student\samplers.cpp`. You will need to implement the constructor, the inversion sampling function, and the PDF function, which returns the value of your PDF at a particular direction. Once these methods are complete, upgrade `Env_Map::sample` and `Env_Map::pdf` to use your new `image_sampler`.
+The bulk of the importance sampling algorithm will be found as `Samplers::Sphere::Image` in `src/pathtracer/samplers.cpp`. You will need to implement the constructor, the inversion sampling function, and the PDF function, which returns the value of your PDF at a particular direction.
 
-Be sure to update your `image_sampler` to scale the returned PDF according to
-the Jacobian that appears when converting from one sampling distribution to the
-other. The PDF value that corresponds to a pixel in the HDR map should be
+Be sure your `Samplers::Sphere::Image::pdf()` function takes into account the fact that different elements of your computed `pdf_` take up different areas on the surface of the sphere (so need to be weighted differently).
+
+Or, to say that more verbosely: the PDF value that corresponds to a pixel in the HDR map should be
 multiplied by the Jacobian below before being returned by
 `Samplers::Sphere::Image::pdf`.
 
@@ -73,12 +72,12 @@ Altogether, the final Jacobian is $\frac{wh}{2\pi^2 \sin(\theta)}$.
 
 ### Tips
 
-- Remember to use the coordinate system as outlined in Task 1!
 - When computing areas corresponding to a pixel, use the value of theta at the pixel centers.
-- Compute the PDF and CDF in the constructor of `Sampler::Sphere::Image`, storing them values in fields `_pdf` and `_cdf`. See `rays/sampler.h`.
+- Compute the PDF and CDF in the constructor of `Samplers::Sphere::Image`, storing them values in fields `_pdf` and `_cdf`. See `src/pathtracer/sampler.h`.
 - `Spectrum::luma()` returns the luminance (brightness) of a Spectrum. The weight assigned to a pixel should be proportional both its luminance and the solid angle it subtends.
 - For inversion sampling, use `std::upper_bound`: it's a binary search. Read about it [here](https://en.cppreference.com/w/cpp/algorithm/upper_bound).
 - If you didn't use the ray log to debug area light sampling, start using it now to visualize what directions are being sampled from the environment map.
+- `src/scene/shapes.h`/`.cpp` declare/define `Sphere::uv` which converts from directions to lat/lon space.
 
 ---
 
@@ -87,3 +86,7 @@ Altogether, the final Jacobian is $\frac{wh}{2\pi^2 \sin(\theta)}$.
 ![ennis](images/ennis.png)
 ![uffiz](images/uffiz.png)
 ![grace](images/grace.png)
+
+## Extra Credit
+
+- Implement a version of `Samplers::Sphere::Image` that uses the alias method to do constant-time sampling (as opposed to the inversion sampling approach described above). Allow the methods to be switched with a `constexpr bool` global flag (along the lines of, e.g., `SAMPLE_AREA_LIGHTS` in `pathtracer.cpp`). Report the speedup (if any) of your alias method sampler as part of your write-up.

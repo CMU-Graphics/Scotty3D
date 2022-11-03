@@ -89,13 +89,12 @@ Spectrum Mirror::evaluate(Vec3 out, Vec3 in, Vec2 uv) const {
 }
 
 Scatter Mirror::scatter(RNG &rng, Vec3 out, Vec2 uv) const {
-	//A3T5: scattering 
-
-	// TODO (PathTracer): Task 5
+	//A3T5: mirror
 
     Scatter ret;
     ret.direction = Vec3();
     ret.attenuation = Spectrum{};
+	ret.specular = true;
     return ret;
 }
 
@@ -120,7 +119,7 @@ Spectrum Refract::evaluate(Vec3 out, Vec3 in, Vec2 uv) const {
 }
 
 Scatter Refract::scatter(RNG &rng, Vec3 out, Vec2 uv) const {
-    // TODO (PathTracer): Task 5
+	//A3T5 - refract
 
     // (1) Compute Fresnel coefficient. Tip: Schlick's approximation.
     // (2) Reflect or refract probabilistically based on Fresnel coefficient. Tip: RNG::coin_flip
@@ -168,9 +167,9 @@ Spectrum Glass::evaluate(Vec3 out, Vec3 in, Vec2 uv) const {
 }
 
 Scatter Glass::scatter(RNG &rng, Vec3 out, Vec2 uv) const {
-    // OPTIONAL (PathTracer): Task 5
+	//A3T5 - glass
 
-    // When debugging BSDF_Glass, it may be useful to compare to a pure-refraction BSDF
+    // When debugging Glass, it may be useful to compare to a pure-refraction BSDF
 
     Scatter ret;
     ret.direction = Vec3();
