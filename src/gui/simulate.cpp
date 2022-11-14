@@ -61,16 +61,16 @@ void Simulate::build_scene(Scene& scene) {
 
 		for (const auto& [name, mesh] : scene.meshes) {
 			mesh_names[mesh] = name;
-			mesh_futs.emplace_back(thread_pool.enqueue([name = name, mesh = mesh]() {
+			mesh_futs.emplace_back(thread_pool.enqueue([name=name,mesh=mesh,this]() {
 				return std::pair{name, PT::Tri_Mesh(Indexed_Mesh::from_halfedge_mesh(
-										   *mesh, Indexed_Mesh::SplitEdges))};
+										   *mesh, Indexed_Mesh::SplitEdges), use_bvh)};
 			}));
 		}
 
 		for (const auto& [name, mesh] : scene.skinned_meshes) {
 			skinned_mesh_names[mesh] = name;
-			mesh_futs.emplace_back(thread_pool.enqueue([name = name, mesh = mesh]() {
-				return std::pair{name, PT::Tri_Mesh(mesh->posed_mesh())};
+			mesh_futs.emplace_back(thread_pool.enqueue([name=name,mesh=mesh,this]() {
+				return std::pair{name, PT::Tri_Mesh(mesh->posed_mesh(), use_bvh)};
 			}));
 		}
 

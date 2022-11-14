@@ -1,4 +1,3 @@
-
 #pragma once
 
 #include "vec3.h"
@@ -60,8 +59,17 @@ struct Spectrum {
 
 	static Spectrum direction(Vec3 v) {
 		v.normalize();
-		Spectrum s(std::abs(v.x), std::abs(v.y), std::abs(v.z));
-		s.to_linear();
+		Spectrum s(0.5f * v.x + 0.5f, 0.5f * v.y + 0.5f, 0.5f * v.z + 0.5f);
+
+		//HACK: adjust so that HDR_Image::tonemap_to(, e) will result in linear output:
+		constexpr float e = 1.0f; //in case we change the default exposure
+		//tonemap_to does 's.to_srgb()' last. So invert that:
+		s = s.to_linear();
+		//tonemap_to does r = 1.0f - std::exp(-r * e), invert that:
+		s.r = std::log(std::max(0.001f, 1.0f - s.r)) / -e;
+		s.g = std::log(std::max(0.001f, 1.0f - s.g)) / -e;
+		s.b = std::log(std::max(0.001f, 1.0f - s.b)) / -e;
+
 		return s;
 	}
 

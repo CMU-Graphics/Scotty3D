@@ -7,7 +7,7 @@ Now that you have implemented the ability to sample more complex light paths, it
 
 <p align="center"><img src="figures\rays_dir.png" style="height:420px"></p>
 
-First, take another at the BSDF interface in `src/scene/material.h`. There are a number of key methods you should understand in `BSDF`:
+First, take another at the BSDF interface in `src/scene/material.h`. There are a number of key methods you should understand in `Material`:
 
 - `Scatter scatter(RNG &rng, Vec3 out, Vec2 uv)`: given outgoing direction `out`, generates a random sample for incoming direction (using `RNG` as the random number source and looking up material properties at location `uv`). It returns a `Scatter`, which contains both the sampled `direction` and the `attenuation` for the in/out pair. (And a flag `scatter` for if the scattering was specular.)
 - `Spectrum evaluate(Vec3 out, Vec3 in)`: evaluates the BSDF for a given pair of directions. This is only called for continuous BSDFs.
@@ -36,9 +36,9 @@ $$\frac{\eta_i\sin(\theta_i)}{\eta_t}\overset{?}{\geq} 1$$
 
 Implement `reflect` and `Mirror::scatter()`.
 
-Because discrete BSDFs do not require Monte Carlo integration (we can simply analytically evaluate each possible direction), we do not implement `BSDF::pdf`. Perhaps more interestingly, we also do not require `BSDF::evaluate`. This is because evaluating the BSDF is only necessary when sampling directions from distributions other than the BSDF itself. When the BSDF is discrete, like a perfect mirror, we can assume other distributions never sample the single (infinitesimal) direction at which the BSDF is non-zero.
+Because discrete BSDFs do not require Monte Carlo integration (we can simply analytically evaluate each possible direction), we do not implement `BSDF::pdf`. Perhaps more interestingly, we also do not require `Material::evaluate`. This is because evaluating the BSDF is only necessary when sampling directions from distributions other than the BSDF itself. When the BSDF is discrete, like a perfect mirror, we can assume other distributions never sample the single (infinitesimal) direction at which the BSDF is non-zero.
 
-Therefore, we must update our path tracing procedure in `Pathtracer::sample_(in)direct_lighting`: when the BSDF is discrete (`BSDF::is_discrete`), we are not doing a Monte Carlo estimate, hence should not use `BSDF::pdf`. Instead, simply multiply the scattering attenuation and the incoming light. Note that failing to make this check will cause the invalid BSDF calls to abort.
+Therefore, we must update our path tracing procedure in `Pathtracer::sample_(in)direct_lighting`: when the BSDF is discrete (`Material::is_specular`), we are not doing a Monte Carlo estimate, hence should not use `Material::pdf`. Instead, simply multiply the scattering attenuation and the incoming light. Note that failing to make this check will cause the invalid BSDF calls to abort.
 
 ## Step 2: `Materials::Refract`
 
@@ -85,15 +85,15 @@ Therefore, for a dielectric material, the fraction of reflected light will be gi
 - Check the behavior of your refract function when `index_of_refraction = 1.f`. This should not change the transmitted direction, hence make the glass sphere transparent.
 - Test reflection and refraction separately, i.e. ignore the Fresnel coefficient and only refract or reflect. Once you've verified that those are correct, then go ahead and reintroduce the Fresnel coefficient and split rays between reflection  and refraction.
 
-<p align="center"><img src="images/cbox_debug.png"></p>
+<p align="center"><img src="figures/T5.materials.png"></p>
 
 ---
 
 ## Reference Results
 
-When you are done, you will be able to render images with specular materials, like the Cornell Box with a metal and glass sphere (`cbox.dae`, 1024 samples, max depth 8):
+When you are done, you will be able to render images with specular materials, like the Cornell Box with a metal and glass sphere (`A3-cbox-spheres.s3d`, 1024 samples, max depth 8):
 
-<p align="center"><img src="images/cbox.png"></p>
+<p align="center"><img src="renders/T5.A3-cbox-spheres.png"></p>
 
 ---
 
