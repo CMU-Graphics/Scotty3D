@@ -57,6 +57,7 @@ private:
 
 	//a 'Tile' is a region of the image (in both pixel and sample space) to trace:
 	struct Tile {
+		uint32_t seed = 0; //RNG seed to use
 		uint32_t x_begin = 0, x_end = 0;
 		uint32_t y_begin = 0, y_end = 0;
 		uint32_t s_begin = 0, s_end = 0;
@@ -75,9 +76,13 @@ private:
 	Timer render_timer, build_timer;
 
 	std::mutex accumulator_mut;
-	HDR_Image accumulator;
-	//used to weight accumulator when adding samples:
+	uint32_t accumulator_w = 0, accumulator_h = 0;
+	//accumulator will store spectrums as 40.24 fixed point to avoid order-of-addition nondeterminism:
+	std::vector< std::array< int64_t, 3 > > accumulator;
+	//accumulator will store sample counts as well:
 	std::vector< uint32_t > accumulator_samples;
+	//compute image (divide spectrums by sample counts):
+	HDR_Image accumulator_to_image() const;
 
 	uint32_t total_tiles = 0;
 	std::atomic<uint32_t> traced_tiles = 0;

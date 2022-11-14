@@ -37,7 +37,7 @@ intersection point, for ray-triangle intersection. We will provide motivation fo
 Down below will be our main diagram that will illustrate this algorithm:
 
 <p align="center">
-    <img src="figures\triangle_intersect_diagram.png" style="height:300px">
+    <img src="figures/triangle_intersect_diagram.png" style="height:300px">
 </p>
 
 First, we can parameterize any point $\textbf{P}$ in terms of the vertices $\textbf{p}_0$, $\textbf{p}_1$ andd $\textbf{p}_2$ with barycentric coordinates $u$, $v$ and $w$:
@@ -74,7 +74,7 @@ Once you've successfully implemented triangle intersection, you will be able to 
 
 A few final notes and thoughts:
 - While you are working with `src/parhtracer/tri_mesh.cpp`, you can choose to implement `Triangle::bbox` as well (pretty straightforward to do), which is needed for task 3.
-- If the denominator ($(\textbf{e}_1 \times \textbf{d}) \cdot \textbf{e}_2$) is zero, what does that mean about the relationship of the ray and the triangle? Can a triangle with this area be hit by a ray? Given $u$ and $v$, how do you know if the ray hits the triangle? Don't forget that the intersection point on the ray should be within the ray's `dist_bounds`.
+- If the denominator ( $(\textbf{e}_1 \times \textbf{d}) \cdot \textbf{e}_2$ ) is zero, what does that mean about the relationship of the ray and the triangle? Can a triangle with this area be hit by a ray? Given $u$ and $v$, how do you know if the ray hits the triangle? Don't forget that the intersection point on the ray should be within the ray's `dist_bounds`.
 - **Don't** use `abs()`. This is the (C) integer-only absolute value function. You want the C++ `std::abs()` which has a floating-point overload; or the C `fabsf()` function.
 
 ---
@@ -88,7 +88,7 @@ The second intersect routine you will implement is the `hit` routine for spheres
 Down below will be our main diagram that will illustrate this algorithm:
 
 <p align="center">
-    <img src="figures\sphere_intersect_diagram.png" style="height:300px">
+    <img src="figures/sphere_intersect_diagram.png" style="height:300px">
 </p>
 
 We will use an algebraic approach to solve for any potential intersection points.
@@ -129,24 +129,24 @@ intersection time $t_1$ is out of bounds but the second intersection time $t_2$ 
 (in which case you should return $t_2$).
 
 <p align="center">
-    <img src="figures\sphere_specialcase_diagram.png" style="height:200px">
+    <img src="figures/sphere_specialcase_diagram.png" style="height:200px">
 </p>
 
 ---
 
 ## Reference Results
 
-You should now be able to render all of the example scenes colored based on surface normals. Note that scenes with high geometric complexity will be extremely slow until you implement task 3. Here is `dodecahedron.s3d`, `cbox.s3d`, and `cow.s3d`:
+You should now be able to render all of the example scenes colored based on surface normals. Note that scenes with high geometric complexity will be extremely slow until you implement task 3. Here is `dodecahedron-lit.s3d`, `A3-cbox-lambertian-spheres.s3d`, and `cow.s3d`:
 
 
 <p align="center">
-    <img src="images/dodecahedron_normals.png" style="height:300px">
+    <img src="renders/T2.dodecahedron-lit.normals.png" style="height:300px">
 </p>
 <p align="center">
-    <img src="images/cbox_normals.png" style="height:300px">
+    <img src="renders/T2.A3-cbox-lambertian-spheres.normals.png" style="height:300px">
 </p>
 <p align="center">
-    <img src="images/cow_normals.png" style="height:300px">
+    <img src="renders/T2.cow.normals.png" style="height:300px">
 </p>
 
 

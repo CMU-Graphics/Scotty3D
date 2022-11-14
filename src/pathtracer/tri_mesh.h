@@ -45,7 +45,7 @@ class Tri_Mesh {
 public:
 	Tri_Mesh() = default;
 	// You can only build Tri_Mesh from an Indexed_Mesh:
-	Tri_Mesh(const Indexed_Mesh& mesh, bool use_bvh = true);
+	Tri_Mesh(const Indexed_Mesh& mesh, bool use_bvh);
 
 	Tri_Mesh(Tri_Mesh&& src) = default;
 	Tri_Mesh& operator=(Tri_Mesh&& src) = default;

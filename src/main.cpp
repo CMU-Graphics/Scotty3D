@@ -52,6 +52,7 @@ int main(int argc, char** argv) {
 	args.add_flag("--animate", animate, "Output animation frames (if headless)");
 	args.add_flag("--no_bvh", no_bvh, "Don't use BVH (if headless)");
 	args.add_option("--exposure", exp, "Output exposure (if headless)");
+	args.add_option("--seed", RNG::fixed_seed, "Use fixed seed for RNG when rendering; (0 disables).");
 	args.add_option("--film-width",          film_width, "Override camera film width (pixels)");
 	args.add_option("--film-height",         film_height, "Override camera film height (pixels)");
 	args.add_option("--film-samples",        film_samples, "Override film samples-per-pixel (for pathtracer)");
@@ -148,13 +149,16 @@ int main(int argc, char** argv) {
 			}
 		}
 
+		if (RNG::fixed_seed == 0) {
+			RNG::fixed_seed = (std::random_device())();
+		}
 
 		//do the render:
 		info("Render settings:");
 		info("\twidth: %d", camera->film.width);
 		info("\theight: %d", camera->film.height);
-		info("\theight: %d", camera->film.height);
 		info("\texposure: %f", exp);
+		info("\tseed: 0x%X", RNG::fixed_seed);
 
 		if (pathtrace) {
 			info("\tsamples: %d", camera->film.samples);

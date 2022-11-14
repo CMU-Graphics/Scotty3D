@@ -26,7 +26,9 @@ struct RNG {
 	void random_seed();
 	uint32_t get_seed();
 
+	static inline uint32_t fixed_seed = 0; //0 = 'pick a new seed every render', otherwise use as seed
+
+	std::mt19937 mt;
 private:
 	uint32_t _seed = 0;
-	std::mt19937 mt;
 };

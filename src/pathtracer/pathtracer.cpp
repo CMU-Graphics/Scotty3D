@@ -170,15 +170,15 @@ void Pathtracer::build_scene(Scene& scene_) {
 
 		for (const auto& [name, mesh] : scene_.meshes) {
 			mesh_names[mesh] = name;
-			mesh_futs.emplace_back(thread_pool.enqueue([name = name, mesh = mesh]() {
-				return std::pair{name, Tri_Mesh(Indexed_Mesh::from_halfedge_mesh( *mesh, Indexed_Mesh::SplitEdges))};
+			mesh_futs.emplace_back(thread_pool.enqueue([name=name,mesh=mesh,this]() {
+				return std::pair{name, Tri_Mesh(Indexed_Mesh::from_halfedge_mesh( *mesh, Indexed_Mesh::SplitEdges), scene_use_bvh)};
 			}));
 		}
 
 		for (const auto& [name, mesh] : scene_.skinned_meshes) {
 			skinned_mesh_names[mesh] = name;
-			mesh_futs.emplace_back(thread_pool.enqueue([name = name, mesh = mesh]() {
-				return std::pair{name, Tri_Mesh(mesh->posed_mesh())};
+			mesh_futs.emplace_back(thread_pool.enqueue([name=name,mesh=mesh,this]() {
+				return std::pair{name, Tri_Mesh(mesh->posed_mesh(), scene_use_bvh)};
 			}));
 		}
 
@@ -366,15 +366,35 @@ void Pathtracer::accumulate(Tile const &tile, const HDR_Image& data) {
 
 	for (uint32_t py = tile.y_begin; py < tile.y_end; ++py) {
 		for (uint32_t px = tile.x_begin; px < tile.x_end; ++px) {
-			uint32_t &samples = accumulator_samples[accumulator.w * py + px];
-			samples += (tile.s_end - tile.s_begin);
-			float weight = (tile.s_end - tile.s_begin) / float(samples);
+			uint32_t idx = py * accumulator_w + px;
+			uint32_t &samples = accumulator_samples[idx];
+			std::array< int64_t, 3 > &spectrum = accumulator[idx];
 
-			Spectrum& s = accumulator.at(px, py);
+			//convert to 40.24 fixed point and add:
 			const Spectrum& n = data.at(px, py);
-			s += (n - s) * weight;
+			spectrum[0] += int64_t(n.r * (1ll<<24ll));
+			spectrum[1] += int64_t(n.g * (1ll<<24ll));
+			spectrum[2] += int64_t(n.b * (1ll<<24ll));
+
+			//add appropriate weight:
+			samples += (tile.s_end - tile.s_begin);
 		}
 	}
+}
+
+HDR_Image Pathtracer::accumulator_to_image() const {
+	HDR_Image image(accumulator_w, accumulator_h, Spectrum(0.0f, 0.0f, 0.0f));
+	for (uint32_t i = 0; i < uint32_t(accumulator.size()); ++i) {
+		//(doing the conversion in double precision is probably overkill)
+		if (accumulator_samples[i] > 0) {
+			image.at(i) = Spectrum(
+				float(accumulator[i][0] / double(1ll<<24ll) / double(accumulator_samples[i])),
+				float(accumulator[i][1] / double(1ll<<24ll) / double(accumulator_samples[i])),
+				float(accumulator[i][2] / double(1ll<<24ll) / double(accumulator_samples[i]))
+			);
+		}
+	}
+	return image;
 }
 
 void Pathtracer::do_trace(RNG &rng, Tile const &tile) {
@@ -383,8 +403,6 @@ void Pathtracer::do_trace(RNG &rng, Tile const &tile) {
 	HDR_Image sample(camera.film.width, camera.film.height, Spectrum(0.0f, 0.0f, 0.0f));
 	for (uint32_t py = tile.y_begin; py < tile.y_end; ++py) {
 		for (uint32_t px = tile.x_begin; px < tile.x_end; ++px) {
-
-			uint32_t sampled = 0;
 			for (uint32_t s = tile.s_begin; s < tile.s_end; ++s) {
 
 				//generate a camera ray for this pixel:
@@ -405,13 +423,10 @@ void Pathtracer::do_trace(RNG &rng, Tile const &tile) {
 
 				if (p.valid()) {
 					sample.at(px, py) += p;
-					sampled++;
 				}
 
 				if (cancel_flag && *cancel_flag) return;
 			}
-
-			if (sampled > 0) sample.at(px, py) *= (1.0f / sampled);
 		}
 	}
 	accumulate(tile, sample);
@@ -442,8 +457,7 @@ void Pathtracer::render(Scene& scene_, std::shared_ptr<::Instance::Camera> camer
 	//copy camera to local camera:
 	set_camera(camera_);
 
-	auto [aw, ah] = accumulator.dimension();
-	if (aw != camera_->camera.lock()->film.width || ah != camera_->camera.lock()->film.height) {
+	if (accumulator_w != camera_->camera.lock()->film.width || accumulator_h != camera_->camera.lock()->film.height) {
 		add_samples = false;
 	}
 
@@ -451,8 +465,12 @@ void Pathtracer::render(Scene& scene_, std::shared_ptr<::Instance::Camera> camer
 		build_timer.reset();
 		build_scene(scene_);
 		build_timer.pause();
-		accumulator = HDR_Image(camera.film.width, camera.film.height, Spectrum(0.0f, 0.0f, 0.0f));
-		accumulator_samples.assign(camera.film.width * camera.film.height, 0);
+		accumulator_w = camera.film.width;
+		accumulator_h = camera.film.height;
+		std::array< int64_t, 3 > zero;
+		zero.fill(0);
+		accumulator.assign(accumulator_w * accumulator_h, zero);
+		accumulator_samples.assign(accumulator_w * accumulator_h, 0);
 		ray_log.clear();
 	}
 	render_timer.reset();
@@ -467,13 +485,18 @@ void Pathtracer::render(Scene& scene_, std::shared_ptr<::Instance::Camera> camer
 	constexpr uint32_t tile_height = 100;
 	constexpr uint32_t tile_samples = 50;
 
+	//get a pseudo-random stream to seed the tiles with:
+	RNG seeds_rng;
+	if (RNG::fixed_seed != 0) seeds_rng.seed(RNG::fixed_seed);
+
 	for (uint32_t y_begin = 0; y_begin < camera.film.height; y_begin += tile_height) {
 		uint32_t y_end = std::min(y_begin + tile_height, camera.film.height);
 		for (uint32_t x_begin = 0; x_begin < camera.film.width; x_begin += tile_width) {
 			uint32_t x_end = std::min(x_begin + tile_width, camera.film.width);
 			for (uint32_t s_begin = 0; s_begin < camera.film.samples; s_begin += tile_samples) {
 				uint32_t s_end = std::min(s_begin + tile_samples, camera.film.samples);
-				tiles.emplace_back(Tile{x_begin, x_end, y_begin, y_end, s_begin, s_end});
+				uint32_t seed = seeds_rng.mt();
+				tiles.emplace_back(Tile{seed, x_begin, x_end, y_begin, y_end, s_begin, s_end});
 			}
 		}
 	}
@@ -501,17 +524,17 @@ void Pathtracer::render(Scene& scene_, std::shared_ptr<::Instance::Camera> camer
 	for (auto const &tile : tiles) {
 		//queue up a render job per-tile:
 		thread_pool.enqueue([tile, this]() {
-			RNG rng;
+			RNG rng(tile.seed);
 			do_trace(rng, tile);
 
 			uint32_t traced = traced_tiles.fetch_add(1) + 1;
 			if (traced == total_tiles) {
 				std::lock_guard<std::mutex> lock(accumulator_mut);
 				render_timer.pause();
-				report_fn({1.0f, accumulator.copy()});
+				report_fn({1.0f, accumulator_to_image()});
 			} else {
 				std::lock_guard<std::mutex> lock(accumulator_mut);
-				report_fn({traced / float(total_tiles), accumulator.copy()});
+				report_fn({traced / float(total_tiles), accumulator_to_image()});
 			}
 		});
 	}

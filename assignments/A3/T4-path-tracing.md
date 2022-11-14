@@ -41,15 +41,15 @@ Note: separately sampling direct lighting might seem silly, as we could have jus
 
 ## Reference Results
 
-After correctly implementing task 4, your renderer should be able to make a beautifully lit picture of the Cornell Box with Lambertian spheres (`cbox_lambertian.s3d`). Below is a render using 1024 samples per pixel (spp):
+After correctly implementing task 4, your renderer should be able to make a beautifully lit picture of the Cornell Box with Lambertian spheres (`A3-cbox-lambertian-spheres.s3d`). Below is a render using 1024 samples per pixel (spp):
 
-![cbox_lambertian](images/cbox_lambertian.png)
+![cbox lambertian](renders/T4.A3-cbox-lambertian-spheres.s1024.large.png)
 
 Note the time-quality tradeoff here. This image was rendered with a sample rate of 1024 camera rays per pixel and a max ray depth of 8. This will produce a relatively high quality result, but will take quite some time to render. Rendering a fully converged image may take a even longer, so start testing your path tracer early!
 
-Thankfully, runtime will scale (roughly) linearly with the number of samples. Below are the results and runtime of rendering the Lambertian cornell box at 720p on a Ryzen 5950x (max ray depth 8):
+Thankfully, runtime will scale (roughly) linearly with the number of samples. Below are the results and runtime of rendering the Lambertian cornell box at 240x240 on an Intel Core i7-8086K (max ray depth 8):
 
-![cbox_lambertian_timing](images/cbox_lambertian_timing.png)
+![cbox-lambertian timing](figures/T4.A3-cbox-lambertian-spheres.timing.png)
 
 ---
 
