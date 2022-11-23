@@ -1,5 +1,6 @@
-
 #pragma once
+
+#include "introspect.h"
 
 #include "../lib/mathlib.h"
 #include "../util/hdr_image.h"
@@ -40,6 +41,18 @@ public:
 	std::vector<HDR_Image> levels; //mipmap levels (if needed)
 
 	GL::Tex2D to_gl() const;
+
+	//- - - - - - - - - - - -
+	void make_valid(); //called after data is written to make texture valid
+	template< Intent I, typename F, typename T >
+	static void introspect(F&& f, T&& t) {
+		if constexpr (I != Intent::Animate) introspect_enum< I >(f, "sampler", t.sampler, std::vector< std::pair< const char *, Sampler> >{{"nearest", Sampler::nearest},{"bilinear", Sampler::bilinear},{"trilinear", Sampler::trilinear}});
+		if constexpr (I != Intent::Animate) f("image", t.image);
+		if constexpr (I == Intent::Write) {
+			t.make_valid();
+		}
+	}
+	static inline const char *TYPE = "Constant"; //used by introspect_variant<>
 };
 
 class Constant {
@@ -65,6 +78,14 @@ public:
 
 	Spectrum color = Spectrum(0.75f, 0.75f, 0.75f);
 	float scale = 1.0f;
+
+	//- - - - - - - - - - - -
+	template< Intent I, typename F, typename T >
+	static void introspect(F&& f, T&& t) {
+		f("color", t.color);
+		f("scale", t.scale);
+	}
+	static inline const char *TYPE = "Constant"; //used by introspect_variant<>
 };
 
 } // namespace Textures
@@ -88,6 +109,11 @@ public:
 	}
 
 	std::variant<Textures::Image, Textures::Constant> texture;
+
+	template< Intent I, typename F, typename T >
+	static void introspect(F&& f, T&& t) {
+		introspect_variant< I >(std::forward< F >(f), t.texture);
+	}
 };
 
 bool operator!=(const Textures::Constant& a, const Textures::Constant& b);

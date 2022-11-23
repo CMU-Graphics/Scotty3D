@@ -360,95 +360,127 @@ void Renderer::halfedge_editor(Renderer::HalfedgeOpt opt) {
 }
 
 Renderer::Skeleton_ID_Map Renderer::skeleton(Renderer::SkeletonOpt sopt) {
+	uint32_t id = sopt.first_id;
 
-	uint32_t id = sopt.base_id;
-	uint32_t root_id = id++;
-
-	std::unordered_map<uint32_t, std::weak_ptr<Bone>> id_to_bone;
-	std::unordered_map<uint32_t, std::weak_ptr<Skeleton::IK_Handle>> id_to_handle;
-	std::unordered_map<std::shared_ptr<Bone>, uint32_t> bone_to_id;
+	Skeleton_ID_Map id_map;
+	id_map.base_id = id++; //id for the base sphere goes first (some old UI code might depend on this)
 
 	// Draw mesh
 	if (sopt.face_mesh) {
 		MeshOpt opt;
 		opt.modelview = sopt.view;
 		opt.color = Spectrum{1.0f};
-		opt.id = id++;
+		opt.id = id_map.mesh_id = id++;
 		mesh(*sopt.face_mesh, opt);
 	}
 
-	// Draw bone outlines
-	sopt.skeleton.for_bones([&](std::shared_ptr<Bone> b) {
-		id_to_bone[id] = b;
-		bone_to_id[b] = id;
+	// Get current pose of bones:
+	Vec3 base = (sopt.posed ? sopt.skeleton.base + sopt.skeleton.base_offset : sopt.skeleton.base);
+	std::vector< Mat4 > pose = (sopt.posed ? sopt.skeleton.current_pose() : sopt.skeleton.bind_pose());
+	std::vector< Skeleton::Bone > const &bones = sopt.skeleton.bones;
+	std::vector< Skeleton::Handle > const &handles = sopt.skeleton.handles;
+	assert(bones.size() == pose.size());
+
+	id_map.bone_ids_begin = id;
+	for (uint32_t b = 0; b < uint32_t(bones.size()); ++b) {
+		Skeleton::Bone const &bone = bones[b];
+		//bone radius capsule:
 		MeshOpt opt;
-		opt.modelview = sopt.view *
-		                (sopt.posed ? sopt.skeleton.j_to_posed(b) : sopt.skeleton.j_to_bind(b)) *
-		                Mat4::rotate_to(b->extent);
+		opt.modelview = sopt.view * pose[b] * Mat4::rotate_to(bone.extent);
 		opt.id = id++;
 		opt.alpha = 0.8f;
 		opt.color = Gui::Color::hover;
-		capsule(opt, b->extent.norm(), b->radius);
-	});
+		capsule(opt, bone.extent.norm(), bone.radius);
+	}
+	id_map.bone_ids_end = id;
 
-	// Outline selected bone
-	if (!sopt.selected_bone.expired()) {
-		auto selected = sopt.selected_bone.lock();
+	if (sopt.selected_bone < bones.size()) {
+		Skeleton::Bone const &selected = bones[sopt.selected_bone];
 
-		Mat4 model =
-			(sopt.posed ? sopt.skeleton.j_to_posed(selected) : sopt.skeleton.j_to_bind(selected)) *
-			Mat4::rotate_to(selected->extent);
-
-		BBox box;
 		MeshOpt opt;
-		opt.modelview = sopt.view * model;
-		opt.id = bone_to_id[selected];
+		opt.modelview = sopt.view * pose[sopt.selected_bone] * Mat4::rotate_to(selected.extent);
+		opt.id = id_map.bone_ids_begin + sopt.selected_bone;
 		opt.depth_only = true;
 
+		BBox box;
 		begin_outline();
-		capsule(opt, selected->extent.norm(), selected->radius, box);
+		capsule(opt, selected.extent.norm(), selected.radius, box);
 		end_outline(box);
 	}
 	reset_depth();
 
-	// Render skeleton base point
+	// Draw skeleton base point
 	{
 		MeshOpt opt;
-		opt.id = root_id;
-		opt.modelview = sopt.view * Mat4::translate(sopt.skeleton.base) * Mat4::scale(Vec3{0.1f});
-		opt.color = sopt.root_selected ? Gui::Color::active : Gui::Color::hover;
+		opt.id = id_map.base_id;
+		opt.modelview = sopt.view * Mat4::translate(base) * Mat4::scale(Vec3{0.1f});
+		opt.color = (sopt.selected_base ? Gui::Color::active : Gui::Color::hover);
 		sphere(opt);
 	}
-
-	// Draw bone base points
-	sopt.skeleton.for_bones([&](std::shared_ptr<Bone> b) {
+	
+	// Draw bone tip points
+	for (uint32_t b = 0; b < uint32_t(bones.size()); ++b) {
+		Skeleton::Bone const &bone = bones[b];
 		MeshOpt opt;
-		opt.modelview = sopt.view *
-		                (sopt.posed ? sopt.skeleton.j_to_posed(b) : sopt.skeleton.j_to_bind(b)) *
-		                Mat4::translate(b->extent) * Mat4::scale(Vec3{b->radius * 0.25f});
-		opt.id = bone_to_id[b];
-		opt.color = sopt.selected_bone.lock() == b ? Gui::Color::active : Gui::Color::hover;
+		opt.modelview = sopt.view * pose[b] * Mat4::translate(bone.extent) * Mat4::scale(Vec3{bone.radius * 0.25f});
+		opt.id = id_map.bone_ids_begin + b;
+		opt.color = (sopt.selected_bone == b ? Gui::Color::active : Gui::Color::hover);
 		sphere(opt);
-	});
-
+	}
+	
 	// Draw IK handles
 	{
 		GL::Lines ik_lines;
-		for (auto& h : sopt.skeleton.handles) {
-			id_to_handle[id] = h;
+		id_map.handle_ids_begin = id;
+		for (uint32_t h = 0; h < uint32_t(handles.size()); ++h) {
+			Skeleton::Handle const &handle = handles[h];
+
 			MeshOpt opt;
-			opt.modelview = sopt.view * Mat4::translate(sopt.skeleton.base + h->target) *
-			                Mat4::scale(Vec3{h->bone.lock()->radius * 0.3f});
+			opt.modelview = sopt.view * Mat4::translate(handle.target) * Mat4::scale(Vec3{bones[handle.bone].radius * 0.3f});
 			opt.id = id++;
-			opt.color = sopt.selected_handle.lock() == h ? Gui::Color::active : Gui::Color::hoverg;
-			Vec3 j_world =
-				sopt.posed ? sopt.skeleton.end_of_posed(h->bone) : sopt.skeleton.end_of(h->bone);
-			ik_lines.add(h->target + sopt.skeleton.base, j_world,
-			             h->enabled ? Spectrum(1.0f, 0.0f, 0.0f) : Spectrum(0.0f));
+			opt.color = (sopt.selected_handle == h ? Gui::Color::active : Gui::Color::hoverg);
 			sphere(opt);
+
+			Vec3 end_effector = pose[handle.bone] * Vec3(bones[handle.bone].extent);
+			ik_lines.add(handle.target, end_effector, handle.enabled ? Spectrum(1.0f, 0.0f, 0.0f) : Spectrum(0.0f));
 		}
+		id_map.handle_ids_end = id;
+
 		lines(ik_lines, sopt.view);
 	}
 
-	return {id_to_bone, id_to_handle};
+	// Draw bone rotation axes:
+	for (uint32_t b = 0; b < uint32_t(bones.size()); ++b) {
+		Skeleton::Bone const &bone = bones[b];
+		Vec3 x,y,z;
+		bone.compute_rotation_axes(&x, &y, &z);
+
+		Mat4 xf;
+		if (bone.parent < bones.size()) {
+			xf = sopt.view * pose[bone.parent] * Mat4::translate(bones[bone.parent].extent);
+		} else {
+			xf = sopt.view * Mat4::translate(base);
+		}
+
+		MeshOpt opt;
+		opt.id = id_map.bone_ids_begin + b;
+		opt.modelview = xf * Mat4::rotate_to(z);
+		opt.color = Spectrum{0.2f, 0.2f, 1.0f};
+		capsule(opt, 0.5f * bone.radius, 0.05f * bone.radius);
+
+		if (sopt.posed) xf = xf * Mat4::angle_axis(bone.pose.z, z);
+
+		opt.modelview = xf * Mat4::rotate_to(y);
+		opt.color = Spectrum{0.2f, 1.0f, 0.2f};
+		capsule(opt, 0.5f * bone.radius, 0.05f * bone.radius);
+
+		if (sopt.posed) xf = xf * Mat4::angle_axis(bone.pose.y, y);
+
+		opt.modelview = xf * Mat4::rotate_to(x);
+		opt.color = Spectrum{1.0f, 0.2f, 0.2f};
+		capsule(opt, 0.5f * bone.radius, 0.05f * bone.radius);
+	}
+
+
+	return id_map;
 }

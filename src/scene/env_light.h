@@ -33,6 +33,14 @@ public:
 
 	float intensity = 1.0f;
 	std::weak_ptr<Texture> radiance;
+
+	//- - - - - - - - - - - - -
+	template< Intent I, typename F, typename T >
+	static void introspect(F&& f, T&& t) {
+		f("intensity", t.intensity);
+		if constexpr (I != Intent::Animate) f("radiance", t.radiance);
+	}
+	static inline const char *TYPE = "Hemisphere"; //used by introspect_variant<>
 };
 
 class Sphere {
@@ -51,6 +59,14 @@ public:
 
 	float intensity = 1.0f;
 	std::weak_ptr<Texture> radiance;
+
+	//- - - - - - - - - - - - -
+	template< Intent I, typename F, typename T >
+	static void introspect(F&& f, T&& t) {
+		f("intensity", t.intensity);
+		if constexpr (I != Intent::Animate) f("radiance", t.radiance);
+	}
+	static inline const char *TYPE = "Sphere"; //used by introspect_variant<>
 };
 
 } // namespace Environment_Lights
@@ -80,6 +96,12 @@ public:
 	}
 
 	std::variant<Environment_Lights::Hemisphere, Environment_Lights::Sphere> light;
+
+	//- - - - - - - - - - - -
+	template< Intent I, typename F, typename T >
+	static void introspect(F&& f, T&& t) {
+		introspect_variant< I >(std::forward< F >(f), t.light);
+	}
 };
 
 bool operator!=(const Environment_Lights::Hemisphere& a, const Environment_Lights::Hemisphere& b);

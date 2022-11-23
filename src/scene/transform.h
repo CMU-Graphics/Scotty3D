@@ -3,6 +3,7 @@
 
 #include <memory>
 
+#include "introspect.h"
 #include "../lib/mathlib.h"
 
 class Transform {
@@ -22,6 +23,14 @@ public:
 	Mat4 parent_to_local() const;
 	Mat4 local_to_world() const;
 	Mat4 world_to_local() const;
+
+	template< Intent I, typename F, typename T >
+	static void introspect(F&& f, T&& t) {
+		if constexpr (I != Intent::Animate) f("parent", t.parent);
+		f("translation", t.translation);
+		f("rotation", t.rotation);
+		f("scale", t.scale);
+	}
 };
 
 bool operator!=(const Transform& a, const Transform& b);

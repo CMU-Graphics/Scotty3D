@@ -1,7 +1,9 @@
 #pragma once
 
+#include "introspect.h"
 #include "../lib/mathlib.h"
 #include "../platform/gl.h"
+#include "../rasterizer/sample_pattern.h"
 
 struct RNG;
 
@@ -26,6 +28,31 @@ public:
 		//rasterizer parameters:
 		uint32_t sample_pattern = 1; //supersampling pattern id
 	} film;
+
+	template< Intent I, typename F, typename C >
+	static void introspect(F&& f, C&& c) {
+		f("vertical_fov", c.vertical_fov);
+		f("aspect_ratio", c.aspect_ratio);
+		f("near_plane", c.near_plane);
+		if constexpr (I != Intent::Animate) {
+			f("film.width", c.film.width);
+			f("film.height", c.film.height);
+			f("film.samples", c.film.samples);
+			f("film.max_ray_depth", c.film.max_ray_depth);
+			//NOTE: might be null
+			SamplePattern const *sample_pattern = SamplePattern::from_id(c.film.sample_pattern);
+			f("film.sample_pattern", sample_pattern);
+			if constexpr (I == Intent::Write) {
+				if (sample_pattern != nullptr) {
+					c.film.sample_pattern = sample_pattern->id;
+				} else {
+					Camera def;
+					c.film.sample_pattern = def.film.sample_pattern;
+					warn("Camera with no sample pattern, defaulting to %u", c.film.sample_pattern);
+				}
+			}
+		}
+	}
 };
 
 bool operator!=(const Camera& a, const Camera& b);

@@ -8,6 +8,7 @@
 #include "../lib/mathlib.h"
 #include "../pathtracer/samplers.h"
 
+#include "introspect.h"
 #include "texture.h"
 
 namespace Materials {
@@ -61,6 +62,13 @@ public:
 	void for_each(const std::function<void(std::weak_ptr<Texture>&)>& f);
 
 	std::weak_ptr<Texture> albedo;
+
+	template< Intent I, typename F, typename T >
+	static void introspect(F&& f, T&& t) {
+		f("albedo", t.albedo);
+	}
+	static inline const char *TYPE = "Lambertian"; //used by introspect_variant<>
+
 };
 
 class Mirror {
@@ -78,6 +86,12 @@ public:
 	void for_each(const std::function<void(std::weak_ptr<Texture>&)>& f);
 
 	std::weak_ptr<Texture> reflectance;
+
+	template< Intent I, typename F, typename T >
+	static void introspect(F&& f, T&& t) {
+		f("reflectance", t.reflectance);
+	}
+	static inline const char *TYPE = "Mirror"; //used by introspect_variant<>
 };
 
 class Refract {
@@ -96,6 +110,13 @@ public:
 
 	std::weak_ptr<Texture> transmittance;
 	float ior = 1.5f;
+
+	template< Intent I, typename F, typename T >
+	static void introspect(F&& f, T&& t) {
+		f("transmittance", t.transmittance);
+		f("ior", t.ior);
+	}
+	static inline const char *TYPE = "Refract"; //used by introspect_variant<>
 };
 
 class Glass {
@@ -114,6 +135,14 @@ public:
 
 	std::weak_ptr<Texture> transmittance, reflectance;
 	float ior = 1.5f;
+
+	template< Intent I, typename F, typename T >
+	static void introspect(F&& f, T&& t) {
+		f("transmittance", t.transmittance);
+		f("reflectance", t.reflectance);
+		f("ior", t.ior);
+	}
+	static inline const char *TYPE = "Glass"; //used by introspect_variant<>
 };
 
 class Emissive {
@@ -131,16 +160,22 @@ public:
 	void for_each(const std::function<void(std::weak_ptr<Texture>&)>& f);
 
 	std::weak_ptr<Texture> emissive;
+
+	template< Intent I, typename F, typename T >
+	static void introspect(F&& f, T&& t) {
+		f("emissive", t.emissive);
+	}
+	static inline const char *TYPE = "Emissive"; //used by introspect_variant<>
 };
 
 } // namespace Materials
 
 class Material {
 public:
-	Material(std::variant<Materials::Lambertian, Materials::Mirror, Materials::Refract,
-	                      Materials::Glass, Materials::Emissive>
-	             material)
-		: material(std::move(material)) {
+	//material wraps one of several material types:
+	std::variant<Materials::Lambertian, Materials::Mirror, Materials::Refract, Materials::Glass, Materials::Emissive> material;
+
+	Material(decltype(material) material_) : material(std::move(material_)) {
 	}
 	Material() : material(Materials::Lambertian{}) {
 	}
@@ -179,9 +214,11 @@ public:
 		return std::holds_alternative<T>(material);
 	}
 
-	std::variant<Materials::Lambertian, Materials::Mirror, Materials::Refract, Materials::Glass,
-	             Materials::Emissive>
-		material;
+
+	template< Intent I, typename F, typename T >
+	static void introspect(F&& f, T&& t) {
+		introspect_variant< I >(std::forward< F >(f), t.material);
+	}
 };
 
 bool operator!=(const Materials::Lambertian& a, const Materials::Lambertian& b);

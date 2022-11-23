@@ -67,6 +67,8 @@ public:
 	void tonemap_to(std::vector<uint8_t>& data, float exposure) const;
 
 	uint32_t w = 0, h = 0;
+
+	std::string loaded_from = "";
 private:
 	std::vector<Spectrum> pixels;
 };

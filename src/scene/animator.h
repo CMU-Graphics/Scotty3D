@@ -21,13 +21,19 @@ template<> struct hash<pair<string, string>> {
 };
 } // namespace std
 
+namespace sejp { struct value; }
+
 class Animator {
 public:
 	// Load from stream; expects stream to start with s3da data; throws on error:
 	static Animator load(std::istream& from);
-
 	// Save to stream in s3da format:
 	void save(std::ostream& to) const;
+
+	// Load from json value in js3da format; throws on error:
+	static Animator load_json(sejp::value const &from);
+	// Save to stream as a json value in js3da format:
+	void save_json(std::ostream &to) const;
 
 	// Merges splines from other into this animator. Already existing paths are replaced.
 	void merge(Animator&& other);
@@ -40,11 +46,14 @@ public:
 	using Channel_Spline = std::variant<Spline<bool>, Spline<float>, Spline<Vec2>, Spline<Vec3>,
 	                                    Spline<Vec4>, Spline<Quat>, Spline<Spectrum>, Spline<Mat4>>;
 
-	void drive(Scene& scene, float time);
+	void drive(Scene& scene, float time) const;
 	void rename(const std::string& old_name, const std::string& new_name);
 
+	std::vector< std::pair< Path, Channel_Spline > > remove_unused_channels(Scene& scene); //remove channels that refer to nothing
+	void insert_channels(std::vector< std::pair< Path, Channel_Spline > > const &channels); //add channels back (intended to be used when undo()-ing remove_unused_channels)
+
 	template<typename T> void set(const Path& path, float time, T value);
-	template<typename T> std::optional<T> get(const Path& path, float time);
+	template<typename T> std::optional<T> get(const Path& path, float time) const;
 	void erase(const Path& path, float time);
 
 	bool has_channels(Scene& scene, const std::string& name) const;

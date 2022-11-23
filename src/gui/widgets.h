@@ -169,12 +169,10 @@ private:
 	bool color_activated = false, scale_activated = false;
 };
 
-class Widget_Halfedge_Mesh {
+class Halfedge_Mesh_Controls {
 public:
-	Mode ui(Mode current, const std::string& name, Undo& undo,
-	        std::weak_ptr<Halfedge_Mesh> apply_to);
-	void ui(const std::string& name, Undo& undo, std::weak_ptr<Halfedge_Mesh> apply_to);
-
+	//shows/executes mesh UI tasks, wrapping any actual modification in 'apply':
+	void ui(std::function< void(std::function< void(Halfedge_Mesh &) > const &) > const &apply);
 	std::optional<Halfedge_Mesh> create_shape();
 
 private:
@@ -192,14 +190,21 @@ private:
 	uint32_t sphere_subdivisions = 2;
 };
 
+class Widget_Halfedge_Mesh {
+public:
+	Mode ui(Mode current, const std::string& name, Undo& undo, std::weak_ptr<Halfedge_Mesh> apply_to);
+	void ui(const std::string& name, Undo& undo, std::weak_ptr<Halfedge_Mesh> apply_to);
+private:
+	Halfedge_Mesh_Controls controls;
+};
+
 class Widget_Skinned_Mesh {
 public:
-	Mode ui(Mode current, const std::string& name, Undo& undo,
-	        std::weak_ptr<Skinned_Mesh> apply_to);
+	Mode ui(Mode current, const std::string& name, Undo& undo, std::weak_ptr<Skinned_Mesh> apply_to);
 	void ui(const std::string& name, Undo& undo, std::weak_ptr<Skinned_Mesh> apply_to);
 
 private:
-	Widget_Halfedge_Mesh halfedge_mesh_widget;
+	Halfedge_Mesh_Controls controls;
 };
 
 class Widget_Render {

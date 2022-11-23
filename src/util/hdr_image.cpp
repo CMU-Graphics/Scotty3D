@@ -93,6 +93,9 @@ HDR_Image HDR_Image::load(const std::string& file) {
 		}
 	}
 
+	//remember where the image came from:
+	image.loaded_from = file;
+
 	return image;
 }
 

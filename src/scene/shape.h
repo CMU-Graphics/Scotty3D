@@ -9,6 +9,8 @@
 #include "../pathtracer/samplers.h"
 #include "../pathtracer/trace.h"
 
+#include "introspect.h"
+
 namespace Shapes {
 
 class Sphere {
@@ -27,6 +29,13 @@ public:
 
 	Samplers::Sphere::Uniform sampler;
 	float radius;
+
+	//- - - - - - - - - - - - -
+	template< Intent I, typename F, typename T >
+	static void introspect(F&& f, T&& t) {
+		f("radius", t.radius);
+	}
+	static inline const char *TYPE = "Sphere"; //used by introspect_variant<>
 };
 
 } // namespace Shapes
@@ -63,6 +72,12 @@ public:
 	}
 
 	std::variant<Shapes::Sphere> shape;
+
+	//- - - - - - - - - - - -
+	template< Intent I, typename F, typename T >
+	static void introspect(F&& f, T&& t) {
+		introspect_variant< I >(std::forward< F >(f), t.shape);
+	}
 };
 
 bool operator!=(const Shapes::Sphere& a, const Shapes::Sphere& b);

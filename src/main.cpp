@@ -9,6 +9,7 @@
 #include "pathtracer/pathtracer.h"
 #include "rasterizer/rasterizer.h"
 #include "rasterizer/sample_pattern.h"
+#include "scene/io.h"
 
 #include "test.h"
 
@@ -38,6 +39,8 @@ int main(int argc, char** argv) {
 	uint32_t film_max_ray_depth = -1U; //override film max ray depth (if not -1U)
 	std::string film_sample_pattern = ""; //override film sample pattern (if not "")
 
+	std::string write_file = ""; //write file (useful for conversions)
+
 
 	CLI::App args{"Scotty3D - Student Version"};
 
@@ -45,6 +48,7 @@ int main(int argc, char** argv) {
 	tests_option->expected(0, 1);
 
 	args.add_option("-s,--scene", set.scene_file, "Scene file to load");
+	args.add_option("--write", write_file, "Re-save file and exit");
 	args.add_flag("--trace", pathtrace, "Path trace scene without opening the GUI");
 	args.add_flag("--rasterize", rasterize, "Rasterize scene without opening the GUI");
 	args.add_option("-c,--camera", camera_name, "Camera instance to render (if headless)");
@@ -72,19 +76,28 @@ int main(int argc, char** argv) {
 	}
 
 	//if headless render requested, do that and return:
-	if (pathtrace || rasterize) {
-		if (set.scene_file == "") std::cout << "ERROR: must specify a scene file via --scene when doing --trace or --rasterize." << std::endl;
+	if (pathtrace || rasterize || write_file != "") {
+		if (set.scene_file == "") std::cout << "ERROR: must specify a scene file via --scene when doing --trace or --rasterize or --write." << std::endl;
 		Scene scene;
 		Animator animator;
 
 		//load scene:
 		try {
-			std::ifstream file(set.scene_file, std::ios::binary);
-			scene = Scene::load(file);
-			animator = Animator::load(file);
+			load(set.scene_file, &scene, &animator);
 		} catch (std::exception const &e) {
 			warn("ERROR: Failed to load scene '%s': %s", set.scene_file.c_str(), e.what());
 			return 1;
+		}
+
+		if (write_file != "") {
+			info("Writing to '%s'...", write_file.c_str());
+			try {
+				save(write_file, scene, animator);
+			} catch (std::exception const &e) {
+				warn("ERROR: Failed to write scene '%s': %s", write_file.c_str(), e.what());
+				return 1;
+			}
+			return 0;
 		}
 
 		//find camera:

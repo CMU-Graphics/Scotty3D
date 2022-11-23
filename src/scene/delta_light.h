@@ -7,6 +7,8 @@
 #include "../geometry/indexed.h"
 #include "../lib/mathlib.h"
 
+#include "introspect.h"
+
 struct RNG;
 
 namespace Delta_Lights {
@@ -37,6 +39,14 @@ public:
 	float intensity = 1.0f;
 
 	Spectrum display() const;
+
+	//- - - - - - - - - - - - -
+	template< Intent I, typename F, typename T >
+	static void introspect(F&& f, T&& t) {
+		f("color", t.color);
+		f("intensity", t.intensity);
+	}
+	static inline const char *TYPE = "Point"; //used by introspect_variant<>
 };
 
 class Directional {
@@ -47,6 +57,14 @@ public:
 	float intensity = 1.0f;
 
 	Spectrum display() const;
+
+	//- - - - - - - - - - - - -
+	template< Intent I, typename F, typename T >
+	static void introspect(F&& f, T&& t) {
+		f("color", t.color);
+		f("intensity", t.intensity);
+	}
+	static inline const char *TYPE = "Directional"; //used by introspect_variant<>
 };
 
 class Spot {
@@ -60,6 +78,16 @@ public:
 
 	GL::Lines to_gl() const;
 	Spectrum display() const;
+
+	//- - - - - - - - - - - - -
+	template< Intent I, typename F, typename T >
+	static void introspect(F&& f, T&& t) {
+		f("color", t.color);
+		f("intensity", t.intensity);
+		f("inner_angle", t.inner_angle);
+		f("outer_angle", t.outer_angle);
+	}
+	static inline const char *TYPE = "Spot"; //used by introspect_variant<>
 };
 
 } // namespace Delta_Lights
@@ -79,6 +107,12 @@ public:
 	}
 
 	std::variant<Delta_Lights::Point, Delta_Lights::Directional, Delta_Lights::Spot> light;
+
+	//- - - - - - - - - - - -
+	template< Intent I, typename F, typename T >
+	static void introspect(F&& f, T&& t) {
+		introspect_variant< I >(std::forward< F >(f), t.light);
+	}
 };
 
 bool operator!=(const Delta_Lights::Point& a, const Delta_Lights::Point& b);

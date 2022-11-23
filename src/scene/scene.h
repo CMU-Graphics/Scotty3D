@@ -20,8 +20,10 @@
 #include "skeleton.h"
 #include "texture.h"
 #include "transform.h"
+#include "introspect.h"
 
 class Animator;
+namespace sejp { struct value; }
 
 /*
  * Scene represents a 3D scene with a scene graph.
@@ -29,7 +31,7 @@ class Animator;
  * Resources in the scene are held with std::shared_ptr<>'s.
  * Resources refer to other resources via std::weak_ptr<>'s.
  *
- * NOTE: except for parent pointers in Transforms and Bones,
+ * NOTE: except for parent pointers in Transforms,
  *  which can be nullptr, any weak_ptr<> held by a resource
  *  must point to something else held via shared_ptr<> in the
  *  same scene, such that weak_ptr< >::lock() will always
@@ -53,17 +55,23 @@ public:
 	Scene& operator=(const Scene&) = delete;
 	Scene& operator=(Scene&&) = default;
 
+	//binary (s3ds) format:
 	// Load from stream; expects stream to start with s3ds data; throws on error:
 	static Scene load(std::istream& from);
 	// Save to stream in s3ds format:
 	void save(std::ostream& to) const;
+
+	// Load from json (js3d) format:
+	static Scene load_json(sejp::value const &from, std::string const &from_path);
+	// Save as json (js3d) value:
+	void save_json(std::ostream& to, std::string const &to_path) const;
 
 	// Move all data into this scene, doing renaming where necessary.
 	// Renames animation channels in rename so it can also be merged.
 	void merge(Scene&& other, Animator& rename);
 
 	// Runs simulations for dt seconds
-	void step(float dt);
+	//void step(float dt); (unimplemented!)
 
 	template<typename T> std::string create(const std::string& name, T&& resource);
 	template<typename T> std::weak_ptr<T> get(const std::string& name);
@@ -99,7 +107,41 @@ public:
 		Storage<Instance::Particles> particles;
 		Storage<Instance::Delta_Light> delta_lights;
 		Storage<Instance::Environment_Light> env_lights;
+		
+		template< Intent I, typename F, typename S >
+		static void introspect(F&& f, S&& s) {
+			f("cameras", s.cameras);
+			f("meshes", s.meshes);
+			f("skinned_meshes", s.skinned_meshes);
+			f("shapes", s.shapes);
+			f("particles", s.particles);
+			f("delta_lights", s.delta_lights);
+			f("env_lights", s.env_lights);
+		}
 	} instances;
+
+	bool valid() const; //check that scene is "valid", as per block comment above (self-contained and no null references except transform.parent)
+
+	template< Intent I, typename F, typename S >
+	static void introspect(F&& f, S&& s) {
+		//doing things in this order so that all references are to earlier-visited objects:
+		f("transforms", s.transforms);
+		f("cameras", s.cameras);
+		f("meshes", s.meshes);
+		f("skinned_meshes", s.skinned_meshes);
+		f("shapes", s.shapes);
+		f("particles", s.particles);
+		f("textures", s.textures);
+		f("materials", s.materials);
+		f("delta_lights", s.delta_lights);
+		f("env_lights", s.env_lights);
+
+		f("instances", s.instances);
+
+		if constexpr (I == Intent::Write) {
+			if (!s.valid()) throw std::runtime_error("Scene invalidated by writing.");
+		}
+	}
 
 	std::unordered_set<std::string> all_names();
 

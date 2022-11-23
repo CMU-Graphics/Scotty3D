@@ -1041,76 +1041,53 @@ void Widget_Texture::ui(const std::string& name, Manager& manager, Undo& undo,
 	}
 }
 
-Mode Widget_Halfedge_Mesh::ui(Mode current, const std::string& name, Undo& undo,
-                              std::weak_ptr<Halfedge_Mesh> apply_to) {
-
+void Halfedge_Mesh_Controls::ui(std::function< void(std::function< void(Halfedge_Mesh &) > const &) > const &apply) {
 	using namespace ImGui;
-
-	if (apply_to.expired()) return current;
-	auto mesh = apply_to.lock();
-
-	if (Button("Edit")) current = Mode::model;
-	SameLine();
-	ui(name, undo, apply_to);
-
-	return current;
-}
-
-void Widget_Halfedge_Mesh::ui(const std::string& name, Undo& undo,
-                              std::weak_ptr<Halfedge_Mesh> apply_to) {
-
-	using namespace ImGui;
-
-	if (apply_to.expired()) return;
-	auto mesh = apply_to.lock();
 
 	if (Button("Flip Orientation")) {
-		Halfedge_Mesh old = mesh->copy();
-		mesh->flip_orientation();
-		undo.update_cached<Halfedge_Mesh>(name, mesh, std::move(old));
+		apply([]( Halfedge_Mesh &mesh ){
+			mesh.flip_orientation();
+		});
 	}
-	{
+	{ //normal smoothing:
 		SliderFloat("##Smooth Angle", &corner_normals_angle, 0.0f, 180.0f, "%.1f deg");
 		if (WrapButton("Smooth Normals")) {
-			Halfedge_Mesh old = mesh->copy();
-			mesh->set_corner_normals(corner_normals_angle);
-			undo.update_cached<Halfedge_Mesh>(name, mesh, std::move(old));
+			apply([this]( Halfedge_Mesh &mesh ){
+				mesh.set_corner_normals(corner_normals_angle);
+			});
 		}
 	}
 	if (Button("UVs XY")) {
-		Halfedge_Mesh old = mesh->copy();
-		mesh->set_corner_uvs_project(Vec3(0.0f, 0.0f, 0.0f), Vec3(1.0f, 0.0f, 0.0f), Vec3(0.0f, 1.0f, 0.0f));
-		undo.update_cached<Halfedge_Mesh>(name, mesh, std::move(old));
+		apply([]( Halfedge_Mesh &mesh ){
+			mesh.set_corner_uvs_project(Vec3(0.0f, 0.0f, 0.0f), Vec3(1.0f, 0.0f, 0.0f), Vec3(0.0f, 1.0f, 0.0f));
+		});
 	}
 	SameLine();
 	if (WrapButton("XZ")) {
-		Halfedge_Mesh old = mesh->copy();
-		mesh->set_corner_uvs_project(Vec3(0.0f, 0.0f, 0.0f), Vec3(1.0f, 0.0f, 0.0f), Vec3(0.0f, 0.0f, 1.0f));
-		undo.update_cached<Halfedge_Mesh>(name, mesh, std::move(old));
+		apply([]( Halfedge_Mesh &mesh ){
+			mesh.set_corner_uvs_project(Vec3(0.0f, 0.0f, 0.0f), Vec3(1.0f, 0.0f, 0.0f), Vec3(0.0f, 0.0f, 1.0f));
+		});
 	}
 	SameLine();
 	if (Button("YZ")) {
-		Halfedge_Mesh old = mesh->copy();
-		mesh->set_corner_uvs_project(Vec3(0.0f, 0.0f, 0.0f), Vec3(0.0f, 1.0f, 0.0f), Vec3(0.0f, 0.0f, 1.0f));
-		undo.update_cached<Halfedge_Mesh>(name, mesh, std::move(old));
+		apply([]( Halfedge_Mesh &mesh ){
+			mesh.set_corner_uvs_project(Vec3(0.0f, 0.0f, 0.0f), Vec3(0.0f, 1.0f, 0.0f), Vec3(0.0f, 0.0f, 1.0f));
+		});
 	}
 	SameLine();
 	if (Button("Per-Face")) {
-		Halfedge_Mesh old = mesh->copy();
-		mesh->set_corner_uvs_per_face();
-		undo.update_cached<Halfedge_Mesh>(name, mesh, std::move(old));
+		apply([]( Halfedge_Mesh &mesh ){
+			mesh.set_corner_uvs_per_face();
+		});
 	}
-
-
 	if (auto new_shape = create_shape()) {
-		Halfedge_Mesh old = mesh->copy();
-		*mesh = std::move(new_shape.value());
-		undo.update_cached<Halfedge_Mesh>(name, mesh, std::move(old));
+		apply([&new_shape]( Halfedge_Mesh &mesh ){
+			mesh = std::move(new_shape.value());
+		});
 	}
 }
 
-std::optional<Halfedge_Mesh> Widget_Halfedge_Mesh::create_shape() {
-
+std::optional<Halfedge_Mesh> Halfedge_Mesh_Controls::create_shape() {
 	using namespace ImGui;
 
 	const char* label = nullptr;
@@ -1182,17 +1159,38 @@ std::optional<Halfedge_Mesh> Widget_Halfedge_Mesh::create_shape() {
 	} break;
 	default: die("Unknown shape type");
 	}
-
 	return std::nullopt;
 }
 
-Mode Widget_Skinned_Mesh::ui(Mode current, const std::string& name, Undo& undo,
-                             std::weak_ptr<Skinned_Mesh> apply_to) {
-
+Mode Widget_Halfedge_Mesh::ui(Mode current, const std::string& name, Undo& undo, std::weak_ptr<Halfedge_Mesh> apply_to) {
 	using namespace ImGui;
 
-	if (apply_to.expired()) return current;
 	auto mesh = apply_to.lock();
+	if (!mesh) return current;
+
+	if (Button("Edit")) current = Mode::model;
+	SameLine();
+	ui(name, undo, apply_to);
+
+	return current;
+}
+
+void Widget_Halfedge_Mesh::ui(const std::string& name, Undo& undo, std::weak_ptr<Halfedge_Mesh> apply_to) {
+	auto mesh = apply_to.lock();
+	if (!mesh) return;
+
+	controls.ui( [&]( std::function< void(Halfedge_Mesh &) > const &edit ){
+		Halfedge_Mesh old = mesh->copy();
+		edit(*mesh);
+		undo.update_cached< Halfedge_Mesh >(name, mesh, std::move(old));
+	});
+}
+
+Mode Widget_Skinned_Mesh::ui(Mode current, const std::string& name, Undo& undo, std::weak_ptr<Skinned_Mesh> apply_to) {
+	using namespace ImGui;
+
+	auto mesh = apply_to.lock();
+	if (!mesh) return current;
 
 	if (Button("Edit Mesh")) current = Mode::model;
 	if (WrapButton("Edit Skeleton")) current = Mode::rig;
@@ -1201,24 +1199,17 @@ Mode Widget_Skinned_Mesh::ui(Mode current, const std::string& name, Undo& undo,
 	return current;
 }
 
-void Widget_Skinned_Mesh::ui(const std::string& name, Undo& undo,
-                             std::weak_ptr<Skinned_Mesh> apply_to) {
-
+void Widget_Skinned_Mesh::ui(const std::string& name, Undo& undo, std::weak_ptr<Skinned_Mesh> apply_to) {
 	using namespace ImGui;
 
-	if (apply_to.expired()) return;
 	auto mesh = apply_to.lock();
+	if (!mesh) return;
 
-	if (Button("Flip Orientation")) {
+	controls.ui( [&]( std::function< void(Halfedge_Mesh &) > const &edit ){
 		Skinned_Mesh old = mesh->copy();
-		mesh->mesh.flip_orientation();
+		edit(mesh->mesh);
 		undo.update_cached<Skinned_Mesh>(name, mesh, std::move(old));
-	}
-	if (auto new_shape = halfedge_mesh_widget.create_shape()) {
-		Skinned_Mesh old = mesh->copy();
-		mesh->mesh = std::move(new_shape.value());
-		undo.update_cached<Skinned_Mesh>(name, mesh, std::move(old));
-	}
+	});
 }
 
 bool Widget_Render::in_progress() {

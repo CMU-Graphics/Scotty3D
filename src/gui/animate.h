@@ -1,6 +1,7 @@
 
 #pragma once
 
+#include "../platform/renderer.h"
 #include "../util/timer.h"
 #include "widgets.h"
 
@@ -18,20 +19,18 @@ public:
 
 	bool keydown(SDL_Keysym key);
 
-	Vec3 selected_pos(Mat4 pose);
+	Vec3 selected_pos(Mat4 const &local_to_world);
 	void end_transform(Undo& undo);
-	bool apply_transform(Widgets& widgets);
+	bool apply_transform(Widgets& widgets, Mat4 const &local_to_world);
 
 	void clear_select();
 	bool skel_selected();
-	bool select(Scene& scene, Widgets& widgets, Mat4 pose, uint32_t id, Vec3 cam, Vec2 spos,
-	            Vec3 dir);
+	bool select(Scene& scene, Widgets& widgets, Mat4 const &local_to_world, uint32_t id, Vec3 cam, Vec2 spos, Vec3 dir);
 	void erase_mesh(const std::string& name);
 	void set_mesh(const std::string& name, std::weak_ptr<Skinned_Mesh> mesh);
 
-	bool render(Scene& scene, Widgets& widgets, Mat4 pose, uint32_t next_id, View_3D& cam);
-	void ui_timeline(Undo& undo, Animator& animator, Scene& scene,
-	                 View_3D& gui_cam, std::optional<std::string> selected);
+	bool render(Scene& scene, Widgets& widgets, Mat4 const &local_to_world, uint32_t next_id, View_3D& cam);
+	void ui_timeline(Undo& undo, Animator& animator, Scene& scene, View_3D& gui_cam, std::optional<std::string> selected);
 	void ui_sidebar(Undo& undo, View_3D& user_cam);
 
 	bool playing_or_rendering();
@@ -62,15 +61,14 @@ private:
 
 	std::string mesh_name;
 	std::weak_ptr<Skinned_Mesh> skinned_mesh_select;
-	std::weak_ptr<Bone> selected_bone;
-	std::weak_ptr<Skeleton::IK_Handle> selected_handle;
+	Skeleton::BoneIndex selected_bone = -1U;
+	Skeleton::HandleIndex selected_handle = -1U;
+	bool selected_base = false;
+	bool run_solve_ik = true;
 
-	Skinned_Mesh old_mesh;
-	Mat4 old_T;
-	Vec3 old_euler, old_pos, old_euler_spaghetti_code;
+	Skinned_Mesh old_mesh; //stored when *any* edit starts -- used for updating undo stack
 
-	std::unordered_map<uint32_t, std::weak_ptr<Bone>> id_to_bone;
-	std::unordered_map<uint32_t, std::weak_ptr<Skeleton::IK_Handle>> id_to_handle;
+	Renderer::Skeleton_ID_Map id_map;
 
 	bool visualize_splines = false;
 	bool dont_clear_select = false;

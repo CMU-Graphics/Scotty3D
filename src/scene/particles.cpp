@@ -3,11 +3,11 @@
 
 bool Particles::update(const World_Info& world, Particles::Particle& p) {
 
-    // TODO(Animation): Task 4
+    //A4T4: particle update
 
     // Compute the trajectory of this particle for the next dt seconds.
 
-    // (1) Build a ray representing the particle's path if it travelled at constant velocity.
+    // (1) Build a ray representing the particle's path as if it travelled at constant velocity.
 
     // (2) Intersect the ray with the scene and account for collisions. Be careful when placing
     // collision points using the particle radius. Move the particle to its next position.
@@ -53,7 +53,7 @@ void Particles::step(const PT::Aggregate& scene, const Mat4& to_world, float r) 
     	float cos = std::cos(Radians(spread_angle) / 2.0f);
 
 		//will emit particle i when i == time * rate
-		//will emit particle when time * rate hits an integer value.
+		//(i.e., will emit particle when time * rate hits an integer value.)
 		//so need to figure out all integers in [current_step, current_step+1) * step_size * rate
 		//compute the range:
 		double begin_t = current_step * double(step_size) * double(rate);

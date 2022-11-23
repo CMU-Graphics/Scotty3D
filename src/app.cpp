@@ -9,6 +9,7 @@
 #include "platform/platform.h"
 #include "platform/renderer.h"
 #include "test.h"
+#include "scene/io.h"
 
 App::App(Launch_Settings set, Platform* plt)
 	: window_dim(plt ? plt->window_draw() : Vec2{1.0f}),
@@ -17,15 +18,7 @@ App::App(Launch_Settings set, Platform* plt)
 
 	if (!set.scene_file.empty()) {
 		info("Loading scene file...");
-		try {
-			std::ifstream file(set.scene_file, std::ios::binary);
-			scene = Scene::load(file);
-			animator = Animator::load(file);
-			gui.set_file(set.scene_file);
-			gui.get_animate().set_max(static_cast<uint32_t>(std::ceil(animator.max_key())));
-		} catch (std::exception& e) {
-			warn("Error loading scene: %s", e.what());
-		}
+		gui.load_scene(&set.scene_file, Gui::Manager::Load::new_scene);
 	}
 
 	GL::global_params();

@@ -16,6 +16,120 @@ void Scene::merge(Scene&& other, Animator& animator) {
 	});
 }
 
+bool Scene::valid() const {
+	std::unordered_set< const void * > in_storage;
+	auto add = [&](auto const &storage) {
+		for (auto const &[k, v] : storage) {
+			in_storage.emplace(v.get());
+		}
+	};
+	add(transforms);
+	add(cameras);
+	add(meshes);
+	add(skinned_meshes);
+	add(shapes);
+	add(particles);
+	add(delta_lights);
+	add(env_lights);
+	add(textures);
+	add(materials);
+
+	//instances don't talk about each-other so not adding those.
+
+	bool is_valid = true;
+
+	for (auto const &[k, v] : transforms) {
+		auto p = v->parent.lock();
+		if (p) { //okay to be null for transforms
+			if (!in_storage.count(p.get())) {
+				std::cerr << "transform " << k << "'s parent is outside scene." << std::endl;
+				is_valid = false;
+			}
+		}
+	}
+
+	for (auto const &kv : env_lights) {
+		auto const &k = kv.first; auto const &v = kv.second;
+		v->for_each([&](std::weak_ptr< Texture >&wt){
+			auto t = wt.lock();
+			if (!t) {
+				is_valid = false;
+				std::cerr << "env_light " << k << "'s texture is missing." << std::endl;
+			} else if (!in_storage.count(t.get())) {
+				is_valid = false;
+				std::cerr << "env_light " << k << "'s texture is outside scene." << std::endl;
+			}
+		});
+	}
+
+	for (auto const &kv : materials) {
+		auto const &k = kv.first; auto const &v = kv.second;
+		v->for_each([&](std::weak_ptr< Texture >&wt){
+			auto t = wt.lock();
+			if (!t) {
+				is_valid = false;
+				std::cerr << "material " << k << "'s texture is missing." << std::endl;
+			} else if (!in_storage.count(t.get())) {
+				is_valid = false;
+				std::cerr << "material" << k << "'s texture is outside scene." << std::endl;
+			}
+		});
+	}
+
+	#define CHECK(name, member) \
+		do { \
+			auto l = v->member.lock(); \
+			if (!l) { \
+				is_valid = false; \
+				std::cerr << name " " << k << "'s " #name " is missing." << std::endl; \
+			} \
+		} while (0)
+
+	for (auto const &[k, v] : instances.cameras) {
+		CHECK("camera instance", transform);
+		CHECK("camera instance", camera);
+	}
+
+	for (auto const &[k, v] : instances.meshes) {
+		CHECK("mesh instance", transform);
+		CHECK("mesh instance", mesh);
+		CHECK("mesh instance", material);
+	}
+
+	for (auto const &[k, v] : instances.skinned_meshes) {
+		CHECK("skinned_mesh instance", transform);
+		CHECK("skinned_mesh instance", mesh);
+		CHECK("skinned_mesh instance", material);
+	}
+
+	for (auto const &[k, v] : instances.shapes) {
+		CHECK("shape instance", transform);
+		CHECK("shape instance", shape);
+		CHECK("shape instance", material);
+	}
+
+	for (auto const &[k, v] : instances.particles) {
+		CHECK("particles instance", transform);
+		CHECK("particles instance", mesh);
+		CHECK("particles instance", material);
+		CHECK("particles instance", particles);
+	}
+
+	for (auto const &[k, v] : instances.delta_lights) {
+		CHECK("delta_light instance", transform);
+		CHECK("delta_light instance", light);
+	}
+
+	for (auto const &[k, v] : instances.env_lights) {
+		CHECK("env_light instance", transform);
+		CHECK("env_light instance", light);
+	}
+
+	#undef CHECK
+
+	return true;
+}
+
 std::unordered_set<std::string> Scene::all_names() {
 	std::unordered_set<std::string> names;
 	for_storages([&](auto& storage) {

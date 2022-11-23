@@ -46,7 +46,6 @@ class Manager {
 public:
 	Manager(Scene& scene, Undo& undo, Animator& animator, Vec2 window_dim);
 
-	void set_file(std::string save);
 	void set_error(std::string msg);
 	void invalidate_gpu(const std::string& name);
 	void update_dim(Vec2 dim);
@@ -98,14 +97,18 @@ private:
 
 	void frame(View_3D& gui_cam);
 
-	static inline const char* scene_file_types = "s3d";
+	static inline const char* scene_file_types = "js3d;s3d";
 	static inline const char* image_file_types = "png;jpg;exr;hdr;hdri;jpeg;tga;bmp;psd;gif";
 
+public:
 	enum class Load : uint8_t { new_scene, append };
 	void new_scene();
-	void load_scene(Load strategy);
-	bool save_scene();
-	bool save_scene_as();
+	//if path is passed, doesn't show dialog:
+	void load_scene(std::string *path = nullptr, Load strategy = Load::new_scene);
+	//if path is passed, doesn't show dialog:
+	bool save_scene_as(std::string *path = nullptr);
+
+private:
 	void erase_selected();
 	void to_s3d();
 
@@ -120,7 +123,9 @@ private:
 	bool error_shown = false, debug_shown = false, settings_shown = false;
 	bool save_first_shown = false, already_denied_save = false, new_object_shown = false,
 		 new_object_focus = false;
-	std::string error_msg, save_file;
+	std::string error_msg;
+	std::string save_file;
+
 	size_t n_actions_at_last_save = 0;
 	std::function<void(bool)> after_save;
 	Vec2 window_dim;

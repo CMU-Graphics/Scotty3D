@@ -65,10 +65,10 @@ public:
 		GL::Mesh* face_mesh = nullptr;
 		Mat4 view;
 		bool posed = false;
-		bool root_selected = false;
-		uint32_t base_id = 0;
-		std::weak_ptr<Bone> selected_bone;
-		std::weak_ptr<Skeleton::IK_Handle> selected_handle;
+		bool selected_base = false;
+		Skeleton::BoneIndex selected_bone = -1U;
+		Skeleton::HandleIndex selected_handle = -1U;
+		uint32_t first_id = 0;
 	};
 
 	void mesh(GL::Mesh& mesh, MeshOpt opt);
@@ -88,9 +88,14 @@ public:
 
 	void halfedge_editor(HalfedgeOpt opt);
 
-	using Skeleton_ID_Map =
-		std::pair<std::unordered_map<uint32_t, std::weak_ptr<Bone>>,
-	              std::unordered_map<uint32_t, std::weak_ptr<Skeleton::IK_Handle>>>;
+	struct Skeleton_ID_Map {
+		uint32_t base_id = -1U;
+		uint32_t mesh_id = -1U;
+		uint32_t bone_ids_begin = -1U;
+		uint32_t bone_ids_end = -1U;
+		uint32_t handle_ids_begin = -1U;
+		uint32_t handle_ids_end = -1U;
+	};
 	Skeleton_ID_Map skeleton(SkeletonOpt opt);
 
 	GLuint saved() const;

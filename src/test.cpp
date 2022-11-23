@@ -314,7 +314,8 @@ bool Test::differs(Mat4 a, Mat4 b) {
 	return false;
 }
 
-std::optional<std::string> Test::differs(Ray a, Ray b) {
+template< >
+std::optional<std::string> Test::differs< Ray >(Ray const &a, Ray const &b) {
 	if (differs(a.point, b.point)) {
 		return "Origins do not match!";
 	}
@@ -328,7 +329,8 @@ std::optional<std::string> Test::differs(Ray a, Ray b) {
 	return std::nullopt;
 }
 
-std::optional<std::string> Test::differs(PT::Trace a, PT::Trace b) {
+template< >
+std::optional<std::string> Test::differs< PT::Trace >(PT::Trace const &a, PT::Trace const &b) {
 	if (a.hit != b.hit) {
 		return "Hit booleans do not match!";
 	}
@@ -355,21 +357,21 @@ std::optional<std::string> Test::differs(PT::Trace a, PT::Trace b) {
 	return std::nullopt;
 }
 
-std::optional<std::string> Test::differs(Bone a, Bone b) {
+template< >
+std::optional<std::string> Test::differs< Skeleton::Bone >(Skeleton::Bone const &a, Skeleton::Bone const &b) {
 
 	if (differs(a.extent, b.extent)) {
 		return "Bone extents do not match!";
 	}
-	if (differs(a.pose, b.pose)) {
-		return "Bone poses do not match!";
-	}
-	if (differs(a.pose_gradient, b.pose_gradient)) {
-		return "Bone gradients do not match!";
+	if (differs(a.roll, b.roll)) {
+		return "Bone rolls do not match!";
 	}
 	if (differs(a.radius, b.radius)) {
 		return "Bone radii do not match!";
 	}
-
+	if (differs(a.pose, b.pose)) {
+		return "Bone poses do not match!";
+	}
 	return std::nullopt;
 }
 

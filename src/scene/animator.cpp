@@ -106,35 +106,37 @@ template<typename F> static void channels(Particles& val, F&& f) {
 }
 
 template<typename F>
-static void channels_prefix(const std::string& prefix, Bone& val, F&& f) {
-	f(prefix + ".extent", val.extent);
+static void channels_prefix(const std::string& prefix, Skeleton::Bone& val, F&& f) {
+	//these influence bind pose and shouldn't be driven during animation:
+	//f(prefix + ".extent", val.extent);
+	//f(prefix + ".roll", val.extent);
+	//f(prefix + ".radius", val.radius);
+
 	f(prefix + ".pose", val.pose);
-	f(prefix + ".radius", val.radius);
-	for (size_t i = 0; i < val.children.size(); ++i) {
-		auto prefix_child = prefix + "." + std::to_string(i);
-		channels_prefix(prefix_child, *val.children[i], std::forward<F&&>(f));
-	}
 }
 
 template<typename F>
-static void channels_prefix(const std::string& prefix, Skeleton::IK_Handle& val, F&& f) {
+static void channels_prefix(const std::string& prefix, Skeleton::Handle& val, F&& f) {
+	//hmm, not sure if these should be animatable:
 	f(prefix + ".target", val.target);
 	f(prefix + ".enabled", val.enabled);
 }
 
 template<typename F> static void channels(Skeleton& val, F&& f) {
-	f("base", val.base);
-	for (size_t i = 0; i < val.roots.size(); ++i) {
-		auto& joint = val.roots[i];
-		channels_prefix("joint." + std::to_string(i), *joint, std::forward<F&&>(f));
+	//base is part of bind pose and shouldn't be driven during animation:
+	//f("base", val.base);
+
+	f("base_offset", val.base_offset);
+	for (auto &bone : val.bones) {
+		channels_prefix("bone." + std::to_string(bone.channel_id), bone, std::forward<F&&>(f));
 	}
-	for (size_t i = 0; i < val.handles.size(); ++i) {
-		auto& handle = val.handles[i];
-		channels_prefix("handle." + std::to_string(i), *handle, std::forward<F&&>(f));
+	for (auto &handle : val.handles) {
+		channels_prefix("handle." + std::to_string(handle.channel_id), handle, std::forward<F&&>(f));
 	}
 }
 
 template<typename F> static void channels(Skinned_Mesh& val, F&& f) {
+	channels(val.mesh, std::forward<F&&>(f));
 	channels(val.skeleton, std::forward<F&&>(f));
 }
 
@@ -166,7 +168,7 @@ void Animator::merge(Animator&& other) {
 	other.splines.clear();
 }
 
-template<typename T> std::optional<T> Animator::get(const Animator::Path& path, float time) {
+template<typename T> std::optional<T> Animator::get(const Animator::Path& path, float time) const {
 	auto it = splines.find(path);
 	if (it == splines.end()) {
 		return std::nullopt;
@@ -213,7 +215,7 @@ void Animator::erase(const Path& path, float time) {
 	}
 }
 
-void Animator::drive(Scene& scene, float time) {
+void Animator::drive(Scene& scene, float time) const {
 	scene.for_each([&](const std::string& name, auto& resource) {
 		channels(*resource, [&](const std::string& path, auto& value) {
 			if (auto v = get<std::decay_t<decltype(value)>>(Path{name, path}, time)) {
@@ -221,6 +223,41 @@ void Animator::drive(Scene& scene, float time) {
 			}
 		});
 	});
+}
+
+std::vector< std::pair< Animator::Path, Animator::Channel_Spline > > Animator::remove_unused_channels(Scene& scene) {
+	std::unordered_set< Path > paths;
+
+	scene.for_each([&](const std::string& name, auto& resource) {
+		channels(*resource, [&](const std::string& path, auto& value) {
+			auto ret = paths.emplace(Path{name, path});
+			if (!ret.second) {
+				warn("Channel '%s:%s' appears more than once in scene(!)", name.c_str(), path.c_str());
+			}
+		});
+	});
+
+	std::vector< std::pair< Path, Channel_Spline > > unused;
+	for (auto i = splines.begin(); i != splines.end(); /* later */) {
+		if (!paths.count(i->first)) {
+			unused.emplace_back(*i);
+			auto old = i;
+			++i;
+			splines.erase(old);
+		} else {
+			++i;
+		}
+	}
+	if (!unused.empty()) {
+		info("Removed %u unused channels.", uint32_t(unused.size()));
+	}
+	return unused;
+}
+
+void Animator::insert_channels(std::vector< std::pair< Path, Channel_Spline > > const &channels) {
+	for (auto const &c : channels) {
+		splines.emplace(c);
+	}
 }
 
 bool Animator::has_channels(Scene& scene, const std::string& name) const {
@@ -392,7 +429,7 @@ float Animator::max_key() const {
 
 #define SPECIALIZE(T)                                                                              \
 	template void Animator::set<T>(const Path&, float, T);                                         \
-	template std::optional<T> Animator::get<T>(const Path&, float);
+	template std::optional<T> Animator::get<T>(const Path&, float) const;
 
 SPECIALIZE(bool);
 SPECIALIZE(float);

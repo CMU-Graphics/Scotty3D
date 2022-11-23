@@ -136,6 +136,10 @@ GL::Tex2D Image::to_gl() const {
 	return image.to_gl(1.0f);
 }
 
+void Image::make_valid() {
+	update_mipmap();
+}
+
 Spectrum Constant::evaluate(Vec2 uv, float lod) const {
 	return color * scale;
 }

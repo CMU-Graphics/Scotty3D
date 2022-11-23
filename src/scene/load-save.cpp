@@ -864,40 +864,43 @@ Scene Scene::load(std::istream& from) {
 
 			//the bones:
 			CHECK_RANGE("Skinned_Mesh", bones, loaded.bones_begin, loaded.bones_end);
-			std::vector< std::shared_ptr< Bone > > index_to_bone;
 			for (uint32_t i = loaded.bones_begin; i != loaded.bones_end; ++i) {
 				s3ds::Bone const &lb = bones[i];
-				std::shared_ptr< Bone > bone = std::make_shared< Bone >();
-				bone->extent = Vec3(lb.extent[0], lb.extent[1], lb.extent[2]);
-				bone->pose = Vec3(lb.pose[0], lb.pose[1], lb.pose[2]);
-				bone->radius = lb.radius;
+				Skeleton::Bone bone;
+				bone.extent = Vec3(lb.extent[0], lb.extent[1], lb.extent[2]);
+				bone.roll = 0.0f; //not saved :-/
+				bone.pose = Vec3(lb.pose[0], lb.pose[1], lb.pose[2]);
+				bone.radius = lb.radius;
+				bone.channel_id = i - loaded.bones_begin; //not saved (!!)
 				if (lb.parent == static_cast<uint32_t>(-1)) {
-					skinned_mesh->skeleton.roots.emplace_back(bone);
+					bone.parent = -1U;
 				} else {
 					if (lb.parent < loaded.bones_begin || lb.parent >= loaded.bones_end) throw std::runtime_error(file_info() + "Bone's parent isn't in the same skeleton.");
 					uint32_t index = lb.parent - loaded.bones_begin;
-					if (index >= index_to_bone.size()) throw std::runtime_error(file_info() + "Bone is stored before parent.");
-					bone->parent = index_to_bone[index];
-					index_to_bone[index]->children.emplace_back(bone);
+					if (index >= i - loaded.bones_begin) throw std::runtime_error(file_info() + "Bone is stored before parent.");
+					bone.parent = index;
 				}
-				index_to_bone.emplace_back(bone);
+				skinned_mesh->skeleton.bones.emplace_back(bone);
 			}
 
 			//the handles:
  			CHECK_RANGE("Skinned_Mesh", handles, loaded.handles_begin, loaded.handles_end);
  			for (uint32_t i = loaded.handles_begin; i != loaded.handles_end; ++i) {
  				s3ds::Handle const &lh = handles[i];
- 				std::shared_ptr< Skeleton::IK_Handle > handle = std::make_shared< Skeleton::IK_Handle >();
+ 				Skeleton::Handle handle;
  				if (lh.bone < loaded.bones_begin || lh.bone >= loaded.bones_end) throw std::runtime_error(file_info() + "IK handle's bone isn't in the same skeleton.");
- 				handle->bone = index_to_bone[lh.bone - loaded.bones_begin];
- 				handle->target = Vec3(lh.target[0], lh.target[1], lh.target[2]);
- 				handle->enabled = (lh.enabled_flag != 0);
+ 				handle.bone = lh.bone - loaded.bones_begin;
+ 				handle.target = Vec3(lh.target[0], lh.target[1], lh.target[2]);
+ 				handle.enabled = (lh.enabled_flag != 0);
+				handle.channel_id = i - loaded.handles_begin; //not saved (!!)
  				skinned_mesh->skeleton.handles.emplace_back(handle);
  			}
 
 			skinned_mesh->skeleton.base.x = loaded.base[0];
 			skinned_mesh->skeleton.base.y = loaded.base[1];
 			skinned_mesh->skeleton.base.z = loaded.base[2];
+
+			//base_offset is not stored(!)
  
 			scene.skinned_meshes.emplace(name, skinned_mesh);
 			index_to_skinned_mesh.emplace_back(skinned_mesh);
@@ -1545,16 +1548,34 @@ void Scene::save(std::ostream& to) const {
 			std::copy(name.begin(), name.end(), std::back_inserter(f_strings));
 			load.name_end = static_cast<uint32_t>(f_strings.size());
 
+			// -- bones --
+			// (doing a bit out-of-order so bones_begin is available for vertex weight saving)
+			load.bones_begin = static_cast<uint32_t>(f_skinned_bones.size());
+			for (auto const& bone : skinned_mesh->skeleton.bones) {
+				s3ds::Bone load_bone;
+				load_bone.parent = (bone.parent == -1U ? -1U : load.bones_begin + bone.parent);
+				load_bone.extent[0] = bone.extent.x;
+				load_bone.extent[1] = bone.extent.y;
+				load_bone.extent[2] = bone.extent.z;
+				load_bone.pose[0] = bone.pose.x;
+				load_bone.pose[1] = bone.pose.y;
+				load_bone.pose[2] = bone.pose.z;
+				load_bone.radius = bone.radius;
+				if (bone.channel_id != f_skinned_bones.size() - load.bones_begin) info("Bone channel_id of %u will be %u on load, messing up animations.", bone.channel_id, uint32_t(f_skinned_bones.size() - load.bones_begin));
+				f_skinned_bones.emplace_back(load_bone);
+			}
+			load.bones_end = static_cast<uint32_t>(f_skinned_bones.size());
+
 			// -- halfedges --
 			std::unordered_map<Halfedge_Mesh::HalfedgeRef, uint32_t> halfedgeref_to_index;
 			for (auto halfedge = skinned_mesh->mesh.halfedges.begin(); halfedge != skinned_mesh->mesh.halfedges.end(); ++halfedge) {
-				uint32_t i = static_cast<uint32_t>(f_halfedges.size()) + static_cast<uint32_t>(halfedgeref_to_index.size());
+				uint32_t i = static_cast<uint32_t>(f_skinned_halfedges.size()) + static_cast<uint32_t>(halfedgeref_to_index.size());
 				halfedgeref_to_index.emplace(halfedge, i);
 				halfedgeref_to_index.emplace(halfedge->twin, i^1);
 			}
 
 			load.halfedges_begin = static_cast<uint32_t>(f_skinned_halfedges.size());
-			f_skinned_halfedges.resize(f_halfedges.size() + halfedgeref_to_index.size());
+			f_skinned_halfedges.resize(f_skinned_halfedges.size() + halfedgeref_to_index.size());
 			for (auto halfedge = skinned_mesh->mesh.halfedges.begin(); halfedge != skinned_mesh->mesh.halfedges.end(); ++halfedge) {
 				s3ds::Halfedge load_halfedge;
 				load_halfedge.corner_uv[0] = halfedge->corner_uv.x;
@@ -1582,7 +1603,7 @@ void Scene::save(std::ostream& to) const {
 				for (auto & bone_weight : vertex->bone_weights) {
 					s3ds::Weight load_weight;
 					load_weight.weight = bone_weight.weight;
-					load_weight.bone = bone_weight.bone;
+					load_weight.bone = bone_weight.bone + load.bones_begin;
 
 					f_skinned_weights.emplace_back(load_weight);
 				}
@@ -1614,56 +1635,17 @@ void Scene::save(std::ostream& to) const {
 			}
 			load.faces_end = static_cast<uint32_t>(f_skinned_faces.size());
 
-			// -- bones --
-			std::unordered_map<Bone const*, uint32_t> bone_to_index;
-			load.bones_begin = static_cast<uint32_t>(f_skinned_bones.size());
-			for (auto const& root : skinned_mesh->skeleton.roots) {
-				s3ds::Bone load_bone;
-				load_bone.parent = static_cast<uint32_t>(-1);
-				load_bone.extent[0] = root->extent.x;
-				load_bone.extent[1] = root->extent.y;
-				load_bone.extent[2] = root->extent.z;
-				load_bone.pose[0] = root->pose.x;
-				load_bone.pose[1] = root->pose.y;
-				load_bone.pose[2] = root->pose.z;
-				load_bone.radius = root->radius;
-
-				bone_to_index[root.get()] = static_cast<uint32_t>(bone_to_index.size());
-				f_skinned_bones.emplace_back(load_bone);
-			}
-
-			std::function<void(Bone*)> dfs_bones = [&](Bone const* bone) {
-				for (auto const& child : bone->children) {
-					s3ds::Bone load_bone;
-					load_bone.parent = bone_to_index[bone];
-					load_bone.extent[0] = child->extent.x;
-					load_bone.extent[1] = child->extent.y;
-					load_bone.extent[2] = child->extent.z;
-					load_bone.pose[0] = child->pose.x;
-					load_bone.pose[1] = child->pose.y;
-					load_bone.pose[2] = child->pose.z;
-					load_bone.radius = child->radius;
-
-					bone_to_index[child.get()] = static_cast<uint32_t>(bone_to_index.size());
-					f_skinned_bones.emplace_back(load_bone);
-					dfs_bones(child.get());
-				}
-			};
-
-			for (auto const& root : skinned_mesh->skeleton.roots) {
-				dfs_bones(root.get());
-			}
-			load.bones_end = static_cast<uint32_t>(f_skinned_bones.size());
-
+			
 			// -- ik handles --
  			load.handles_begin = static_cast<uint32_t>(f_skinned_handles.size());
  			for (auto const& handle : skinned_mesh->skeleton.handles) {
  				s3ds::Handle load_handle;
- 				load_handle.bone = bone_to_index[handle->bone.lock().get()];
- 				load_handle.target[0] = handle->target.x;
- 				load_handle.target[1] = handle->target.y;
- 				load_handle.target[2] = handle->target.z;
- 				load_handle.enabled_flag = static_cast<uint8_t>(handle->enabled);
+ 				load_handle.bone = handle.bone + load.bones_begin;
+ 				load_handle.target[0] = handle.target.x;
+ 				load_handle.target[1] = handle.target.y;
+ 				load_handle.target[2] = handle.target.z;
+ 				load_handle.enabled_flag = (handle.enabled ? 1 : 0);
+				if (handle.channel_id != f_skinned_handles.size() - load.handles_begin) info("Handle channel_id of %u will be %u on load, messing up animations.", handle.channel_id, uint32_t(f_skinned_handles.size() - load.handles_begin));
  				f_skinned_handles.emplace_back(load_handle);
  			}
  			load.handles_end = static_cast<uint32_t>(f_skinned_handles.size());
@@ -1717,7 +1699,7 @@ void Scene::save(std::ostream& to) const {
 			load.step_size = particle_system->step_size;
 			//(seed isn't saved)
 
-			load.particles_begin = static_cast<uint32_t>(particles.size());
+			load.particles_begin = static_cast<uint32_t>(f_particles.size());
 			for (auto & i : particle_system->particles) {
 				s3ds::Particle particle;
 				particle.position[0] = i.position.x;
@@ -1729,7 +1711,7 @@ void Scene::save(std::ostream& to) const {
 				particle.age = i.age;
 				f_particles.emplace_back(particle);
 			}
-			load.particles_end = static_cast<uint32_t>(particles.size());
+			load.particles_end = static_cast<uint32_t>(f_particles.size());
 
 			f_particle_systems.emplace_back(load);
 			particles_to_index[particle_system.get()] = static_cast<uint32_t>(particles_to_index.size());

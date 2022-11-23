@@ -133,6 +133,8 @@ const scene_objects = [
 	maek.CPP("src/scene/undo.cpp"),
 	maek.CPP("src/scene/scene.cpp"),
 	maek.CPP("src/scene/load-save.cpp"),
+	maek.CPP("src/scene/load-save-json.cpp"),
+	maek.CPP("src/scene/io.cpp"),
 	maek.CPP("src/scene/animator.cpp"),
 	maek.CPP("src/scene/delta_light.cpp"),
 	maek.CPP("src/scene/env_light.cpp"),
@@ -179,6 +181,7 @@ const deps_objects = [
 	maek.CPP("deps/imgui/imgui.cpp"),
 	maek.CPP("deps/glad/glad.cpp"),
 	maek.CPP("deps/nfd/nfd_common.c", undefined, nfd_common_options),
+	maek.CPP("deps/sejp/sejp.cpp"),
 ];
 if (maek.OS === 'linux') {
 	deps_objects.push(

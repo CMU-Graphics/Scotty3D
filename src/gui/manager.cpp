@@ -13,6 +13,7 @@
 #include "../platform/renderer.h"
 #include "../scene/undo.h"
 #include "../test.h"
+#include "../scene/io.h"
 
 namespace Gui {
 
@@ -107,8 +108,8 @@ bool Manager::keydown(SDL_Keysym key, View_3D& gui_cam) {
 		switch (key.sym) {
 		case SDLK_d: debug_shown = true; return true;
 		case SDLK_e: save_scene_as(); return true;
-		case SDLK_o: load_scene(Load::new_scene); return true;
-		case SDLK_s: save_scene(); return true;
+		case SDLK_o: load_scene(); return true;
+		case SDLK_s: save_scene_as((save_file.empty() ? nullptr : &save_file)); return true;
 		}
 	}
 
@@ -147,57 +148,39 @@ static bool postfix(const std::string& path, const std::string& type) {
 	return false;
 }
 
-bool Manager::save_scene() {
-	if (save_file.empty()) {
+bool Manager::save_scene_as(std::string *new_path) {
+	if (!new_path) {
+		//no file? prompt user:
 		char* path = nullptr;
-		NFD_SaveDialog("s3d", nullptr, &path);
+		NFD_SaveDialog(scene_file_types, nullptr, &path);
 		if (!path) return false;
 
-		std::string spath(path);
-		if (!postfix(spath, ".s3d")) {
-			spath += ".s3d";
-		}
-		set_file(spath);
+		save_file = std::string(path);
 		free(path);
+
+		if (postfix(save_file, ".s3d")) {
+			//old (binary) format file
+		} else if (postfix(save_file, ".js3d")) {
+			//new (json) format file
+		} else {
+			//no extension, make it json-s3d
+			save_file += ".js3d";
+		}
+	} else {
+		save_file = *new_path;
 	}
+
+	//save the file:
 	try {
-		std::ofstream file(save_file, std::ios::binary);
-		scene.save(file);
-		animator.save(file);
+		save(save_file, scene, animator);
 	} catch (std::exception& e) {
 		set_error(e.what());
 		return false;
 	}
+
+	//and update undo info:
 	n_actions_at_last_save = undo.n_actions();
 	return true;
-}
-
-bool Manager::save_scene_as() {
-	char* path = nullptr;
-	NFD_SaveDialog("s3d", nullptr, &path);
-	if (!path) return false;
-
-	std::string spath(path);
-	if (!postfix(spath, ".s3d")) {
-		spath += ".s3d";
-	}
-	set_file(spath);
-	free(path);
-
-	try {
-		std::ofstream file(save_file, std::ios::binary);
-		scene.save(file);
-		animator.save(file);
-	} catch (std::exception& e) {
-		set_error(e.what());
-		return false;
-	}
-	n_actions_at_last_save = undo.n_actions();
-	return true;
-}
-
-void Manager::set_file(std::string save) {
-	save_file = save;
 }
 
 void Manager::new_scene() {
@@ -223,26 +206,34 @@ void Manager::new_scene() {
 	after_save(true);
 }
 
-void Manager::load_scene(Load strategy) {
+void Manager::load_scene(std::string *from_path_, Load strategy) {
 
-	bool clear = strategy == Load::new_scene;
+	bool clear = (strategy == Load::new_scene);
 
-	after_save = [this, clear](bool success) {
+	std::optional< std::string > from_path;
+	if (from_path_) from_path = *from_path_;
+
+	after_save = [this,clear,from_path](bool success) {
 		if (!success) {
 			save_first_shown = true;
 			return;
 		}
 
-		char* path = nullptr;
-		NFD_OpenDialog(scene_file_types, nullptr, &path);
-		if (!path) return;
+		std::string load_from;
 
-		std::string path_str(path);
-		free(path);
-		path = nullptr;
+		//no supplied path? ask the user:
+		if (from_path) {
+			load_from = *from_path;
+		} else {
+			char* path = nullptr;
+			NFD_OpenDialog(scene_file_types, nullptr, &path);
+			if (!path) return;
+			load_from = std::string(path);
+			free(path);
+		}
 
 		if (clear) {
-			save_file = path_str;
+			save_file = load_from;
 			model.set_mesh({}, std::weak_ptr<Halfedge_Mesh>{});
 			rig.set_mesh({}, std::weak_ptr<Skinned_Mesh>{});
 			animate.set_mesh({}, std::weak_ptr<Skinned_Mesh>{});
@@ -252,13 +243,12 @@ void Manager::load_scene(Load strategy) {
 		Animator old_animator(std::move(animator));
 
 		try {
-			std::ifstream file(path_str, std::ios::binary);
-			scene = Scene::load(file);
-			animator = Animator::load(file);
+			load(load_from, &scene, &animator);
 		} catch (std::exception& e) {
 			scene = std::move(old_scene);
 			animator = std::move(old_animator);
 			set_error(e.what());
+			warn("Error loading scene: %s", e.what());
 			return;
 		}
 
@@ -279,7 +269,7 @@ void Manager::load_scene(Load strategy) {
 		}
 	};
 
-	if (clear && n_actions_at_last_save != undo.n_actions()) {
+	if (!from_path && clear && n_actions_at_last_save != undo.n_actions()) {
 		save_first_shown = true;
 		return;
 	}
@@ -383,7 +373,7 @@ void Manager::ui_sidebar(float menu_height, View_3D& gui_cam) {
 	Begin("Menu", nullptr, flags);
 
 	if (mode == Mode::layout) {
-		if (Button("Open Scene")) load_scene(Load::new_scene);
+		if (Button("Open Scene")) load_scene(nullptr, Load::new_scene);
 		if (WrapButton("Save Scene As")) save_scene_as();
 		if (WrapButton("Clear")) {
 			std::unordered_set<std::string> names = scene.all_names();
@@ -396,7 +386,7 @@ void Manager::ui_sidebar(float menu_height, View_3D& gui_cam) {
 		}
 
 		if (Button("Append Objects")) {
-			load_scene(Load::append);
+			load_scene(nullptr, Load::append);
 		}
 		if (WrapButton("Create Object")) {
 			new_object_shown = true;
@@ -1448,7 +1438,7 @@ void Manager::ui_savefirst() {
 	                 ImGuiWindowFlags_AlwaysAutoResize);
 	if (ImGui::Button("Yes")) {
 		save_first_shown = false;
-		after_save(save_scene());
+		after_save(save_scene_as((save_file.empty() ? nullptr : &save_file)));
 	}
 	ImGui::SameLine();
 	if (ImGui::Button("No")) {
@@ -1524,9 +1514,9 @@ float Manager::ui_menu() {
 		if (BeginMenu("File")) {
 
 			if (MenuItem("New Scene")) new_scene();
-			if (MenuItem("Open Scene (Ctrl+o)")) load_scene(Load::new_scene);
+			if (MenuItem("Open Scene (Ctrl+o)")) load_scene(nullptr, Load::new_scene);
 			if (MenuItem("Save Scene As (Ctrl+e)")) save_scene_as();
-			if (MenuItem("Save Scene (Ctrl+s)")) save_scene();
+			if (MenuItem("Save Scene (Ctrl+s)")) save_scene_as((save_file.empty() ? nullptr : &save_file));
 			ImGui::EndMenu();
 		}
 
@@ -1594,6 +1584,14 @@ void Manager::drag_to(Vec3 cam, Vec2 spos, Vec3 dir, Modifiers mods) {
 
 	if (!widgets.is_dragging()) return;
 
+	//for controls that need to know about world<->local xform:
+	Mat4 local_to_world;
+	if (auto transform = selected_instance_transform.lock()) {
+		local_to_world = transform->local_to_world();
+	} else {
+		local_to_world = Mat4::I;
+	}
+
 	std::optional<Vec3> pos;
 	float snap = 0.0f;
 
@@ -1621,10 +1619,7 @@ void Manager::drag_to(Vec3 cam, Vec2 spos, Vec3 dir, Modifiers mods) {
 		pos = rig.selected_pos();
 	} break;
 	case Mode::animate: {
-		Mat4 p = selected_instance_transform.expired()
-		             ? Mat4::I
-		             : selected_instance_transform.lock()->local_to_world();
-		pos = animate.selected_pos(p);
+		pos = animate.selected_pos(local_to_world);
 	} break;
 	default: assert(false);
 	}
@@ -1649,7 +1644,7 @@ void Manager::drag_to(Vec3 cam, Vec2 spos, Vec3 dir, Modifiers mods) {
 		rig.apply_transform(widgets);
 	} break;
 	case Mode::animate: {
-		if (!animate.apply_transform(widgets)) {
+		if (!animate.apply_transform(widgets, local_to_world)) {
 			if (!selected_instance_transform.expired()) {
 				auto t = selected_instance_transform.lock();
 				*t = widgets.apply_action(transform_widget.cache);

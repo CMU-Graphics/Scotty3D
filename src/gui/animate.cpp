@@ -24,8 +24,7 @@ bool Animate::keydown(SDL_Keysym key) {
 	return false;
 }
 
-bool Animate::render(Scene& scene, Widgets& widgets, Mat4 pose, uint32_t next_id,
-                     View_3D& user_cam) {
+bool Animate::render(Scene& scene, Widgets& widgets, Mat4 const &local_to_world, uint32_t next_id, View_3D& user_cam) {
 
 	Mat4 view = user_cam.get_view();
 	auto& R = Renderer::get();
@@ -36,52 +35,52 @@ bool Animate::render(Scene& scene, Widgets& widgets, Mat4 pose, uint32_t next_id
 		}
 	}
 
-	if (!skinned_mesh_select.expired()) {
+	auto mesh = skinned_mesh_select.lock();
+	if (!mesh) return false;
 
-		auto mesh = skinned_mesh_select.lock();
-
+	{ //render mesh:
 		Renderer::SkeletonOpt opt(mesh->skeleton);
-		opt.view = view * pose;
+		opt.view = view * local_to_world;
 		opt.posed = true;
 		opt.face_mesh = nullptr;
-		opt.base_id = next_id;
-		opt.root_selected = false;
+		opt.first_id = next_id;
+		opt.selected_base = selected_base;
 		opt.selected_bone = selected_bone;
 		opt.selected_handle = selected_handle;
 
-		std::tie(id_to_bone, id_to_handle) = R.skeleton(opt);
-
-		if (!selected_handle.expired()) {
-			widgets.active = Widget_Type::move;
-		} else if (!selected_bone.expired()) {
-			widgets.active = Widget_Type::rotate;
-		}
+		id_map = R.skeleton(opt);
 	}
 
-	if (!selected_handle.expired()) {
+	if (selected_handle < mesh->skeleton.handles.size()) {
+		//translate an IK handle:
+		Skeleton::Handle &handle = mesh->skeleton.handles[selected_handle];
 
-		auto mesh = skinned_mesh_select.lock();
-		assert(mesh);
-
-		auto handle = selected_handle.lock();
-
-		Vec3 wpos = pose * (handle->target + mesh->skeleton.base);
+		Vec3 wpos = local_to_world * handle.target;
 		float scale = std::min((user_cam.pos() - wpos).norm() / 5.5f, 10.0f);
+
+		widgets.active = Widget_Type::move;
 		widgets.render(view, wpos, scale);
 
 		return true;
 
-	} else if (!selected_bone.expired()) {
+	} else if (selected_bone < mesh->skeleton.bones.size()) {
+		//rotate a bone:
+		std::vector< Mat4 > pose = mesh->skeleton.current_pose();
 
-		auto mesh = skinned_mesh_select.lock();
-		assert(mesh);
-
-		auto bone = selected_bone.lock();
-
-		Vec3 wpos = pose * mesh->skeleton.j_to_posed(bone) * Vec3{};
+		Vec3 wpos = local_to_world * (pose[selected_bone] * Vec3{0.0f, 0.0f, 0.0f});
 		float scale = std::min((user_cam.pos() - wpos).norm() / 5.5f, 10.0f);
+
+		widgets.active = Widget_Type::rotate;
 		widgets.render(view, wpos, scale);
 
+		return true;
+	} else if (selected_base) {
+		//translate the base offset:
+		Vec3 wpos = local_to_world * (mesh->skeleton.base + mesh->skeleton.base_offset);
+		float scale = std::min((user_cam.pos() - wpos).norm() / 5.5f, 10.0f);
+
+		widgets.active = Widget_Type::move;
+		widgets.render(view, wpos, scale);
 		return true;
 	}
 
@@ -118,218 +117,287 @@ void Animate::make_spline(Animator& animator, const std::string& id) {
 
 void Animate::erase_mesh(const std::string& name) {
 	if (name == mesh_name) {
-		skinned_mesh_select.reset();
-		selected_bone.reset();
-		selected_handle.reset();
+		clear_select();
 	}
 }
 
 void Animate::set_mesh(const std::string& name, std::weak_ptr<Skinned_Mesh> mesh) {
+	clear_select();
 	mesh_name = name;
 	skinned_mesh_select = mesh;
-	selected_bone.reset();
-	selected_handle.reset();
 }
 
 void Animate::clear_select() {
-	selected_bone.reset();
-	selected_handle.reset();
+	selected_bone = -1U;
+	selected_handle = -1U;
 	skinned_mesh_select.reset();
 }
 
 void Animate::ui_sidebar(Undo& undo, View_3D& user_cam) {
-
 	using namespace ImGui;
 
-	if (skinned_mesh_select.expired()) {
-		selected_bone.reset();
-		selected_handle.reset();
+	auto mesh = skinned_mesh_select.lock();
+
+	if (!mesh) {
+		clear_select();
 	}
 
-	if (!selected_handle.expired()) {
+	if (mesh) {
+		Checkbox("Solve IK", &run_solve_ik);
+	}
 
-		auto mesh = skinned_mesh_select.lock();
-		auto handle = selected_handle.lock();
+	if (mesh && selected_handle < mesh->skeleton.handles.size()) {
+		Skeleton::Handle &handle = mesh->skeleton.handles[selected_handle];
 
 		Text("Edit IK Handle");
-		DragFloat3("Pos", handle->target.data, 0.1f, 0.0f, 0.0f, "%.2f");
-		if (IsItemActivated()) old_pos = handle->target;
-		if (IsItemDeactivatedAfterEdit() && old_pos != handle->target) {
-			Vec3 new_pos = handle->target;
-			handle->target = old_pos;
+		DragFloat3("Pos", handle.target.data, 0.1f, 0.0f, 0.0f, "%.2f");
+		if (IsItemActivated()) {
 			old_mesh = mesh->copy();
-			handle->target = new_pos;
+		}
+		if (IsItemDeactivatedAfterEdit()
+		&& (old_mesh.skeleton.handles.size() != mesh->skeleton.handles.size() || old_mesh.skeleton.handles[selected_handle].target != handle.target)) {
 			dont_clear_select = true;
 			undo.update_cached<Skinned_Mesh>(mesh_name, skinned_mesh_select, std::move(old_mesh));
 			dont_clear_select = false;
 		}
-		if (Checkbox("Enable", &handle->enabled)) {
-			bool new_enable = handle->enabled;
-			handle->enabled = !new_enable;
+		if (Checkbox("Enable", &handle.enabled)) {
+			bool new_enable = handle.enabled;
+			handle.enabled = !new_enable;
 			old_mesh = mesh->copy();
-			handle->enabled = new_enable;
+			handle.enabled = new_enable;
 			dont_clear_select = true;
 			undo.update_cached<Skinned_Mesh>(mesh_name, skinned_mesh_select, std::move(old_mesh));
 			dont_clear_select = false;
 		}
 		Separator();
 
-	} else if (!selected_bone.expired()) {
-
-		auto mesh = skinned_mesh_select.lock();
-		auto bone = selected_bone.lock();
+	} else if (mesh && selected_bone < mesh->skeleton.bones.size()) {
+		Skeleton::Bone &bone = mesh->skeleton.bones[selected_bone];
 
 		Text("Edit Joint");
 
-		if (DragFloat3("Pose", bone->pose.data, 1.0f, 0.0f, 0.0f, "%.2f")) {
+		if (DragFloat3("Pose", bone.pose.data, 1.0f, 0.0f, 0.0f, "%.2f")) {
 			dont_clear_select = true;
 			manager.invalidate_gpu(mesh_name);
 			dont_clear_select = false;
 		}
-
-		if (IsItemActivated()) old_euler = bone->pose;
-		if (IsItemDeactivatedAfterEdit() && old_euler != bone->pose) {
-			bone->pose = bone->pose.range(0.0f, 360.0f);
-			Vec3 new_euler = bone->pose;
-			bone->pose = old_euler;
+		if (IsItemActivated()) {
 			old_mesh = mesh->copy();
-			bone->pose = new_euler;
+		}
+		if (IsItemDeactivatedAfterEdit()
+		&& (old_mesh.skeleton.bones.size() != mesh->skeleton.bones.size() || old_mesh.skeleton.bones[selected_bone].pose != bone.pose)) {
 			dont_clear_select = true;
 			undo.update_cached<Skinned_Mesh>(mesh_name, skinned_mesh_select, std::move(old_mesh));
 			dont_clear_select = false;
 		}
 		Separator();
-	}
-
-	if (!skinned_mesh_select.expired()) {
-		auto mesh = skinned_mesh_select.lock();
-		if (mesh->skeleton.run_ik(100)) {
+	} else if (mesh && selected_base) {
+		Text("Edit Base Point");
+		if (DragFloat3("Offset", mesh->skeleton.base_offset.data, 0.01f, 0.0f, 0.0f, "%.2f")) {
 			dont_clear_select = true;
 			manager.invalidate_gpu(mesh_name);
 			dont_clear_select = false;
 		}
+		if (IsItemActivated()) {
+			old_mesh = mesh->copy();
+		}
+		if (IsItemDeactivatedAfterEdit() && old_mesh.skeleton.base_offset != mesh->skeleton.base_offset) {
+			dont_clear_select = true;
+			undo.update_cached<Skinned_Mesh>(mesh_name, skinned_mesh_select, std::move(old_mesh));
+			dont_clear_select = false;
+		}
+	}
+
+	if (mesh && run_solve_ik) {
+		mesh->skeleton.solve_ik();
+		dont_clear_select = true;
+		manager.invalidate_gpu(mesh_name);
+		dont_clear_select = false;
 	}
 }
 
 bool Animate::skel_selected() {
-	return !selected_bone.expired() || !selected_handle.expired();
+	auto mesh = skinned_mesh_select.lock();
+	return mesh && (selected_bone < mesh->skeleton.bones.size() || selected_handle < mesh->skeleton.handles.size() || selected_base);
 }
 
 void Animate::end_transform(Undo& undo) {
+	auto mesh = skinned_mesh_select.lock();
+	if (!mesh) return;
 
-	if (skinned_mesh_select.expired()) return;
-
-	if (!selected_bone.expired() || !selected_handle.expired()) {
+	if (selected_bone < mesh->skeleton.bones.size() || selected_handle < mesh->skeleton.handles.size() || selected_base) {
 		dont_clear_select = true;
 		undo.update_cached<Skinned_Mesh>(mesh_name, skinned_mesh_select, std::move(old_mesh));
 		dont_clear_select = false;
 	}
 }
 
-Vec3 Animate::selected_pos(Mat4 pose) {
-
+Vec3 Animate::selected_pos(Mat4 const &local_to_world) {
 	auto mesh = skinned_mesh_select.lock();
-	if (!mesh) return pose * Vec3{};
+	if (!mesh) return local_to_world * Vec3{};
 
-	if (!selected_handle.expired()) {
-		auto handle = selected_handle.lock();
-		return pose * (handle->target + mesh->skeleton.base);
-	} else if (!selected_bone.expired()) {
-		auto bone = selected_bone.lock();
-		return pose * (mesh->skeleton.j_to_posed(bone) * Vec3{});
+	if (selected_handle < mesh->skeleton.handles.size()) {
+		Skeleton::Handle &handle = mesh->skeleton.handles[selected_handle];
+		return local_to_world * handle.target;
+	} else if (selected_bone < mesh->skeleton.bones.size()) {
+		std::vector< Mat4 > pose = mesh->skeleton.current_pose();
+		return local_to_world * (pose[selected_bone] * Vec3{});
+	} else if (selected_base) {
+		return local_to_world * (mesh->skeleton.base + mesh->skeleton.base_offset);
 	}
 
-	return pose * Vec3{};
+	return local_to_world * Vec3{};
 }
 
-bool Animate::apply_transform(Widgets& widgets) {
+bool Animate::apply_transform(Widgets& widgets, Mat4 const &local_to_world) {
+	auto mesh = skinned_mesh_select.lock();
+	if (!mesh) return false;
 
-	Transform old_translate;
-	old_translate.translation = old_pos;
-	old_translate.rotation = Quat::euler(old_euler_spaghetti_code);
+	if (selected_handle < mesh->skeleton.handles.size()) {
+		if (old_mesh.skeleton.handles.size() != mesh->skeleton.handles.size()) {
+			warn("Somehow lost old mesh [handle count mis-match].");
+			return true;
+		}
+		Skeleton::Handle const &old_handle = old_mesh.skeleton.handles[selected_handle];
+		Skeleton::Handle &handle = mesh->skeleton.handles[selected_handle];
 
-	if (!selected_handle.expired()) {
+		//set up transform at the location of the old handle:
+		Transform at;
+		at.translation = local_to_world * old_handle.target;
 
-		auto mesh = skinned_mesh_select.lock();
-		auto handle = selected_handle.lock();
+		//move the new handle to the old handle:
+		handle.target = local_to_world.inverse() * widgets.apply_action(at).translation;
 
-		Vec3 p = old_T * widgets.apply_action(old_translate).translation;
-		handle->target = p - mesh->skeleton.base;
 		return true;
+	} else if (selected_bone < mesh->skeleton.bones.size()) {
+		if (old_mesh.skeleton.bones.size() != mesh->skeleton.bones.size()) {
+			warn("Somehow lost old mesh [bone count mis-match].");
+			return true;
+		}
 
-	} else if (!selected_bone.expired()) {
+		Skeleton::Bone const &old_bone = old_mesh.skeleton.bones[selected_bone];
+		Skeleton::Bone &bone = mesh->skeleton.bones[selected_bone];
 
-		auto mesh = skinned_mesh_select.lock();
-		auto bone = selected_bone.lock();
+		std::vector< Mat4 > old_pose = old_mesh.skeleton.current_pose();
 
-		Quat rot = widgets.apply_action(old_translate).rotation;
-		bone->pose = (old_T * rot.to_mat()).to_euler();
+		Transform at;
+		at.translation = local_to_world * (old_pose[selected_bone] * Vec3(0.0f, 0.0f, 0.0f));
+		//n.b. could set at.rotation to reflect local axes here but unclear that would help
+
+		//rot is incremental rotation to apply in world space:
+		Quat rot = widgets.apply_action(at).rotation;
+
+		//rotation from bone's children -> world space:
+		Mat4 bone_to_world = old_pose[selected_bone];
+		bone_to_world[0][3] = 0.0f; bone_to_world[1][3] = 0.0f; bone_to_world[2][3] = 0.0f;
+		bone_to_world[3] = Vec4(0.0f, 0.0f, 0.0f, 1.0f);
+
+		//rotation from world space to bone's parent:
+		Mat4 world_to_parent;
+		if (old_bone.parent < old_mesh.skeleton.bones.size()) {
+			Mat4 parent_to_world = old_pose[old_bone.parent];
+			parent_to_world[0][3] = 0.0f; parent_to_world[1][3] = 0.0f; parent_to_world[2][3] = 0.0f;
+			parent_to_world[3] = Vec4(0.0f, 0.0f, 0.0f, 1.0f);
+
+			world_to_parent = Mat4::transpose(parent_to_world);
+		} else {
+			world_to_parent = Mat4::I;
+		}
+
+		rot = Quat(); //DEBUG!
+
+		//thus, the new rotation we'd like for bone's children is:
+		Mat4 new_rot = world_to_parent * rot.to_mat() * bone_to_world;
+
+		//convert into euler angles w.r.t. bone's local rotation axes:
+		Vec3 x,y,z;
+		old_bone.compute_rotation_axes(&x, &y, &z);
+
+		Mat4 new_rot_local = Mat4(
+			Vec4(x, 0.0f),
+			Vec4(y, 0.0f),
+			Vec4(z, 0.0f),
+			Vec4(0.0f, 0.0f, 0.0f, 1.0f)
+		) * new_rot;
+
+		std::cout << "old pose: " << old_bone.pose << ", new rot (local): " << new_rot_local << ", euler: " << new_rot_local.to_euler() << std::endl; //DEBUG
+
+		bone.pose = new_rot_local.to_euler();
 
 		dont_clear_select = true;
 		manager.invalidate_gpu(mesh_name);
 		dont_clear_select = false;
+		return true;
+	} else if (selected_base) {
+		//set up transform at the location of the old base offset:
+		Transform at;
+		at.translation = local_to_world * (old_mesh.skeleton.base + old_mesh.skeleton.base_offset);
+
+		//update the base offset accordingly:
+		mesh->skeleton.base_offset = (local_to_world.inverse() * widgets.apply_action(at).translation) - mesh->skeleton.base;
 		return true;
 	}
 
 	return false;
 }
 
-bool Animate::select(Scene& scene, Widgets& widgets, Mat4 pose, uint32_t id,
-                     Vec3 cam, Vec2 spos, Vec3 dir) {
+bool Animate::select(Scene& scene, Widgets& widgets, Mat4 const &local_to_world, uint32_t id, Vec3 cam, Vec2 spos, Vec3 dir) {
+	auto mesh = skinned_mesh_select.lock();
 
 	if (widgets.want_drag()) {
 
-		if (!selected_handle.expired()) {
-
-			auto handle = selected_handle.lock();
-			auto mesh = skinned_mesh_select.lock();
-			assert(mesh);
-
-			Vec3 base = pose * (handle->target + mesh->skeleton.base);
-
+		if (mesh && selected_handle < mesh->skeleton.handles.size()) {
+			//store old mesh:
 			old_mesh = mesh->copy();
-			old_pos = base;
-			old_euler = handle->target;
-			old_euler_spaghetti_code = Vec3{};
 
+			//figure out where drag starts:
+			Skeleton::Handle &handle = mesh->skeleton.handles[selected_handle];
+			Vec3 base = local_to_world * handle.target;
+
+			//start the drag:
 			widgets.start_drag(base, cam, spos, dir);
-			old_T = pose.inverse();
-
-		} else if (!selected_bone.expired()) {
-
-			auto bone = selected_bone.lock();
-			auto mesh = skinned_mesh_select.lock();
-			assert(mesh);
-
-			Vec3 base = pose * mesh->skeleton.j_to_posed(bone) * Vec3{};
-			Mat4 j_to_p = pose * mesh->skeleton.j_to_posed(bone);
+		} else if (mesh && selected_bone < mesh->skeleton.bones.size()) {
+			//store old mesh:
 			old_mesh = mesh->copy();
-			old_pos = Vec3{};
-			old_euler = bone->pose;
-			old_euler_spaghetti_code = j_to_p.to_euler();
-			j_to_p = j_to_p * Mat4::euler(old_euler).inverse();
-			old_T = j_to_p.inverse();
 
+			//figure out where drag starts:
+			//Skeleton::Bone &bone = mesh->skeleton.bones[selected_bone]; //may eventually need this
+			std::vector< Mat4 > pose = mesh->skeleton.current_pose();
+			Vec3 base = local_to_world * pose[selected_bone] * Vec3{0.0f, 0.0f, 0.0f};
+
+			//start the drag:
 			widgets.start_drag(base, cam, spos, dir);
+		} else if (mesh && selected_base) {
+			//store old mesh:
+			old_mesh = mesh->copy();
 
+			//figure out where drag starts:
+			Vec3 base = local_to_world * (mesh->skeleton.base + mesh->skeleton.base_offset);
+
+			//start the drag:
+			widgets.start_drag(base, cam, spos, dir);
 		} else {
-
-			widgets.start_drag(pose * Vec3{}, cam, spos, dir);
+			widgets.start_drag(local_to_world * Vec3{}, cam, spos, dir);
 		}
 		return true;
 
-	} else if (!skinned_mesh_select.expired()) {
-
-		auto mesh = skinned_mesh_select.lock();
-
-		selected_bone = id_to_bone[id];
-		selected_handle = id_to_handle[id];
-		if (!selected_bone.expired()) {
+	} else if (mesh) {
+		if (id_map.bone_ids_begin <= id && id < id_map.bone_ids_end) {
+			selected_bone = id - id_map.bone_ids_begin;
+			selected_handle = -1U;
+			selected_base = false;
 			widgets.active = Widget_Type::rotate;
-		} else if (!selected_handle.expired()) {
+		} else if (id_map.handle_ids_begin <= id && id < id_map.handle_ids_end) {
+			selected_bone = -1U;
+			selected_handle = id - id_map.handle_ids_begin;
+			selected_base = false;
+			widgets.active = Widget_Type::move;
+		} else if (id == id_map.base_id) {
+			selected_bone = -1U;
+			selected_handle = -1U;
+			selected_base = true;
 			widgets.active = Widget_Type::move;
 		}
-
 	} else {
 		manager.set_select(id);
 	}
@@ -582,8 +650,9 @@ void Animate::refresh(Scene& scene, Animator& animator) {
 }
 
 void Animate::clear() {
-	selected_bone.reset();
-	selected_handle.reset();
+	selected_bone = -1U;
+	selected_handle = -1U;
+	selected_base = false;
 	skinned_mesh_select.reset();
 	mesh_name = {};
 }
@@ -592,8 +661,9 @@ void Animate::invalidate(const std::string& name) {
 	spline_cache.erase(name);
 	if (name == mesh_name) {
 		if (!dont_clear_select) {
-			selected_bone.reset();
-			selected_handle.reset();
+			selected_bone = -1U;
+			selected_handle = -1U;
+			selected_base = false;
 		}
 	}
 }

@@ -15,7 +15,6 @@ class Scene;
 class Halfedge_Mesh;
 class Indexed_Mesh;
 struct Spectrum;
-class Skeleton;
 class Bone;
 struct Vec2;
 struct Vec3;
@@ -65,9 +64,10 @@ public:
 	static bool differs(Spectrum a, Spectrum b);
 	static bool differs(std::vector<Vec3> a, std::vector<Vec3> b);
 
-	static std::optional<std::string> differs(Ray a, Ray b);
-	static std::optional<std::string> differs(PT::Trace a, PT::Trace b);
-	static std::optional<std::string> differs(Bone a, Bone b);
+	//this is specialized for a fair few more things:
+	// (see skeleton.cpp)
+	template< typename T >
+	static std::optional<std::string> differs(T const &a, T const &b);
 
 	using CheckExtra = uint8_t;
 	enum : CheckExtra {
