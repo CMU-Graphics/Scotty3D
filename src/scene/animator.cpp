@@ -98,7 +98,7 @@ template<typename F> static void channels(Shape& val, F&& f) {
 
 template<typename F> static void channels(Particles& val, F&& f) {
 	f("gravity", val.gravity);
-	f("scale", val.scale);
+	f("radius", val.radius);
 	f("initial_velocity", val.initial_velocity);
 	f("spread_angle", val.spread_angle);
 	f("lifetime", val.lifetime);

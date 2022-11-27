@@ -867,7 +867,7 @@ void Widget_Particles::ui(Undo& undo, std::weak_ptr<Particles> apply_to) {
 
 	auto temp_particles = std::move(particles->particles);
 
-	bool any_activated = gravity_activated || scale_activated || initial_velocity_activated ||
+	bool any_activated = gravity_activated || radius_activated || initial_velocity_activated ||
 	                     spread_angle_activated || lifetime_activated || pps_activated ||
 	                     step_size_activated;
 	auto activate = [&](bool changed, bool& activated) {
@@ -886,7 +886,7 @@ void Widget_Particles::ui(Undo& undo, std::weak_ptr<Particles> apply_to) {
 	};
 
 	activate(DragFloat3("Gravity", &particles->gravity.x, 0.1f), gravity_activated);
-	activate(DragFloat("Scale", &particles->scale, 0.01f, 0.01f, std::numeric_limits<float>::max(), "%.2f"), scale_activated);
+	activate(DragFloat("Radius", &particles->radius, 0.01f, 1e-4f, std::numeric_limits<float>::max(), "%.2f"), radius_activated);
 	activate(DragFloat("Initial Velocity", &particles->initial_velocity, 0.1f, 0.0f, std::numeric_limits<float>::max(), "%.2f"), initial_velocity_activated);
 	activate(SliderFloat("Spread Angle", &particles->spread_angle, 0.0f, 180.0f, "%.2f"), spread_angle_activated);
 	activate(DragFloat("Lifetime", &particles->lifetime, 0.01f, 0.0f, std::numeric_limits<float>::max(), "%.2f"), lifetime_activated);
@@ -1313,7 +1313,7 @@ void Widget_Render::ui_animate(Scene& scene, Manager& manager, Undo& undo, View_
 
 		SameLine();
 		if (method == Method::path_trace || method == Method::software_raster) {
-			ProgressBar((static_cast<float>(next_frame) + percent_done) / (max_frame + 1));
+			ProgressBar((static_cast<float>(next_frame) + render_progress) / (max_frame + 1));
 		} else {
 			ProgressBar(static_cast<float>(next_frame) / (max_frame + 1));
 		}
@@ -1329,8 +1329,8 @@ void Widget_Render::ui_animate(Scene& scene, Manager& manager, Undo& undo, View_
 
 			auto report_callback = [&](auto&& report) {
 				std::lock_guard<std::mutex> lock(report_mut);
-				if (report.first > percent_done) {
-					percent_done = report.first;
+				if (report.first > render_progress) {
+					render_progress = report.first;
 					display_hdr = std::move(report.second);
 					update_display = true;
 				}
@@ -1366,8 +1366,8 @@ bool Widget_Render::ui_render(Scene& scene, Manager& manager, Undo& undo, View_3
 
 	auto report_callback = [this](auto&& report) {
 		std::lock_guard<std::mutex> lock(report_mut);
-		if (report.first > percent_done) {
-			percent_done = report.first;
+		if (report.first > render_progress) {
+			render_progress = report.first;
 			display_hdr = std::move(report.second);
 			update_display = true;
 			rebuild_ray_log = true;
@@ -1382,7 +1382,7 @@ bool Widget_Render::ui_render(Scene& scene, Manager& manager, Undo& undo, View_3
 		}
 
 		SameLine();
-		ProgressBar(percent_done);
+		ProgressBar(render_progress);
 
 	} else {
 
@@ -1390,7 +1390,7 @@ bool Widget_Render::ui_render(Scene& scene, Manager& manager, Undo& undo, View_3
 
 			ret = true;
 			quit = false;
-			percent_done = 0.0f;
+			render_progress = 0.0f;
 
 			if (method == Method::path_trace) {
 
@@ -1453,7 +1453,7 @@ bool Widget_Render::ui_render(Scene& scene, Manager& manager, Undo& undo, View_3
 		    !render_cam.lock()->camera.expired()) {
 
 			quit = false;
-			percent_done = 0.0f;
+			render_progress = 0.0f;
 			pathtracer.render(scene, render_cam.lock(), std::move(report_callback), &quit, true);
 		}
 	}
@@ -1522,22 +1522,36 @@ std::string Widget_Render::step_animation(Scene& scene, Animator& animator, Mana
 			return "No output folder!";
 		}
 
-		animator.drive(scene, static_cast<float>(next_frame));
+		//helper called when scene needs to be advanced (not actually called every 'step_animation' step, since pathtrace / software rasterize need to wait)
+		auto step_frame = [&,this]() {
+			//animate scene:
+			Scene::StepOpts opts;
+			opts.use_bvh = use_bvh;
+			//TODO: opts.thread_pool = &thread_pool;
+
+			if (next_frame == 0) opts.reset = true;
+			scene.step(animator, float(next_frame) - 1.0f, float(next_frame), 1.0f / animator.frame_rate, opts);
+
+			//for hardware_raster, need to invalidate_gpu on skinned meshes (since it uses these to render and the scene update may have broken them)
+			if (method == Method::hardware_raster) {
+				for(auto& [name, _] : scene.skinned_meshes) {
+					manager.invalidate_gpu(name);
+				}
+			}
+		};
 
 		auto camera = render_cam.lock()->camera.lock();
 
 		auto report_callback = [&](auto&& report) {
 			std::lock_guard<std::mutex> lock(report_mut);
-			if (report.first > percent_done) {
-				percent_done = report.first;
-				display_hdr = std::move(report.second);
-				update_display = true;
-			}
+			render_progress = report.first;
+			display_hdr = std::move(report.second);
+			update_display = true;
 		};
 
 		if (method == Method::hardware_raster) {
+			step_frame();
 
-			manager.get_animate().step_sim(scene);
 			std::vector<unsigned char> data;
 
 			Renderer::get().save(manager, render_cam.lock());
@@ -1563,6 +1577,8 @@ std::string Widget_Render::step_animation(Scene& scene, Animator& animator, Mana
 		} else if (method == Method::path_trace) {
 
 			if (!pathtracer.in_progress()) {
+				step_frame();
+
 				std::vector<unsigned char> data;
 
 				{
@@ -1584,7 +1600,7 @@ std::string Widget_Render::step_animation(Scene& scene, Animator& animator, Mana
 					return "Failed to write output!";
 				}
 
-				manager.get_animate().step_sim(scene);
+				render_progress = 0.0f;
 				pathtracer.use_bvh(use_bvh);
 				pathtracer.render(scene, render_cam.lock(), std::move(report_callback), &quit);
 				next_frame++;
@@ -1593,6 +1609,8 @@ std::string Widget_Render::step_animation(Scene& scene, Animator& animator, Mana
 		} else if (method == Method::software_raster) {
 
 			if (!(rasterizer && rasterizer->in_progress())) {
+				step_frame();
+
 				std::vector<unsigned char> data;
 
 				{
@@ -1614,7 +1632,7 @@ std::string Widget_Render::step_animation(Scene& scene, Animator& animator, Mana
 					return "Failed to write output!";
 				}
 
-				manager.get_animate().step_sim(scene);
+				render_progress = 0.0f;
 				rasterizer.reset(new Rasterizer(scene, *render_cam.lock(), std::move(report_callback)));
 				next_frame++;
 			}

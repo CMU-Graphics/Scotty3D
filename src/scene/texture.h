@@ -52,7 +52,7 @@ public:
 			t.make_valid();
 		}
 	}
-	static inline const char *TYPE = "Constant"; //used by introspect_variant<>
+	static inline const char *TYPE = "Image"; //used by introspect_variant<>
 };
 
 class Constant {
@@ -114,6 +114,7 @@ public:
 	static void introspect(F&& f, T&& t) {
 		introspect_variant< I >(std::forward< F >(f), t.texture);
 	}
+	static inline const char *TYPE = "Texture";
 };
 
 bool operator!=(const Textures::Constant& a, const Textures::Constant& b);

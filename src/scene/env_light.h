@@ -102,6 +102,7 @@ public:
 	static void introspect(F&& f, T&& t) {
 		introspect_variant< I >(std::forward< F >(f), t.light);
 	}
+	static inline const char *TYPE = "Environment_Light";
 };
 
 bool operator!=(const Environment_Lights::Hemisphere& a, const Environment_Lights::Hemisphere& b);

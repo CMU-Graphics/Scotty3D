@@ -66,4 +66,6 @@ public:
 	std::unordered_map<std::string, std::set<float>> all_keys() const;
 
 	std::unordered_map<Path, Channel_Spline> splines;
+
+	float frame_rate = 24.0f; //splines are timed in frames; divide frames by frame rate to get world times
 };

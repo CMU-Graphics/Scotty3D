@@ -306,11 +306,12 @@ void Pathtracer::build_scene(Scene& scene_) {
 			auto& material = materials.at(part_inst->material.expired()
 			                                  ? default_material_name
 			                                  : material_names.at(part_inst->material.lock()));
-			Mat4 T = part_inst->transform.lock()->local_to_world();
+			//Mat4 T = part_inst->transform.lock()->local_to_world();
 
 			auto particles = part_inst->particles.lock();
 			for (const auto& p : particles->particles) {
-				Mat4 pT = T * Mat4::translate(p.position) * Mat4::scale(Vec3{particles->scale});
+				//NOTE: particle positions stored in world space (thus no 'T *' here):
+				Mat4 pT = Mat4::translate(p.position) * Mat4::scale(Vec3{particles->radius});
 
 				objects.emplace_back(mesh.get(), material.get(), pT);
 				if (material->is_emissive()) {

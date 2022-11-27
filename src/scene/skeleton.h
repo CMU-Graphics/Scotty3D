@@ -56,6 +56,7 @@ public:
 			f("pose", t.pose);
 			if constexpr (I != Intent::Animate) f("channel_id", t.channel_id);
 		}
+		static inline const char *TYPE = "Bone";
 	};
 	std::vector< Bone > bones;
 	//NOTE: care is taken to keep bones topologically sorted (children appear after parents)
@@ -87,6 +88,7 @@ public:
 			f("enabled", t.enabled);
 			if constexpr (I != Intent::Animate) f("channel_id", t.channel_id);
 		}
+		static inline const char *TYPE = "Handle";
 	};
 	std::vector< Handle > handles;
 
@@ -145,6 +147,7 @@ public:
 
 		if constexpr (I == Intent::Write) t.make_valid();
 	}
+	static inline const char *TYPE = "Skeleton";
 };
 
 class Skinned_Mesh {
@@ -162,4 +165,5 @@ public:
 		f("mesh", t.mesh);
 		f("skeleton", t.skeleton);
 	}
+	static inline const char *TYPE = "Skinned_Mesh";
 };

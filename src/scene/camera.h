@@ -53,6 +53,7 @@ public:
 			}
 		}
 	}
+	static inline const char *TYPE = "Camera";
 };
 
 bool operator!=(const Camera& a, const Camera& b);

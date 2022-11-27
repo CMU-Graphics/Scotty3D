@@ -12,9 +12,13 @@ public:
 	Particles() { reset(); }
 
 	struct Particle {
+		//note: position and velocity are always in world (not system-local) space:
 		Vec3 position;
 		Vec3 velocity;
 		float age;
+
+		//called by Particles::step(); returns 'true' if particle should be kept for next frame:
+		bool update(const PT::Aggregate &scene, Vec3 const &gravity, const float radius, const float dt);
 
 		//- - - - - - - - - - - - -
 		template< Intent I, typename F, typename T >
@@ -23,22 +27,15 @@ public:
 			if constexpr (I != Intent::Animate) f("velocity", t.velocity);
 			if constexpr (I != Intent::Animate) f("age", t.age);
 		}
+		static inline const char *TYPE = "Particle";
 	};
-
-	struct World_Info {
-		const PT::Aggregate& scene;
-		Mat4 to_world, to_local, to_local_normal;
-		float dt = 0.0f;
-		float radius = 1.0f;
-	};
-	bool update(const World_Info& world, Particle& p);
 
 	void reset(); //reset to time = 0
-	void advance(const PT::Aggregate& scene, const Mat4& to_world, float r, float dt);
+	void advance(const PT::Aggregate& scene, const Mat4& to_world, float dt);
 
 	Vec3 gravity = Vec3(0.0f, -9.8f, 0.0f); //in world coordinates
-	float scale = 0.1f;
-	float initial_velocity = 5.0f; //along local z axis, canonically
+	float radius = 0.1f; //radius of particles, in world units
+	float initial_velocity = 5.0f; //along local y axis
 	float spread_angle = 0.0f;
 	float lifetime = 2.5f;
 	float rate = 10.0f; //particles emitted per second
@@ -52,7 +49,7 @@ public:
 	template< Intent I, typename F, typename T >
 	static void introspect(F&& f, T&& t) {
 		f("gravity", t.gravity);
-		f("scale", t.scale);
+		f("radius", t.radius);
 		f("initial_velocity", t.initial_velocity);
 		f("spread_angle", t.spread_angle);
 		f("lifetime", t.lifetime);
@@ -62,10 +59,11 @@ public:
 
 		if constexpr (I != Intent::Animate) f("particles", t.particles); //these probably don't need to be read/written
 	}
+	static inline const char *TYPE = "Particles";
 
 private:
 	float step_accum = 0.0f; //accumulated time toward next step, used by advance()
-	void step(const PT::Aggregate& scene, const Mat4& to_world, float r);
+	void step(const PT::Aggregate& scene, const Mat4& to_world);
 	uint64_t current_step = 0; //steps run so far, used by step() to determine how many particles to spawn
 	RNG rng;
 };

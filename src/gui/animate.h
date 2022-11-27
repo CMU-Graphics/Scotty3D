@@ -37,10 +37,8 @@ public:
 	void clear();
 	void update(Scene& scene, Animator& animator);
 	void refresh(Scene& scene, Animator& animator);
-	void step_sim(Scene& scene);
 
 	std::string pump_output(Scene& scene, Animator& animator);
-	void set_time(Scene& scene, Animator& animator, float time);
 	uint32_t n_frames() const;
 	void set_max(uint32_t n_frames);
 	void make_spline(Animator& animator, const std::string& id);
@@ -51,10 +49,10 @@ private:
 	bool playing = false;
 	Timer frame_timer;
 
-	uint32_t frame_rate = 24;
+	void jump_to_frame(Scene& scene, Animator& animator, float frame);
+
 	uint32_t current_frame = 0;
 	uint32_t max_frame = 96;
-	uint32_t displayed_frame = 0;
 
 	Widget_Render ui_render;
 	Manager& manager;

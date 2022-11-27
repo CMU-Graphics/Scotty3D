@@ -1,97 +1,32 @@
 #include "scene.h"
 #include "animator.h"
 #include "../rasterizer/sample_pattern.h"
+#include "../util/to_json.h"
 
 #include <sejp/sejp.hpp>
 
-#include <charconv>
 #include <typeinfo>
 #include <filesystem>
 
-//some conversion helpers for writing json values:
-
-[[maybe_unused]]
-static std::string to_json(std::string const &str) {
-	std::string ret;
-	ret += '"';
-	for (auto const &c : str) {
-		if (c == '\\' || c == '"') ret += '\\';
-		ret += c;
-	}
-	ret += '"';
-	return ret;
-}
-
-[[maybe_unused]]
-static std::string to_json(float val) {
-	double dval = val; //NOTE: convert to double here because on the json side number will be parsed as a double, and we want correct round-trip behavior without having to think too hard
-	std::array< char, 30 > buffer; //shouldn't need more than 24 digits
-	//after example at: https://en.cppreference.com/w/cpp/utility/to_chars
-	auto [ptr, ec] = std::to_chars(buffer.data(), buffer.data() + buffer.size(), dval);
-	assert(ec == std::errc());
-	return std::string(buffer.data(), ptr);
-}
-
-[[maybe_unused]]
-static std::string to_json(Spectrum const &spec) {
-	return '[' + to_json(spec.r) + ',' + to_json(spec.g) + ',' + to_json(spec.b) + ']';
-}
-
-[[maybe_unused]]
-static std::string to_json(Vec3 const &vec) {
-	return '[' + to_json(vec.x) + ',' + to_json(vec.y) + ',' + to_json(vec.z) + ']';
-}
-
-[[maybe_unused]]
-static void from_json(std::string const &desc, std::map< std::string, sejp::value > const &info, std::string const &key, Vec3 *vec_) {
-	assert(vec_);
-	auto &vec = *vec_;
-	auto f = info.find(key);
-	if (f == info.end()) throw std::runtime_error(desc + "." + key + " does not exist.");
-	auto const &arr = f->second.as_array();
-	if (!arr) throw std::runtime_error(desc + "." + key + " is not an array.");
-	if (arr->size() != 3) throw std::runtime_error(desc + "." + key + " has " + std::to_string(arr->size()) + " values, expected 3.");
-	auto const &x = arr->at(0).as_number();
-	auto const &y = arr->at(1).as_number();
-	auto const &z = arr->at(2).as_number();
-	if (!x || !y || !z) throw std::runtime_error(desc + "." + key + " has non-number entries.");
-	vec.x = *x;
-	vec.y = *y;
-	vec.z = *z;
-}
-
-[[maybe_unused]]
-static std::string to_json(Quat const &quat) {
-	return '[' + to_json(quat.x) + ',' + to_json(quat.y) + ',' + to_json(quat.z) + ',' + to_json(quat.w) + ']';
-}
-
-[[maybe_unused]]
-static void from_json(std::string const &desc, std::map< std::string, sejp::value > const &info, std::string const &key, Quat *quat_) {
-	assert(quat_);
-	auto &quat = *quat_;
-	auto f = info.find(key);
-	if (f == info.end()) throw std::runtime_error(desc + "." + key + " does not exist.");
-	auto const &arr = f->second.as_array();
-	if (!arr) throw std::runtime_error(desc + "." + key + " is not an array.");
-	if (arr->size() != 4) throw std::runtime_error(desc + "." + key + " has " + std::to_string(arr->size()) + " values, expected 4.");
-	auto const &x = arr->at(0).as_number();
-	auto const &y = arr->at(1).as_number();
-	auto const &z = arr->at(2).as_number();
-	auto const &w = arr->at(3).as_number();
-	if (!x || !y || !z || !w) throw std::runtime_error(desc + "." + key + " has non-number entries.");
-	quat.x = *x;
-	quat.y = *y;
-	quat.z = *z;
-	quat.w = *w;
-}
-
+//---------------------------------------------------------
+//Actual classes used with introspection for load/save:
 
 //base class -- used to book-keep where we are in introspection:
 struct HasIntrospectionStack {
+
 	struct IntrospectionFrame;
 	std::vector< IntrospectionFrame const * > introspection_stack;
 	struct IntrospectionFrame {
-		IntrospectionFrame(HasIntrospectionStack &self_, std::string const &name_, std::type_info const &type_) : self(self_), name(name_), type(type_) {
+		IntrospectionFrame(HasIntrospectionStack &self_, std::string const &name_, const char *type_)
+		: self(self_), name(name_), type(type_) {
+			//std::cout << "-> " << type << " " << name << std::endl; //DEBUG
+			self.introspection_stack.emplace_back(this);
+		}
+
+		template< typename T >
+		IntrospectionFrame(HasIntrospectionStack &self_, std::string const &name_, T const &t)
+		: self(self_), name(name_), type(name_type(&t,0)) {
+			//std::cout << "-> " << type << " " << name << std::endl; //DEBUG
 			self.introspection_stack.emplace_back(this);
 		}
 		~IntrospectionFrame() {
@@ -101,14 +36,69 @@ struct HasIntrospectionStack {
 		}
 		HasIntrospectionStack &self;
 		std::string const &name;
-		std::type_info const &type;
+		std::string type;
+
+		//overloads to do type naming:
+		template< typename T, typename C = std::remove_cv_t< std::remove_reference_t< T > >, typename enable = decltype(C::TYPE) >
+		static std::string name_type(T const *, int) {
+			return C::TYPE;
+		}
+
+		//write down names for some types that don't have introspection:
+		#define NAME(cls, name) \
+			static std::string name_type(cls const *, int) { \
+				return name; \
+			}
+
+		NAME(Halfedge_Mesh, "Halfedge_Mesh");
+		NAME(HDR_Image, "HDR_Image");
+		NAME(Spectrum, "Spectrum");
+		NAME(Vec4, "Vec4");
+		NAME(Vec3, "Vec3");
+		NAME(Vec2, "Vec2");
+		NAME(Quat, "Quat");
+		NAME(bool, "bool");
+		NAME(float, "float");
+		NAME(uint32_t, "uint32_t");
+		NAME(std::string, "string");
+		NAME(SamplePattern const *, "SamplePattern");
+
+		#undef NAME
+
+		//some standard classes:
+		template< typename T >
+		static std::string name_type(std::vector< T > const *, int) {
+			T const *t = nullptr;
+			return "vector<" + name_type(t,0) + ">";
+		}
+
+		template< typename T >
+		static std::string name_type(std::weak_ptr< T > const *, int) {
+			T const *t = nullptr;
+			return "weak_ptr<" + name_type(t,0) + ">";
+		}
+
+		template< typename T >
+		static std::string name_type(std::unordered_map< std::string, std::shared_ptr< T > > const *, int) {
+			T const *t = nullptr;
+			return "unordered_map<string,shared_ptr<" + name_type(t,0) + ">>";
+		}
+
+		/*
+		//generic fall-through -- useful for development, but not the prettiest names:
+		template< typename T, typename C = std::remove_cv_t< std::remove_reference_t< T > > >
+		static std::string name_type(T const *, double) {
+			return typeid(T).name();
+		}
+		*/
+
 	};
 
 	std::string introspection_str() const {
 		std::string str;
 		for (auto f : introspection_stack) {
 			if (!str.empty()) str += ".";
-			str += "[" + std::string(f->type.name()) + " " + f->name + "]";
+			str += "[" + std::string(f->type) + " " + f->name + "]";
 		}
 		return str;
 	}
@@ -117,15 +107,16 @@ struct HasIntrospectionStack {
 
 struct JSONLoader : HasIntrospectionStack {
 	static void load(sejp::value const &value, std::string const &from_path, Scene &scene) {
-		JSONLoader loader(scene);
+		JSONLoader loader(scene, from_path);
 
 		ValueFrame frame(loader, "", value);
 
 		introspect< Intent::Write >(loader, scene);
 	}
 
-	JSONLoader(Scene &scene_) : scene(scene_) { }
+	JSONLoader(Scene &scene_, std::string const &from_path_) : scene(scene_), from_path(from_path_) { }
 	Scene &scene;
+	std::string from_path;
 
 	//-------------------------------------------------
 	//This object traverses an introspection hierarchy and a json hierarchy.
@@ -159,7 +150,7 @@ struct JSONLoader : HasIntrospectionStack {
 	//Some helpers to make it easier to walk through the value hierarchy:
 
 	//if current value is an object with a property 'name', traverse to it and run 'op':
-	void for_property(std::string const &name, std::function< void(sejp::value const &) > const &op) {
+	void for_member(std::string const &name, std::function< void(sejp::value const &) > const &op) {
 		auto object = value_stack.back()->value.as_object();
 		if (!object) {
 			std::cerr << "cannot load " << introspection_str() << " from " << value_str() << " -- it is not an object." << std::endl;
@@ -167,15 +158,15 @@ struct JSONLoader : HasIntrospectionStack {
 		}
 		auto f = object->find(name);
 		if (f == object->end()) {
-			std::cerr << "cannot load " << introspection_str() << " from " << value_str() << " -- it does name have a '" << name << "' property." << std::endl;
+			std::cerr << "cannot load " << introspection_str() << " from " << value_str() << " -- it does not have a '" << name << "' property." << std::endl;
 			return;
 		}
 		ValueFrame frame(*this, "." + name, f->second);
 		op(f->second);
 	}
 
-	//if current value is an object, iterate all properties:
-	void for_properties(std::function< void(std::string const &, sejp::value const &) > const &op) {
+	//if current value is an object, iterate all members:
+	void for_members(std::function< void(std::string const &, sejp::value const &) > const &op) {
 		auto object = value_stack.back()->value.as_object();
 		if (!object) {
 			std::cerr << "cannot load " << introspection_str() << " by iterating " << value_str() << " -- it is not an object." << std::endl;
@@ -187,41 +178,90 @@ struct JSONLoader : HasIntrospectionStack {
 		}
 	}
 
+	//if current value is an array, iterate all elements:
+	void for_elements(std::function< void(uint32_t i, sejp::value const &) > const &op) {
+		auto array = value_stack.back()->value.as_array();
+		if (!array) {
+			std::cerr << "cannot load " << introspection_str() << " by iterating " << value_str() << " -- it is not an array." << std::endl;
+			return;
+		}
+		uint32_t i = 0;
+		for (auto const &v : *array) {
+			ValueFrame frame(*this, "[" + std::to_string(i) + "]", v);
+			op(i, v);
+			++i;
+		}
+	}
+
 	//----------------------------------------------------------------------------------
 	//generic introspection helpers:
+
+	//sometimes need to branch depending on whether a 'from_json' function exists:
+	template< typename T, typename enable = decltype(from_json(*(sejp::value*)nullptr, (T*)nullptr) ) >
+	void from_json_introspect_or_complain(sejp::value const &value, T &t, char) {
+		try { 
+			from_json(value, &t);
+		} catch (std::runtime_error const &e) {
+			std::cerr << "Failed to load " << value_str() << " -> " << introspection_str() << ": " << e.what() << "; using default-constructed value instead." << std::endl;
+			t = T();
+		}
+	}
+
+	template< typename T >
+	void from_json_introspect_or_complain(sejp::value const &, T &t, int) {
+		introspect< Intent::Write >(*this, t);
+	}
+
+	template< typename T >
+	void from_json_introspect_or_complain(std::string const &name, T const &t, double) {
+		std::cout << "Cannot introspect " << introspection_str() << " -> " << name << " (at " << value_str() << ")." << std::endl;
+	}
 
 	//load a Storage< > of something:
 	template< typename T >
 	void operator()(std::string const &name, std::unordered_map< std::string, std::shared_ptr< T > > &out) {
-		IntrospectionFrame frame(*this, name, typeid(T));
+		IntrospectionFrame frame(*this, name, out);
 		if (!out.empty()) {
 			std::cerr << "WARNING: loading into non-empty " << introspection_str() << "." << std::endl;
 		}
-		for_property(name, [&]( sejp::value const & ) {
+		for_member(name, [&]( sejp::value const & ) {
 			//pre-allocate:
-			for_properties( [&]( std::string const &key, sejp::value const &value ) {
+			for_members( [&]( std::string const &key, sejp::value const &value ) {
 				out.emplace(key, std::make_shared< T > ());
 			});
 			//fill:
-			for_properties( [&]( std::string const &key, sejp::value const &value ) {
-				introspect< Intent::Write >(*this, *out.at(key));
+			for_members( [&]( std::string const &key, sejp::value const &value ) {
+				from_json_introspect_or_complain(value, *out.at(key), 'x');
 			});
 		});
 	}
 
-	//handle instances:
-	void operator()(std::string const &name, decltype(Scene::instances) &instances) {
-		IntrospectionFrame frame(*this, name, typeid(decltype(Scene::instances)));
-		for_property(name, [&]( sejp::value const & ){
-			introspect< Intent::Write >(*this, instances);
+	//load a vector< > of something:
+	template< typename T >
+	void operator()(std::string const &name, std::vector< T > &out) {
+		IntrospectionFrame frame(*this, name, out);
+		if (!out.empty()){
+			std::cerr << "WARNING: loading into non-empty " << introspection_str() << " -- will clear." << std::endl;
+			out.clear();
+		}
+		for_member(name, [&]( sejp::value const & ) {
+			//pre-allocate:
+			for_elements( [&]( uint32_t i, sejp::value const &value ) {
+				out.emplace_back();
+			});
+			//fill:
+			for_elements( [&]( uint32_t i, sejp::value const &value ) {
+				from_json_introspect_or_complain(value, out.at(i), 'x');
+			});
 		});
 	}
 
-	//references to transforms:
-	void operator()(std::string const &name, std::weak_ptr< Transform > &ref) {
-		IntrospectionFrame frame(*this, name, typeid(decltype(ref)));
+	//weak reference to something:
+	template< typename T >
+	void operator()(std::string const &name, std::weak_ptr< T > &ref) {
+		IntrospectionFrame frame(*this, name, ref);
 		ref.reset();
-		for_property(name, [&,this]( sejp::value const &val ){
+		for_member(name, [&,this]( sejp::value const &val ){
 			//leave empty on null:
 			if (val.as_null()) return;
 			auto str = val.as_string();
@@ -229,9 +269,10 @@ struct JSONLoader : HasIntrospectionStack {
 				std::cerr << "Cannot load " << introspection_str() << " from " << value_str() << " -- not null or a string. (Will leave empty.)" << std::endl;
 				return;
 			}
-			auto f = scene.transforms.find(*str);
-			if (f == scene.transforms.end()) {
-				std::cerr << "Cannot load " << introspection_str() << " from " << value_str() << " -- '" << *str << "' is not a transform." << std::endl;
+			Scene::Storage< T > const &storage = scene.get_storage< T >();
+			auto f = storage.find(*str);
+			if (f == storage.end()) {
+				std::cerr << "Cannot load " << introspection_str() << " from " << value_str() << " -- '" << *str << "' is not in storage." << std::endl;
 				return;
 			}
 			ref = f->second;
@@ -239,62 +280,55 @@ struct JSONLoader : HasIntrospectionStack {
 	}
 
 	//- - - - - - - - - - - - - - - - -
-	//basic data:
-
-	//Vec3 from [x,y,z] array
-	void operator()(std::string const &name, Vec3 &vec) {
-		IntrospectionFrame frame(*this, name, typeid(Vec3));
-		for_property(name, [&]( sejp::value const &val ){
-			auto arr = val.as_array();
-			if (!arr) {
-				throw std::runtime_error("Cannot load " + introspection_str() + " from " + value_str() + " -- not an array.");
+	//special data types:
+	void operator()(std::string const &name, HDR_Image &t) {
+		IntrospectionFrame frame(*this, name, t);
+		for_member(name, [&,this]( sejp::value const &val ) {
+			auto str = val.as_string();
+			if (!str) {
+				std::cerr << "Cannot load " << introspection_str() << " from " << value_str() << " -- not a string. (Will set to missing image.)" << std::endl;
+				t = HDR_Image::missing_image();
+				return;
 			}
-			if (arr->size() != 3) {
-				throw std::runtime_error("Cannot load " + introspection_str() + " from " + value_str() + " -- has " + std::to_string(arr->size()) + " values, expected 3.");
+			if (str->substr(0,6) == "hdr64:") {
+				std::vector< uint8_t > buffer;
+				try {
+					from_json_base64(val, &buffer, "hdr64:");
+					t = HDR_Image::decode(buffer.data(), buffer.size());
+				} catch (std::exception const &e) {
+					std::cout << "Failed to load " << introspection_str() << " as a base64-encoded data blob: " << e.what() << std::endl;
+				}
+				return;
 			}
-			auto const &x = arr->at(0).as_number();
-			auto const &y = arr->at(1).as_number();
-			auto const &z = arr->at(2).as_number();
-			if (!x || !y || !z) {
-				throw std::runtime_error("Cannot load " + introspection_str() + " from " + value_str() + " -- non-number entries.");
+			std::string fn = ( std::filesystem::absolute(std::filesystem::path(from_path)).remove_filename() / std::filesystem::path(*str) ).generic_string();
+			try {
+				t = HDR_Image::load(fn);
+				return;
+			} catch ( std::exception const &e ) {
+				std::cout << "Failed to load " << introspection_str() << " from " << fn << ": " << e.what() << std::endl;
+				std::cout << "Trying as non-relative path..." << std::endl;
 			}
-			vec.x = *x;
-			vec.y = *y;
-			vec.z = *z;
-		});
-	}
-
-	//Quat from [x,y,z,w] array
-	void operator()(std::string const &name, Quat &quat) {
-		IntrospectionFrame frame(*this, name, typeid(Quat));
-		for_property(name, [&]( sejp::value const &val ){
-			auto arr = val.as_array();
-			if (!arr) {
-				throw std::runtime_error("Cannot load " + introspection_str() + " from " + value_str() + " -- not an array.");
+			try {
+				t = HDR_Image::load(*str);
+				return;
+			} catch ( std::exception const &e ) {
+				std::cout << "Failed to load " << introspection_str() << " from " << *str << ": " << e.what() << std::endl;
 			}
-			if (arr->size() != 4) {
-				throw std::runtime_error("Cannot load " + introspection_str() + " from " + value_str() + " -- has " + std::to_string(arr->size()) + " values, expected 4.");
-			}
-			auto const &x = arr->at(0).as_number();
-			auto const &y = arr->at(1).as_number();
-			auto const &z = arr->at(2).as_number();
-			auto const &w = arr->at(3).as_number();
-			if (!x || !y || !z || !w) {
-				throw std::runtime_error("Cannot load " + introspection_str() + " from " + value_str() + " -- non-number entries.");
-			}
-			quat.x = *x;
-			quat.y = *y;
-			quat.z = *z;
-			quat.w = *w;
+			warn("Image '%s' is missing.", str->c_str());
+			t = HDR_Image::missing_image();
+			t.loaded_from = fn; //somewhat awkward way to set this!
 		});
 	}
 
 	//- - - - - - - - - - - - - - - - -
-	//fall-through case:
+	//everything else:
+
 	template< typename T >
 	void operator()(std::string const &name, T&& t) {
-		IntrospectionFrame frame(*this, name, typeid(T));
-		std::cout << "Loader unimplemented for " << introspection_str() << "'." << std::endl;
+		IntrospectionFrame frame(*this, name, t);
+		for_member(name, [&]( sejp::value const &val ){
+			from_json_introspect_or_complain(val, t, 'x');
+		});
 	}
 };
 
@@ -303,7 +337,7 @@ struct JSONSaver : HasIntrospectionStack {
 	static void save(Scene const &scene, std::ostream &to, std::string const &to_path) {
 		JSONSaver saver(to, to_path);
 
-		IntrospectionFrame(saver, "scene", typeid(Scene));
+		IntrospectionFrame(saver, "scene", scene);
 		saver.object([&](){
 			saver.member_value("FORMAT", [&](){ saver.to << "\"js3d-v1\""; });
 			introspect< Intent::Read >(saver, scene);
@@ -408,28 +442,32 @@ struct JSONSaver : HasIntrospectionStack {
 	//save a Storage< > of something:
 	template< typename T >
 	void operator()(std::string const &name, std::unordered_map< std::string, std::shared_ptr< T > > const &val) {
-		IntrospectionFrame frame(*this, name, typeid(T));
-		//store refs:
+		IntrospectionFrame frame(*this, name, val);
+		std::vector< std::string > keys; keys.reserve(val.size());
+		//store refs, populate keys:
 		for (auto const &[k, v] : val) {
+			keys.emplace_back(k);
 			auto ret = json_refs.emplace(v.get(), to_json(k));
 			if (!ret.second) {
 				std::cerr << "WARNING: " << introspection_str() << " re-uses name '" << k << "' -- references may be screwed up." << std::endl;
 			}
 		}
-		//store items:
+
+		//store items as object members: (in sorted order)
+		std::sort(keys.begin(), keys.end());
 		member(name, [&,this](){
 			object([&,this](){
-				for (auto const &[k, v] : val) {
-					(*this)(k, *v.get());
+				for (auto const &k : keys) {
+					(*this)(k, *val.at(k));
 				}
 			});
 		});
 	}
 
-	//save a weak reference to something:
+	//save a weak reference by turning into a string (using our stored list of references):
 	template< typename T >
 	void operator()(std::string const &name, std::weak_ptr< T > const &ref) {
-		IntrospectionFrame frame(*this, name, typeid(T));
+		IntrospectionFrame frame(*this, name, ref);
 		member(name, [&,this](){
 			value([&,this](){
 				auto f = json_refs.find(ref.lock().get());
@@ -443,10 +481,10 @@ struct JSONSaver : HasIntrospectionStack {
 		});
 	}
 
-	//handle vectors of stuff:
+	//handle vectors of stuff as arrays:
 	template< typename T >
 	void operator()(std::string const &name, std::vector< T > const &val) {
-		IntrospectionFrame frame(*this, name, typeid(std::vector< T >));
+		IntrospectionFrame frame(*this, name, val);
 
 		member(name, [&,this](){
 			array([&,this](){
@@ -462,45 +500,16 @@ struct JSONSaver : HasIntrospectionStack {
 	//- - - - - - - - - - - - - - - - -
 	//fancy data types (or that are big enough to require special care):
 
-	//sample patterns get saved by name:
-	void operator()(std::string const &name, SamplePattern const *val) {
-		IntrospectionFrame frame(*this, name, typeid(SamplePattern));
-		if (val == nullptr) {
-			warn("%s has a null sample pattern. Not saving it.", introspection_str().c_str());
-			return;
-		}
-
-		member(name, [&,this](){
-			value([&,this](){
-				to << to_json(val->name);
-			});
-		});
-	}
-
-	//Halfedge Meshes get custom save code based on s3ds format:
-	void operator()(std::string const &name, Halfedge_Mesh const &val) {
-		IntrospectionFrame frame(*this, name, typeid(Halfedge_Mesh));
-
-		member(name, [&,this](){
-			object([&,this](){
-				member("type", [&,this](){ to << "\"js3d-e/2-1\""; });
-
-				//TODO
-				std::cerr << "About that halfedge mesh saving code." << std::endl;
-				
-			});
-		});
-	}
-
 	//handle HDR_Image by saving relative path
 	void operator()(std::string const &name, HDR_Image const &val) {
-		IntrospectionFrame frame(*this, name, typeid(HDR_Image));
+		IntrospectionFrame frame(*this, name, "HDR_Image");
 		member_value(name, [&,this](){
 			if (val.loaded_from == "") {
-				std::cerr << "HDR_Image does not indicate where it was loaded from. Cannot save as relative path." << std::endl;
-				//TODO: store as in-file base64 blob?
+				std::cerr << "WARNING: HDR_Image does not indicate where it was loaded from. Saving a (pretty large!) base64 encoded blob into the file." << std::endl;
+				std::vector< uint8_t > buffer = val.encode();
+				to << to_json_base64(buffer, "hdr64:");
 			} else {
-				std::string rel = std::filesystem::proximate( std::filesystem::path(val.loaded_from), std::filesystem::path(to_path).remove_filename() ).generic_string();
+				std::string rel = std::filesystem::proximate( std::filesystem::path(val.loaded_from), std::filesystem::absolute(std::filesystem::path(to_path)).remove_filename() ).generic_string();
 				std::cout << val.loaded_from << " relative to " << to_path << " is " << rel << std::endl; //DEBUG
 				to << to_json(rel);
 			}
@@ -508,72 +517,38 @@ struct JSONSaver : HasIntrospectionStack {
 	}
 
 	//- - - - - - - - - - - - - - - - -
-	//basic data types:
+	//anything not otherwise mentioned, either look for a from_json/to_json, store as an object by introspecting, or complain:
 
-	void operator()(std::string const &name, bool const &val) {
-		member_value(name, [&,this](){
-			to << (val ? "true" : "false");
-		});
+	//quick two-overloads hack to allow complaining about unimplemented introspection fn:
+
+	template< Intent I, typename T, typename enable = decltype(to_json(T())) >
+	void convert_introspect_or_complain(std::string const &name, T const &t, char) {
+		IntrospectionFrame frame(*this, name, t);
+		member_value(name, [&,this](){ to << to_json(t); });
 	}
 
-	void operator()(std::string const &name, uint32_t const &val) {
-		member_value(name, [&,this](){
-			to << val;
-		});
-	}
 
-	void operator()(std::string const &name, float const &val) {
-		member_value(name, [&,this](){
-			to << to_json(val);
-		});
-	}
-
-	void operator()(std::string const &name, Vec3 const &val) {
-		member_value(name, [&,this](){
-			to << to_json(val);
-		});
-	}
-
-	void operator()(std::string const &name, Quat const &val) {
-		member_value(name, [&,this](){
-			to << to_json(val);
-		});
-	}
-
-	void operator()(std::string const &name, Spectrum const &val) {
-		member_value(name, [&,this](){
-			to << to_json(val);
-		});
-	}
-
-	void operator()(std::string const &name, std::string const &val) {
-		member_value(name, [&,this](){
-			to << to_json(val);
-		});
-	}
-
-	//- - - - - - - - - - - - - - - - -
-	//anything not otherwise mentioned, we store as an object by introspecting:
-	template< typename T >
-	void operator()(std::string const &name, T const & t) {
-		IntrospectionFrame frame(*this, name, typeid(T));
+	template< Intent I, typename T >
+	void convert_introspect_or_complain(std::string const &name, T const &t, int) {
+		IntrospectionFrame frame(*this, name, t);
 
 		member(name, [&,this](){
 			object([&,this](){
-				introspect< Intent::Read >(*this, t);
+				introspect< I >(*this, t);
 			});
 		});
+
 	}
 
-	/*
-	//- - - - - - - - - - - - - - - - -
-	//fall-through case:
+	template< Intent I, typename T >
+	void convert_introspect_or_complain(std::string const &name, T const &t, double) {
+		std::cout << "Cannot introspect " << introspection_str() << " -> " << name << "." << std::endl;
+	}
+
 	template< typename T >
 	void operator()(std::string const &name, T const & t) {
-		IntrospectionFrame frame(*this, name, typeid(T));
-		std::cout << "Saver unimplemented for " << introspection_str() << "'." << std::endl;
+		convert_introspect_or_complain< Intent::Read >(name, t, 'x');
 	}
-	*/
 
 };
 
@@ -593,13 +568,138 @@ void Scene::save_json(std::ostream &to, std::string const &to_path) const {
 
 Animator Animator::load_json(sejp::value const &from) {
 	Animator animator;
-	//TODO
-	warn("Loading for animator is not yet implemented.");
+
+	auto const &top = from.as_object();
+	if (!top) throw std::runtime_error("Expecting object at top level of animator json.");
+
+	if (!(top->count("FORMAT") && top->at("FORMAT").as_string() && *top->at("FORMAT").as_string() == "js3d-v1")) {
+		warn("Missing or unexpected 'FORMAT' when reading animator. (Ignoring and continuing.)");
+	}
+
+	if (!(top->count("splines") && top->at("splines").as_object())) {
+		warn("Missing or non-object 'splines' when reading animator. (Result will be empty.)");
+		return animator;
+	}
+
+	auto &splines = top->at("splines").as_object();
+	assert(splines); //already checked above!
+	for (auto const &rv : *splines) {
+		std::string const &resource = rv.first;
+		auto const &channels = rv.second.as_object();
+		if (!channels) {
+			warn("Ignoring non-object resource %s", resource.c_str());
+			continue;
+		}
+		for (auto const &cv : *channels) {
+			std::string const &channel = cv.first;
+			try {
+				auto const &data = cv.second.as_object();
+				if (!data) throw std::runtime_error("not an object");
+
+				if (!(data->count("type") && data->at("type").as_string())) throw std::runtime_error("type not string");
+				std::string type = *data->at("type").as_string();
+
+				//create correct type of spline to hold the data:
+				Animator::Channel_Spline spline;
+				if (type == "bool") spline = Spline< bool >();
+				else if (type == "float") spline = Spline< float >();
+				else if (type == "Vec2") spline = Spline< Vec2 >();
+				else if (type == "Vec3") spline = Spline< Vec3 >();
+				else if (type == "Vec4") spline = Spline< Vec4 >();
+				else if (type == "Quat") spline = Spline< Quat >();
+				else if (type == "Spectrum") spline = Spline< Spectrum >();
+				else if (type == "Mat4") spline = Spline< Mat4 >();
+				else throw std::runtime_error("unrecognized type '" + type + "'");
+
+				if (!(data->count("knots") && data->at("knots").as_array())) throw std::runtime_error("knots not array");
+				auto const &knots = *data->at("knots").as_array();
+
+				//copy knots into the spline:
+				std::visit([&](auto&& s){
+					bool warned = false;
+					for (uint32_t i = 0; i + 1 < knots.size(); i += 2) {
+						try {
+							auto const &time = knots[i].as_number();
+							if (!time) throw std::runtime_error("time is not number");
+
+							decltype(s.at(0.0f)) val;
+							from_json(knots[i+1], &val);
+
+							s.knots.emplace(float(*time), val);
+						} catch (std::runtime_error const &e) {
+							if (!warned) {
+								warn("Ignoring knot(s) in %s.%s: %s", resource.c_str(), channel.c_str(), e.what());
+								warned = true;
+							}
+						}
+					}
+				}, spline);
+
+				//store into animator:
+				animator.splines.emplace(std::make_pair(resource, channel), std::move(spline));
+			} catch (std::runtime_error const &e) {
+				warn("Ignoring %s.%s: %s", resource.c_str(), channel.c_str(), e.what());
+			}
+		}
+	}
+
 	return animator;
 }
 
 void Animator::save_json(std::ostream &to) const {
-	//TODO
-	warn("Saving for animator is not yet implemented -- writing an empty object.");
-	to << "{}";
+	//arrange paths in sorted order:
+	std::map< std::string, std::set< std::string > > paths;
+	for (auto const &kv : splines) {
+		paths[kv.first.first].emplace(kv.first.second);
+	}
+	to << '{';
+	to << "\"FORMAT\":\"js3d-v1\"";
+	to << ",\n\"splines\":{";
+	bool first_resource = true;
+	for (auto const &resource_channels : paths) {
+		if (first_resource) first_resource = false;
+		else to << ',';
+		to << "\n\t" << to_json(resource_channels.first) << ":{";
+		bool first_channel = true;
+		for (auto const &channel : resource_channels.second) {
+			if (first_channel) first_channel = false;
+			else to << ',';
+			to << "\n\t\t" << to_json(channel) << ":{";
+
+			Path path = std::make_pair(resource_channels.first, channel);
+			Channel_Spline const &spline = splines.at(path);
+
+			to << "\n\t\t\t" << "\"type\":\"";
+			std::visit(overloaded{
+				[&](Spline< bool > const &){ to << "bool"; },
+				[&](Spline< float > const &){ to << "float"; },
+				[&](Spline< Vec2 > const &){ to << "Vec2"; },
+				[&](Spline< Vec3 > const &){ to << "Vec3"; },
+				[&](Spline< Vec4 > const &){ to << "Vec4"; },
+				[&](Spline< Quat > const &){ to << "Quat"; },
+				[&](Spline< Spectrum > const &){ to << "Spectrum"; },
+				[&](Spline< Mat4 > const &){ to << "Mat4"; }
+			}, spline);
+			to << '"';
+
+			to << ",\n\t\t\t" << "\"knots\":[";
+			std::visit([&](auto&& s){
+				//write array of alternating times and values:
+				bool first = true;
+				for (auto const &knot : s.knots) {
+					if (first) first = false;
+					else to << ",";
+					to << "\n\t\t\t\t" << to_json(knot.first) << ", " << to_json(knot.second);
+				}
+			}, spline);
+			to << "\n\t\t\t]";
+
+			to << "\n\t\t}";
+
+		}
+		to << "\n\t" << '}';
+	}
+	to << '}';
+
+	to << '}';
 }

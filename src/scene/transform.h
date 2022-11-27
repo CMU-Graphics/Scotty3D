@@ -31,6 +31,7 @@ public:
 		f("rotation", t.rotation);
 		f("scale", t.scale);
 	}
+	static inline const char *TYPE = "Transform";
 };
 
 bool operator!=(const Transform& a, const Transform& b);

@@ -78,6 +78,7 @@ public:
 	static void introspect(F&& f, T&& t) {
 		introspect_variant< I >(std::forward< F >(f), t.shape);
 	}
+	static inline const char *TYPE = "Shape";
 };
 
 bool operator!=(const Shapes::Sphere& a, const Shapes::Sphere& b);

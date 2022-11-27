@@ -333,9 +333,9 @@ struct RasterJob {
 				//TODO: other material types!
 			}
 			done += 1;
-			report_fn(std::make_pair(done / float(count) * 100.0f, framebuffer.resolve_colors()));
+			report_fn(std::make_pair(done / float(count), framebuffer.resolve_colors()));
 		}
-		report_fn(std::make_pair(100.0f, framebuffer.resolve_colors()));
+		report_fn(std::make_pair(1.0f, framebuffer.resolve_colors()));
 		
 	}
 };

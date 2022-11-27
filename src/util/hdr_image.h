@@ -63,6 +63,9 @@ public:
 	static HDR_Image decode(uint8_t const *buffer, size_t length); //load from memory buffer, throws on error
 	std::vector< uint8_t > encode() const;
 
+	//placeholder for missing images:
+	static HDR_Image missing_image();
+
 	GL::Tex2D to_gl(float exposure) const;
 	void tonemap_to(std::vector<uint8_t>& data, float exposure) const;
 

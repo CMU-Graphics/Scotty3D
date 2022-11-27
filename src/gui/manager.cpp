@@ -194,7 +194,7 @@ void Manager::new_scene() {
 		gpu_texture_cache = std::unordered_map<std::string, GL::Tex2D>();
 
 		n_actions_at_last_save = undo.n_actions();
-		simulate.build_scene(scene);
+		simulate.build_collision(scene);
 		animate.refresh(scene, animator);
 	};
 
@@ -258,7 +258,7 @@ void Manager::load_scene(std::string *from_path_, Load strategy) {
 			gpu_lines_cache = std::unordered_map<std::string, GL::Lines>();
 			gpu_texture_cache = std::unordered_map<std::string, GL::Tex2D>();
 			n_actions_at_last_save = undo.n_actions();
-			simulate.build_scene(scene);
+			simulate.build_collision(scene);
 			animate.refresh(scene, animator);
 		} else {
 			old_scene.merge(std::move(scene), animator);
@@ -1839,8 +1839,8 @@ std::weak_ptr<Transform> Manager::render_instances(Mat4 view, bool gui) {
 
 	next_id = static_cast<uint32_t>(Widget_IDs::count);
 
-	auto make_meshopt = [&](const auto& inst) {
-		Mat4 model = inst->transform.expired() ? Mat4::I : inst->transform.lock()->local_to_world();
+	auto make_meshopt = [&](const auto& inst, bool world_space = false) {
+		Mat4 model = (world_space || inst->transform.expired()) ? Mat4::I : inst->transform.lock()->local_to_world();
 
 		Renderer::MeshOpt opt;
 		opt.id = next_id;
@@ -1981,7 +1981,7 @@ std::weak_ptr<Transform> Manager::render_instances(Mat4 view, bool gui) {
 		GL::Instances instances;
 		instances.clear(particles->particles.size());
 		for (auto& p : particles->particles) {
-			float s = particles->scale;
+			float s = particles->radius;
 			Vec3 pos = p.position;
 			instances.add(Mat4{Vec4{s, 0.0f, 0.0f, 0.0f}, Vec4{0.0f, s, 0.0f, 0.0f},
 			                   Vec4{0.0f, 0.0f, s, 0.0f}, Vec4{pos.x, pos.y, pos.z, 1.0f}},
@@ -1993,15 +1993,15 @@ std::weak_ptr<Transform> Manager::render_instances(Mat4 view, bool gui) {
 		if (name == selected_object_name) ret = inst->transform;
 		if (!inst->settings.visible) continue;
 
-		auto opt = make_meshopt(inst);
 
 		if (!inst->mesh.expired() && !inst->particles.expired()) {
+			Renderer::MeshOpt opt = make_meshopt(inst, true); //no model transform (particles are simulated in world space)
 			auto mesh_name = mesh_names[inst->mesh.lock()];
 			auto particles = inst->particles.lock();
-			Renderer::get().instances(particle_instance_cache.at(particles),
-			                          gpu_mesh_cache.at(mesh_name), opt);
+			Renderer::get().instances(particle_instance_cache.at(particles), gpu_mesh_cache.at(mesh_name), opt);
 		}
 
+		Renderer::MeshOpt opt = make_meshopt(inst);
 		opt.solid_color = true;
 		opt.wireframe = false;
 		render_mesh(name, particle_system_mesh, opt);

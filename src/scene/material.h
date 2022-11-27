@@ -219,6 +219,7 @@ public:
 	static void introspect(F&& f, T&& t) {
 		introspect_variant< I >(std::forward< F >(f), t.material);
 	}
+	static inline const char *TYPE = "Material";
 };
 
 bool operator!=(const Materials::Lambertian& a, const Materials::Lambertian& b);

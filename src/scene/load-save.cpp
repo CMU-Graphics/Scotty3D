@@ -942,7 +942,7 @@ Scene Scene::load(std::istream& from) {
 
 			std::shared_ptr< Particles > particle_system = std::make_shared< Particles >();
 			particle_system->gravity = Vec3(0.0f, -loaded.gravity, 0.0f);
-			particle_system->scale = loaded.scale;
+			particle_system->radius = loaded.scale;
 			particle_system->initial_velocity = loaded.initial_velocity;
 			particle_system->spread_angle = loaded.spread_angle;
 			particle_system->lifetime = loaded.lifetime;
@@ -1691,7 +1691,7 @@ void Scene::save(std::ostream& to) const {
 			load.name_end = static_cast<uint32_t>(f_strings.size());
 
 			load.gravity = -particle_system->gravity.y;
-			load.scale = particle_system->scale;
+			load.scale = particle_system->radius;
 			load.initial_velocity = particle_system->initial_velocity;
 			load.spread_angle = particle_system->spread_angle;
 			load.lifetime = particle_system->lifetime;
@@ -2016,9 +2016,9 @@ Animator Animator::load(std::istream& from) {
 	if (header.version > 0) throw std::runtime_error(file_info() + "Version " + std::to_string(header.version) + " is newer than latest supported (0).");
 
 	//keep track of the names used:
-	std::unordered_set< std::string > names;
-	auto check_name = [&](const char *what, std::string const &name) {
-		if (!names.emplace(name).second) throw std::runtime_error(file_info() + std::string(what) + " has duplicated name " + name + ".");
+	std::unordered_set< std::pair< std::string, std::string > > paths;
+	auto check_path = [&](const char *what, std::string const &resource, std::string const &channel) {
+		if (!paths.emplace(std::make_pair(resource, channel)).second) throw std::runtime_error(file_info() + std::string(what) + " has duplicated resource '" + resource + "' and channel '" + channel + "'.");
 	};
 
 	//helpful for checking ranges:
@@ -2046,13 +2046,7 @@ Animator Animator::load(std::istream& from) {
 		for (auto const &loaded : f_splines) {
 			std::string resource = get_string("Resource name", loaded.name_begin, loaded.path_begin);
 			std::string channel = get_string("Channel path", loaded.path_begin, loaded.path_end);
-			try { //if same resource
- 				check_name("Resource", resource);
- 			} //check channel name
- 			catch (const std::runtime_error& e) {
-				(void)e;
- 				check_name("Channel", channel);
- 			}
+			check_path("Spline", resource, channel);
 			CHECK_RANGE("Spline", spline_data, loaded.data_begin, loaded.data_end);
 
 			Channel_Spline spline;

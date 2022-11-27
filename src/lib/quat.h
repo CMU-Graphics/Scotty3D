@@ -10,12 +10,17 @@
 #include "vec4.h"
 
 struct Quat {
-	float x = 0.0f;
-	float y = 0.0f;
-	float z = 0.0f;
-	float w = 1.0f;
+	union {
+		struct {
+			float x;
+			float y;
+			float z;
+			float w;
+		};
+		float data[4];
+	};
 
-	Quat() = default;
+	Quat() : x(0.0f), y(0.0f), z(0.0f), w(1.0f) { };
 	Quat(const Quat&) = default;
 	Quat& operator=(const Quat&) = default;
 	~Quat() = default;

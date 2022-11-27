@@ -28,12 +28,14 @@ namespace Instance {
 class Geometry_Settings {
 public:
 	bool visible = true;
+	bool collides = true;
 	DrawStyle style = DrawStyle::Correct;
 
 	//- - - - - - - - - - - -
 	template< Intent I, typename F, typename T >
 	static void introspect(F&& f, T&& t) {
 		f("visible", t.visible);
+		f("collides", t.collides);
 		introspect_enum< I >(f, "style", t.style, std::vector< std::pair< const char *, DrawStyle > >{
 			{"Wireframe", DrawStyle::Wireframe},
 			{"Flat", DrawStyle::Flat},
@@ -41,6 +43,7 @@ public:
 			{"Correct", DrawStyle::Correct}
 		});
 	}
+	static inline const char *TYPE = "Instance::Geometry_Settings";
 };
 
 class Light_Settings {
@@ -52,6 +55,7 @@ public:
 	static void introspect(F&& f, T&& t) {
 		f("visible", t.visible);
 	}
+	static inline const char *TYPE = "Instance::Light_Settings";
 };
 
 class Simulate_Settings {
@@ -67,6 +71,7 @@ public:
 		f("wireframe", t.wireframe);
 		f("simulate_here", t.simulate_here);
 	}
+	static inline const char *TYPE = "Instance::Simulate_Settings";
 };
 
 class Mesh {
@@ -84,6 +89,7 @@ public:
 		if constexpr (I != Intent::Animate) f("material", t.material);
 		Geometry_Settings::introspect< I >(std::forward< F >(f), t.settings);
 	}
+	static inline const char *TYPE = "Instance::Mesh";
 };
 
 class Skinned_Mesh {
@@ -101,6 +107,7 @@ public:
 		if constexpr (I != Intent::Animate) f("material", t.material);
 		Geometry_Settings::introspect< I >(std::forward< F >(f), t.settings);
 	}
+	static inline const char *TYPE = "Instance::Skinned_Mesh";
 };
 
 class Shape {
@@ -118,6 +125,7 @@ public:
 		if constexpr (I != Intent::Animate) f("material", t.material);
 		Geometry_Settings::introspect< I >(std::forward< F >(f), t.settings);
 	}
+	static inline const char *TYPE = "Instance::Shape";
 };
 
 class Delta_Light {
@@ -133,6 +141,7 @@ public:
 		if constexpr (I != Intent::Animate) f("light", t.light);
 		Light_Settings::introspect< I >(std::forward< F >(f), t.settings);
 	}
+	static inline const char *TYPE = "Instance::Delta_Light";
 };
 
 class Environment_Light {
@@ -148,6 +157,7 @@ public:
 		if constexpr (I != Intent::Animate) f("light", t.light);
 		Light_Settings::introspect< I >(std::forward< F >(f), t.settings);
 	}
+	static inline const char *TYPE = "Instance::Environment_Light";
 };
 
 class Particles {
@@ -167,6 +177,7 @@ public:
 		if constexpr (I != Intent::Animate) f("particles", t.particles);
 		Simulate_Settings::introspect< I >(std::forward< F >(f), t.settings);
 	}
+	static inline const char *TYPE = "Instance::Particles";
 };
 
 class Camera {
@@ -180,6 +191,7 @@ public:
 		if constexpr (I != Intent::Animate) f("transform", t.transform);
 		if constexpr (I != Intent::Animate) f("camera", t.camera);
 	}
+	static inline const char *TYPE = "Instance::Camera";
 };
 
 } // namespace Instance

@@ -23,6 +23,8 @@
 #include "introspect.h"
 
 class Animator;
+class Thread_Pool;
+namespace PT { class Aggregate; class Tri_Mesh; }
 namespace sejp { struct value; }
 
 /*
@@ -70,8 +72,31 @@ public:
 	// Renames animation channels in rename so it can also be merged.
 	void merge(Scene&& other, Animator& rename);
 
-	// Runs simulations for dt seconds
-	//void step(float dt); (unimplemented!)
+	// Advances scene through time:
+	//  (1) if opts.reset, reset simulations and drive animations to start time (ignores animate/simulate flags)
+	//  (2) build collision, step simulations
+	//  (3) drive animations to end time.
+	// opts may slightly modify these steps:
+	struct StepOpts {
+		bool reset = false; //reset simulations, drive animations to animation_from before advancing
+		bool use_bvh = true; //use bvh when building aggregate for simulations
+		bool animate = true; //actually advance animations?
+		bool simulate = true; //actually run simulations?
+		Thread_Pool *thread_pool = nullptr; //use thread pool to build bvh, if supplied
+	};
+	void step(Animator const &animator,
+		float animate_from, float animate_to, //where to drive animation at start / end of step
+		float simulate_for, //time advance for simulations during step
+		StepOpts const &opts);
+
+	//helper used by step() [and by GUI, which is why it's here]:
+	//NOTE: returned collision.world [may] reference collision.meshes and this->shapes.
+	struct Collision {
+		PT::Aggregate world;
+		std::unordered_map< Halfedge_Mesh const *, PT::Tri_Mesh > meshes;
+		//NOTE: if there is a use case for Collision outliving a scene, probably should also have a copy of Shapes here
+	};
+	Collision build_collision(bool use_bvh, Thread_Pool *use_thread_pool = nullptr) const;
 
 	template<typename T> std::string create(const std::string& name, T&& resource);
 	template<typename T> std::weak_ptr<T> get(const std::string& name);
@@ -99,7 +124,7 @@ public:
 	Storage<Material> materials;
 
 	// Instances include resources into the scene by associating them with transforms:
-	struct {
+	struct Instances {
 		Storage<Instance::Camera> cameras;
 		Storage<Instance::Mesh> meshes;
 		Storage<Instance::Skinned_Mesh> skinned_meshes;
@@ -118,6 +143,7 @@ public:
 			f("delta_lights", s.delta_lights);
 			f("env_lights", s.env_lights);
 		}
+		static inline const char *TYPE = "instances";
 	} instances;
 
 	bool valid() const; //check that scene is "valid", as per block comment above (self-contained and no null references except transform.parent)
@@ -142,6 +168,7 @@ public:
 			if (!s.valid()) throw std::runtime_error("Scene invalidated by writing.");
 		}
 	}
+	static inline const char *TYPE = "Scene";
 
 	std::unordered_set<std::string> all_names();
 

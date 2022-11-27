@@ -154,6 +154,41 @@ std::vector< uint8_t > HDR_Image::encode() const {
 	return data;
 }
 
+HDR_Image HDR_Image::missing_image() {
+	static const uint64_t img[16] = {
+		0xaabaabaabaabaaba,
+		0xabaabaabaabaabaa,
+		0xbaeeeeeeeeeeeaab,
+		0xaaefffffffff1aba,
+		0xabefffffffff1baa,
+		0xbaeff9fff9ff1aab,
+		0xaaeff89f98ff1aba,
+		0xabefff898fff1baa,
+		0xbaefff989fff1aab,
+		0xaaeff98f89ff1aba,
+		0xabeff8fff8ff1baa,
+		0xbaefffffffff1aab,
+		0xaaefffffffff1aba,
+		0xab11111111110baa,
+		0xbaabaabaabaabaab,
+		0xaabaabaabaabaaba
+	};
+	std::vector< Spectrum > pixels;
+	pixels.reserve(16*16);
+	for (uint32_t row = 15; row < 16; --row) {
+		uint64_t data = img[row];
+		for (uint32_t col = 0; col < 16; ++col) {
+			pixels.emplace_back(
+				((data & 8) / 4  + (data & 1)) / 3.0f,
+				((data & 4) / 2  + (data & 1)) / 3.0f,
+				(row & 3) / 3.0f
+			);
+			data >>= 4;
+		}
+	}
+	return HDR_Image(16, 16, pixels);
+}
+
 //TODO: should support HDR (i.e. floating point) textures in GL::Tex2D to avoid tonemapping
 GL::Tex2D HDR_Image::to_gl(float e) const {
 	std::vector<uint8_t> data(w * h);

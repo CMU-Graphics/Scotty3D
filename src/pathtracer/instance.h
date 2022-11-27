@@ -14,11 +14,11 @@ namespace PT {
 
 class Instance {
 public:
-	Instance(Shape* shape, Material* material, const Mat4& T)
+	Instance(Shape const * shape, Material* material, const Mat4& T)
 		: T(T), iT(T.inverse()), material(material), geometry(shape) {
 		has_transform = T != Mat4::I;
 	}
-	Instance(Tri_Mesh* mesh, Material* material, const Mat4& T)
+	Instance(Tri_Mesh const * mesh, Material* material, const Mat4& T)
 		: T(T), iT(T.inverse()), material(material), geometry(mesh) {
 		has_transform = T != Mat4::I;
 	}

@@ -20,11 +20,13 @@ enum class Intent {
 	Animate //reading/writing channels for animation
 };
 
+//if you want to fail at runtime instead of compile time on introspecting:
+#ifdef INTROSPECT_SOFT_FAILURE
 //as per https://slashvar.github.io/2019/08/17/Detecting-Functions-existence-with-SFINAE.html
 namespace details {
 	template< Intent I, typename F, typename T >
 	auto introspect_impl(F&& f, T&& t, int) -> decltype(std::remove_reference< T >::type:: template introspect< I >(f, t)) {
-		std::remove_reference< T >::type:: template introspect< I >(f, t);
+		std::remove_reference< T >::type:: template introspect< I >(std::forward< F >(f), std::forward< T >(t));
 	}
 
 	template< Intent I, typename F, typename T >
@@ -32,10 +34,17 @@ namespace details {
 		warn("Trying to introspect %s, but no method available.", typeid(T).name());
 	}
 };
+#endif
 
 template< Intent I, typename F, typename T >
 void introspect(F&& f, T&& t) {
+#ifdef INTROSPECT_SOFT_FAILURE
+	//will *complain* when run if introspection not implemented for T:
 	details::introspect_impl< I >(std::forward< F >(f), std::forward< T >(t), 0);
+#else
+	//will fail at compile time if introspection not implemented for T:
+	std::remove_reference< T >::type:: template introspect< I >(std::forward< F >(f), std::forward< T >(t));
+#endif
 }
 
 //-------------------------------------------------------------
@@ -104,18 +113,18 @@ void introspect_enum(F&& f, const char *name, E&& e, std::vector< std::pair< con
 
 	std::string value;
 	{ //find current name from supplied list:
-		auto f = std::find_if(possible.begin(), possible.end(), [&](auto&& p){ return p.second == e; });
-		assert(f != possible.end());
-		value = f->first;
+		auto found = std::find_if(possible.begin(), possible.end(), [&](auto&& p){ return p.second == e; });
+		assert(found != possible.end());
+		value = found->first;
 	}
 	f(name, value);
 	if constexpr (I == Intent::Write) {
 		//translate string back to enum:
-		auto f = std::find_if(possible.begin(), possible.end(), [&](auto&& p){ return p.first == value; });
-		if (f == possible.end()) {
+		auto found = std::find_if(possible.begin(), possible.end(), [&](auto&& p){ return p.first == value; });
+		if (found == possible.end()) {
 			warn("Invalid enum value '%s' (for %s); setting to '%s'.", value.c_str(), name, possible[0].first);
-			f = possible.begin();
+			found = possible.begin();
 		}
-		e = f->second;
+		e = found->second;
 	}
 }

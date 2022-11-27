@@ -420,6 +420,12 @@ void Animate::ui_timeline(Undo& undo, Animator& animator, Scene& scene,
 	Columns(2);
 	SetColumnWidth(0, 150.0f);
 
+	/*
+	if (Button("<<##Reset")) {
+		//TODO
+	}
+	*/
+
 	if (!playing) {
 		if (Button("Play")) {
 			if (!ui_render.in_progress()) {
@@ -428,7 +434,7 @@ void Animate::ui_timeline(Undo& undo, Animator& animator, Scene& scene,
 			}
 		}
 	} else {
-		if (Button("Stop")) {
+		if (Button("Pause")) {
 			playing = false;
 		}
 	}
@@ -446,16 +452,16 @@ void Animate::ui_timeline(Undo& undo, Animator& animator, Scene& scene,
 	PopStyleVar();
 
 	if (Button("Add Frames")) {
-		undo.anim_set_max_frame(*this, max_frame + frame_rate, max_frame);
+		undo.anim_set_max_frame(*this, max_frame + uint32_t(animator.frame_rate), max_frame);
 	}
 
 	if (Button("Crop End")) {
 		undo.anim_set_max_frame(*this, current_frame + 1, max_frame);
-		set_time(scene, animator, static_cast<float>(current_frame));
+		jump_to_frame(scene, animator, static_cast<float>(current_frame));
 	}
 
-	SliderUInt32("Rate", &frame_rate, 1, 240);
-	frame_rate = std::clamp(frame_rate, 1u, 240u);
+	DragFloat("Rate", &animator.frame_rate, 1.0f, 1.0f, 240.0f);
+	animator.frame_rate = std::clamp(animator.frame_rate, 1.0f, 240.0f);
 
 	Checkbox("Draw Splines", &visualize_splines);
 
@@ -610,18 +616,18 @@ void Animate::ui_timeline(Undo& undo, Animator& animator, Scene& scene,
 	}
 	spline_cache = std::move(new_cache);
 
-	if (frame_changed) update(scene, animator);
+	if (frame_changed) jump_to_frame(scene, animator, float(current_frame));
 }
 
-void Animate::step_sim(Scene& scene) {
-	manager.get_simulate().build_scene(scene);
-	manager.get_simulate().step(scene, 1.0f / frame_rate);
-}
+void Animate::jump_to_frame(Scene& scene, Animator& animator, float frame) {
+	uint32_t target_frame = uint32_t(std::max(0.0f, std::round(frame)));
 
-void Animate::set_time(Scene& scene, Animator& animator, float time) {
-	current_frame = static_cast<uint32_t>(time);
-	animator.drive(scene, time);
-	manager.get_simulate().build_scene(scene);
+	//TODO: could add user options to show particles perfectly in sync, in which case there might be (a lot!) of simulation here
+
+	current_frame = target_frame;
+	if (current_frame == 0) manager.get_simulate().clear_particles(scene);
+	animator.drive(scene, frame);
+	manager.get_simulate().build_collision(scene);
 	for(auto& [name, _] : scene.skinned_meshes) {
 		manager.invalidate_gpu(name);
 	}
@@ -643,7 +649,7 @@ std::string Animate::pump_output(Scene& scene, Animator& animator) {
 void Animate::refresh(Scene& scene, Animator& animator) {
 	current_frame = 0;
 	set_max(std::max(n_frames(), static_cast<uint32_t>(std::ceil(animator.max_key()))));
-	set_time(scene, animator, static_cast<float>(current_frame));
+	jump_to_frame(scene, animator, static_cast<float>(current_frame));
 	for (auto& spline : animator.splines) {
 		make_spline(animator, (spline.first).first);
 	}
@@ -673,26 +679,31 @@ bool Animate::playing_or_rendering() {
 }
 
 void Animate::update(Scene& scene, Animator& animator) {
+	if (!playing) return;
 
-	if (playing) {
+	bool updated = false;
 
-		if (frame_timer.s() > 1.0f / frame_rate) {
+	if (frame_timer.s() > 1.0f / animator.frame_rate) {
+		if (current_frame == max_frame - 1) {
+			playing = false;
+			current_frame = 0;
+		} else {
+			Scene::StepOpts opts;
+			opts.use_bvh = manager.get_simulate().use_bvh;
+			//opts.thread_pool = /* TODO */;
+			if (current_frame == 0) opts.reset = true;
+			scene.step(animator, float(current_frame), float(current_frame + 1), 1.0f / animator.frame_rate, opts);
+			updated = true;
 
-			if (current_frame == max_frame - 1) {
-				playing = false;
-				current_frame = 0;
-			} else {
-				current_frame++;
-				step_sim(scene);
-			}
-
-			frame_timer.reset();
+			current_frame++;
 		}
+		frame_timer.reset();
 	}
 
-	if (displayed_frame != current_frame) {
-		set_time(scene, animator, static_cast<float>(current_frame));
-		displayed_frame = current_frame;
+	if (updated) {
+		for(auto& [name, _] : scene.skinned_meshes) {
+			manager.invalidate_gpu(name);
+		}
 	}
 }
 

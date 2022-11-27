@@ -153,7 +153,7 @@ public:
 
 private:
 	Particles old;
-	bool gravity_activated = false, scale_activated = false, initial_velocity_activated = false,
+	bool gravity_activated = false, radius_activated = false, initial_velocity_activated = false,
 		 spread_angle_activated = false, lifetime_activated = false, pps_activated = false,
 		 step_size_activated = false;
 };
@@ -241,7 +241,7 @@ private:
 	bool rendering_animation = false;
 	uint32_t next_frame = 0, max_frame = 0;
 
-	float percent_done = 0.0f;
+	float render_progress = 0.0f;
 	std::mutex report_mut;
 	std::string folder;
 	char output_path_buffer[256] = {};

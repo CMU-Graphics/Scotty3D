@@ -1,56 +1,53 @@
 
 #include "particles.h"
 
-bool Particles::update(const World_Info& world, Particles::Particle& p) {
+bool Particles::Particle::update(const PT::Aggregate &scene, Vec3 const &gravity, const float radius, const float dt) {
 
-    //A4T4: particle update
+	//A4T4: particle update
 
-    // Compute the trajectory of this particle for the next dt seconds.
+	// Compute the trajectory of this particle for the next dt seconds.
 
-    // (1) Build a ray representing the particle's path as if it travelled at constant velocity.
+	// (1) Build a ray representing the particle's path as if it travelled at constant velocity.
 
-    // (2) Intersect the ray with the scene and account for collisions. Be careful when placing
-    // collision points using the particle radius. Move the particle to its next position.
+	// (2) Intersect the ray with the scene and account for collisions. Be careful when placing
+	// collision points using the particle radius. Move the particle to its next position.
 
-    // (3) Account for acceleration due to gravity.
+	// (3) Account for acceleration due to gravity.
 
-    // (4) Repeat until the entire time step has been consumed.
+	// (4) Repeat until the entire time step has been consumed.
 
-    // (5) Decrease the particle's age and return whether it should die.
+	// (5) Decrease the particle's age and return 'false' if it should be removed.
 
-    return false;
+	return false;
 }
 
-void Particles::advance(const PT::Aggregate& scene, const Mat4& to_world, float r, float dt) {
-	
-    if(step_size < EPS_F) return;
+void Particles::advance(const PT::Aggregate& scene, const Mat4& to_world, float dt) {
 
-    step_accum += dt;
+	if(step_size < EPS_F) return;
 
-    while(step_accum > step_size) {
-        step(scene, to_world, r);
-        step_accum -= step_size;
-    }
+	step_accum += dt;
+
+	while(step_accum > step_size) {
+		step(scene, to_world);
+		step_accum -= step_size;
+	}
 }
 
-void Particles::step(const PT::Aggregate& scene, const Mat4& to_world, float r) {
+void Particles::step(const PT::Aggregate& scene, const Mat4& to_world) {
 
-    std::vector<Particle> next;
-    next.reserve(particles.size());
+	std::vector<Particle> next;
+	next.reserve(particles.size());
 
-    Mat4 to_local = to_world.inverse();
-    World_Info info {scene, to_world, to_local, to_world.T(), step_size, r};
+	for(Particle& p : particles) {
+		if(p.update(scene, gravity, radius, step_size)) {
+			next.emplace_back(p);
+		}
+	}
 
-    for(Particle& p : particles) {
-        if(update(info, p)) {
-            next.emplace_back(p);
-        }
-    }
-
-    if(rate > 0.0f) {
+	if(rate > 0.0f) {
 
 		//helpful when emitting particles:
-    	float cos = std::cos(Radians(spread_angle) / 2.0f);
+		float cos = std::cos(Radians(spread_angle) / 2.0f);
 
 		//will emit particle i when i == time * rate
 		//(i.e., will emit particle when time * rate hits an integer value.)
@@ -66,19 +63,20 @@ void Particles::step(const PT::Aggregate& scene, const Mat4& to_world, float r) 
 		for (uint64_t i = begin_i; i < end_i; ++i) {
 			//spawn particle 'i':
 
-            float z = lerp(cos, 1.0f, rng.unit());
-            float t = 2 * PI_F * rng.unit();
-            float d = std::sqrt(1.0f - z * z);
-            Vec3 dir = Vec3(d * std::cos(t), d * std::sin(t), initial_velocity * z);
+			float y = lerp(cos, 1.0f, rng.unit());
+			float t = 2 * PI_F * rng.unit();
+			float d = std::sqrt(1.0f - y * y);
+			Vec3 dir = Vec3(d * std::cos(t), initial_velocity * y, d * std::sin(t));
 
-            Particle p;
-            p.velocity = dir;
-            p.age = lifetime; //NOTE: could adjust lifetime based on index
-            next.push_back(p);
-        }
-    }
+			Particle p;
+			p.position = to_world * Vec3(0.0f, 0.0f, 0.0f);
+			p.velocity = to_world.rotate(dir);
+			p.age = lifetime; //NOTE: could adjust lifetime based on index
+			next.push_back(p);
+		}
+	}
 
-    particles = std::move(next);
+	particles = std::move(next);
 	current_step += 1;
 }
 
@@ -90,7 +88,12 @@ void Particles::reset() {
 }
 
 bool operator!=(const Particles& a, const Particles& b) {
-	return a.gravity != b.gravity || a.scale != b.scale ||
-	       a.initial_velocity != b.initial_velocity || a.spread_angle != b.spread_angle ||
-	       a.lifetime != b.lifetime || a.rate != b.rate || a.step_size != b.step_size || a.seed != b.seed;
+	return a.gravity != b.gravity
+	|| a.radius != b.radius
+	|| a.initial_velocity != b.initial_velocity
+	|| a.spread_angle != b.spread_angle
+	|| a.lifetime != b.lifetime
+	|| a.rate != b.rate
+	|| a.step_size != b.step_size
+	|| a.seed != b.seed;
 }

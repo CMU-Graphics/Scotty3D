@@ -113,6 +113,7 @@ public:
 	static void introspect(F&& f, T&& t) {
 		introspect_variant< I >(std::forward< F >(f), t.light);
 	}
+	static inline const char *TYPE = "Delta_Light";
 };
 
 bool operator!=(const Delta_Lights::Point& a, const Delta_Lights::Point& b);

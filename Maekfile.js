@@ -123,6 +123,7 @@ const util_objects = [
 	maek.CPP("src/util/thread_pool.cpp"),
 	maek.CPP("src/util/rand.cpp"),
 	maek.CPP("src/util/timer.cpp"),
+	maek.CPP("src/util/to_json.cpp"),
 ];
 const platform_objects = [
 	maek.CPP("src/platform/gl.cpp"),
@@ -132,6 +133,7 @@ const platform_objects = [
 const scene_objects = [
 	maek.CPP("src/scene/undo.cpp"),
 	maek.CPP("src/scene/scene.cpp"),
+	maek.CPP("src/scene/scene-step.cpp"),
 	maek.CPP("src/scene/load-save.cpp"),
 	maek.CPP("src/scene/load-save-json.cpp"),
 	maek.CPP("src/scene/io.cpp"),
