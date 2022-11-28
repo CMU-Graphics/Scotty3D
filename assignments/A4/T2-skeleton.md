@@ -15,8 +15,8 @@ When discussing skeletal animation we have a whole family of different transform
 ## `A4T2a` Forward Kinematics
 
 **Implement:**
-- `Skeleton::bind_pose`, which returns a vector whose $i\textrm{th}$ entry is $\hat{X}_{i\to\emptyset}$.
-- `Skeleton::current_pose`, which returns a vector whose $i\textrm{th}$ entry is $X_{i\to\emptyset}$.
+- `Skeleton::bind_pose`, which returns a vector whose $i\textrm{th}$ entry is $B_j \equiv \hat{X}_{\emptyset \gets i}$.
+- `Skeleton::current_pose`, which returns a vector whose $i\textrm{th}$ entry is $P_i \equiv X_{\emptyset \gets i}$.
 
 In the first half of this task, you will implement `Skeleton::bind_pose` and `Skeleton::current_pose`, which compute all the bind-to-local and pose-to-local transformations $B_j$ and $P_j$, respectively. It makes sense to compute these transformations in bulk because they are defined recursively in terms of a bone-to-parent transformation.
 
@@ -28,7 +28,7 @@ $$X_{p \gets b} \equiv T_{p_e} R_{rz_b @ z_b} R_{ry_b @ y_b} R_{rx_b @ x_b}$$
 
 Where $T_{p_e}$ is a translation by $p_e$ and $R_{ra @ a}$ rotates by angle $ra$ around axis $a$.
 
-Bones without a parent are just translated by the skeleton's base point, $r$, and current base offset, $o$:
+Bones without a parent are translated by the skeleton's base point, $r$, and current base offset, $o$:
 $$X_{\emptyset \gets b} \equiv T_{r+o}$$
 
 The overall transform from each bone to local space can be computed recursively:
@@ -37,13 +37,15 @@ $$X_{\emptyset \gets b} \equiv X_{\emptyset \gets p} X_{p \gets b}$$
 
 In the _bind pose_ the bones are not posed or offset, so we have:
 
-$$\hat{X}_{p \gets b} \equiv T_{p_e}$$
-$$\hat{X}_{\emptyset \gets b} \equiv T_{r}$$
-$$\hat{X}_{\emptyset \gets b} \equiv \hat{X}_{\emptyset \gets p} \hat{X}_{p \gets b}$$
+for bone $b$ with parent $p$, $\hat{X}\_{p \gets b} \equiv T\_{p\_e}$
+
+for bone $b$ without parent, $\hat{X}\_{\emptyset \gets b} \equiv T\_{r}$
+
+and, recursively, $\hat{X}\_{\emptyset \gets b} \equiv \hat{X}\_{\emptyset \gets p} \hat{X}\_{p \gets b}$
 
 
 Implementation notes:
- - The list of bones in the skeleton is guaranteed to be sorted such that bones' parent appear first, so your code should be able to work in a single pass through the bones array.
+ - The list of bones in the skeleton is guaranteed to be sorted such that bones' parents appear first, so your code should be able to work in a single pass through the bones array.
  - The functions `Mat4::angle_axis` and `Mat4::translate` will be helpful.
 
 ### Aside: Local Axes
@@ -62,10 +64,10 @@ To define $x_b$ we start with $\hat{x}$, the axis perpendicular to $y_b$ and ali
 $$\hat{x} \equiv \mathrm{normalize}((1,0,0) - ((1,0,0) \cdot y_b) y_b)$$
 (In case $y_b$ is parallel to the $x$ axis, $\hat{x}$ is set to $(0,0,1)$.)
 
-The $x_b$ axis is $\hat{x}$ rotated by `bone.roll` ($\theta_b$) around $y_b$:
+The $x_b$ axis is $\hat{x}$ rotated by $\theta_b \equiv$ `bone.roll` around $y_b$:
 $$x_b \equiv \cos(\theta_b) \hat{x} - \sin(\theta_b) (\hat{x} \times y_b)$$
 
-And, finally, $z_b$ axis is perpendicular to $x_b$ and $y_b$ to form a right-handed coordinate system:
+And, finally, the $z_b$ axis is set perpendicular to $x_b$ and $y_b$ to form a right-handed coordinate system:
 $$z_b \equiv x_b \times y_b$$
 
 ### A picture of what's going on
@@ -82,7 +84,7 @@ Then, $c_1$ is rotated by $\theta_1$ which affects itself and $c_2$. Finally, wh
 
 Once you have implemented these basic kinematics, you should be able to define skeletons, set their positions at a collection of keyframes, and watch the skeleton smoothly interpolate the motion (see the [user guide](https://cmu-graphics.github.io/Scotty3D-docs/guide/animate_mode/) for an explanation of the interface and some demo videos).
 
-Note that the skeleton does not yet influence the geometry of the cube in this scene -- that will come in Task 3!
+Note that the skeleton does not yet influence the geometry of meshes in the scene -- that will come in Task 3!
 
 
 ## `A4T2b` Inverse Kinematics
@@ -100,7 +102,7 @@ Specifically, we'll be using gradient descent to find the minimum of a cost func
 
 $$f(q) = \sum_{(h,i)} \frac{1}{2}|p_i(q) - h|^2 $$
 
-Where $p_i(q) = X_{i \to \emptyset} [ e_i 1 ]^T $ is the end position of bone $i$.
+Where $p\_i(q) = I_{3\times 4} X\_{\emptyset \gets i } [ e_i ~ 1 ]^T$  is the end position of bone $i$. (Here $I_{3\times 4}$ is a 3-row, 4-column matrix with ones on the diagonal to strip the homogenous coordinate, leaving just the position component. This is okay to do as long as $X$ is made up of well-behaved translations and rotations that don't (say) scale the homogenous coordinate.)
 
 
 *Implementation Notes:*
@@ -113,7 +115,7 @@ Where $p_i(q) = X_{i \to \emptyset} [ e_i 1 ]^T $ is the end position of bone $i
 ### Computing $\nabla f$
 
 The gradient of $f$ (i.e., $\nabla f$) is the vector consisting of the partial derivatives of $f$ with respect to every element of $q$.
-So let's look at one example -- let's take the partial derivative with respect to $ry_b$ -- the rotation around the local $y_b$ axis of bone $b$.
+So let's look at one example: let's take the partial derivative with respect to $ry_b$ -- the rotation around the local $y_b$ axis of bone $b$.
 
 First, we expand the definition of $f$:
 $$\frac{\partial}{\partial ry_b} f = \sum_{(h,i)} \frac{\partial}{\partial ry_b} \frac{1}{2}|p_i(\mathbf{\theta}) - h|^2 $$
@@ -125,30 +127,22 @@ $$\frac{\partial}{\partial ry_b} \frac{1}{2}|p_i(q) - h|^2
  = (p_i(q) - h) \cdot \frac{\partial}{\partial ry_b} p_i(q) $$
 
 Then expand the definition of $p_i$:
-$$= (p_i(q) - h) \cdot \frac{\partial}{\partial ry_b} X_{\emptyset \gets i} [ e_i 1 ]^T $$
-$$= (p_i(q) - h) \cdot \frac{\partial}{\partial ry_b} X_{\emptyset \gets \ldots \gets c} X_{c \gets b} X_{b \gets \ldots \gets i} [ e_i 1 ]^T $$
-$$= (p_i(q) - h) \cdot ( X_{outer} \frac{\partial}{\partial ry_b} R_{rx_b @ x_b} X_{inner} [ e_i 1 ]^T ) $$
+$$= (p_i(q) - h) \cdot \frac{\partial}{\partial ry_b} X\_{\emptyset \gets i} [ e_i ~ 1 ]^T $$
+$$= (p_i(q) - h) \cdot \frac{\partial}{\partial ry_b} X\_{\emptyset \gets \ldots \gets c} X_{c \gets b} X\_{b \gets \ldots \gets i} [ e_i ~ 1 ]^T $$
 
-In other words, you need only to project the end effector position to the appropriate space, compute the partial derivative of a rotation relative to its angle, and project this partial derivative to skeleton-local space.
+$$= (p_i(q) - h) \cdot (
+\underbrace{X_{\emptyset \gets \ldots \gets c} T_{c_e} R_{rz_b @ z_b}}\_{\textrm{linear xform}}
+\underbrace{\frac{\partial}{\partial ry_b} R_{ry_b @ y_b}}\_{\textrm{rotation}}
+\underbrace{R\_{rx\_b @ x\_b} X\_{b \gets \ldots \gets i} [ e\_i ~ 1 ]^T}\_{\textrm{some point}}
+)$$
 
+In other words, your code needs only to find partial derivative of a rotation relative to its angle, and project this partial derivative to skeleton-local space.
 
-### Some older words that need to be removed
+Here's a useful bit of geometric reasoning: if you transform the axis of rotation and the base point of the bone into skeleton local space, then you can use the fact that the derivative (w.r.t. $\theta$) of the rotation by $\theta$ around axis $x$ and center $r$ of point $p$ is a vector perpendicular $x$ with length $|r-p|$:
 
-Now we just need a way to calculate the Jacobian of $\theta$. For this, we can use the fact that:
+$$\frac{\partial}{\partial \theta} R_{\theta @ x} (p - r) + r = x \times (p - r)$$
 
-$$(J_\theta)_i = \overrightarrow{\textbf{r}} \times \overrightarrow{\textbf{p}}$$
-
-Where:
-
-*   $J_i$ is the $i$th column of $J_\theta$.
-*   $\overrightarrow{\textbf{r}}$ is the axis of rotation in the current joint space.
-*   $\overrightarrow{\textbf{p}}$is the vector from the base of joint $i$ to the end point of the target joint.
-
-For a more in-depth derivation of Jacobian transpose (and a look into other inverse kinematics algorithms), please check out [this presentation](https://web.archive.org/web/20190501035728/https://autorob.org/lectures/autorob_11_ik_jacobian.pdf). (Pages 45-56 in particular)
-
-
-In order to implement this, you should update `Joint::compute_gradient` and `Skeleton::step_ik`. `Joint::compute_gradient` should calculate the gradient of $$\theta$$ in the rotated $$x$$, $$y$$, and $$z$$ directions, and add them to `Joint::angle_gradient` for all relevant joints. `Skeleton::step_ik` should actually do the gradient descent calculations and update the `pose` of each joint. In this function, you should use a small timestep, but do several iterations (say, $$10$$s to $$100$$s) of gradient descent in order to speed things up.
-
+For a more in-depth derivation of the process of computing this derivative (and a look into other inverse kinematics algorithms), please check out [this presentation](https://web.archive.org/web/20190501035728/https://autorob.org/lectures/autorob_11_ik_jacobian.pdf). (Pages 45-56 in particular)
 
 ### Using your IK!
 Once you have IK implemented, you should be able to create a series of joints, and get a particular joint to move to the desired final position you have selected.
