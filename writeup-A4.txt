@@ -1,0 +1,27 @@
+AndrewID:
+
+Under each task, write 'Fully implemented.', 'Not attempted.', or explain your attempted solution and where it fails.
+
+--- A4.0 ---
+
+Task A4T1:
+	Fully implemented.
+
+Task A4T2:
+	Fully implemented.
+
+--- A4.5 ---
+
+Task A4T3:
+	Fully implemented.
+
+Task A3T4:
+	Fully implemented.
+
+animation.mp4:
+	How did you make it?
+
+	How does it use Negative Space?
+
+	Any free model sources you need to credit?
+

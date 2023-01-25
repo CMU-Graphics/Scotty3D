@@ -1,0 +1,36 @@
+AndrewID:
+
+Under each task, write 'Fully implemented.', 'Not attempted.', or explain your attempted solution and where it fails.
+
+--- A3.0 ---
+
+Task A3T1:
+	Fully implemented.
+
+Task A3T2:
+	Fully implemented.
+
+Task A3T3:
+	Fully implemented.
+
+--- A3.5 ---
+
+Task A3T4:
+	Fully implemented.
+
+Task A3T5:
+	Fully implemented.
+
+Task A3T6:
+	Fully implemented.
+
+Task A3T7:
+	Fully implemented.
+
+render.png:
+	How did you make it?
+
+	Why is it Art Nouveau?
+
+	Any free model sources you need to credit?
+
