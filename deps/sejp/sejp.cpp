@@ -113,7 +113,7 @@ value parse(std::istream &from) {
 		}
 
 		double val;
-		#ifdef __APPLE__
+		#if defined(__APPLE__) || defined(__linux__)
 		//(until clang gets its charconv right)
 		val = std::stod(acc);
 		#else

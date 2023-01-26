@@ -78,7 +78,7 @@ void from_json(sejp::value const &info, uint32_t *val) {
 
 std::string to_json(float val) {
 	double dval = val; //NOTE: convert to double here because on the json side number will be parsed as a double, and we want correct round-trip behavior without having to think too hard
-	#ifdef __APPLE__
+	#if defined(__APPLE__) || defined(__linux__)
 	//until clang gets its charconv right
 	std::ostringstream oss;
 	oss.precision( std::numeric_limits< double >::digits10 + 1 );
