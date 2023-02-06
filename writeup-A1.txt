@@ -13,10 +13,10 @@ Task A1T2:
 Task A1T3:
 	Fully implemented.
 
---- A1.5 ---
-
 Task A1T4:
 	Fully implemented.
+
+--- A1.5 ---
 
 Task A1T5:
 	Fully implemented.

@@ -64,17 +64,17 @@ Test test_a1_task1_world_to_local_no_parent("a1.task1.world_to_local.no_parent",
 Test test_a1_task1_local_to_world("a1.task1.local_to_world", []() {
 	TestHierarchy hierarchy;
 
-	Mat4 expected = hierarchy.C->local_to_world();
-	Mat4 mat = Mat4{
+	Mat4 got = hierarchy.C->local_to_world();
+	Mat4 expected = Mat4{
 		8.0f, 0.0f, 0.0f, 0.0f,
 		0.0f, 8.0f, 0.0f, 0.0f,
 		0.0f, 0.0f, 8.0f, 0.0f,
 		1.0f, 2.0f, 4.0f, 1.0f
 	};
 
-	if (Test::differs(mat, expected)) {
+	if (Test::differs(got, expected)) {
 		info("Transform C's local_to_world:");
-		Test::print_matrix(mat);
+		Test::print_matrix(got);
 		info("Expected:");
 		Test::print_matrix(expected);
 		throw Test::error("Transform's local_to_world doesn't match expected.");
@@ -84,17 +84,17 @@ Test test_a1_task1_local_to_world("a1.task1.local_to_world", []() {
 Test test_a1_task1_world_to_local("a1.task1.world_to_local", []() {
 	TestHierarchy hierarchy;
 
-	Mat4 expected = hierarchy.C->world_to_local();
-	Mat4 mat = Mat4{
+	Mat4 got = hierarchy.C->world_to_local();
+	Mat4 expected = Mat4{
 		0.125f, 0.0f, 0.0f, 0.0f,
 		0.0f, 0.125f, 0.0f, 0.0f,
 		0.0f, 0.0f, 0.125f, 0.0f,
 		-0.125f,-0.25f,-0.5f, 1.0f
 	};
 
-	if (Test::differs(mat, expected)) {
+	if (Test::differs(got, expected)) {
 		info("Transform C's world_to_local:");
-		Test::print_matrix(mat);
+		Test::print_matrix(got);
 		info("Expected:");
 		Test::print_matrix(expected);
 		throw Test::error("Transform's world_to_local doesn't match expected.");
