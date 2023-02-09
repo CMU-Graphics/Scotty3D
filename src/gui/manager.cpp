@@ -340,8 +340,9 @@ void Manager::to_s3d() {
     // verts and idxs -> index mesh -> halfedge mesh
     Indexed_Mesh idx_mesh(std::move(verts), std::move(idxs));
     Halfedge_Mesh he_mesh = Halfedge_Mesh::from_indexed_mesh(idx_mesh);
+	Halfedge_Mesh skinned_mesh_data = Halfedge_Mesh::from_indexed_mesh(idx_mesh);
 	Skinned_Mesh skinned_mesh;
-	skinned_mesh.mesh = std::move(he_mesh);
+	skinned_mesh.mesh = std::move(skinned_mesh_data);
 
     // add new meshes to scene
 	scene.create<Halfedge_Mesh>("Imported Mesh", std::move(he_mesh));
