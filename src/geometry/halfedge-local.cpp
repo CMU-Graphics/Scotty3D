@@ -310,9 +310,9 @@ std::optional<Halfedge_Mesh::FaceRef> Halfedge_Mesh::bevel_edge(EdgeRef e) {
  * see also [BEVEL NOTE] above.
  */
 std::optional<Halfedge_Mesh::FaceRef> Halfedge_Mesh::extrude_face(FaceRef f) {
-	//A2L5: Extrude Face
+	//A2L4: Extrude Face
 	// Reminder: This function does not update the vertex positions.
-	// Remember to also fill in extrude_helper (A2L5h)
+	// Remember to also fill in extrude_helper (A2L4h)
 
 	(void)f;
     return std::nullopt;
@@ -420,7 +420,7 @@ std::optional<Halfedge_Mesh::VertexRef> Halfedge_Mesh::collapse_face(FaceRef f) 
  * otherwise returns e, updated to represent the newly-welded edge
  */
 std::optional<Halfedge_Mesh::EdgeRef> Halfedge_Mesh::weld_edges(EdgeRef e, EdgeRef e2) {
-	//A2L4: Weld Edges
+	//A2Lx8: Weld Edges
 
 	//Reminder: use interpolate_data() to merge bone_weights data on vertices!
 
@@ -475,7 +475,7 @@ void Halfedge_Mesh::bevel_positions(FaceRef face, std::vector<Vec3> const &start
  * see also [BEVEL NOTE] above.
  */
 void Halfedge_Mesh::extrude_positions(FaceRef face, Vec3 move, float shrink) {
-	//A2L5h: Extrude Positions Helper
+	//A2L4h: Extrude Positions Helper
 
 	//General strategy:
 	// use mesh navigation to get starting positions from the surrounding faces,

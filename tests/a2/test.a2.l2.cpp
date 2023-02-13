@@ -15,8 +15,25 @@ static void expect_split(Halfedge_Mesh &mesh, Halfedge_Mesh::EdgeRef edge, Halfe
 	}
 }
 
+/*
+Initial mesh:
+0--1\
+|  | \
+|  |  2
+|  | /
+3--4/
 
-Test test_a2_l2_flip_edge_simple("a2.l2.split_edge.simple", []() {
+Split edge on Edge: 1-4
+
+After mesh:
+0--1\
+|\ | \
+| \2--3
+|  | /
+4--5/
+
+*/
+Test test_a2_l2_split_edge_simple("a2.l2.split_edge.simple", []() {
 	Halfedge_Mesh mesh = Halfedge_Mesh::from_indexed_faces({
 		Vec3(-1.0f, 1.1f, 0.0f), Vec3(1.1f, 1.0f, 0.0f),
 		                                            Vec3(2.2f, 0.0f, 0.0f),
@@ -32,6 +49,44 @@ Test test_a2_l2_flip_edge_simple("a2.l2.split_edge.simple", []() {
 		Vec3(-1.3f,-0.7f, 0.0f), Vec3(1.4f, -1.0f, 0.0f)
 	}, {
 		{0,4,5,2}, {0,2,1}, {1,2,3}, {2,5,3}
+	});
+
+	expect_split(mesh, edge, after);
+});
+
+/*
+Initial mesh:
+0--1\
+|  | \
+|  |  2
+|  | /
+3--4/
+
+Split edge on Edge: 0-1
+
+After mesh:
+0--1--2\
+|  /  | \
+| /   |  3
+|/    | /
+4-----5/
+*/
+Test test_a2_l2_split_edge_boundary("a2.l2.split_edge.boundary", []() {
+	Halfedge_Mesh mesh = Halfedge_Mesh::from_indexed_faces({
+		Vec3(-1.0f, 1.1f, 0.0f), Vec3(1.1f, 1.0f, 0.0f),
+		                                            Vec3(2.2f, 0.0f, 0.0f),
+		Vec3(-1.3f,-0.7f, 0.0f), Vec3(1.4f, -1.0f, 0.0f)
+	}, {
+		{0,3,4,1}, {1,4,2}
+	});
+	Halfedge_Mesh::EdgeRef edge = mesh.halfedges.begin()->next->next->next->edge;
+
+	Halfedge_Mesh after = Halfedge_Mesh::from_indexed_faces({
+		Vec3(-1.0f, 1.1f, 0.0f),  Vec3(0.05f, 1.05f, 0.0f), Vec3(1.1f, 1.0f, 0.0f),
+		                                            						Vec3(2.2f, 0.0f, 0.0f),
+		Vec3(-1.3f,-0.7f, 0.0f), 							Vec3(1.4f, -1.0f, 0.0f)
+	}, {
+		{0,4,1}, {1,4,5,2}, {2,5,3}
 	});
 
 	expect_split(mesh, edge, after);

@@ -41,7 +41,7 @@ In addition to the mesh connectivity, the mesh stores data on each of the mesh f
 
 Vertices store their location in `position`, and information about skinning (A4!) in `bone_weights`.
 
-Edges store a `sharp` flag which is used in shading normal computation.
+Edges store a `sharp` flag which is used in shading normal computation. If this flag is true, then we treat this edge as a break in the surface when computing shading normals, and if it's false, then we treat this edge as connected when computing shading normals.
 
 Faces store a `boundary` flag which tells you if the face is a solid face or a face that exists to book-keep holes in the model:
 
@@ -49,11 +49,51 @@ Faces store a `boundary` flag which tells you if the face is a solid face or a f
 
 Halfedges store `corner_uv` and `corner_normal` values, which are used to set texture coordinates and shading normals for the corner of the face associated with the halfedge.
 
+
 ### Splitting and Merging Data
 
 Since it is often the case that you are adding or removing features from the mesh, we include an overloaded `interpolate_data` helper function to help in interpolating/merging `Vertex::bone_weights` and `Halfedge::corner_*` data. (Handling of `Edge::sharp` is probably either obvious [as in splits] or arbitrary [as in merges with different flags]. Handling of `Face::boundary` is generally specified by the operation.)
 
 Check the comments near `interpolate_data` in `halfedge.h` for some usage examples.
+
+## Iterating over the Data
+
+Down below are some examples of how to iterate using a `Halfedge_Mesh`. Suppose we have a face $f$ and want to print out the positions of all its vertices. We would write a routine like this:
+
+```
+void printVertexPositions(FaceRef f) {
+  HalfedgeRef h = f->halfedge(); // get the first halfedge of the face
+  do {
+    VertexRef v = h->vertex();   // get the vertex of the current halfedge
+    cout << v->pos << endl;      // print the vertex position
+    h = h->next();               // move to the next halfedge around the face
+  } while (h != f->halfedge());  // keep going until we're back at the beginning
+}
+```
+
+Notice that we refer to a face as a FaceRef rather than just a Face. You can think of a Ref as a kind of pointer. Note that members of an iterator are accessed with an arrow -> rather than a dot ., just as with pointers. (A more in-depth explanation of some of these details can be found in the inline documentation.) Similarly, to print out the positions of all the neighbors of a given vertex we could write a routine like this:
+
+```
+void printNeighborPositions(VertexRef v) {
+  HalfedgeRef h = v->halfedge();    // get one of the outgoing halfedges of the vertex
+  do {
+    HalfedgeRef h_twin = h->twin();   // get the vertex of the current halfedge
+    VertexRef vN = h_twin->vertex();  // vertex is 'source' of the half edge.
+                                      // so h->vertex() is v,
+                                      // whereas h_twin->vertex() is the neighbor vertex.
+    cout << vN->pos << endl;          // print the vertex position
+    h = h_twin->next();               // move to the next outgoing halfedge of the vertex.
+  } while(h != v->halfedge());        // keep going until we're back at the beginning
+}
+```
+
+To iterate over all the vertices in a halfedge mesh, we could write a loop like this:
+
+```
+for(VertexRef v = vertices_begin(); v != vertices_end(); v++) {
+  printNeighborPositions(v); // do something interesting here
+}
+```
 
 ## Temporary Storage
 

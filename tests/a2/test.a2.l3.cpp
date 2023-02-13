@@ -15,8 +15,68 @@ static void expect_collapse(Halfedge_Mesh &mesh, Halfedge_Mesh::EdgeRef edge, Ha
 	}
 }
 
+/*
+Initial mesh:
+0--1\
+|  | \
+2--3--4
+|  | /
+5--6/
+
+Collapse edge on Edge: 2-3
+
+After mesh:
+0-----1\
+ \   /  \
+  \ /    \
+   2------3
+  / \    /
+ /   \  /
+4-----5/
+*/
 
 Test test_a2_l3_collapse_edge_simple("a2.l3.collapse_edge.simple", []() {
+	Halfedge_Mesh mesh = Halfedge_Mesh::from_indexed_faces({
+		  Vec3(-1.0f, 1.0f, 0.0f), 	Vec3(1.1f, 1.0f, 0.0f),
+		 Vec3(-1.2f, 0.0f, 0.0f),   	 Vec3(1.2f, 0.0f, 0.0f),  Vec3(2.3f, 0.0f, 0.0f),
+		Vec3(-1.4f,-1.0f, 0.0f), 		Vec3(1.5f, -1.0f, 0.0f)
+	}, {
+		{0,2,3,1}, {2,5,6,3}, {1,3,4}, {3,6,4}
+	});
+
+	Halfedge_Mesh::EdgeRef edge = mesh.halfedges.begin()->next->edge;
+
+	Halfedge_Mesh after = Halfedge_Mesh::from_indexed_faces({
+		  Vec3(-1.0f, 1.0f, 0.0f), 	Vec3(1.1f, 1.0f, 0.0f),
+		 			Vec3(0.0f, 0.0f, 0.0f),  			Vec3(2.3f, 0.0f, 0.0f),
+		Vec3(-1.4f,-1.0f, 0.0f), 		Vec3(1.5f, -1.0f, 0.0f)
+	}, {
+		{0,2,1}, {2,4,5}, {1,2,3}, {2,5,3}
+	});
+
+	expect_collapse(mesh, edge, after);
+});
+
+/*
+Initial mesh:
+0--1\
+|\ | \
+| \2--3
+|  | /
+4--5/
+
+Collapse edge on Edge: 0-1
+
+After mesh:
+    0--\
+   / \  \
+  /   \  \
+ /     1--2
+/      | /
+3------4/
+
+*/
+Test test_a2_l3_collapse_edge_boundary("a2.l3.collapse_edge.boundary", []() {
 	Halfedge_Mesh mesh = Halfedge_Mesh::from_indexed_faces({
 		Vec3(-1.0f, 1.1f, 0.0f), Vec3(1.1f, 1.0f, 0.0f),
 		                         Vec3(1.2f, 0.0f, 0.0f),  Vec3(2.3f, 0.0f, 0.0f),

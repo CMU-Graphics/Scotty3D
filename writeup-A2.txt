@@ -16,9 +16,6 @@ Task A2L3:
 Task A2L4:
 	Fully implemented.
 
-Task A2L5:
-	Fully implemented.
-
 
 Extra Local Operations:
 
@@ -41,6 +38,9 @@ Task A2Lx6:
 	Not attempted.
 
 Task A2Lx7:
+	Not attempted.
+
+Task A2Lx8:
 	Not attempted.
 
 
