@@ -97,6 +97,4 @@ It may be useful to ensure `Halfedge_Mesh::split_edge()` will now return an iter
 
 (In other words, Step $4$ is a great time to set the members `is_new` for vertices and edges created by the split. It is also a good time to copy the `new_pos` field from the edge being split into the `new_pos` field of the newly inserted vertex.)
 
-We recommend implementing this algorithm in stages, e.g., *first* see if you can correctly update the connectivity, *then* worry about getting the vertex positions right. Some examples below illustrate the correct behavior of the algorithm (coming soon).
-
-This subdivision rule **is not** required to support meshes with boundary, unless the implementer wishes to go above and beyond.
+We recommend implementing this algorithm in stages, e.g., *first* see if you can correctly update the connectivity, *then* worry about getting the vertex positions right.
