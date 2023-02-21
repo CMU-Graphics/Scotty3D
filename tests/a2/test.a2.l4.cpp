@@ -7,9 +7,9 @@ static void expect_extrude(Halfedge_Mesh &mesh, Halfedge_Mesh::FaceRef face, Vec
 			throw Test::error("Invalid mesh: " + msg.value().second);
 		}
 
-		// check if returned edge is the same edge
+		// check if returned face is the same face
 		if (ret != face) {
-			throw Test::error("Did not return the same edge!");
+			throw Test::error("Did not return the same face!");
 		}
 		mesh.extrude_positions(face, move, shrink);
 
@@ -76,13 +76,13 @@ Initial mesh:
 Extrude face on Face: 0-3-4-1
 
 After mesh:
-2-----3\
-|\   /| \
-| 0-1 |  \
+2-----3
+|\   /| 
+| 0-1-|--\
 | | | |   4
-| 7-8 |  /
-|/   \| /
-5-----6/
+| 7-8-|--/
+|/   \| 
+5-----6
 */
 
 Test test_a2_l4_extrude_face_simple_expand("a2.l4.extrude_face.simple.expand", []() {

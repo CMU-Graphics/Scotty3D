@@ -14,7 +14,6 @@
 void Halfedge_Mesh::triangulate() {
 	//A2G1: triangulation
 	
-	// For each face...
 }
 
 /*
@@ -94,6 +93,7 @@ void Halfedge_Mesh::catmark_subdivide() {
  *   does not change mesh
  *   returns false
  *
+ * Do note that this requires a working implementation of edge split and edge flip
  */
 bool Halfedge_Mesh::loop_subdivide() {
 
@@ -155,10 +155,13 @@ bool Halfedge_Mesh::loop_subdivide() {
     // Finally, copy new vertex positions into the Vertex::position.
 
 
+
+
 	return true;
 }
 
 //isotropic_remesh: improves mesh quality through local operations.
+// Do note that this requires a working implementation of EdgeSplit, EdgeFlip, and EdgeCollapse
 void Halfedge_Mesh::isotropic_remesh(Isotropic_Remesh_Parameters const &params) {
 
 	//A2Go2: Isotropic Remeshing
@@ -248,6 +251,8 @@ template<class T> struct MutablePriorityQueue {
  *
  * returns false if it ran out of edges to collapse
  * returns true otherwise
+ * 
+ * Do note that this requires a working implementation of EdgeCollapse
  */
 bool Halfedge_Mesh::simplify(float ratio) {
 

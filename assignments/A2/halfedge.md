@@ -7,7 +7,7 @@ This section provides an overview of some key ideas about halfedge meshes and th
 
 A `Halfedge_Mesh` wrangles four mesh element types: `Vertices`, `Edges`, `Faces`, and `Halfedges`:
 
-<img src="halfedge-mesh-elements.png" width="512" alt="overview of halfedge mesh elements">
+<img src="figures/halfedge-mesh-elements.png" width="512" alt="overview of halfedge mesh elements">
 
 As a pointer-based structure, `Halfedge_Mesh` operations will often require the allocation and deallocation of new elements. Rather than using the C++ `new` and `delete` operators directly, `Halfedge_Mesh` instead provides `emplace_*` and `erase_*` functions to allocate and free (respectively) mesh elements. This allows the mesh to track all of the elements that belong to it in `std::list`s (called `vertices`, `edges`, `faces`, and `halfedges`).
 
@@ -19,25 +19,25 @@ In our halfedge mesh structure, elements store both connectivity information as 
 
 Vertices store a reference to one of the halfedges directed away from them in `Vertex::halfedge`:
 
-<img src="halfedge-mesh-vertex-connectivity.png" width="512" alt="vertex connectivity">
+<img src="figures/halfedge-mesh-vertex-connectivity.png" width="512" alt="vertex connectivity">
 
 Edges store a reference to one of the halfedges that make them up in `Edge::halfedge`:
 
-<img src="halfedge-mesh-edge-connectivity.png" width="512" alt="edge connectivity">
+<img src="figures/halfedge-mesh-edge-connectivity.png" width="512" alt="edge connectivity">
 
 Faces store a reference to one of the halfedges that circulate around them in `Face::halfedge`:
 
-<img src="halfedge-mesh-face-connectivity.png" width="512" alt="face connectivity">
+<img src="figures/halfedge-mesh-face-connectivity.png" width="512" alt="face connectivity">
 
 Halfedges store the bulk of the connectivity information. They store a reference to the halfedge on the other side of their edge in `Halfedge::twin`, a reference to the halfedge that follows them in their current face in `Halfedge::next`, a reference to the vertex they leave in `Halfedge::vertex`, a reference to the edge they border in `Halfedge::edge`, and a reference to the face they circulate in `Halfedge::face`:
 
-<img src="halfedge-mesh-halfedge-connectivity.png" width="512" alt="halfedge connectivity">
+<img src="figures/halfedge-mesh-halfedge-connectivity.png" width="512" alt="halfedge connectivity">
 
 ## Mesh Data
 
 In addition to the mesh connectivity, the mesh stores data on each of the mesh features.
 
-<img src="halfedge-mesh-data.png" width="512" alt="mesh data overview">
+<img src="figures/halfedge-mesh-data.png" width="512" alt="mesh data overview">
 
 Vertices store their location in `position`, and information about skinning (A4!) in `bone_weights`.
 
@@ -45,7 +45,7 @@ Edges store a `sharp` flag which is used in shading normal computation. If this 
 
 Faces store a `boundary` flag which tells you if the face is a solid face or a face that exists to book-keep holes in the model:
 
-<img src="halfedge-mesh-face-data.png" width="512" alt="face data">
+<img src="figures/halfedge-mesh-face-data.png" width="512" alt="face data">
 
 Halfedges store `corner_uv` and `corner_normal` values, which are used to set texture coordinates and shading normals for the corner of the face associated with the halfedge.
 
@@ -62,12 +62,12 @@ Down below are some examples of how to iterate using a `Halfedge_Mesh`. Suppose 
 
 ```
 void printVertexPositions(FaceRef f) {
-  HalfedgeRef h = f->halfedge(); // get the first halfedge of the face
+  HalfedgeRef h = f->halfedge; // get the first halfedge of the face
   do {
-    VertexRef v = h->vertex();   // get the vertex of the current halfedge
-    cout << v->pos << endl;      // print the vertex position
-    h = h->next();               // move to the next halfedge around the face
-  } while (h != f->halfedge());  // keep going until we're back at the beginning
+    VertexRef v = h->vertex;   // get the vertex of the current halfedge
+    std::cout << v->position << std::endl;      // print the vertex position
+    h = h->next;               // move to the next halfedge around the face
+  } while (h != f->halfedge);  // keep going until we're back at the beginning
 }
 ```
 
@@ -75,15 +75,15 @@ Notice that we refer to a face as a FaceRef rather than just a Face. You can thi
 
 ```
 void printNeighborPositions(VertexRef v) {
-  HalfedgeRef h = v->halfedge();    // get one of the outgoing halfedges of the vertex
+  HalfedgeRef h = v->halfedge;    // get one of the outgoing halfedges of the vertex
   do {
-    HalfedgeRef h_twin = h->twin();   // get the vertex of the current halfedge
-    VertexRef vN = h_twin->vertex();  // vertex is 'source' of the half edge.
-                                      // so h->vertex() is v,
-                                      // whereas h_twin->vertex() is the neighbor vertex.
-    cout << vN->pos << endl;          // print the vertex position
-    h = h_twin->next();               // move to the next outgoing halfedge of the vertex.
-  } while(h != v->halfedge());        // keep going until we're back at the beginning
+    HalfedgeRef h_twin = h->twin;   // get the vertex of the current halfedge
+    VertexRef vN = h_twin->vertex;  // vertex is 'source' of the half edge.
+                                      // so h->vertex is v,
+                                      // whereas h_twin->vertex is the neighbor vertex.
+    std::cout << vN->position << std::endl;          // print the vertex position
+    h = h_twin->next;               // move to the next outgoing halfedge of the vertex.
+  } while(h != v->halfedge);        // keep going until we're back at the beginning
 }
 ```
 
@@ -100,7 +100,7 @@ for(VertexRef v = vertices_begin(); v != vertices_end(); v++) {
 Sometimes it is useful to associate temporary storage with the various mesh elements. E.g., to store a position or flag on a mesh element during an algorithm. You can use the fact that mesh elements have stable addresses (and we provide a `std::hash` specialization that hashes their addresses) to do this:
 ```cpp
 std::unordered_map< VertexRef, Vec3 > next_position; //store data per-element
-std::unordered_set< VertexRef > special; //store a set of 
+std::unordered_set< VertexRef > was_special; //store a set of VertexRefs
 
 for (VertexRef v = vertices.begin(); v != vertices.end(); ++v) {
 	next_position[v] = Vec3(0.0f, 0.0f, 0.0f);
