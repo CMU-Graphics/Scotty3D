@@ -6,7 +6,7 @@ This transformation is performed in-place, i.e., the original mesh data is repla
 
 There is more than one way to split a polygon into triangles. Two common patterns are to connect every vertex to a single vertex, or to "zig-zag" the triangulation across the polygon:
 
-<p align="center"><img src="global/loop/loop_41.png" width=500></p>
+<p align="center"><img src="global/triangulate/triangulate.png" width=500></p>
 
 The `triangulate` routine is not required to produce any particular triangulation so long as:
 
