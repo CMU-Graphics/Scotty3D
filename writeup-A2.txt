@@ -68,3 +68,10 @@ Task A2Go2:
 
 Task A2Go3:
 	Not attempted.
+
+Model:
+	How did you make it?
+
+	What effort did you put into it?
+
+	Any free model sources you need to credit?

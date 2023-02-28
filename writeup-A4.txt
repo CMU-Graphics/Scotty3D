@@ -15,13 +15,11 @@ Task A4T2:
 Task A4T3:
 	Fully implemented.
 
-Task A3T4:
+Task A4T4:
 	Fully implemented.
 
 animation.mp4:
 	How did you make it?
-
-	How does it use Negative Space?
 
 	Any free model sources you need to credit?
 

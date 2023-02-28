@@ -20,6 +20,8 @@ static void expect_flip(Halfedge_Mesh &mesh, Halfedge_Mesh::EdgeRef edge, Halfed
 }
 
 /*
+BASIC CASE
+
 Initial mesh:
 0--1\
 |  | \
@@ -27,7 +29,7 @@ Initial mesh:
 |  | /
 3--4/
 
-Flip edge on Edge: 1-4
+Flip Edge on Edge: 1-4
 
 After mesh:
 0--1\
@@ -36,13 +38,14 @@ After mesh:
 |    /
 3--4/
 */
-Test test_a2_l1_flip_edge_simple("a2.l1.flip_edge.simple", []() {
+Test test_a2_l1_flip_edge_basic_simple("a2.l1.flip_edge.basic.simple", []() {
 	Halfedge_Mesh mesh = Halfedge_Mesh::from_indexed_faces({
 		Vec3(-1.0f, 1.1f, 0.0f), Vec3(1.1f, 1.0f, 0.0f),
 		                                            Vec3(2.2f, 0.0f, 0.0f),
 		Vec3(-1.3f,-0.7f, 0.0f), Vec3(1.4f, -1.0f, 0.0f)
 	}, {
-		{0,3,4,1}, {1,4,2}
+		{0, 3, 4, 1}, 
+		{1, 4, 2}
 	});
 	Halfedge_Mesh::EdgeRef edge = mesh.halfedges.begin()->next->next->edge;
 
@@ -51,13 +54,16 @@ Test test_a2_l1_flip_edge_simple("a2.l1.flip_edge.simple", []() {
 		                                            Vec3(2.2f, 0.0f, 0.0f),
 		Vec3(-1.3f,-0.7f, 0.0f), Vec3(1.4f, -1.0f, 0.0f)
 	}, {
-		{0,3,4,2}, {0,2,1}
+		{0, 3, 4, 2}, 
+		{0, 2, 1}
 	});
 
 	expect_flip(mesh, edge, after);
 });
 
 /*
+EDGE CASE
+
 Initial mesh:
 0--1\
 |  | \
@@ -65,7 +71,7 @@ Initial mesh:
 |  | /
 3--4/
 
-Flip edge on Edge: 3-4
+Flip Edge on Edge: 3-4
 
 After mesh:
 0--1\
@@ -74,14 +80,14 @@ After mesh:
 |  | /
 3--4/
 */
-
-Test test_a2_l1_flip_edge_boundary("a2.l1.flip_edge.boundary", []() {
+Test test_a2_l1_flip_edge_edge_boundary("a2.l1.flip_edge.edge.boundary", []() {
 	Halfedge_Mesh mesh = Halfedge_Mesh::from_indexed_faces({
 		Vec3(-1.0f, 1.1f, 0.0f), Vec3(1.1f, 1.0f, 0.0f),
 		                                            Vec3(2.2f, 0.0f, 0.0f),
 		Vec3(-1.3f,-0.7f, 0.0f), Vec3(1.4f, -1.0f, 0.0f)
 	}, {
-		{0,3,4,1}, {1,4,2}
+		{0, 3, 4, 1}, 
+		{1, 4, 2}
 	});
 	Halfedge_Mesh::EdgeRef edge = mesh.halfedges.begin()->next->edge;
 

@@ -82,26 +82,43 @@ static void expect_triangulate(Halfedge_Mesh& mesh) {
 }
 
 
-// Triangulates a square
-Test test_meshedit_a2_g1_triangulate_boundary("a2.g1.triangulate.square", []() {
-	Halfedge_Mesh square = Halfedge_Mesh::from_indexed_faces(
-		{Vec3{-0.5f, 0.0f,-0.5f}, Vec3{-0.5f, 0.0f, 0.5f},
-		 Vec3{ 0.5f, 0.0f,-0.5f}, Vec3{ 0.5f, 0.0f, 0.5f}},
-		{{1, 3, 2, 0}});
+/*
+BASIC CASE
+
+Triangulates a square
+*/
+Test test_a2_g1_triangulate_basic_square("a2.g1.triangulate.basic.square", []() {
+	Halfedge_Mesh mesh = Halfedge_Mesh::from_indexed_faces({
+		Vec3{-0.5f, 0.0f,-0.5f}, Vec3{-0.5f, 0.0f, 0.5f},
+		Vec3{ 0.5f, 0.0f,-0.5f}, Vec3{ 0.5f, 0.0f, 0.5f}
+	},{
+		{1, 3, 2, 0}
+	});
 
 	// Many different implementations of triangulating, so just checks that all the faces are triangles and some other misc things
-	expect_triangulate(square);
+	expect_triangulate(mesh);
 });
 
-// Triangulates a cube with square faces
-Test test_meshedit_a2_g1_triangulate_quad_mesh("a2.g1.triangulate.quad_cube", []() {
-	Halfedge_Mesh quad_cube = Halfedge_Mesh::from_indexed_faces(
-		{Vec3{-1.0f, 1.0f, 1.0f}, Vec3{-1.0f, 1.0f, -1.0f},
-		 Vec3{-1.0f, -1.0f, -1.0f}, Vec3{-1.0f, -1.0f, 1.0f},
-		 Vec3{1.0f, -1.0f, -1.0f}, Vec3{1.0f, -1.0f, 1.0f},
-		 Vec3{1.0f, 1.0f, -1.0f}, Vec3{1.0f, 1.0f, 1.0f}},
-		{{3, 0, 1, 2}, {5, 3, 2, 4}, {7, 5, 4, 6}, {0, 7, 6, 1}, {0, 3, 5, 7}, {6, 4, 2, 1}});
+/*
+BASIC CASE
+
+Triangulates a cube with square faces
+*/
+Test test_a2_g1_triangulate_basic_quad_cube("a2.g1.triangulate.basic.quad_cube", []() {
+	Halfedge_Mesh mesh = Halfedge_Mesh::from_indexed_faces({
+		Vec3{-1.0f, 1.0f, 1.0f}, 	Vec3{-1.0f, 1.0f, -1.0f},
+		Vec3{-1.0f, -1.0f, -1.0f}, 	Vec3{-1.0f, -1.0f, 1.0f},
+		Vec3{1.0f, -1.0f, -1.0f}, 	Vec3{1.0f, -1.0f, 1.0f},
+		Vec3{1.0f, 1.0f, -1.0f}, 	Vec3{1.0f, 1.0f, 1.0f}
+	}, {
+		{3, 0, 1, 2}, 
+		{5, 3, 2, 4}, 
+		{7, 5, 4, 6}, 
+		{0, 7, 6, 1},
+		{0, 3, 5, 7}, 
+		{6, 4, 2, 1}
+	});
 
 	// Many different implementations of triangulating, so just checks that all the faces are triangles and some other misc things
-	expect_triangulate(quad_cube);
+	expect_triangulate(mesh);
 });

@@ -7,7 +7,7 @@ namespace Shapes {
 Vec2 Sphere::uv(Vec3 dir) {
 	float u = std::atan2(dir.z, dir.x) / (2.0f * PI_F);
 	if (u < 0.0f) u += 1.0f;
-	float v = 1.0f - std::acos(std::clamp(dir.y, -1.0f, 1.0f)) / PI_F;
+	float v = std::acos(-1.0f * std::clamp(dir.y, -1.0f, 1.0f)) / PI_F;
 	return Vec2{u, v};
 }
 

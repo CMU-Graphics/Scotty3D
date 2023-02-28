@@ -39,22 +39,6 @@ We've already supplied some camera ray logging code, enabled by setting `LOG_CAM
 
 ## Extra Credit
 
-### Defous Blur and Bokeh (1 point each)
-
-Add members `aperture` and `focal_dist` to `Camera` and make them function properly. **Aperture** is the opening in the lens by which light enters the camera.  **Focal distance** represents the distance between the camera aperture and the plane that is perfectly in focus.  These parameters can be used to simulate the effects of de-focus blur and bokeh found in real cameras.
-
-To use the focal distance parameter, you simply scale up the sensor position from step 1 (and hence ray direction) by `focal_dist` instead of leaving it on the $z = -1$ plane. You might notice that this doesn't actually change anything about your result, since this is just scaling up a vector that is later normalized. However, now aperture comes in.
-
-By default, all rays start a single point, representing a pinhole camera. But when `aperture` $> 0$, we want to randomly choose the ray origin from an `aperture`$\times$`aperture` square centered at the origin and facing the camera direction $(-Z)$. Note that typically aperture of a camera is roughly circular in shape, but a square suffices for our purposes.
-
-Then, we can use this random point as the origin of the generated ray while keeping its sensor position fixed (consider how this changes the ray direction). Now it's as if the same image was taken from slightly off origin. This simulates real cameras with non-pinhole apertures: the final photo is equivalent to averaging images taken by pinhole cameras placed at every point in the aperture.
-
-Finally, we can see that non-zero aperture makes focal distance matter: objects on the focal plane are unaffected, since where the ray hits on the sensor is the same regardless of the ray's origin. However, rays that hit objects closer or farther than the focal distance will be able to "see" slightly different parts of the object based on the ray origin. Averaging over many rays within a pixel, this results in collecting colors from a region larger slightly than that pixel would cover given zero aperture, causing the object to become blurry. We are using a square aperture, so bokeh effects will reflect this.
-
-You can test aperture/focal distance by adjusting `aperture` and `focal_dist` using the camera UI and examining logging rays. Once you have implemented primitive intersections and path tracing (tasks 2/4), you will be able to properly render `dof.dae`:
-
-<p align="center"><img src="images/dof.png" width="400"></p>
-
 ### Low-discrepancy Sampling
 Write your own pixel sampler (replacing `Rect`) that generates samples with a more advanced distribution. Refer to [Physically Based Rendering](http://www.pbr-book.org/3ed-2018/) chapter 7. Some examples include:
   - Jittered Sampling (1 point)

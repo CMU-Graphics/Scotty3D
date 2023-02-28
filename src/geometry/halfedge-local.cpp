@@ -472,6 +472,9 @@ void Halfedge_Mesh::bevel_positions(FaceRef face, std::vector<Vec3> const &start
  * This is called repeatedly as the user interacts, just after extrude_face.
  * (So you can assume the local topology is set up however your extrude_face function does it.)
  *
+ * Using extrude face in the GUI will assume a shrink of 0 to only extrude the selected face
+ * Using bevel face in the GUI will allow you to shrink and increase the size of the selected face
+ * 
  * see also [BEVEL NOTE] above.
  */
 void Halfedge_Mesh::extrude_positions(FaceRef face, Vec3 move, float shrink) {

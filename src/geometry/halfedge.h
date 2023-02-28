@@ -327,7 +327,8 @@ public:
 	static void interpolate_data(std::vector< HalfedgeCRef > const &from, HalfedgeRef to);
 
 	/* interpolate_data usage examples:
-	 
+	  //TODO: change this and explain it a bit more
+
 	  if adding a vertex vm on an edge with vertices (v1, v2), call:
 	    interpolate_data({v1, v2}, vm)
 	  if adding a vertex vm in a face with vertices (v1, ..., vN) call:

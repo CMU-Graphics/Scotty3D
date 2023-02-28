@@ -30,7 +30,5 @@ Task A3T7:
 render.png:
 	How did you make it?
 
-	Why is it Art Nouveau?
-
 	Any free model sources you need to credit?
 

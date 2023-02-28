@@ -445,6 +445,7 @@ Data uv_hemisphere(float radius) {
 	return {verts, triangles};
 }
 
+// TODO: FIX ZIG ZAG https://mft-dev.dk/uv-mapping-sphere/
 Data ico_sphere(float radius, uint32_t level) {
 	struct TriIdx {
 		uint32_t v1, v2, v3;

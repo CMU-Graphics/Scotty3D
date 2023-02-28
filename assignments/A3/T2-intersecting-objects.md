@@ -56,19 +56,33 @@ $$
 
 On the other hand, we can express any point on the ray with origin $\textbf{o}$ and **normalized** direction $\textbf{d}$ as a function of time $t$. Thus, if our ray does intersect the triangle, then we can set these two equations equal:
 
-<center>
-$$\textbf{o} + t \cdot \textbf{d} = \textbf{p}_0 + u \cdot (\textbf{p}_1 - \textbf{p}_0) + v \cdot (\textbf{p}_2 - \textbf{p}_0)$$
-$$\textbf{o} + t \cdot \textbf{d} = \textbf{p}_0 + u \cdot \textbf{e}_1 + v \cdot \textbf{e}_2$$
-$$\implies \textbf{o} - \textbf{p}_0 = u \cdot \textbf{e}_1 + v \cdot \textbf{e}_2 + t \cdot (-\textbf{d})$$
-$$\implies \left\lbrack \matrix{\textbf{e}_1 & \textbf{e}_2 & -\textbf{d}} \right\rbrack \cdot  \left\lbrack \matrix{u \cr v \cr t} \right\rbrack = \textbf{o} - \textbf{p}_0 = \textbf{s}$$
-</center>
+$$ \textbf{o} + t \cdot \textbf{d} = \textbf{p}_0 + u \cdot (\textbf{p}_1 - \textbf{p}_0) + v \cdot (\textbf{p}_2 - \textbf{p}_0) $$
+
+$$ \textbf{o} + t \cdot \textbf{d} = \textbf{p}_0 + u \cdot \textbf{e}_1 + v \cdot \textbf{e}_2 $$
+
+$$ \implies \textbf{o} - \textbf{p}_0 = u \cdot \textbf{e}_1 + v \cdot \textbf{e}_2 + t \cdot (-\textbf{d}) $$
+
+$$
+\implies 
+\left\lbrack \matrix{\textbf{e}_1 & \textbf{e}_2 & -\textbf{d}} \right\rbrack 
+\cdot \left\lbrack \matrix{u \cr v \cr t} \right\rbrack 
+= \textbf{o} - \textbf{p}_0 
+= \textbf{s}
+$$
 
 Where $\textbf{s}$, $\textbf{e}_1$ and $\textbf{e}_2$ are defined in the initial diagram.
 
 We can now use Cramer's rule where we solve for each variable as the fraction of determinants to solve the above equation:
-<center>
-$$\left\lbrack \matrix{ u \cr v \cr t} \right\rbrack = \frac{1}{(\textbf{e}_1 \times \textbf{d}) \cdot \textbf{e}_2} \cdot \left\lbrack \matrix{ -(\textbf{s} \times \textbf{e}_2) \cdot \textbf{d} \cr (\textbf{e}_1 \times \textbf{d}) \cdot \textbf{s} \cr -(\textbf{s} \times \textbf{e}_2) \cdot \textbf{e}_1} \right\rbrack$$
-</center>
+
+$$
+\left\lbrack \matrix{ u \cr v \cr t} \right\rbrack 
+= \frac{1}{(\textbf{e}_1 \times \textbf{d}) 
+\cdot \textbf{e}_2} 
+\cdot \left\lbrack \matrix{ -(\textbf{s} \times \textbf{e}_2) 
+\cdot \textbf{d} \cr (\textbf{e}_1 \times \textbf{d}) 
+\cdot \textbf{s} \cr -(\textbf{s} \times \textbf{e}_2) 
+\cdot \textbf{e}_1} \right\rbrack
+$$
 
 Once you've successfully implemented triangle intersection, you will be able to render many of the scenes in the media directory. However, your ray tracer will be very slow!
 
@@ -136,7 +150,7 @@ intersection time $t_1$ is out of bounds but the second intersection time $t_2$ 
 
 ## Reference Results
 
-You should now be able to render all of the example scenes colored based on surface normals. Note that scenes with high geometric complexity will be extremely slow until you implement task 3. Here is `dodecahedron-lit.s3d`, `A3-cbox-lambertian-spheres.s3d`, and `cow.s3d`:
+You should now be able to render all of the example scenes colored based on surface normals. You'll need to make sure that the setting `RENDER_NORMALS` is set to `True` at the top of `pathtracer.cpp`. Note that scenes with high geometric complexity will be extremely slow until you implement task 3. Here is `dodecahedron-lit.s3d`, `A3-cbox-lambertian-spheres.s3d`, and `cow.s3d`:
 
 
 <p align="center">
