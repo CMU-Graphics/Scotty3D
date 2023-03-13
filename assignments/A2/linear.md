@@ -46,22 +46,28 @@ These vertices are then connected up to form quadrilaterals (_n_ quadrilaterals 
 
 In Scotty3D, a list of polygons can be declared as
 
-    std::vector<std::vector<Index>> quads;
+```cpp
+std::vector<std::vector<Index>> quads;
+```
 
 where `std::vector` is a [class from the C++ standard template library](http://en.cppreference.com/w/cpp/container/vector), representing a dynamically-sized array. An `Index` is just another name for a `size_t`, which is the standard C++ type for integers that specify an element of an array. Polygons can be created by allocating a list of appropriate size, then specifying the indices of each vertex in the polygon. For example:
 
-    std::vector<Index> quad( 4 ); // allocate an array with four elements
-    // Build a quad with vertices specified by integers (a,b,c,d), starting at zero.
-    // These indices should correspond to the indices computing when assigning vertex
-    // positions, as described above.
-    quad[0] = a;
-    quad[1] = b;
-    quad[2] = c;
-    quad[3] = d;
+```cpp
+std::vector<Index> quad( 4 ); // allocate an array with four elements
+// Build a quad with vertices specified by integers (a,b,c,d), starting at zero.
+// These indices should correspond to the indices computing when assigning vertex
+// positions, as described above.
+quad[0] = a;
+quad[1] = b;
+quad[2] = c;
+quad[3] = d;
+```
 
 Once a quad has been created, it can be added to the list of quads by using the method `vector::push_back`, which appends an item to a vector:
 
-    std::vector<std::vector<Index>> newPolygons;
-    newPolygons.push_back( quad );
+```cpp
+std::vector<std::vector<Index>> newPolygons;
+newPolygons.push_back( quad );
+```
 
 The full array of new polygons will then be passed to the method `Halfedge_Mesh::from_poly`, together with the new vertex positions.

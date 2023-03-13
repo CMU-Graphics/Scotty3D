@@ -41,7 +41,7 @@ Refract is a non-physical BSDF that only refracts light (...or perfectly reflect
 
 ### Using Snell's Law
 
-For a given `out_dir`, we can find the `in_dir` by refracting `out_dir`. In [Snell's Law](http://15462.courses.cs.cmu.edu/fall2015/lecture/reflection/slide_032), this corresponds to finding $\theta_t$, the angle of refraction, when `out_dir` is the incident ray and `in_dir` is the refracted ray (Note: This is the exact opposite of reality since we are tracing rays _backwards_):
+For a given `out_dir`, we can find the `in_dir` by refracting `out_dir` through the surface. In [Snell's Law](http://15462.courses.cs.cmu.edu/fall2015/lecture/reflection/slide_032), this corresponds to finding $\theta_t$, the angle of refraction, when `out_dir` corresponds to the incident ray and `in_dir` corresponds to the refracted ray (Note: This is the exact opposite of reality since we are tracing rays _backwards_):
 
 $$\begin{align*}
 \eta_i \sin(\theta_i) &= \eta_t\sin(\theta_t) \\
@@ -49,12 +49,12 @@ $$\begin{align*}
 \theta_t &= \mathord{?}
 \end{align*}$$
 
-Your implementation should assume that rays always travel from / to a vacuum (i.e. index of refraction = 1.0), that is, _in reality_:
+Your implementation should assume that rays always travel from or to a _vacuum_ (i.e. index of refraction = 1.0), that is,
 
-- If `in_dir` is **entering** the surface, then the ray was previously travelling in a vacuum.
-- If `in_dir` is **leaving** the surface, then the ray is entering a vacuum.
+- If `out_dir` is **entering** the surface, then the ray was previously travelling in a vacuum.
+- If `out_dir` is **leaving** the surface, then the ray is entering a vacuum.
 
-In the figure below, observe that whether `in_dir` enters the surface depends on the sign of $(\verb|out_dir|\cdot \hat{n})$. Feel free to use this quantity directly, or further simplify it using the fact that $\hat{n}=(0, 1, 0)$ in our case.
+In the figure below, observe that whether `out_dir` enters the surface depends on the sign of $(\verb|out_dir|\cdot \hat{n})$. Feel free to use this quantity directly, or further simplify it using the fact that $\hat{n}=(0, 1, 0)$ in our case.
 
 <p align="center"><img src="figures\refract.png" style="height:380px"></p>
 
@@ -99,6 +99,7 @@ Therefore, for a dielectric material, the fraction of reflected light will be gi
 - Check your sphere intersection code, as you may have bugs there that were not exposed by rendering Lambertian spheres in Task 4.
 - Check the behavior of your refract function when `index_of_refraction = 1.f`. This should not change the transmitted direction, hence make the glass sphere transparent.
 - Test reflection and refraction separately, i.e. ignore the Fresnel coefficient and only refract or reflect. Once you've verified that those are correct, then go ahead and reintroduce the Fresnel coefficient and split rays between reflection  and refraction.
+- We've provided some **very** basic test cases in `test.a3.task5.bsdf.*.cpp`. Similar to Task 4, we highly recommend testing via the GUI as you're able to get visual feedback on what is happening with these different materials.
 
 <p align="center"><img src="figures/T5.materials.png"></p>
 

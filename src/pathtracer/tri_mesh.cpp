@@ -40,6 +40,8 @@ Trace Triangle::hit(const Ray& ray) const {
     ret.position = Vec3{}; // where was the intersection?
     ret.normal = Vec3{};   // what was the surface normal at the intersection?
                            // (this should be interpolated between the three vertex normals)
+	ret.uv = Vec2{};	   // What was the uv associated with the point of intersection?
+						   // (this should be interpolated between the three vertex uvs)
     return ret;
 }
 

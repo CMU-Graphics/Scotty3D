@@ -26,7 +26,7 @@ This should be sufficient to get environment maps working in the renderer (albei
 
 Since high dynamic range environment maps can be large files, we have not included them in the Scotty3D repository. You can download a set of sample environment maps [here](http://15462.courses.cs.cmu.edu/fall2015content/misc/asst3_images/asst3_exr_archive.zip) or -- for more interesting environment maps -- check out [poly haven](https://polyhaven.com/hdris).
 
-To use a particular environment map with your scene, select `layout` -> `Create Object` -> `Environment Light Instance`, then set the underlying `Light` type to `Sphere`, add a new `Texture`, set the texture type to `Image` and, finally, press `Change` and select your file.
+To use a particular environment map with your scene, select `layout` -> `Create Object` -> `Environment Light Instance`, then set the underlying `Light` type to `Sphere`, add a new `Texture`, set the texture type to `Image` and, finally, press `Change` and select your file. Make sure that you have the variable `SAMPLE_AREA_LIGHTS` set to be false to ensure that you're not importance sampling.
 
 ## Step 2: Importance sampling the environment map
 
@@ -78,14 +78,15 @@ Altogether, the final Jacobian is $\frac{wh}{2\pi^2 \sin(\theta)}$.
 - For inversion sampling, use `std::upper_bound`: it's a binary search. Read about it [here](https://en.cppreference.com/w/cpp/algorithm/upper_bound).
 - If you didn't use the ray log to debug area light sampling, start using it now to visualize what directions are being sampled from the environment map.
 - `src/scene/shapes.h`/`.cpp` declare/define `Sphere::uv` which converts from directions to lat/lon space.
-
+- You may want to read the [PBR section](https://www.pbr-book.org/3ed-2018/Light_Transport_I_Surface_Reflection/Sampling_Light_Sources#sec:mc-infinite-area-lights) on this topic as it helps explain all the derivations for importance sampling more in-depth.
+- The test cases we are releasing for this task are very sparse and not very informative for the most part. We encourage you to run the pathtracer in the GUI or headless to test your code instead.
 ---
 
 ## Reference Results
 
-![ennis](images/ennis.png)
-![uffiz](images/uffiz.png)
-![grace](images/grace.png)
+![ennis](figures/T7.doge.png)
+![uffiz](figures/T7.ennis.png)
+![grace](figures/T7.grace.png)
 
 ## Extra Credit
 

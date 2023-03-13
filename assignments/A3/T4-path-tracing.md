@@ -17,9 +17,10 @@ Implement `Lambertian::scatter`, `Lambertian::evaluate`, and `Lambertian::pdf`. 
 - `Lambertian::evaluate` computes the ratio of incoming to outgoing radiance given a pair of directions. Traditionally, BSDFs are specified as the ratio of incoming radiance to outgoing _irradiance_, which necessitates the extra `cos(theta)` factor in the rendering equation. In Scotty3D, however, we expect the BSDF to operate only on radiance, so you must scale the evaluation accordingly.
 - `Lambertian::pdf` computes the PDF for sampling some incoming direction given some outgoing direction. However, the Lambertian BSDF in particular does not depend on the outgoing direction. Since we sampled the incoming direction from a cosine-weighted hemisphere distribution, what is its PDF?
 
-Note: a variety of sampling functions are provided in `src/pathtracer/samplers.h`.
-
-Note: for testing, notice that `sample_direct_lighting_task4` already samples "delta lights" (i.e., non-area lights). So a scene with point or directional lights should show your material working without requiring Step 3 to be complete.
+Notes: 
+- A variety of sampling functions are provided in `src/pathtracer/samplers.h`.
+- For testing, notice that `sample_direct_lighting_task4` already samples "delta lights" (i.e., non-area lights). So a scene with point or directional lights should show your material working without requiring Step 3 to be complete.
+- We've provided test cases in `tests/test.a3.task4.bsdf.lambertian.cpp` to check whether a sample, direction and attenuation are valid from a randomly generated scatter.
 
 ## Step 3: `Pathtracer::sample_indirect_lighting`
 
@@ -36,6 +37,8 @@ NOTE: you may wish to add some ray logging to help debug. See, for example, the 
 Finally, you will estimate light that hit our shading point after being emitted from a light source without any bounces in between. For now, you should use the same sampling procedure as `Pathtracer::sample_indirect_lighting`, except for using the _direct_ component of incoming light. Note that since we are only interested in light emitted from the first intersection, we can trace a ray with `depth = 0`.
 
 Note: separately sampling direct lighting might seem silly, as we could have just gotten both direct and indirect lighting from tracing a single BSDF sample. However, separating the components will allow us to improve our direct light sampling algorithm in task 6.
+
+We won't be releasing any test cases for lighting - instead, we encourage you to run the pathtracer in the GUI or headless to test your code.
 
 ---
 

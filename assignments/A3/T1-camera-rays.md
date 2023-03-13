@@ -16,12 +16,16 @@ For `do_trace` to work, its camera rays must actually correspond to sensor pixel
 
 <p align="center"><img src="images/camera_coordinate_system.png" ></p>
 
+We've provided test cases in `tests/test.a3.task1.sample_ray.cpp` to construct a camera and plane, and see whether the rays coming from the camera will hit the plane.
+
 ## Step 2: Basic Super-sampling
 Notice that `Pathtracer::do_trace` calls `trace()` multiple times for each pixel of the image, trusting `Camera::sample_ray` to pick a new random location within the pixel. This, in turn, relies on `Rect::sample`.
 
 Implement `Rect::sample` (in `src/pathtracer/samplers.cpp`), such that it provides a random uniformly distributed 2D point within the rectangular region specified by the origin and the member `Rect::size`.
 
 Once you have implemented `Camera::sample_ray` and `Rect::sample`, you will have a working camera (see **Raytracing Visualization** section below to confirm that your camera is indeed working).
+
+We've provided test cases in `tests/test.a3.task1.sampler.rect.cpp` to check whether a sample is valid. If you wish to go above and beyond in testing this, you may want to implement a check to see whether the errors resulting from comparing an expected distribution to the distribution from your implementation is not too large (you may find using `Test::total_squared_error` to be useful).
 
 ### Raytracing Visualization
 

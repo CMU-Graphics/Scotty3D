@@ -10,6 +10,7 @@ Now, you need to implement the `hit` routine for both `Triangle` and `Sphere`. `
 * `distance`: the distance from the origin of the ray to the hit point.
 * `position`: the position of the hit point. This can be computed from `ray.at(distance)` since the ray's direction is normalized.
 * `normal`: the shading normal of the surface at the hit point. The shading normal for a triangle is computed by linear interpolation from per-vertex normals using the barycentric coordinates of the hit point as their weights. The shading normal for a sphere is the same as its geometric normal.
+* `uv`: The uv coordinates of the hit point on the surface. The uv coordinates for a triangle is computed by the linear interpolation from per-vertex uvs using the barycentric coordinates of the hit point as their weights. The uv coordinates for a sphere can be computed with spherical coordinates.
 * `origin`: the origin of the query ray (ignore).
 * `material`: the material ID of the hit object (ignore).
 
@@ -90,6 +91,7 @@ A few final notes and thoughts:
 - While you are working with `src/parhtracer/tri_mesh.cpp`, you can choose to implement `Triangle::bbox` as well (pretty straightforward to do), which is needed for task 3.
 - If the denominator ( $(\textbf{e}_1 \times \textbf{d}) \cdot \textbf{e}_2$ ) is zero, what does that mean about the relationship of the ray and the triangle? Can a triangle with this area be hit by a ray? Given $u$ and $v$, how do you know if the ray hits the triangle? Don't forget that the intersection point on the ray should be within the ray's `dist_bounds`.
 - **Don't** use `abs()`. This is the (C) integer-only absolute value function. You want the C++ `std::abs()` which has a floating-point overload; or the C `fabsf()` function.
+- We've provided test cases in `tests/test.a3.task2.triangle.hit.cpp` to construct a triangle and ray, and see whether the ray intersects the triangle by comparing the resulting trace informations.
 
 ---
 
@@ -141,6 +143,7 @@ normalized version.
 - A common mistake is to forget to check the case where the first
 intersection time $t_1$ is out of bounds but the second intersection time $t_2$ is in bounds
 (in which case you should return $t_2$).
+- We've provided test cases in `tests/test.a3.task2.sphere.hit.cpp` to construct a sphere and ray, and see whether the ray intersects the sphere by comparing the resulting trace informations.
 
 <p align="center">
     <img src="figures/sphere_specialcase_diagram.png" style="height:200px">

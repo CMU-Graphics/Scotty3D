@@ -24,6 +24,8 @@ Implement `BBox::hit` in `src/lib/bbox.h` and `Triangle::bbox` in `src/pathtrace
 
 We recommend checking out this [Scratchapixel article](https://www.scratchapixel.com/lessons/3d-basic-rendering/minimal-ray-tracer-rendering-simple-shapes/ray-box-intersection) for implementing bounding box intersections.
 
+We've provided test cases in `tests/test.a3.task3.bbox.hit.cpp` to construct a bounding box and ray, and see whether the ray intersects the bounding box by comparing the resulting trace informations. We've also provided test cases in `tests/test.a3.task3.bbox.triangle.cpp` to construct the bbox from a triangle and test whether it's valid. If you choose to make your bbox have non-zero volume as the hint suggests, you may need to choose a small enough epsilon that it does not get picked up by the `Test::differs` function.
+
 ## Step 1: BVH Construction
 
 Your job is to construct a `BVH` in `void BVH<Primitive>::build` in `src/pathtracer/bvh.cpp` using the [Surface Area Heuristic](http://15462.courses.cs.cmu.edu/fall2017/lecture/acceleratingqueries/slide_025) discussed in class. Tree construction will occur when the BVH object is constructed. Below is the pseudocode from class by which your BVH construction procedure should generally follow:
@@ -37,8 +39,9 @@ If you find it easier to think of looping over partitions rather than buckets, h
 **Notes:**
 - The $B$ referenced in the first pseudocode is the bucket that the primitive's centroid would lie in along the axis we are currently on. 
 - For the centroid referenced in the pseudocode, we can simply take the center of the primitive's bbox to be a good approximation.
-- A helpful C++ function to use for partitioning primitives is [std::partition](https://en.cppreference.com/w/cpp/algorithm/partition). This function divides the original group of elements into two sub-groups, where the first group contains elements that return true for the execution policy and the second group contains the elements that return false. Note that the elements are **not sorted** within the subgroups themselves. You may want to use [std::sort](https://en.cppreference.com/w/cpp/algorithm/sort) to sort them.
+- A helpful C++ function to use for partitioning primitives is [std::partition](https://en.cppreference.com/w/cpp/algorithm/partition). This function divides the original group of elements into two sub-groups, where the first group contains elements that return true for the execution policy and the second group contains the elements that return false.
 - You may find that this task is one of the most time consuming parts of A3, especially since this part of the documentation is intentionally sparse.
+- We've provided test cases in `tests/test.a3.task3.bvh.build.cpp` to construct a BVH from a series of triangle objects and then check if some of the invariants of the BVH holds.
 
 ## Step 2: Ray-BVH Intersection
 
@@ -48,12 +51,13 @@ Implement the ray-BVH intersection routine `Trace BVH<Primitive>::hit(const Ray&
 
 **Note:** 
 - Implementing BVH will make your renderer much faster, but it is not required to finish the assignment. When you go to Render mode and click Open Render Window, there is a checkbox to not use BVH (or pass `--no_bvh` if rendering from the command line). Uncheck that and you will be able to test the rest of the tasks.
-
+- We've provided test cases in `tests/test.a3.task3.bvh.hit.cpp` to construct a mesh that uses `bvh::hit` and see whether the ray intersects the mesh by comparing the resulting trace informations.
+- 
 ---
 
 ## Reference Results
 
-In Render mode, check the box for "BVH" and then render your image. You should be able to see the BVH you generated in task 3 once it **starts rendering**. You can click on the horizontal bar to see each level of your BVH.
+In Render mode, check the box for "BVH" and then render your image. You should be able to see the BVH you generated in task 3 once it **starts rendering**. You can click on the horizontal bar to see each level of your BVH. We've also provided test cases in `tests/test.a3.task3.bvh.fuzz.cpp` to construct a random scene of large objects and see if we can shoot random rays into the scene in a reasonable amount of time.
 
 <p align="center"><img src="images/bvh_button.png" style="height:100px"></p>
 

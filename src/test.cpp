@@ -338,7 +338,7 @@ std::optional<std::string> Test::differs< PT::Trace >(PT::Trace const &a, PT::Tr
 	// check other values if there was a hit
 	if (a.hit) {
 		if (differs(a.origin, b.origin)) {
-			return "Hit positions do not match!";
+			return "Hit origins do not match!";
 		}
 		if (std::abs(a.distance - b.distance) > EPS_F) {
 			return "Hit distances do not match!";
@@ -760,56 +760,4 @@ float Test::closest_distance(const Halfedge_Mesh& from, const Vec3& to) {
 	}
 
 	return d;
-}
-
-double Test::sphere_integrate_pdf(uint32_t W, uint32_t H, std::function<float(Vec3)> _pdf) {
-	double integral = 0.0f;
-	for (uint32_t x = 0; x < W; ++x) {
-		for (uint32_t y = 0; y < H; ++y) {
-			float theta = 2.0f * PI_F * (x + 0.5f) / W;
-			float phi = PI_F * (y + 0.5f) / H;
-			Vec3 dir = Vec3(std::cos(theta) * std::sin(phi), std::cos(phi),
-			                std::sin(theta) * std::sin(phi));
-			float pdf = _pdf(dir);
-			if (!std::isfinite(pdf)) {
-				throw Test::error("PDF was NaN or Inf!");
-			}
-			if (pdf < 0.0f) {
-				throw Test::error("PDF was negative!");
-			}
-			double theta0 = 2.0f * PI_F * x / W;
-			double theta1 = 2.0f * PI_F * (x + 1) / W;
-			double phi0 = PI_F * y / H;
-			double phi1 = PI_F * (y + 1) / H;
-			double area = (theta1 - theta0) * (std::cos(phi0) - std::cos(phi1));
-			integral += area * pdf;
-		}
-	}
-	return integral;
-}
-
-double Test::hemisphere_integrate_pdf(uint32_t W, uint32_t H, std::function<float(Vec3)> _pdf) {
-	double integral = 0.0f;
-	for (uint32_t x = 0; x < W; ++x) {
-		for (uint32_t y = 0; y < H; ++y) {
-			float theta = 2.0f * PI_F * (x + 0.5f) / W;
-			float phi = (PI_F / 2.0f) * (y + 0.5f) / H;
-			Vec3 dir = Vec3(std::cos(theta) * std::sin(phi), std::cos(phi),
-			                std::sin(theta) * std::sin(phi));
-			float pdf = _pdf(dir);
-			if (!std::isfinite(pdf)) {
-				throw Test::error("PDF was NaN or Inf!");
-			}
-			if (pdf < 0.0f) {
-				throw Test::error("PDF was negative!");
-			}
-			double theta0 = 2.0f * PI_F * x / W;
-			double theta1 = 2.0f * PI_F * (x + 1) / W;
-			double phi0 = (PI_F * 0.5f) * y / H;
-			double phi1 = (PI_F * 0.5f) * (y + 1) / H;
-			double area = (theta1 - theta0) * (std::cos(phi0) - std::cos(phi1));
-			integral += area * pdf;
-		}
-	}
-	return integral;
 }

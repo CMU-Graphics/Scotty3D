@@ -36,6 +36,7 @@ PT::Trace Sphere::hit(Ray ray) const {
     ret.distance = 0.0f;   // at what distance did the intersection occur?
     ret.position = Vec3{}; // where was the intersection?
     ret.normal = Vec3{};   // what was the surface normal at the intersection?
+	ret.uv = Vec2{}; 	   // what was the uv coordinates at the intersection? (you may find Sphere::uv to be useful)
     return ret;
 }
 

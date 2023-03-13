@@ -41,7 +41,7 @@ Spectrum Lambertian::evaluate(Vec3 out, Vec3 in, Vec2 uv) const {
 	//A3T4: Materials - Lambertian BSDF evaluation
 
     // Compute the ratio of reflected/incoming radiance when light from in_dir
-    // is reflected through out_dir: albedo * cos(theta).
+    // is reflected through out_dir: albedo / PI_F * cos(theta).
 
     return Spectrum{};
 }
@@ -93,6 +93,7 @@ Scatter Mirror::scatter(RNG &rng, Vec3 out, Vec2 uv) const {
 
 	// Use reflect to compute the new direction
 	// Don't forget that this is a discrete material!
+	// Similar to albedo, reflectance represents the ratio of incoming light to reflected light
 
     Scatter ret;
     ret.direction = Vec3();
@@ -127,6 +128,7 @@ Scatter Refract::scatter(RNG &rng, Vec3 out, Vec2 uv) const {
 	// Use refract to determine the new direction - what happens in the total internal reflection case?
     // Be wary of your eta1/eta2 ratio - are you entering or leaving the surface?
 	// Don't forget that this is a discrete material!
+	// For attenuation, be sure to take a look at the Specular Transimission section of the PBRT textbook for a derivation
 
     Scatter ret;
     ret.direction = Vec3();
@@ -176,6 +178,7 @@ Scatter Glass::scatter(RNG &rng, Vec3 out, Vec2 uv) const {
     // Be wary of your eta1/eta2 ratio - are you entering or leaving the surface?
     // What happens upon total internal reflection?
     // When debugging Glass, it may be useful to compare to a pure-refraction BSDF
+	// For attenuation, be sure to take a look at the Specular Transimission section of the PBRT textbook for a derivation
 
     Scatter ret;
     ret.direction = Vec3();
