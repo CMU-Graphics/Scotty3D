@@ -25,8 +25,6 @@ Implement `Rect::sample` (in `src/pathtracer/samplers.cpp`), such that it provid
 
 Once you have implemented `Camera::sample_ray` and `Rect::sample`, you will have a working camera (see **Raytracing Visualization** section below to confirm that your camera is indeed working).
 
-We've provided test cases in `tests/test.a3.task1.sampler.rect.cpp` to check whether a sample is valid. If you wish to go above and beyond in testing this, you may want to implement a check to see whether the errors resulting from comparing an expected distribution to the distribution from your implementation is not too large (you may find using `Test::total_squared_error` to be useful).
-
 ### Raytracing Visualization
 
 Your code can also log the results of ray computations for visualization and debugging. To do so, simply call the function `Pathtracer::log_ray` in your `Pathtracer::trace` function. Function `Pathtracer::log_ray` takes in 3 arguments: the ray that you want to log, a float that specifies the distance to log that ray up to, and a color for the ray. If you don't pass a color, it will default to white. We encourage you to make use of this feature for debugging both camera rays and those used for sampling direct & indirect lighting.
