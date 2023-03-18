@@ -8,7 +8,7 @@
 
 namespace PT {
 
-constexpr bool SAMPLE_AREA_LIGHTS = true;
+constexpr bool SAMPLE_AREA_LIGHTS = false;
 constexpr bool RENDER_NORMALS = false;
 constexpr bool LOG_CAMERA_RAYS = false;
 constexpr bool LOG_AREA_LIGHT_RAYS = false;

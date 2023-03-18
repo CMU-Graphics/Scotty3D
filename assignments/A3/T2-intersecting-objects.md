@@ -71,7 +71,7 @@ $$
 = \textbf{s}
 $$
 
-Where $\textbf{s}$, $\textbf{e}_1$ and $\textbf{e}_2$ are defined in the initial diagram.
+Where $\textbf{s}$, $\textbf{e}_1$ and $\textbf{e}_2$ are defined in the initial diagram (please read through the math if you're confused about anything).
 
 We can now use Cramer's rule where we solve for each variable as the fraction of determinants to solve the above equation:
 

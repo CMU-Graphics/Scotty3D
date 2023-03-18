@@ -71,6 +71,10 @@ bool Animate::render(Scene& scene, Widgets& widgets, Mat4 const &local_to_world,
 		float scale = std::min((user_cam.pos() - wpos).norm() / 5.5f, 10.0f);
 
 		widgets.active = Widget_Type::rotate;
+		// Change rotation axes to hopefully fix bone rotation
+		// Vec3 x,y,z;
+		// mesh->skeleton.bones[selected_bone].compute_rotation_axes(&x, &y, &z);
+		// widgets.change_rot(x, y, z);
 		widgets.render(view, wpos, scale);
 
 		return true;
@@ -304,7 +308,7 @@ bool Animate::apply_transform(Widgets& widgets, Mat4 const &local_to_world) {
 			world_to_parent = Mat4::I;
 		}
 
-		rot = Quat(); //DEBUG!
+		// rot = Quat(); //DEBUG!
 
 		//thus, the new rotation we'd like for bone's children is:
 		Mat4 new_rot = world_to_parent * rot.to_mat() * bone_to_world;

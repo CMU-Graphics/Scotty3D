@@ -59,6 +59,12 @@ Widgets::Widgets() : lines(1.0f) {
 	                      Color::yellow, Util::cube_mesh(0.15f).to_gl()};
 }
 
+void Widgets::change_rot(Vec3 x, Vec3 y, Vec3 z) {
+	x_rot.rot = x;
+	y_rot.rot = y;
+	z_rot.rot = z;
+}
+
 void Widgets::generate_lines(Vec3 pos) {
 
 	const uint8_t axis_u = static_cast<uint8_t>(axis);

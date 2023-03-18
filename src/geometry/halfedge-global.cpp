@@ -243,7 +243,7 @@ template<class T> struct MutablePriorityQueue {
 
 /*
  * simplify: reduce edge count through collapses
- *  ratio: proportion of original edges to retain
+ *  ratio: proportion of original faces to retain
  *
  * you may choose to have your implementation work only on triangle meshes,
  *  in which case it may return 'false' if there are non-triangular

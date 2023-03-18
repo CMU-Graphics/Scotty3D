@@ -30,6 +30,8 @@ void Skeleton::Bone::compute_rotation_axes(Vec3 *x_, Vec3 *y_, Vec3 *z_) const {
 	//x,z rotated by roll:
 	float cr = std::cos(roll / 180.0f * PI_F);
 	float sr = std::sin(roll / 180.0f * PI_F);
+	// x = cr * x + sr * -z;
+	// z = cross(x,y);
 	std::tie(x, z) = std::make_pair(cr * x + sr * -z, cr * z + sr * x);
 }
 

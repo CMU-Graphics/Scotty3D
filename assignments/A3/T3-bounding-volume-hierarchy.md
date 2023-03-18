@@ -28,7 +28,7 @@ We've provided test cases in `tests/test.a3.task3.bbox.hit.cpp` to construct a b
 
 ## Step 1: BVH Construction
 
-Your job is to construct a `BVH` in `void BVH<Primitive>::build` in `src/pathtracer/bvh.cpp` using the [Surface Area Heuristic](http://15462.courses.cs.cmu.edu/fall2017/lecture/acceleratingqueries/slide_025) discussed in class. Tree construction will occur when the BVH object is constructed. Below is the pseudocode from class by which your BVH construction procedure should generally follow:
+Your job is to construct a `BVH` in `void BVH<Primitive>::build` in `src/pathtracer/bvh.cpp` using the [Surface Area Heuristic](http://15462.courses.cs.cmu.edu/fall2017/lecture/acceleratingqueries/slide_025) discussed in class. For the sake of this task, you won't need to worry about optimizing this heuristic - as long as you use reasonable values for each of the variables, your BVH should perform pretty well. Tree construction will occur when the BVH object is constructed. Below is the pseudocode from class by which your BVH construction procedure should generally follow:
 
 <p align="center"><img src="figures/BVH_construction_pseudocode.png"></p>
 

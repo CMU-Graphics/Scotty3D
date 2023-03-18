@@ -64,6 +64,8 @@ public:
 
 	void action_button(Widget_Type type, const std::string& name, bool wrap = true);
 
+	void change_rot(Vec3 x, Vec3 y, Vec3 z);
+
 private:
 	void generate_lines(Vec3 pos);
 	bool to_axis(Vec3 obj_pos, Vec3 cam_pos, Vec3 dir, Vec3& hit);
