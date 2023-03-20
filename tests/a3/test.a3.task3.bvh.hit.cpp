@@ -3,11 +3,12 @@
 #include "pathtracer/tri_mesh.h"
 
 Test test_a3_task3_bvh_hit_simple_triangle("a3.task3.bvh.hit.simple.triangle", []() {
-	std::vector<PT::Tri_Mesh_Vert> verts;
-	verts.push_back({Vec3(0, 0, 0), Vec3(1, 0, 0), Vec2(0, 0)});
-	verts.push_back({Vec3(1, 0, 0), Vec3(1, 0, 0), Vec2(0, 0)});
-	verts.push_back({Vec3(0, 1, 0), Vec3(1, 0, 0), Vec2(0, 0)});
-	PT::Triangle mesh = PT::Triangle(verts.data(), 0, 1, 2);
+	std::vector<Indexed_Mesh::Vert> verts;
+	verts.push_back({Vec3(0, 0, 0), Vec3(1, 0, 0), Vec2(0, 0), 0});
+	verts.push_back({Vec3(1, 0, 0), Vec3(1, 0, 0), Vec2(0, 0), 1});
+	verts.push_back({Vec3(0, 1, 0), Vec3(1, 0, 0), Vec2(0, 0), 2});
+	std::vector<Indexed_Mesh::Index> indices = {0, 1, 2};
+	PT::Tri_Mesh mesh = PT::Tri_Mesh(Indexed_Mesh(std::move(verts), std::move(indices)), true);
 
 	Ray ray(Vec3(0, 0, -1), Vec3(0, 0, 1));
 
