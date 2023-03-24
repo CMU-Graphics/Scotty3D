@@ -12,7 +12,7 @@ bool Particles::Particle::update(const PT::Aggregate &scene, Vec3 const &gravity
 	// (2) Intersect the ray with the scene and account for collisions. Be careful when placing
 	// collision points using the particle radius. Move the particle to its next position.
 
-	// (3) Account for acceleration due to gravity.
+	// (3) Account for acceleration due to gravity after updating position.
 
 	// (4) Repeat until the entire time step has been consumed.
 

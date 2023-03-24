@@ -3,7 +3,7 @@
 **Implement:**
 - `bool Particle::update`, which updates a single particle's position over time.
 
-A particle system in Scotty3D is a collection of non-self-interacting, physics-simulated, spherical particles that interact with the rest of the scene. Take a look at the [user guide](https://cmu-graphics.github.io/Scotty3D-docs/guide/simulate_mode/) for an overview of how to create and manage them. 
+A particle system in Scotty3D is a collection of non-self-interacting, physics-simulated, spherical particles that interact with the rest of the scene. Take a look at the [slightly outdated] [user guide](https://cmu-graphics.github.io/Scotty3D-docs/guide/simulate_mode/) for an overview of how to create and manage them. 
 
 Note that this task is dependent on (at the very least) having a working triangle intersection algorithm (from A3.0). If you would like us to grade with the reference intersection code instead of your intersection code, **make sure to specify this in your writeup**.
 
@@ -23,7 +23,7 @@ $$x_{t+\Delta t} = x_t + v_t \cdot \Delta T$$
 
 $$v_{t+\Delta t} = v_t + a \cdot \Delta T$$
 
-In `Particle::update`, use this integrator to step the current particle forward for `dt` seconds. Note that the only force we will apply to our particles is gravity (the `gravity` parameter). Once you've added the update rule, you should already see some interesting behavior - create a particle system and see how the particles travel along nice parabolic trajectories. 
+In `Particle::update`, use this integrator to step the current particle forward for `dt` seconds. Note that the only force we will apply to our particles is gravity (the `gravity` parameter). Once you've added the update rule, you should already see some interesting behavior - create a particle system and see how the particles travel along nice parabolic trajectories. We've provided a sample one in `media/js3d/A4-particles.js3d`.
 
 ## Collisions
 
@@ -43,15 +43,18 @@ We will hence represent particles as small spheres. This means you must take `ra
 
 Simply finding closer intersections based on `radius` will not, of course, resolve all sphere-scene intersections: the ray can miss all geometry while the edge of the sphere would see a collision. However, this will produce visually acceptable results, greatly reducing overlap and never letting particles 'leak' through geometry. 
 
-<center><img src="T4/collision.png"></center>
+<p align="center">
+    <img src="T4/collision.png">
+</p>
 
-Once you have got collisions working, you should be able to open `particles.s3d` and see a randomized collision-fueled waterfall. Try rendering the scene!
+Once you have got collisions working, you should be able to open `media/js3d/A4-particles.s3d` and see a randomized collision-fueled waterfall. Try rendering the scene!
 
 Tips:
 - **Don't** use `abs()`. This is the integer-only absolute value function. To get the float version, use `std::abs()` (which has a floating-point overload) or `fabsf()`.
 - When accounting for radius, you don't know how far along the ray a collision might occur. Look for a collision at any distance, and if it occurs after the end of the current timestep, ignore it.
 - When accounting for radius, consider in what situation(s) you could find a collision at a negative time. In this case, you should not move the particle -- just make the velocity outward.
 - Particle positions are in world space (not particle-system-local space). This allows particle systems to behave reasonably when emitters' transforms are animated. (And makes it much easier to figure out which rays to construct for collision!)
+- We've also provided some test cases, but similar to the other tasks, they are very simple. We encourage using the GUI to test particle simulation as it is much more useful for visualizing what is happening with your code vs outputing a position and velocity of a particle.
 
 ## Lifetime
 

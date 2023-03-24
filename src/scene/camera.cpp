@@ -12,7 +12,7 @@ std::pair<Ray, float> Camera::sample_ray(RNG &rng, uint32_t px, uint32_t py) {
 	//Because cameras look down the -z axis, the "sensor plane" is
 	// the rectangle from (-w/2,-h/2,-1) to (w/2,h/2,-1)
 	// where:
-	//  h is such that the angle made by (-h/2,-1) - (0,0) - (h/2,-1) is `vertical_fov`
+	//  h is such that the angle made by (0,-h/2,-1) - (0,0,0) - (0,h/2,-1) is `vertical_fov`
 	//  and w / h is given by `aspect_ratio`.
 	//
 	//The relationship between sensor pixels and the sensor plane is such that

@@ -313,6 +313,16 @@ bool Animate::apply_transform(Widgets& widgets, Mat4 const &local_to_world) {
 		//thus, the new rotation we'd like for bone's children is:
 		Mat4 new_rot = world_to_parent * rot.to_mat() * bone_to_world;
 
+		// This will at leaset perform in the same manner as manipulating the pose directly in command line, but need to eventually be fixed for the future
+		Mat4 new_rot_local = Mat4(
+			Vec4(Vec3(1.0f, 0.0f, 0.0f), 0.0f),
+			Vec4(Vec3(0.0f, 1.0f, 0.0f), 0.0f),
+			Vec4(Vec3(0.0f, 0.0f, 1.0f), 0.0f),
+			Vec4(0.0f, 0.0f, 0.0f, 1.0f)
+		) * new_rot;
+		/* This is the correct way, but to correctly fix this, we need to change the rotation rings to also reflect these local rotation axes
+		   For now, we will rotate by the global axes
+
 		//convert into euler angles w.r.t. bone's local rotation axes:
 		Vec3 x,y,z;
 		old_bone.compute_rotation_axes(&x, &y, &z);
@@ -325,7 +335,7 @@ bool Animate::apply_transform(Widgets& widgets, Mat4 const &local_to_world) {
 		) * new_rot;
 
 		std::cout << "old pose: " << old_bone.pose << ", new rot (local): " << new_rot_local << ", euler: " << new_rot_local.to_euler() << std::endl; //DEBUG
-
+		*/
 		bone.pose = new_rot_local.to_euler();
 
 		dont_clear_select = true;

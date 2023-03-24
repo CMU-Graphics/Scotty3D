@@ -1,4 +1,3 @@
-
 #include <unordered_set>
 #include "skeleton.h"
 
@@ -63,8 +62,8 @@ std::vector< Mat4 > Skeleton::current_pose() const {
 	//You'll probably want to write a loop similar to bind_pose().
 
 	//Useful functions:
-	//Bone::compute_rotation_axes() will tell you what vectors (in local bone space) Bone::pose should rotate around.
-	//Mat4::angle_axis(angle, axis) will produce a matrix that rotates around a given axis.
+	//Bone::compute_rotation_axes() will tell you what axes (in local bone space) Bone::pose should rotate around.
+	//Mat4::angle_axis(angle, axis) will produce a matrix that rotates angle (in degrees) around a given axis.
 
 	return std::vector< Mat4 >(bones.size(), Mat4::I);
 
@@ -87,30 +86,15 @@ std::vector< Vec3 > Skeleton::gradient_in_current_pose() const {
 
 bool Skeleton::solve_ik(uint32_t steps) {
 	//A4T2b - gradient descent
-
-	// call gradient_in_current_pose() to compute d loss / d pose
-	// add ...
-
+	//check which handles are enabled
 	//run `steps` iterations
+	
+	//call gradient_in_current_pose() to compute d loss / d pose
+	//add ...
 
 	//if at a local minimum (e.g., gradient is near-zero), return 'true'.
-
+	//if run through all steps, return `false`.
 	return false;
-}
-
-void Skeleton::assign_bone_weights(Halfedge_Mesh *mesh_) const {
-	assert(mesh_);
-	auto &mesh = *mesh_;
-	(void)mesh; //avoid complaints about unused mesh
-
-	//A4T3: bone weight computation
-
-	//visit every vertex and set new values in Vertex::bone_weights
-
-	//be sure to use bone positions in the bind pose (not the current pose!)
-
-	//you should fill in the helper closest_point_on_line_segment() before working on this function
-
 }
 
 Vec3 Skeleton::closest_point_on_line_segment(Vec3 const &a, Vec3 const &b, Vec3 const &p) {
@@ -121,6 +105,21 @@ Vec3 Skeleton::closest_point_on_line_segment(Vec3 const &a, Vec3 const &b, Vec3 
 	//Efficiency note: you can do this without any sqrt's! (no .unit() or .norm() is needed!)
 
     return Vec3{};
+}
+
+void Skeleton::assign_bone_weights(Halfedge_Mesh *mesh_) const {
+	assert(mesh_);
+	auto &mesh = *mesh_;
+	(void)mesh; //avoid complaints about unused mesh
+
+	//A4T3: bone weight computation
+
+	//visit every vertex and **set new values** in Vertex::bone_weights (don't append to old values)
+
+	//be sure to use bone positions in the bind pose (not the current pose!)
+
+	//you should fill in the helper closest_point_on_line_segment() before working on this function
+
 }
 
 Indexed_Mesh Skeleton::skin(Halfedge_Mesh const &mesh, std::vector< Mat4 > const &bind, std::vector< Mat4 > const &current) {
@@ -151,7 +150,7 @@ Indexed_Mesh Skeleton::skin(Halfedge_Mesh const &mesh, std::vector< Mat4 > const
 		do {
 			//NOTE: could skip if h->face->boundary, since such corners don't get emitted
 
-			skinned_normals.emplace(h, h->corner_normal); //PLACEHOLDER! Replace with code that properly transforms the normal vector!
+			skinned_normals.emplace(h, h->corner_normal); //PLACEHOLDER! Replace with code that properly transforms the normal vector! Make sure that you normalize correctly.
 
 			h = h->twin->next;
 		} while (h != vi->halfedge);
@@ -159,7 +158,7 @@ Indexed_Mesh Skeleton::skin(Halfedge_Mesh const &mesh, std::vector< Mat4 > const
 
 	//---- step 2: transform into an indexed mesh ---
 
-	//Hint: you should be able to use the code from Indexed_Mesh::from_halfedge_mesh (SplitEdges version) pretty much verbatim.
+	//Hint: you should be able to use the code from Indexed_Mesh::from_halfedge_mesh (SplitEdges version) pretty much verbatim, you'll just need to fill in the positions and normals.
 
 	Indexed_Mesh result = Indexed_Mesh::from_halfedge_mesh(mesh, Indexed_Mesh::SplitEdges); //PLACEHOLDER! you'll probably want to copy the SplitEdges case from this function o'er here and modify it to use skinned_positions and skinned_normals.
 

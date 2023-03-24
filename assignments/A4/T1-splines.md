@@ -48,7 +48,9 @@ $$m_1 = \frac{p_3 - p_1}{t_3 - t_1}$$
 
 In other words, a reasonable guess for the tangent is given by the difference between neighboring points. (See the [Wikipedia](https://en.wikipedia.org/wiki/Cubic_Hermite_spline#Interpolation_on_an_arbitrary_interval) and our [course slides](http://15462.courses.cs.cmu.edu/spring2021/lecture/anim/slide_044) for more details.)
 
-<center><img src="T1/spline_diagram.jpg" style="height:240px"></center>
+<p align="center">
+    <img src="T1/spline_diagram.jpg" style="height:240px">
+</p>
 
 This scheme works great if we have two well-defined knots on either side of the query time $t$. But what happens if we get a query time near the beginning or end of the spline? Or what if the spline contains fewer than four knots? We still have to somehow come up with a reasonable definition for the positions and tangents of the curve at these times. For this assignment, your Catmull-Rom spline interpolation should satisfy the following properties:
 
@@ -65,7 +67,9 @@ Once we have two or more knots, interpolation can be handled using general-purpo
 * At this point, we have four valid knot values (whether "real" or "virtual"), and can compute our tangents and positions as usual.
 * These values are then handed off to our subroutine that computes cubic interpolation over the unit interval.
 
-<center><img src="T1/evaluate_catmull_rom_spline.png" style="height:300px"></center>
+<p align="center">
+    <img src="T1/evaluate_catmull_rom_spline.png" style="height:300px">
+</p>
 
 An important thing to keep in mind is that `Spline::cubic_unit_spline()` assumes that the time value $t$ is between $0$ and $1$, whereas the distance between two knots on our Catmull-Rom spline can be arbitrary. Therefore, when calling this subroutine you will have to normalize $t$ such that it is between $0$ and $1$, i.e., you will have to divide by the length of the current interval over which you are interpolating. You should think very carefully about how this normalization affects the value computed by the subroutine, in comparison to the values we want to return. A transformation is necessary for the tangents that you feed in to specify the unit spline. Refer to the wikipedia or course slides for more information if you're stuck.
 
