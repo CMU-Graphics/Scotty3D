@@ -23,10 +23,12 @@ Let $d_{ij}$ be the distance from vertex $i$ to the closest point on bone $j$ (i
     <img src="T3/closest_on_line_segment.png" style="height:280px">
 </p>
 
-Let $\hat{w}_{ij}$ be $1$ when the point is on the bone and decrease to $0$ at the bone's radius, $r$:
-$$\hat{w}_{ij} \equiv \frac{\mathrm{max}(0, r-d_{ij})}{r}$$
+Let $\hat{w}\_{ij}$ be $1$ when the point is on the bone and decrease to $0$ at the bone's radius, $r$:
+
+$$\hat{w}\_{ij} \equiv \frac{\mathrm{max}(0, r-d_{ij})}{r}$$
 
 Normalize such that the sum of the weights for any given vertex is one:
+
 $$w_{ij} \equiv \frac{\hat{w}_{ij}}{\sum_j \hat{w}_{ij}}$$
 
 (In case all weights are zero, do not store any weights for the vertex, and just transform it by the identity in `skin`.)

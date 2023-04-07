@@ -47,7 +47,7 @@ Simply finding closer intersections based on `radius` will not, of course, resol
     <img src="T4/collision.png">
 </p>
 
-Once you have got collisions working, you should be able to open `media/js3d/A4-particles.s3d` and see a randomized collision-fueled waterfall. Try rendering the scene!
+Once you have got collisions working, you should be able to open `media/js3d/A4-particles.js3d` and see a randomized collision-fueled waterfall. Try rendering the scene!
 
 Tips:
 - **Don't** use `abs()`. This is the integer-only absolute value function. To get the float version, use `std::abs()` (which has a floating-point overload) or `fabsf()`.

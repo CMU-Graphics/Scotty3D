@@ -57,7 +57,7 @@ The direct lighting procedure should now follow these steps:
 
 You will now be able to render scenes featuring area lights using far fewer samples and still get good results. The effect will be particularly pronounced when small and/or intense area lights are used with Lambertian materials (e.g. see task 7, grace.exr). 
 
-Here are `A3-cbox-spheres.s3d` and `A3-cbox-lambertian-spheres.s3d` without (left) and with (right) area light sampling (32 samples, max depth = 8):
+Here are `A3-cbox-spheres.js3d` and `A3-cbox-lambertian-spheres.js3d` without (left) and with (right) area light sampling (32 samples, max depth = 8):
 
 <p align="center"><img src="figures/T6.methods.png"></p>
 

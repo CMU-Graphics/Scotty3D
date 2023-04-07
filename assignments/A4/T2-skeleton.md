@@ -75,8 +75,6 @@ $$x_b \equiv \cos(\theta_b) \hat{x} - \sin(\theta_b) (\hat{x} \times y_b)$$
 And, finally, the $z_b$ axis is set perpendicular to $x_b$ and $y_b$ to form a right-handed coordinate system:
 $$z_b \equiv x_b \times y_b$$
 
-Unfortunately, at the moment, our current implementation of Local Axes is unfinished. While you may still use this function to complete the remaining tasks, rotating bones in the GUI will appear a little funky (as in rotating a specific rotation circle will not rotate around that specific axis).
-
 ### A picture of what's going on
 
 _Note: These diagrams are in 2D for visual clarity, but we will work with a 3D kinematic skeleton._
@@ -91,7 +89,11 @@ Then, $c_1$ is rotated by $\theta_1$ which affects itself and $c_2$. Finally, wh
 </p>
 
 
-Once you have implemented these basic kinematics, you should be able to define skeletons, set their positions at a collection of keyframes, and watch the skeleton smoothly interpolate the motion (see the [user guide](https://cmu-graphics.github.io/Scotty3D-docs/guide/animate_mode/) for an explanation of the interface and some demo videos). We have provided an example skeleton in `media/js3d/A4-human.js3d` that should behave similar to how a normal human's skeleton and joints should behave.
+Once you have implemented these basic kinematics, you should be able to define skeletons, set their positions at a collection of keyframes, and watch the skeleton smoothly interpolate the motion (see the [user guide](https://cmu-graphics.github.io/Scotty3D-docs/guide/animate_mode/) for an explanation of the interface and some demo videos). 
+
+We have provided an example skeleton in `media/js3d/A4-human.js3d` that should behave similar to how a normal human's skeleton and joints should behave. To test if you have correctly implemented forward kinematics, you should be able to see a skeleton rig and rotate any bone around their local $x$, $y$ and $z$ axes (using the `pose` slider on the left side). The rings are slightly buggy in that increasing the pose for $x$ will rotate the bone CCW while increasing $y$ or $z$ will rotate the bone CW (and also jump at varying times), so it's better to test using the slider. 
+
+An incorrect implementation of `bind_pose` will mean you won't have a skeleton rig, while an incorrect implementation of `current_pose` will mean you won't be able to properly rotate any of the bones.
 
 We have also provided some test cases for computing the bind_pose and current_pose - feel free to write more if you wish to extensively test through the test cases.
 
@@ -138,6 +140,7 @@ $$\frac{\partial}{\partial ry_b} \frac{1}{2}|p_i(q) - h|^2
  = (p_i(q) - h) \cdot \frac{\partial}{\partial ry_b} p_i(q) $$
 
 Then expand the definition of $p_i(q)$ (we omit the $I_{3\times 4}$ as it's purpose is to transform a Vec4 to a Vec3, but to make the final equation work out, there should be a $I_{3\times 4}$ to get a dot product between two Vec3s):
+
 $$= (p_i(q) - h) \cdot 
 \frac{\partial}{\partial ry_b} 
 (X_{\emptyset \gets i} \times 

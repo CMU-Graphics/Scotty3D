@@ -20,7 +20,7 @@ First, check out the interface and implementation of `Environment_Lights::Sphere
 
 Implement `Sphere::Uniform::sample` in `src/pathtracer/samplers.cpp`.
 
-Now make an implementation of `Sphere::Image::sample` and `Sphere::Image::pdf` that call `Sphere::Uniform::sample` and `Sphere::Uniform::pdf`.
+Now make an implementation of `Sphere::Image::sample` and `Sphere::Image::pdf` that call `Sphere::Uniform::sample` and `Sphere::Uniform::pdf` (this is just a placeholder so you can test your uniform sampling).
 
 This should be sufficient to get environment maps working in the renderer (albeit in a high-variance / slow-convergence way).
 
@@ -77,7 +77,7 @@ Altogether, the final Jacobian is $\frac{wh}{2\pi^2 \sin(\theta)}$.
 - `Spectrum::luma()` returns the luminance (brightness) of a Spectrum. The weight assigned to a pixel should be proportional both its luminance and the solid angle it subtends.
 - For inversion sampling, use `std::upper_bound`: it's a binary search. Read about it [here](https://en.cppreference.com/w/cpp/algorithm/upper_bound).
 - If you didn't use the ray log to debug area light sampling, start using it now to visualize what directions are being sampled from the environment map.
-- `src/scene/shapes.h`/`.cpp` declare/define `Sphere::uv` which converts from directions to lat/lon space.
+- `src/scene/shapes.h`/`.cpp` declare/define `Sphere::uv` which converts from directions to lat/lon space (not spherical coordinates!).
 - You may want to read the [PBR section](https://www.pbr-book.org/3ed-2018/Light_Transport_I_Surface_Reflection/Sampling_Light_Sources#sec:mc-infinite-area-lights) on this topic as it helps explain all the derivations for importance sampling more in-depth.
 - The test cases we are releasing for this task are very sparse and not very informative for the most part. We encourage you to run the pathtracer in the GUI or headless to test your code instead.
 ---

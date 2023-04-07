@@ -12,7 +12,12 @@ Thus, `do_trace` loops over all pixels in the image (and some number of samples 
 This part has already been implemented for you, but be sure to understand what the code is doing.
 
 ## Step 1: `Camera::sample_ray`
-For `do_trace` to work, its camera rays must actually correspond to sensor pixels. Implement `Camera::sample_ray(rng,px,py)` (in `src/scene/camera.h`, which returns a random ray which passes through a given pixel. Notice that the `Camera` has a `vertical_fov` and `aspect_ratio` indicating the vertical field of view of the camera (in degrees, not radians) as well as the aspect ratio; as well as `film.width` and `film.height` parameters giving the camera's sensor plane size in pixels. Together, these fields will allow your code to transform from a pixel location into a location on the camera's sensor plane.
+For `do_trace` to work, its camera rays must actually correspond to sensor pixels. Implement `Camera::sample_ray(rng,px,py)` (in `src/scene/camera.h`, which returns a random ray which passes through a given pixel. The `Camera` has a couple important fields:
+- `vertical_fov` indicates the vertical field of view of the camera (in degrees, not radians).
+- `aspect_ratio` indicates the aspect ratio of the camera's sensor plane.
+- `film.width` and `film.height` are parameters giving the camera's sensor plane size in pixels (you can think of this as the sizes of the image you want to render). 
+
+Together, these fields will allow your code to transform from a pixel location (**2D coordinate**) into a location on the camera's sensor plane (**3D coordinate**).
 
 <p align="center"><img src="images/camera_coordinate_system.png" ></p>
 
@@ -21,9 +26,9 @@ We've provided test cases in `tests/test.a3.task1.sample_ray.cpp` to construct a
 ## Step 2: Basic Super-sampling
 Notice that `Pathtracer::do_trace` calls `trace()` multiple times for each pixel of the image, trusting `Camera::sample_ray` to pick a new random location within the pixel. This, in turn, relies on `Rect::sample`.
 
-Implement `Rect::sample` (in `src/pathtracer/samplers.cpp`), such that it provides a random uniformly distributed 2D point within the rectangular region specified by the origin and the member `Rect::size`.
+Implement `Rect::sample` (in `src/pathtracer/samplers.cpp`), such that it provides a random uniformly distributed 2D point within the rectangular region specified by the origin and the member `Rect::size`. You may want to take a look at `util/rand.h` to see how you can use Scotty3D's random number generator.
 
-Once you have implemented `Camera::sample_ray` and `Rect::sample`, you will have a working camera (see **Raytracing Visualization** section below to confirm that your camera is indeed working).
+Once you have implemented `Camera::sample_ray` and `Rect::sample`, you will have a working camera (see the **Raytracing Visualization** section below to confirm that your camera is indeed working).
 
 ### Raytracing Visualization
 
@@ -31,7 +36,7 @@ Your code can also log the results of ray computations for visualization and deb
 
 One thing to note is that you should only log only a small fraction of the generated rays. Otherwise, your result will contain too many generated rays, making the result hard to interpret. To do so, you can add `if(log_rng.coin_flip(0.0005f)) log_ray(out, 10.0f);` to log $0.05$% of camera rays.
 
-Finally, you can visualize the logged rays by checking the box for Logged rays under Visualize and then **starting the render** (Open Render Window -> Start Render). After running the path tracer, rays will be shown as lines in visualizer. Be sure to wait for rendering to complete so you see all rays while visualizing.
+Finally, you can visualize the logged rays by checking the box for Logged rays under Visualize and then **starting the render** (Open Render Window -> Start Render). After running the path tracer, rays will be shown as lines in visualizer. Be sure to wait for rendering to complete so you see all rays while visualizing. Do note that this is independent from the scene, so you don't need to open a scene to visualize this.
 
 We've already supplied some camera ray logging code, enabled by setting `LOG_CAMERA_RAYS=true` at the top of `pathtracer.cpp`.
 

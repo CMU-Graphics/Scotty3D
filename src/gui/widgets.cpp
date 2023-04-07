@@ -59,10 +59,13 @@ Widgets::Widgets() : lines(1.0f) {
 	                      Color::yellow, Util::cube_mesh(0.15f).to_gl()};
 }
 
-void Widgets::change_rot(Vec3 x, Vec3 y, Vec3 z) {
-	x_rot.rot = x;
-	y_rot.rot = y;
-	z_rot.rot = z;
+void Widgets::change_rot(Mat4 xf, Vec3 pose, Vec3 x, Vec3 y, Vec3 z) {
+	x_rot.rot = (xf * Mat4::angle_axis(pose.z, z) * Mat4::angle_axis(pose.y, y) * Mat4::rotate_to(x)).to_euler();
+	y_rot.rot = (xf * Mat4::angle_axis(pose.z, z) * Mat4::rotate_to(y)).to_euler();
+	z_rot.rot = (xf * Mat4::rotate_to(z)).to_euler();
+	// x_rot.rot = (xf * Mat4::rotate_to(x)).to_euler();
+	// y_rot.rot = (xf * Mat4::rotate_to(y)).to_euler();
+	// z_rot.rot = (xf * Mat4::rotate_to(z)).to_euler();
 }
 
 void Widgets::generate_lines(Vec3 pos) {

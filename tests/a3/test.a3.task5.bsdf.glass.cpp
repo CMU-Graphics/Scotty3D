@@ -30,6 +30,7 @@ Test test_a3_task5_bsdf_glass_simple("a3.task5.bsdf.glass.simple", []() {
 		return false;
 	}
 
-	throw Test::error("Scattered Vec3{" + std::to_string(out.x) + ", " + std::to_string(out.y) + ", " +
-	                  std::to_string(out.z) + "} incorrectly!");
+	throw Test::error("Scattered Vec3{" + std::to_string(out.x) + ", " + std::to_string(out.y) + ", " + std::to_string(out.z) + "} incorrectly!\n" + 
+						"Expected Vec3{" + std::to_string(in.x) + ", " + std::to_string(in.y) + ", " + std::to_string(in.z) + "} but got "
+						+ "Vec3{" + std::to_string(s.direction.x) + ", " + std::to_string(s.direction.y) + ", " + std::to_string(s.direction.z) + "} instead");
 });

@@ -14,6 +14,8 @@ The BVH class also maintains a vector of all primitives in the BVH. The fields s
 
 The starter code constructs a valid BVH, but it is a trivial BVH with a single node containing all scene primitives. Once you are done with this task, you can check the box for BVH in the left bar under "Visualize" when you start render to visualize your BVH and see each level.
 
+<!-- TODO: We've also provided an example of how to make a helper function within bvh.cpp - it is up to you if you want to modify it or instead try to use a data structure to implement the recursion. -->
+
 Finally, note that the BVH visualizer will start drawing from `BVH::root_idx`, so be sure to set this to the proper index (probably `0` or `nodes.size() - 1`, depending on your implementation) when you build the BVH.
 
 ---
@@ -22,10 +24,11 @@ Finally, note that the BVH visualizer will start drawing from `BVH::root_idx`, s
 
 Implement `BBox::hit` in `src/lib/bbox.h` and `Triangle::bbox` in `src/pathtracer/tri_mesh.cpp` (if you haven't already from Task 2).
 
-We recommend checking out this [Scratchapixel article](https://www.scratchapixel.com/lessons/3d-basic-rendering/minimal-ray-tracer-rendering-simple-shapes/ray-box-intersection) for implementing bounding box intersections.
+We recommend checking out this [Scratchapixel article](https://www.scratchapixel.com/lessons/3d-basic-rendering/minimal-ray-tracer-rendering-simple-shapes/ray-box-intersection) for implementing bounding box intersections. Please read the whole article to understand each part of the code snippet at the bottom - do note the difference between our implementation with `times` versus the provided code. 
 
-We've provided test cases in `tests/test.a3.task3.bbox.hit.cpp` to construct a bounding box and ray, and see whether the ray intersects the bounding box by comparing the resulting trace informations. We've also provided test cases in `tests/test.a3.task3.bbox.triangle.cpp` to construct the bbox from a triangle and test whether it's valid. If you choose to make your bbox have non-zero volume as the hint suggests, you may need to choose a small enough epsilon that it does not get picked up by the `Test::differs` function.
+We've provided test cases in `tests/test.a3.task3.bbox.hit.cpp` to construct a bounding box and ray, and seeing whether the ray intersects the bounding box by comparing the resulting trace informations. 
 
+We've also provided test cases in `tests/test.a3.task3.bbox.triangle.cpp` to construct the bbox from a triangle and test whether it's valid. If you choose to make your bbox have non-zero volume as the hint suggests, you may need to choose a small enough epsilon that it does not get picked up by the `Test::differs` function.
 ## Step 1: BVH Construction
 
 Your job is to construct a `BVH` in `void BVH<Primitive>::build` in `src/pathtracer/bvh.cpp` using the [Surface Area Heuristic](http://15462.courses.cs.cmu.edu/fall2017/lecture/acceleratingqueries/slide_025) discussed in class. For the sake of this task, you won't need to worry about optimizing this heuristic - as long as you use reasonable values for each of the variables, your BVH should perform pretty well. Tree construction will occur when the BVH object is constructed. Below is the pseudocode from class by which your BVH construction procedure should generally follow:
@@ -41,18 +44,18 @@ If you find it easier to think of looping over partitions rather than buckets, h
 - For the centroid referenced in the pseudocode, we can simply take the center of the primitive's bbox to be a good approximation.
 - A helpful C++ function to use for partitioning primitives is [std::partition](https://en.cppreference.com/w/cpp/algorithm/partition). This function divides the original group of elements into two sub-groups, where the first group contains elements that return true for the execution policy and the second group contains the elements that return false.
 - You may find that this task is one of the most time consuming parts of A3, especially since this part of the documentation is intentionally sparse.
+- There is no "correct" BVH construction - as long as your BVH levels seem to look approximately correct, it is likely that you have a good implementation. If it looks biased on one of the axes or if it seems that there are levels missing, then you likely have a buggy implementation.
 - We've provided test cases in `tests/test.a3.task3.bvh.build.cpp` to construct a BVH from a series of triangle objects and then check if some of the invariants of the BVH holds.
 
 ## Step 2: Ray-BVH Intersection
 
-Implement the ray-BVH intersection routine `Trace BVH<Primitive>::hit(const Ray& ray)` in `src/pathtracer/bvh.cpp`. You may wish to consider the node visit order optimizations we discussed in class. Once complete, your renderer should be able to render all of the test scenes in a reasonable amount of time. Below is the pseudocode that we went over [in class](http://15462.courses.cs.cmu.edu/spring2022/lecture/spatial/slide_021):
+Implement the ray-BVH intersection routine `Trace BVH<Primitive>::hit(const Ray& ray)` in `src/pathtracer/bvh.cpp`. You may wish to consider the node visit order optimizations we discussed in class. Once complete, your renderer should be able to render all of the test scenes in a reasonable amount of time (as in you can see progress and it will eventually finish). Below is the pseudocode that we went over [in class](http://15462.courses.cs.cmu.edu/spring2022/lecture/spatial/slide_021):
 
 <p align="center"><img src="figures/ray_bvh_pseudocode.png"></p>
 
 **Note:** 
-- Implementing BVH will make your renderer much faster, but it is not required to finish the assignment. When you go to Render mode and click Open Render Window, there is a checkbox to not use BVH (or pass `--no_bvh` if rendering from the command line). Uncheck that and you will be able to test the rest of the tasks.
+- Implementing BVH will make your renderer much faster, but it is not required to finish the assignment. When you go to Render mode and click Open Render Window, there is a checkbox to not use BVH (or pass `--no_bvh` if rendering from the command line). Uncheck that and you will be able to test the rest of the tasks in A3.5.
 - We've provided test cases in `tests/test.a3.task3.bvh.hit.cpp` to construct a mesh that uses `bvh::hit` and see whether the ray intersects the mesh by comparing the resulting trace informations.
-- 
 ---
 
 ## Reference Results

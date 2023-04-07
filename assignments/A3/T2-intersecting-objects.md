@@ -2,26 +2,26 @@
 
 Now that your ray tracer generates camera rays, we need to be able to answer the core query in ray tracing: "does this ray hit this object?" Here, you will start by implementing ray-object intersection routines against the two types of objects in the starter code: **triangles** and **spheres**.
 
-First, take a look at `src/pathtracer/instance.h` for the interface of the `Instance` class. An `Instance` can be **either** a `Tri_Mesh` or a `Shape`. The interfaces for `Tri_Mesh` and `Shape` are in `src/pathtracer/tri_mesh.h`  and `src/scene/shape.h`, respectively. `Tri_Mesh` contains a BVH (or list) of `Triangle`, and in this task you will be working with the `Triangle` class. For `Shape`, you are going to work with a `Sphere`, which is the only type of `Shape` in Scotty3D.
+First, take a look at `src/pathtracer/instance.h` for the interface of the `Instance` class. An `Instance` can be **either** a `Tri_Mesh` or a `Shape`. The interfaces for `Tri_Mesh` and `Shape` are in `src/pathtracer/tri_mesh.h` and `src/scene/shape.h`, respectively. `Tri_Mesh` contains a BVH (or list) of `Triangle`, and in this task you will be working with the `Triangle` class. For `Shape`, you are going to work with a `Sphere`, which is the only type of `Shape` in Scotty3D.
 
 Now, you need to implement the `hit` routine for both `Triangle` and `Sphere`. `hit` takes in a ray, and returns a `Trace` structure (see: `src/pathtracer/trace.h`), which contains the following information:
 
 * `hit`: a boolean representing if there is a hit or not.
-* `distance`: the distance from the origin of the ray to the hit point.
+* `distance`: the distance from the origin of the ray to the hit point. This will often times be `t` since the ray's direction is normalized (think back to distance = rate $\times$ time).
 * `position`: the position of the hit point. This can be computed from `ray.at(distance)` since the ray's direction is normalized.
 * `normal`: the shading normal of the surface at the hit point. The shading normal for a triangle is computed by linear interpolation from per-vertex normals using the barycentric coordinates of the hit point as their weights. The shading normal for a sphere is the same as its geometric normal.
 * `uv`: The uv coordinates of the hit point on the surface. The uv coordinates for a triangle is computed by the linear interpolation from per-vertex uvs using the barycentric coordinates of the hit point as their weights. The uv coordinates for a sphere can be computed with spherical coordinates.
-* `origin`: the origin of the query ray (ignore).
+* `origin`: the origin of the query ray.
 * `material`: the material ID of the hit object (ignore).
 
 In order to correctly implement `hit`, you will also need to understand some of the fields in the Ray structure defined in `src/lib/ray.h`.
 
-* `point`: the 3D point of origin of the ray
-* `dir`: the 3D direction of the ray (always normalized)
+* `point`: the 3D point of origin of the ray.
+* `dir`: the 3D direction of the ray (always normalized).
 * `dist_bounds`: the minimum and maximum distance along the ray. Primitive intersections that lie outside the [`ray.dist_bounds.x`, `ray.dist_bounds.y`] range should be disregarded.
 * `depth`: the recursive depth of the ray (Used in task $4$).
 
-One important detail of the ray structure is the `dist_bounds` field. When finding intersections with aggregates of many primitives, you will want to update the ray's `dist_bounds` value after finding each hit with scene geometry (possibly by using a local copy of the ray given they are often `const &` parameters). By bounding the ray as tightly as possible, your ray tracer will be able to avoid unnecessary tests with scene geometry that is known to not be able to result in a closest hit, resulting in higher performance.
+One important detail of the ray structure is the `dist_bounds` field. When finding intersections with aggregates of many primitives, you will want to update the ray's `dist_bounds` value after finding each hit with scene geometry (possibly by using a local copy of the ray given they are often `const &` parameters). By bounding the ray as tightly as possible, your ray tracer will be able to avoid unnecessary tests with scene geometry that is known to not be able to result in a closest hit, resulting in higher performance. You may ignore this for now, but this will be important in later tasks.
 
 ---
 
@@ -31,15 +31,18 @@ One important detail of the ray structure is the `dist_bounds` field. When findi
 
 The first intersect routine you will implement is the `hit` routine for triangle meshes in `src/pathtracer/tri_mesh.cpp`.
 
-We recommend that you implement the [*Moller-Trumbore algorithm*](https://www.scratchapixel.com/lessons/3d-basic-rendering/ray-tracing-rendering-a-triangle/moller-trumbore-ray-triangle-intersection), a fast algorithm
-that takes advantage of a barycentric coordinates parameterization of the
-intersection point, for ray-triangle intersection. We will provide motivation for the algorithm down below, but feel free to look at other resources for ray-triangle intersections.
+We recommend that you implement the [*Moller-Trumbore algorithm*](https://www.scratchapixel.com/lessons/3d-basic-rendering/ray-tracing-rendering-a-triangle/moller-trumbore-ray-triangle-intersection), a fast algorithm that takes advantage of a barycentric coordinates parameterization of the intersection point, for ray-triangle intersection. We will provide motivation for the algorithm down below, but feel free to look at other resources for ray-triangle intersections.
 
 Down below will be our main diagram that will illustrate this algorithm:
 
 <p align="center">
     <img src="figures/triangle_intersect_diagram.png" style="height:300px">
 </p>
+
+We define the following variables in terms of this diagram:
+- $s = o - p_0$
+- $e_1 = p_1 - p_0$
+- $e_2 = p_2 - p_0$
 
 First, we can parameterize any point $\textbf{P}$ in terms of the vertices $\textbf{p}_0$, $\textbf{p}_1$ andd $\textbf{p}_2$ with barycentric coordinates $u$, $v$ and $w$:
 
@@ -91,6 +94,7 @@ A few final notes and thoughts:
 - While you are working with `src/parhtracer/tri_mesh.cpp`, you can choose to implement `Triangle::bbox` as well (pretty straightforward to do), which is needed for task 3.
 - If the denominator ( $(\textbf{e}_1 \times \textbf{d}) \cdot \textbf{e}_2$ ) is zero, what does that mean about the relationship of the ray and the triangle? Can a triangle with this area be hit by a ray? Given $u$ and $v$, how do you know if the ray hits the triangle? Don't forget that the intersection point on the ray should be within the ray's `dist_bounds`.
 - **Don't** use `abs()`. This is the (C) integer-only absolute value function. You want the C++ `std::abs()` which has a floating-point overload; or the C `fabsf()` function.
+- Please use the $t$ value that is computed via the algorithm. Recomputing the point of intersection and then the distance may need to small floating point errors that cause significant errors when performing global illumination.
 - We've provided test cases in `tests/test.a3.task2.triangle.hit.cpp` to construct a triangle and ray, and see whether the ray intersects the triangle by comparing the resulting trace informations.
 
 ---
@@ -131,7 +135,7 @@ $$
 
 Notice how there are potentially two solutions to the quadratic - this makes sense as if we go into the sphere in some direction, then we will go out of the sphere on the other side. Consider what happens when the discriminant is negative or zero, and how to take care of that case.
 
-Once you've implemented both this and ray-triangle intersections, you should be able to render the normals of `cbox.s3d` and any other scene that involves spheres.
+Once you've implemented both this and ray-triangle intersections, you should be able to render the normals of `A3-cbox-lambertian-spheres.js3d` and any other scene that involves spheres.
 
 
 A few final notes and thoughts:
@@ -143,6 +147,7 @@ normalized version.
 - A common mistake is to forget to check the case where the first
 intersection time $t_1$ is out of bounds but the second intersection time $t_2$ is in bounds
 (in which case you should return $t_2$).
+- Please use the $t$ value(s) that is computed via the algorithm. Recomputing the point of intersection and then the distance may need to small floating point errors that cause significant errors when performing global illumination.
 - We've provided test cases in `tests/test.a3.task2.sphere.hit.cpp` to construct a sphere and ray, and see whether the ray intersects the sphere by comparing the resulting trace informations.
 
 <p align="center">
@@ -153,7 +158,7 @@ intersection time $t_1$ is out of bounds but the second intersection time $t_2$ 
 
 ## Reference Results
 
-You should now be able to render all of the example scenes colored based on surface normals. You'll need to make sure that the setting `RENDER_NORMALS` is set to `True` at the top of `pathtracer.cpp`. Note that scenes with high geometric complexity will be extremely slow until you implement task 3. Here is `dodecahedron-lit.s3d`, `A3-cbox-lambertian-spheres.s3d`, and `cow.s3d`:
+You should now be able to render all of the example scenes colored based on surface normals. You'll need to make sure that the setting `RENDER_NORMALS` is set to `True` at the top of `pathtracer.cpp`. Note that scenes with high geometric complexity will be extremely slow until you implement task 3. Here is `dodecahedron-lit.js3d`, `A3-cbox-lambertian-spheres.js3d`, and `cow.js3d`:
 
 
 <p align="center">

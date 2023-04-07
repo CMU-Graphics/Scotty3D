@@ -58,15 +58,15 @@ In the figure below, observe that whether `out_dir` enters the surface depends o
 
 <p align="center"><img src="figures\refract.png" style="height:380px"></p>
 
-Note that there is a special case to account for: total internal reflection. This occurs when a ray hits a refractive boundary at an angle greater than the _critical angle_. The critical angle is the incident $\theta_i$ that causes the refracted $\theta_t$ to be $\ge 90$ degrees, hence can produce no real solution to Snell's Law. In this case, you should set `was_internal` to `true`.
+Note that there is a special case to account for: total internal reflection. This occurs when a ray hits a refractive boundary at an angle greater than the _critical angle_. The critical angle is the incident $\theta_i$ that causes the refracted $\theta_t$ to be $> 90$ degrees, hence can produce no real solution to Snell's Law. In this case, you should set `was_internal` to `true`.
 
-$$\frac{\eta_i\sin(\theta_i)}{\eta_t}\overset{?}{\geq} 1$$
+$$\frac{\eta_i\sin(\theta_i)}{\eta_t}\overset{?}{>} 1$$
 
 ### Distribution Function for Transmitted Light
 
 Although we described the BRDF for perfect specular reflection in class, we did not discuss the distribution function for transmitted light. Unlike reflection, refraction "spreads" or "condenses" a differential beam of light. Hence, a refraction event should change the radiance along a ray.
 
-After using Snell's Law to find the direction of refracted rays, compute the BSDF attenuation using the distribution function found in Pharr, Jakob, and and Humphries's book [Physically Based Rendering](http://www.pbr-book.org/3ed-2018/Reflection_Models/Specular_Reflection_and_Transmission.html). It also includes a derivation based Snell's Law and the relation $d\Phi_t = (1-F_r)d\Phi_i$. Of course, you are more than welcome to attempt a derivation on your own!
+After using Snell's Law to find the direction of refracted rays, compute the BSDF attenuation using the distribution function found in Pharr, Jakob, and and Humphries's book [Physically Based Rendering](http://www.pbr-book.org/3ed-2018/Reflection_Models/Specular_Reflection_and_Transmission.html). Since this material is pure refraction, we won't need to weight the attenuation on the Fresnel coefficient.
 
 
 ## Step 3: `Materials::Glass`
@@ -107,7 +107,7 @@ Therefore, for a dielectric material, the fraction of reflected light will be gi
 
 ## Reference Results
 
-When you are done, you will be able to render images with specular materials, like the Cornell Box with a metal and glass sphere (`A3-cbox-spheres.s3d`, 1024 samples, max depth 8):
+When you are done, you will be able to render images with specular materials, like the Cornell Box with a metal and glass sphere (`A3-cbox-spheres.js3d`, 1024 samples, max depth 8):
 
 <p align="center"><img src="renders/T5.A3-cbox-spheres.png"></p>
 

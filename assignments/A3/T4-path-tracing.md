@@ -4,25 +4,26 @@ Up to this point, your renderer has only computed object visibility using ray tr
 
 ---
 
-## Step 1: `Pathtracer::trace`
+## Step 0: `Pathtracer::trace`
 
-`Pathtracer::trace` is the function responsible for coordinating the path tracing procedure. We've given you code to intersect a ray with the scene and collect information about the surface intersection necessary for computing the lighting at that point. You should read this function and understand where/why functions of the `bsdf` are called.
+`Pathtracer::trace` is the function responsible for coordinating the path tracing procedure. We've given you code to intersect a ray with the scene and collect information about the surface intersection necessary for computing the lighting at that point. You should read this function and understand where/why functions of the `bsdf` are called. **You do not need to modify anything here, just understand the procedure.**
 
-## Step 2: `Lambertian`
+## Step 1: `Lambertian`
 
 Implement `Lambertian::scatter`, `Lambertian::evaluate`, and `Lambertian::pdf`. Note that their interfaces are defined in `src/scene/material.h`. Task 5 will further discuss sampling BSDFs, so reading ahead may help your understanding.
 
 - `Lambertian::albedo` is a texture giving the ratio of incoming light to reflected light, also known as the base color of the Lambertian material. Call `albedo.lock()->evaluate(uv)` to get the albedo at the current point. Note that an albedo of $1$ should correspond to perfect energy conservation. (I.e., this value has _not_ been pre-divided by $\pi$.)
 - `Lambertian::scatter` returns a `Scatter` object, with `direction` and `attenuation` components. You can use a `Samplers::Hemisphere::Cosine sampler` to randomly sample a direction from a cosine-weighted hemisphere distribution and you can compute the attenuation component via `Lambertian::evaluate`.
-- `Lambertian::evaluate` computes the ratio of outgoing **differential irradiance** to incoming **radiance**, given a pair of directions. Traditionally, BSDFs are specified as the ratio of outgoing radiance to incoming radiance, which necessitates the extra `cos(theta_in)` factor in the rendering equation. In Scotty3D, however, we move this cosine term from the rendering equation into the BSDF, meaning it returns differential irradiance.
+- `Lambertian::evaluate` computes the ratio of outgoing to incoming radiance given a pair of directions. Traditionally, BSDFs are specified as the ratio of outgoing radiance to incoming _irradiance_, which necessitates the extra `cos(theta)` factor in the rendering equation. In Scotty3D, however, we expect the BSDF to operate only on radiance, so you must scale the evaluation accordingly.
 - `Lambertian::pdf` computes the PDF for sampling some incoming direction given some outgoing direction. However, the Lambertian BSDF in particular does not depend on the outgoing direction. Since we sampled the incoming direction from a cosine-weighted hemisphere distribution, what is its PDF?
 
 Notes: 
 - A variety of sampling functions are provided in `src/pathtracer/samplers.h`.
 - For testing, notice that `sample_direct_lighting_task4` already samples "delta lights" (i.e., non-area lights). So a scene with point or directional lights should show your material working without requiring Step 3 to be complete.
+- Understanding what `out_dir` and `in_dir` represents is key to understanding pathtracing as a whole - make sure you also read the beginning of task 5's documentation if you're still confused.
 - We've provided test cases in `tests/test.a3.task4.bsdf.lambertian.cpp` to check whether a sample, direction and attenuation are valid from a randomly generated scatter.
 
-## Step 3: `Pathtracer::sample_indirect_lighting`
+## Step 2: `Pathtracer::sample_indirect_lighting`
 
 In this function, you will estimate light that bounced off at least one other surface before reaching our shading point. This is called _indirect_ lighting.
 
@@ -32,7 +33,7 @@ In this function, you will estimate light that bounced off at least one other su
 
 NOTE: you may wish to add some ray logging to help debug. See, for example, the code in `sample_direct_lighting_task6` for and example of such code. Guarding it with a constant (in the example: `LOG_AREA_LIGHT_RAYS`) is useful so it is easy to turn off for increased performance.
 
-## Step 4: `Pathtracer::sample_direct_lighting_task4`
+## Step 3: `Pathtracer::sample_direct_lighting_task4`
 
 Finally, you will estimate light that hit our shading point after being emitted from a light source without any bounces in between. For now, you should use the same sampling procedure as `Pathtracer::sample_indirect_lighting`, except for using the _direct_ component of incoming light. Note that since we are only interested in light emitted from the first intersection, we can trace a ray with `depth = 0`.
 
@@ -44,7 +45,7 @@ We won't be releasing any test cases for lighting - instead, we encourage you to
 
 ## Reference Results
 
-After correctly implementing task 4, your renderer should be able to make a beautifully lit picture of the Cornell Box with Lambertian spheres (`A3-cbox-lambertian-spheres.s3d`). Below is a render using 1024 samples per pixel (spp):
+After correctly implementing task 4, your renderer should be able to make a beautifully lit picture of the Cornell Box with Lambertian spheres (`A3-cbox-lambertian-spheres.js3d`). Below is a render using 1024 samples per pixel (spp):
 
 ![cbox lambertian](renders/T4.A3-cbox-lambertian-spheres.s1024.large.png)
 

@@ -79,22 +79,19 @@ Note that this loop is just a representative example, the implementer must consi
 
 For Loop subdivision, there are some additional data members that will make it easy to keep track of the data needed to update the connectivity and vertex positions. In particular:
 
-- `vertex_new_pos` can be used as temporary storage for the new position (computed via the weighted average above). Note that one should *not* change the value of `Vertex::pos` until *all* the new vertex positions have been computed -- otherwise, subsequent computation will take averages of values that have already been averaged!
+- `vertex_new_pos` can be used as temporary storage for the new position (computed via the weighted average above). Note that one should *not* change the value of `Vertex::position` until *all* the new vertex positions have been computed -- otherwise, subsequent computation will take averages of values that have already been averaged!
 - Likewise, `edge_new_pos` can be used to store the position of the vertices that will ultimately be inserted at edge midpoints. Again, these values should be computed from the original values (before subdivision), and applied to the new vertices only at the very end. Each `edge_new_pos` value will be used for the position of the vertex that will appear along the old edge after the edge is split. We precompute the position of the new vertex before splitting the edges and allocating the new vertices because it is easier to traverse the simpler original mesh to find the positions for the weighted average that determines the positions of the new vertices.
 
 Given this setup, we strongly suggest that it will be easiest to implement subdivision according to the following "recipe" (though the implementer is of course welcome to try doing things a different way!). The basic strategy is to *first* compute the new vertex positions (storing the results in the `new_pos` maps for both vertices and edges), and only *then* update the connectivity. Doing it this way will be much easier, since traversal of the original (coarse) connectivity is much simpler than traversing the new (fine) connectivity. In more detail:
 
-1. Mark all vertices as belonging to the original mesh by setting `Vertex::is_new` to `false` for all vertices in the mesh.
-2. Compute updated positions for all vertices in the original mesh using the vertex subdivision rule, and store them in `Vertex::new_pos`.
-3. Compute new positions associated with the vertices that will be inserted at edge midpoints, and store them in `Edge::new_pos`.
-4. Split every edge in the mesh, being careful about how the loop is written. In particular, you should make sure to iterate only over edges of the original mesh. Otherwise, the loop will keep splitting edges that you just created!
-5. Flip any new edge that connects an old and new vertex.
-6. Finally, copy the new vertex positions (`Vertex::new_pos`) into the usual vertex positions (`Vertex::pos`).
+1. Compute updated positions for all vertices in the original mesh using the vertex subdivision rule, and store them in `vertex_new_pos`.
+2. Compute new positions associated with the vertices that will be inserted at edge midpoints, and store them in `edge_new_pos`.
+3. Split every edge in the mesh, being careful about how the loop is written. In particular, you should make sure to iterate only over edges of the original mesh. Otherwise, the loop will keep splitting edges that you just created!
+4. Flip any new edge that connects an old and new vertex, using the provided `is_new` lambda function.
+5. Finally, copy the new vertex positions (in `vertex_new_pos`) into the usual vertex positions (`Vertex::position`).
 
-It may be useful to ensure `Halfedge_Mesh::split_edge()` will now return an iterator to the newly inserted vertex, and particularly that the halfedge of this vertex will point along the edge of the original mesh. This iterator is useful because it can be used to 
-1. Flag the vertex returned by the split operation as a new vertex, and 
-2. Flag each outgoing edge as either being new or part of the original mesh. 
+It may be useful to ensure `Halfedge_Mesh::split_edge()` will now return an iterator to the newly inserted vertex, and particularly that the halfedge of this vertex will point along the edge of the original mesh. This iterator is useful because it can be used to flag each outgoing edge as either being new or part of the original mesh. 
 
-(In other words, Step $4$ is a great time to set the members `is_new` for vertices and edges created by the split. It is also a good time to copy the `new_pos` field from the edge being split into the `new_pos` field of the newly inserted vertex.)
+(In other words, Step 3 is a great time to copy the position from `edge_new_pos` to the newly inserted vertex. It is also a good time to flag the new edges after each split and store them in `new_edges` for later use.)
 
 We recommend implementing this algorithm in stages, e.g., *first* see if you can correctly update the connectivity, *then* worry about getting the vertex positions right.

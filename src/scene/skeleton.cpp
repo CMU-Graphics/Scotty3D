@@ -187,6 +187,8 @@ void Skeleton::erase_bone(BoneIndex bone) {
 			bones[b].parent -= 1;
 		}
 	}
+	// erase the bone
+	bones.erase(bones.begin() + bone);
 	//update indices in handles (and erase any handles on this bone):
 	for (uint32_t h = 0; h < handles.size(); /* later */) {
 		if (handles[h].bone == bone) {
