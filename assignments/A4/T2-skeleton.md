@@ -131,7 +131,7 @@ The gradient of $f$ (i.e., $\nabla f$) is the vector consisting of the partial d
 So let's look at one example: let's take the partial derivative with respect to $ry_b$ -- the rotation around the local $y_b$ axis of bone $b$.
 
 First, we expand the definition of $f$:
-$$\frac{\partial}{\partial ry_b} f = \sum_{(h,i)} \frac{\partial}{\partial ry_b} \frac{1}{2}|p_i(\mathbf{\theta}) - h|^2 $$
+$$\frac{\partial}{\partial ry_b} f = \sum_{(h,i)} \frac{\partial}{\partial ry_b} \frac{1}{2}|p_i(q) - h|^2 $$
 
 In other words, we can compute the partial derivatives for each IK handle individually and sum them.
 Any IK handle where $b$ isn't in the kinematic chain will contribute nothing to the partial derivative (can you explain why?), so let's look at a handle whose bone $i$ is a descendant of $b$, and apply the chain rule (do make a note of the dimensions of each of these parts):
