@@ -12,9 +12,9 @@ std::optional<std::pair<std::string, size_t>> compareVerts(std::vector<Indexed_M
 		if (Test::differs(expected[i].pos, actual[i].pos)) {
 			return std::pair{"Vertex positions differ", i};
 		}
-        if(Test::differs(expected[i].pos, actual[i].pos)) {
-			return std::pair{"Vertex normals differ", i};
-        }
+		if(Test::differs(expected[i].norm, actual[i].norm)) {
+				return std::pair{"Vertex normals differ", i};
+		}
 	}
 
 	return std::nullopt;
