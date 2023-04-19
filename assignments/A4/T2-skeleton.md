@@ -111,7 +111,7 @@ Now that we have a logical way to move joints around, we can implement Inverse K
 $$q \gets q - \tau \nabla f$$
 
 Where $\tau$ is a small timestep and $q$ holds all the `Bone::pose` coordinates.
-Specifically, we'll be using gradient descent to find the minimum of a cost function which measures the total squared distance between a set of IK handles positions $h$ and their associated bones $b$:
+Specifically, we'll be using gradient descent to find the minimum of a cost function which measures the total squared distance between a set of IK handles positions $h$ and their associated bones $i$:
 
 $$f(q) = \sum_{(h,i)} \frac{1}{2}|p_i(q) - h|^2 $$
 
