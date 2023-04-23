@@ -1,7 +1,7 @@
 # `A4T4` Particle Systems
 
 **Implement:**
-- `bool Particle::update`, which updates a single particle's position over time.
+- `bool Particle::update` in `src/scene/particles.cpp`, which updates a single particle's position over time.
 
 A particle system in Scotty3D is a collection of non-self-interacting, physics-simulated, spherical particles that interact with the rest of the scene. Take a look at the [slightly outdated] [user guide](https://cmu-graphics.github.io/Scotty3D-docs/guide/simulate_mode/) for an overview of how to create and manage them. 
 
