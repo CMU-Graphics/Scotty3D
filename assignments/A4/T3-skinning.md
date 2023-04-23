@@ -41,7 +41,7 @@ For efficiency, you should only store nonzero bone weights in `Vertex::bone_weig
 - `Skeleton::skin`, which applies a skining transform to a halfedge mesh and produces an indexed mesh.
 
 Compute the resulting position of every vertex by doing a weighted average of the bind-to-posed transforms from each bone and applying it to the vertex.
-Compute the normals of the adjacent corners by applying the [inverse transpose](https://paroj.github.io/gltut/Illumination/Tut09%20Normal%20Transformation.html) of the transformation applied to the vertex.
+Compute the normals of the adjacent corners by applying the [inverse transpose](https://paroj.github.io/gltut/Illumination/Tut09%20Normal%20Transformation.html) of the transformation applied to the vertex. Do note that the default constructor for a `Mat4` is the **identity matrix**, not the **zero matrix**.
 
 Notice that `Skeleton::skin` outputs an indexed mesh. This is because the result of skinning is passed to drawing / rendering code that expects `Indexed_Mesh` structures, so there's no reason to stuff the results back into a `Halfedge_Mesh`. You may wish to read the `SplitEdges` case of `Indexed_Mesh::from_halfedge_mesh` for inspiration on how to structure this part of your `skin` function.
 
