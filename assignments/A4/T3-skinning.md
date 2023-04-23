@@ -3,7 +3,7 @@
 Now that we have a skeleton set up, we need to link the skeleton to the mesh in order to get the mesh to follow the movements of the skeleton. We will implement linear blend skinning using `Skeleton::skin`, which uses weights stored on a mesh by `Skeleton::assign_bone_weights`, which in turn uses the helper `Skeleton::closest_point_on_line_segment`.
 
 Linear blend skinning means that each vertex will be transformed to a weighted sum of its positions under various bone transformations (transformations from bind space to posed space):
-$$v_i' = \sum_j w_{ij} P_j B_j^{-1} v_i$$
+$$v_i' = (\sum_j w_{ij} P_j B_j^{-1}) v_i$$
 
 Where $P_j$ is the bone-to-pose transformation for bone $j$, $B_j$ is the bone-to-bind transformation for bone $j$, and $w_{ij}$ is the weight given to bone $j$ for vertex $i$. Note that if $\sum_j w_{ij} \ne 1$, the vertex will be scaled toward/away from the origin, so you should be cognizant of this when computing weights.
 
