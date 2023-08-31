@@ -23,7 +23,7 @@ Spectrum sample_nearest(HDR_Image const &image, Vec2 uv) {
 }
 
 Spectrum sample_bilinear(HDR_Image const &image, Vec2 uv) {
-	//A1T6: sample_bilinear
+	// A1T6: sample_bilinear
 	//TODO: implement bilinear sampling strategy on texture 'image'
 
 	return sample_nearest(image, uv); //placeholder so image doesn't look blank
@@ -31,7 +31,7 @@ Spectrum sample_bilinear(HDR_Image const &image, Vec2 uv) {
 
 
 Spectrum sample_trilinear(HDR_Image const &base, std::vector< HDR_Image > const &levels, Vec2 uv, float lod) {
-	//A1T6: sample_trilinear
+	// A1T6: sample_trilinear
 	//TODO: implement trilinear sampling strategy on using mip-map 'levels'
 
 	return sample_nearest(base, uv); //placeholder so image doesn't look blank
@@ -88,7 +88,7 @@ void generate_mipmap(HDR_Image const &base, std::vector< HDR_Image > *levels_) {
 		assert(std::max(1u, src.w / 2u) == dst.w);
 		assert(std::max(1u, src.h / 2u) == dst.h);
 
-		//A1T6: generate
+		// A1T6: generate
 		//TODO: Write code to fill the levels of the mipmap hierarchy by downsampling
 
 		//Be aware that the alignment of the samples in dst and src will be different depending on whether the image is even or odd.

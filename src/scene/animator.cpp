@@ -12,7 +12,7 @@ template<typename F> static void channels(Camera& val, F&& f) {
 
 template<typename F> static void channels(Instance::Geometry_Settings& val, F&& f) {
 	f("visible", val.visible);
-	//f("wireframe", val.style); //<-- for now, let's not deal with this
+	//f("wireframe", val.draw_style); //<-- for now, let's not deal with this
 }
 
 template<typename F> static void channels(Instance::Simulate_Settings& val, F&& f) {

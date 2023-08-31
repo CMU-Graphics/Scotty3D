@@ -2,6 +2,8 @@
 #include "samplers.h"
 #include "../util/rand.h"
 
+constexpr bool IMPORTANCE_SAMPLING = true;
+
 namespace Samplers {
 
 Vec2 Rect::sample(RNG &rng) const {
@@ -107,20 +109,28 @@ Sphere::Image::Image(const HDR_Image& image) {
 }
 
 Vec3 Sphere::Image::sample(RNG &rng) const {
-    //A3T7 - image sampler sampling
-
-    // Use your importance sampling data structure to generate a sample direction.
-    // Tip: std::upper_bound
-
-    return Vec3{};
+	if(!IMPORTANCE_SAMPLING) {
+		// Step 1: Uniform sampling
+		// Declare a uniform sampler and return its sample
+    	return Vec3{};
+	} else {
+		// Step 2: Importance sampling
+		// Use your importance sampling data structure to generate a sample direction.
+		// Tip: std::upper_bound
+    	return Vec3{};
+	}
 }
 
 float Sphere::Image::pdf(Vec3 dir) const {
-    //A3T7 - image sampler pdf
-
-    // What is the PDF of this distribution at a particular direction?
-
-    return 0.0f;
+    if(!IMPORTANCE_SAMPLING) {
+		// Step 1: Uniform sampling
+		// Declare a uniform sampler and return its pdf
+    	return 0.f;
+	} else {
+		// A3T7 - image sampler importance sampling pdf
+		// What is the PDF of this distribution at a particular direction?
+    	return 0.f;
+	}
 }
 
 } // namespace Samplers

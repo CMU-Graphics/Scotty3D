@@ -97,12 +97,6 @@
 			"type":"Emissive",
 			"emissive":"white"
 		},
-		"glass_white":{
-			"type":"Glass",
-			"transmittance":"white",
-			"reflectance":"white",
-			"ior":1.5
-		},
 		"lam_blue":{
 			"type":"Lambertian",
 			"albedo":"blue"
@@ -114,10 +108,6 @@
 		"lam_white":{
 			"type":"Lambertian",
 			"albedo":"white"
-		},
-		"mir_white":{
-			"type":"Mirror",
-			"reflectance":"white"
 		}
 	},
 	"delta_lights":{},
@@ -136,7 +126,9 @@
 				"material":"lam_white",
 				"visible":true,
 				"collides":true,
-				"style":"Correct"
+				"draw style":"Correct",
+				"blend style":"Blend Replace",
+				"depth style":"Depth Less"
 			},
 			"Floor_instance":{
 				"transform":"Floor_transform",
@@ -144,7 +136,9 @@
 				"material":"lam_white",
 				"visible":true,
 				"collides":true,
-				"style":"Correct"
+				"draw style":"Correct",
+				"blend style":"Blend Replace",
+				"depth style":"Depth Less"
 			},
 			"Light_instance":{
 				"transform":"Light_transform",
@@ -152,23 +146,29 @@
 				"material":"em_white",
 				"visible":true,
 				"collides":true,
-				"style":"Correct"
+				"draw style":"Correct",
+				"blend style":"Blend Replace",
+				"depth style":"Depth Less"
 			},
 			"Sphere_instance_1":{
 				"transform":"Sphere_transform_1",
 				"mesh":"Sphere",
-				"material":"mir_white",
+				"material":"lam_white",
 				"visible":true,
 				"collides":true,
-				"style":"Correct"
+				"draw style":"Correct",
+				"blend style":"Blend Replace",
+				"depth style":"Depth Less"
 			},
 			"Sphere_instance_2":{
 				"transform":"Sphere_transform_2",
 				"mesh":"Sphere",
-				"material":"glass_white",
+				"material":"lam_white",
 				"visible":true,
 				"collides":true,
-				"style":"Correct"
+				"draw style":"Correct",
+				"blend style":"Blend Replace",
+				"depth style":"Depth Less"
 			},
 			"Wall_instance_1":{
 				"transform":"Wall_transform_1",
@@ -176,7 +176,9 @@
 				"material":"lam_red",
 				"visible":true,
 				"collides":true,
-				"style":"Correct"
+				"draw style":"Correct",
+				"blend style":"Blend Replace",
+				"depth style":"Depth Less"
 			},
 			"Wall_instance_2":{
 				"transform":"Wall_transform_2",
@@ -184,7 +186,9 @@
 				"material":"lam_blue",
 				"visible":true,
 				"collides":true,
-				"style":"Correct"
+				"draw style":"Correct",
+				"blend style":"Blend Replace",
+				"depth style":"Depth Less"
 			},
 			"Wall_instance_3":{
 				"transform":"Wall_transform_3",
@@ -192,7 +196,9 @@
 				"material":"lam_white",
 				"visible":true,
 				"collides":true,
-				"style":"Correct"
+				"draw style":"Correct",
+				"blend style":"Blend Replace",
+				"depth style":"Depth Less"
 			}
 		},
 		"skinned_meshes":{},

@@ -40,7 +40,6 @@ class Scatter {
 public:
 	Vec3 direction;
 	Spectrum attenuation;
-	bool specular = false;
 };
 
 class Lambertian {

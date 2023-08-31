@@ -72,7 +72,9 @@
 				"material":"lam_white",
 				"visible":true,
 				"collides":true,
-				"style":"Correct"
+				"draw style":"Correct",
+				"blend style":"Blend Replace",
+				"depth style":"Depth Less"
 			},
 			"Light_instance":{
 				"transform":"Light_transform",
@@ -80,7 +82,9 @@
 				"material":"em_white",
 				"visible":true,
 				"collides":true,
-				"style":"Correct"
+				"draw style":"Correct",
+				"blend style":"Blend Replace",
+				"depth style":"Depth Less"
 			}
 		},
 		"skinned_meshes":{},

@@ -1,5 +1,7 @@
 #include <unordered_set>
 #include "skeleton.h"
+#include "test.h"
+#include <iostream>
 
 void Skeleton::Bone::compute_rotation_axes(Vec3 *x_, Vec3 *y_, Vec3 *z_) const {
 	assert(x_ && y_ && z_);
@@ -38,19 +40,19 @@ std::vector< Mat4 > Skeleton::bind_pose() const {
 	//A4T2a: bone-to-skeleton transformations in the bind pose
 	//(the bind pose does not rotate by Bone::pose)
 
-	std::vector< Mat4 > pose;
-	pose.reserve(bones.size());
+	std::vector< Mat4 > bind;
+	bind.reserve(bones.size());
 
 	//NOTE: bones is guaranteed to be ordered such that parents appear before child bones.
 
 	for (auto const &bone : bones) {
 		(void)bone; //avoid complaints about unused bone
 		//placeholder -- your code should actually compute the correct transform:
-		pose.emplace_back(Mat4::I);
+		bind.emplace_back(Mat4::I);
 	}
 
-	assert(pose.size() == bones.size()); //should have a transform for every bone.
-	return pose;
+	assert(bind.size() == bones.size()); //should have a transform for every bone.
+	return bind;
 }
 
 std::vector< Mat4 > Skeleton::current_pose() const {

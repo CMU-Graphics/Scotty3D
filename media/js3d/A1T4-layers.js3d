@@ -107,7 +107,9 @@
 				"material":"Material",
 				"visible":true,
 				"collides":true,
-				"style":"Correct"
+				"draw style":"Correct",
+				"blend style":"Blend Replace",
+				"depth style":"Depth Less"
 			},
 			"Wall_instance_1":{
 				"transform":"Wall_transform_1",
@@ -115,7 +117,9 @@
 				"material":"lam_red",
 				"visible":true,
 				"collides":true,
-				"style":"Correct"
+				"draw style":"Correct",
+				"blend style":"Blend Replace",
+				"depth style":"Depth Less"
 			},
 			"Wall_instance_2":{
 				"transform":"Wall_transform_2",
@@ -123,7 +127,9 @@
 				"material":"lam_blue",
 				"visible":true,
 				"collides":true,
-				"style":"Correct"
+				"draw style":"Correct",
+				"blend style":"Blend Replace",
+				"depth style":"Depth Less"
 			}
 		},
 		"skinned_meshes":{},

@@ -32,8 +32,6 @@ float schlick(Vec3 in_dir, float index_of_refraction) {
 
 	// Implement Schlick's approximation of the Fresnel reflection factor.
 
-	// The surface normal is (0,1,0)
-
 	return 0.0f;
 }
 
@@ -42,6 +40,7 @@ Spectrum Lambertian::evaluate(Vec3 out, Vec3 in, Vec2 uv) const {
 
     // Compute the ratio of reflected/incoming radiance when light from in_dir
     // is reflected through out_dir: albedo / PI_F * cos(theta).
+    // Note that for Scotty3D, y is the 'up' direction.
 
     return Spectrum{};
 }
@@ -59,8 +58,6 @@ Scatter Lambertian::scatter(RNG &rng, Vec3 out, Vec2 uv) const {
 	//TODO: compute the attenuation of the light using Lambertian::evaluate():
 	ret.attenuation = Spectrum{};
 
-	//indicate that this is not a specular reflection:
-	ret.specular = false;
 	return ret;
 }
 
@@ -98,7 +95,6 @@ Scatter Mirror::scatter(RNG &rng, Vec3 out, Vec2 uv) const {
     Scatter ret;
     ret.direction = Vec3();
     ret.attenuation = Spectrum{};
-	ret.specular = true;
     return ret;
 }
 
@@ -221,7 +217,6 @@ Spectrum Emissive::evaluate(Vec3 out, Vec3 in, Vec2 uv) const {
 
 Scatter Emissive::scatter(RNG &rng, Vec3 out, Vec2 uv) const {
 	Scatter ret;
-	ret.specular = true;
 	ret.direction = {};
 	ret.attenuation = {};
 	return ret;

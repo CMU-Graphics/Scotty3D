@@ -1,12 +1,12 @@
 # `A3T4` Path Tracing
 
-Up to this point, your renderer has only computed object visibility using ray tracing. Now, we will simulate the complicated paths that light can take throughout the scene, bouncing off many surfaces before eventually reaching the camera. Simulating this multi-bounce light is referred to as _global illumination_, and it is critical for producing realistic images, especially when specular surfaces are present. Note that all functions in `src/scene/material.cpp` are in **local space** to the surface with respect to the ray intersection point, while functions in `src/pathtracer/pathtracer.cpp` are generally in **world space**.
+Up to this point, your renderer has only computed object visibility using ray tracing. Now, we will simulate the complicated paths that light can take throughout the scene, bouncing off many surfaces before eventually reaching the camera. Simulating this multi-bounce light is referred to as _global illumination_, and it is critical for producing realistic images, especially when specular surfaces are present. Note that all functions in `src/scene/material.cpp` are in **local space** to the surface with respect to the ray intersection point, while functions in `src/pathtracer/pathtracer.cpp` are generally in **world space**. Keep in mind that in Scotty3D's coordinate system, x is horizontal, y is vertical (the 'up' direction), and z is depth.
 
 ---
 
 ## Step 0: `Pathtracer::trace`
 
-`Pathtracer::trace` is the function responsible for coordinating the path tracing procedure. We've given you code to intersect a ray with the scene and collect information about the surface intersection necessary for computing the lighting at that point. You should read this function and understand where/why functions of the `bsdf` are called. **You do not need to modify anything here, just understand the procedure.**
+`Pathtracer::trace` is the function responsible for coordinating the path tracing procedure. We've given you code to intersect a ray with the scene and collect information about the surface intersection necessary for computing the lighting at that point. You should read this function and understand where/why functions of the `bsdf` are called and how the parameters are set up. **You do not need to modify anything here, just understand the procedure.**
 
 ## Step 1: `Lambertian`
 

@@ -10,14 +10,14 @@ Mat4 Transform::parent_to_local() const {
 }
 
 Mat4 Transform::local_to_world() const {
-	//A1T1: local_to_world
+	// A1T1: local_to_world
 	//don't use Mat4::inverse() in your code.
 
 	return Mat4::I; //<-- wrong, but here so code will compile
 }
 
 Mat4 Transform::world_to_local() const {
-	//A1T1: world_to_local
+	// A1T1: world_to_local
 	//don't use Mat4::inverse() in your code.
 
 	return Mat4::I; //<-- wrong, but here so code will compile

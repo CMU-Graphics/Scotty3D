@@ -182,6 +182,7 @@ private:
 	Util::Shape type = Util::Shape::cube;
 	float cube_radius = 1.0f;
 	float square_radius = 1.0f;
+	float pentagon_radius = 1.0f;
 	float cylinder_radius = 0.5f, cylinder_height = 2.0f;
 	uint32_t cylinder_sides = 12;
 	float torus_inner_radius = 0.8f, torus_outer_radius = 1.0f;

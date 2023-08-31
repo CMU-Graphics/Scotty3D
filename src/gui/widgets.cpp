@@ -532,6 +532,24 @@ void Widget_Camera::ui(Undo& undo, const std::string& name, std::weak_ptr<Camera
 		if (IsItemDeactivated() && cache != camera) update = true;
 	};
 
+	const char* label = nullptr;
+	SamplePattern const *sample_pattern = SamplePattern::from_id(camera.film.sample_pattern);
+	if (sample_pattern != nullptr) {
+		label = sample_pattern->name.c_str();
+	}
+	if (BeginCombo("Sample Pattern", label)) {
+		for (SamplePattern const &sp : SamplePattern::all_patterns()) {
+			if(Selectable(sp.name.c_str())) {
+				label = sp.name.c_str();
+				cache = camera;
+				camera.film.sample_pattern = sp.id;
+				update = cache != camera;
+				break;
+			}
+		}
+		EndCombo();
+	}
+
 	slider(SliderFloat("Aspect Ratio", &camera.aspect_ratio, 0.1f, 10.0f, "%.2f",
 	                   ImGuiSliderFlags_Logarithmic),
 	       ar_activated);
@@ -564,8 +582,6 @@ void Widget_Camera::ui(Undo& undo, const std::string& name, std::weak_ptr<Camera
 		camera.aspect_ratio = static_cast<float>(camera.film.width) / static_cast<float>(camera.film.height);
 		update = cache != camera;
 	}
-
-	//TODO: camera.film.sample_pattern drop-down menu
 
 	camera.aspect_ratio = std::clamp(camera.aspect_ratio, 0.1f, 10.0f);
 	camera.vertical_fov = std::clamp(camera.vertical_fov, 10.0f, 160.0f);
@@ -1103,6 +1119,7 @@ std::optional<Halfedge_Mesh> Halfedge_Mesh_Controls::create_shape() {
 	switch (type) {
 	case Util::Shape::cube: label = "Cube"; break;
 	case Util::Shape::square: label = "Square"; break;
+	case Util::Shape::pentagon: label = "Pentagon"; break;
 	case Util::Shape::cylinder: label = "Cylinder"; break;
 	case Util::Shape::torus: label = "Torus"; break;
 	case Util::Shape::cone: label = "Cone"; break;
@@ -1112,6 +1129,7 @@ std::optional<Halfedge_Mesh> Halfedge_Mesh_Controls::create_shape() {
 	if (BeginCombo("##create-combo", label)) {
 		if (Selectable("Cube")) type = Util::Shape::cube;
 		if (Selectable("Square")) type = Util::Shape::square;
+		if (Selectable("Pentagon")) type = Util::Shape::pentagon;
 		if (Selectable("Cylinder")) type = Util::Shape::cylinder;
 		if (Selectable("Torus")) type = Util::Shape::torus;
 		if (Selectable("Cone")) type = Util::Shape::cone;
@@ -1125,6 +1143,8 @@ std::optional<Halfedge_Mesh> Halfedge_Mesh_Controls::create_shape() {
 			return Halfedge_Mesh::cube(cube_radius);
 		case Util::Shape::square:
 			return Halfedge_Mesh::from_indexed_mesh(Util::square_mesh(square_radius));
+		case Util::Shape::pentagon:
+			return Halfedge_Mesh::from_indexed_mesh(Util::pentagon_mesh(pentagon_radius));
 		case Util::Shape::cylinder:
 			return Halfedge_Mesh::from_indexed_mesh(Util::cyl_mesh(cylinder_radius, cylinder_height, cylinder_sides));
 		case Util::Shape::torus:
@@ -1165,6 +1185,9 @@ std::optional<Halfedge_Mesh> Halfedge_Mesh_Controls::create_shape() {
 	case Util::Shape::sphere: {
 		SliderFloat("Radius##sphere", &sphere_radius, 0.01f, 10.0f, "%.2f");
 		SliderUInt32("Subdivisions##sphere", &sphere_subdivisions, 0, 10);
+	} break;
+	case Util::Shape::pentagon: {
+		SliderFloat("Radius##pentagon", &pentagon_radius, 0.01f, 10.0f, "%.2f");
 	} break;
 	default: die("Unknown shape type");
 	}

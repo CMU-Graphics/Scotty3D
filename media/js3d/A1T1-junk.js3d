@@ -125,7 +125,9 @@
 				"material":"Material",
 				"visible":true,
 				"collides":true,
-				"style":"Correct"
+				"draw style":"Correct",
+				"blend style":"Blend Replace",
+				"depth style":"Depth Less"
 			},
 			"Mesh Instance 1":{
 				"transform":"Transform 1",
@@ -133,7 +135,9 @@
 				"material":"Material 1",
 				"visible":true,
 				"collides":true,
-				"style":"Correct"
+				"draw style":"Correct",
+				"blend style":"Blend Replace",
+				"depth style":"Depth Less"
 			},
 			"Mesh Instance 2":{
 				"transform":"Transform 2",
@@ -141,7 +145,9 @@
 				"material":"Material 2",
 				"visible":true,
 				"collides":true,
-				"style":"Correct"
+				"draw style":"Correct",
+				"blend style":"Blend Replace",
+				"depth style":"Depth Less"
 			},
 			"Mesh Instance 3":{
 				"transform":"Transform 3",
@@ -149,7 +155,9 @@
 				"material":"Material 3",
 				"visible":true,
 				"collides":true,
-				"style":"Correct"
+				"draw style":"Correct",
+				"blend style":"Blend Replace",
+				"depth style":"Depth Less"
 			},
 			"Mesh Instance 4":{
 				"transform":"Transform 4",
@@ -157,7 +165,9 @@
 				"material":"Material 4",
 				"visible":true,
 				"collides":true,
-				"style":"Correct"
+				"draw style":"Correct",
+				"blend style":"Blend Replace",
+				"depth style":"Depth Less"
 			}
 		},
 		"skinned_meshes":{},

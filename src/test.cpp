@@ -326,6 +326,18 @@ bool Test::differs(std::vector<Mat4> a, std::vector<Mat4> b) {
 	return false;
 }
 
+bool Test::differs(std::vector<int> a, std::vector<int> b) {
+	if (a.size() != b.size()) {
+		return true;
+	}
+	for (size_t i = 0; i < a.size(); i++) {
+		if (a[i] != b[i]) {
+			return true;
+		}
+	}
+	return false;
+}
+
 template< >
 std::optional<std::string> Test::differs< Ray >(Ray const &a, Ray const &b) {
 	if (differs(a.point, b.point)) {

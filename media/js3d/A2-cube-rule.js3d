@@ -74,7 +74,9 @@
 				"material":"Material",
 				"visible":true,
 				"collides":true,
-				"style":"Correct"
+				"draw style":"Correct",
+				"blend style":"Blend Replace",
+				"depth style":"Depth Less"
 			},
 			"Calzone":{
 				"transform":"Calzone Transform",
@@ -82,7 +84,9 @@
 				"material":"Material",
 				"visible":true,
 				"collides":true,
-				"style":"Correct"
+				"draw style":"Correct",
+				"blend style":"Blend Replace",
+				"depth style":"Depth Less"
 			},
 			"Maki":{
 				"transform":"Maki Transform",
@@ -90,7 +94,9 @@
 				"material":"Material",
 				"visible":true,
 				"collides":true,
-				"style":"Correct"
+				"draw style":"Correct",
+				"blend style":"Blend Replace",
+				"depth style":"Depth Less"
 			},
 			"Sandwich":{
 				"transform":"Sandwich Transform",
@@ -98,7 +104,9 @@
 				"material":"Material",
 				"visible":true,
 				"collides":true,
-				"style":"Correct"
+				"draw style":"Correct",
+				"blend style":"Blend Replace",
+				"depth style":"Depth Less"
 			},
 			"Taco":{
 				"transform":"Taco Transform",
@@ -106,7 +114,9 @@
 				"material":"Material",
 				"visible":true,
 				"collides":true,
-				"style":"Correct"
+				"draw style":"Correct",
+				"blend style":"Blend Replace",
+				"depth style":"Depth Less"
 			},
 			"Toast":{
 				"transform":"Toast Transform",
@@ -114,7 +124,9 @@
 				"material":"Material",
 				"visible":true,
 				"collides":true,
-				"style":"Correct"
+				"draw style":"Correct",
+				"blend style":"Blend Replace",
+				"depth style":"Depth Less"
 			}
 		},
 		"skinned_meshes":{},

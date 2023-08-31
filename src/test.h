@@ -64,6 +64,7 @@ public:
 	static bool differs(Spectrum a, Spectrum b);
 	static bool differs(std::vector<Vec3> a, std::vector<Vec3> b);
 	static bool differs(std::vector<Mat4> a, std::vector<Mat4> b);
+	static bool differs(std::vector<int> a, std::vector<int> b);
 
 	//this is specialized for a fair few more things:
 	// (see skeleton.cpp)

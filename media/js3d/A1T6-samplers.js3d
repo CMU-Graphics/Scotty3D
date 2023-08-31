@@ -157,7 +157,9 @@
 				"material":"Bilinear Material",
 				"visible":true,
 				"collides":true,
-				"style":"Correct"
+				"draw style":"Correct",
+				"blend style":"Blend Replace",
+				"depth style":"Depth Less"
 			},
 			"Mesh Instance":{
 				"transform":"Transform 6",
@@ -165,7 +167,9 @@
 				"material":"Trilinear Material",
 				"visible":true,
 				"collides":true,
-				"style":"Correct"
+				"draw style":"Correct",
+				"blend style":"Blend Replace",
+				"depth style":"Depth Less"
 			},
 			"Mesh Instance 1":{
 				"transform":"Transform 7",
@@ -173,7 +177,9 @@
 				"material":"Trilinear Material",
 				"visible":true,
 				"collides":true,
-				"style":"Correct"
+				"draw style":"Correct",
+				"blend style":"Blend Replace",
+				"depth style":"Depth Less"
 			},
 			"Nearest Plane":{
 				"transform":"Transform",
@@ -181,7 +187,9 @@
 				"material":"Nearest Material",
 				"visible":true,
 				"collides":true,
-				"style":"Correct"
+				"draw style":"Correct",
+				"blend style":"Blend Replace",
+				"depth style":"Depth Less"
 			},
 			"Trilinear Plane":{
 				"transform":"Transform 2",
@@ -189,7 +197,9 @@
 				"material":"Trilinear Material",
 				"visible":true,
 				"collides":true,
-				"style":"Correct"
+				"draw style":"Correct",
+				"blend style":"Blend Replace",
+				"depth style":"Depth Less"
 			}
 		},
 		"skinned_meshes":{},

@@ -50,9 +50,9 @@ Simply finding closer intersections based on `radius` will not, of course, resol
 Once you have got collisions working, you should be able to open `media/js3d/A4-particles.js3d` and see a randomized collision-fueled waterfall. Try rendering the scene!
 
 Tips:
-- **Don't** use `abs()`. This is the integer-only absolute value function. To get the float version, use `std::abs()` (which has a floating-point overload) or `fabsf()`.
 - When accounting for radius, you don't know how far along the ray a collision might occur. Look for a collision at any distance, and if it occurs after the end of the current timestep, ignore it.
-- When accounting for radius, consider in what situation(s) you could find a collision at a negative time. In this case, you should not move the particle -- just make the velocity outward.
+- When accounting for radius, consider in what situation(s) you could find a collision at a negative time. In this case, you should not move the particle -- just reflect the velocity outward.
+- When accounting for radius, note that you don't necessarily know which direction the normal of the scene intersection is -- if you're trying to subtract a distance to compute where to position the particle to not allow leakage, make sure your distance is positive!
 - Particle positions are in world space (not particle-system-local space). This allows particle systems to behave reasonably when emitters' transforms are animated. (And makes it much easier to figure out which rays to construct for collision!)
 - We've also provided some test cases, but similar to the other tasks, they are very simple. We encourage using the GUI to test particle simulation as it is much more useful for visualizing what is happening with your code vs outputing a position and velocity of a particle.
 

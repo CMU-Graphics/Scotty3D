@@ -9,14 +9,14 @@ Now that you have implemented the ability to sample more complex light paths, it
 
 First, take another at the BSDF interface in `src/scene/material.h`. There are a number of key methods you should understand in `Material`:
 
-- `Scatter scatter(RNG &rng, Vec3 out, Vec2 uv)`: given outgoing direction `out`, generates a random sample for incoming direction (using `RNG` as the random number source and looking up material properties at location `uv`). It returns a `Scatter`, which contains both the sampled `direction` and the `attenuation` for the in/out pair. (And a flag `specular` for if the scattering was specular.)
+- `Scatter scatter(RNG &rng, Vec3 out, Vec2 uv)`: given outgoing direction `out`, generates a random sample for incoming direction (using `RNG` as the random number source and looking up material properties at location `uv`). It returns a `Scatter`, which contains both the sampled `direction` and the `attenuation` for the in/out pair.
 - `Spectrum evaluate(Vec3 out, Vec3 in)`: evaluates the BSDF for a given pair of directions. This is only called for continuous BSDFs.
 - `float pdf(Vec3 out, Vec3 in)`: computes the PDF for sampling `in` from the BSDF distribution, given `out`. This is only meaningful for continuous BSDFs.
 - `Spectrum emission(Vec2 uv)`: returns emitted light. This is zero for all materials except the `Emissive` material.
 
 To complete the mirror and glass materials, you will only need to implement their `scatter` functions, as they are both discrete BSDFs (i.e. they have a finite number of possible `in_dir`s for any `out_dir`). Additionally, you will want to complete two helper functions:
 
-- `Vec3 reflect(Vec3 dir)`: returns a direction that is the **perfect specular reflection** of `dir` about `{0, 1, 0}`. More detail about specular reflection can be found [here](http://15462.courses.cs.cmu.edu/fall2015/lecture/reflection/slide_028).
+- `Vec3 reflect(Vec3 dir)`: returns a direction that is the **perfect specular reflection** of `dir` about the local surface normal `{0, 1, 0}`. More detail about specular reflection can be found [here](http://15462.courses.cs.cmu.edu/fall2015/lecture/reflection/slide_028).
 
 - `Vec3 refract(Vec3 out_dir, float index_of_refraction, bool& was_internal)`: returns the ray that results from refracting `out_dir` through the surface according to Snell's Law.
 
@@ -31,7 +31,7 @@ Implement `reflect` and `Mirror::scatter()`.
 
 Because discrete BSDFs do not require Monte Carlo integration (we can simply analytically evaluate each possible direction), we do not implement `BSDF::pdf`. Perhaps more interestingly, we also do not require `Material::evaluate`. This is because evaluating the BSDF is only necessary when sampling directions from distributions other than the BSDF itself. When the BSDF is discrete, like a perfect mirror, we can assume other distributions never sample the single (infinitesimal) direction at which the BSDF is non-zero.
 
-Therefore, we must update our path tracing procedure in `Pathtracer::sample_(in)direct_lighting`: when the BSDF is discrete (`Material::is_specular`), we are not doing a Monte Carlo estimate, hence should not use `Material::pdf`. Instead, simply multiply the scattering attenuation and the incoming light. Note that failing to make this check will cause the invalid BSDF calls to abort.
+Therefore, we must update our path tracing procedure in `Pathtracer::sample_(in)direct_lighting`: when the BSDF is discrete (`Material::is_specular`), we are not doing a Monte Carlo estimate, hence should not use `Material::pdf`. Instead, simply multiply the scattering attenuation and the incoming light. Note that failing to make this check will cause the invalid BSDF calls to abort or may result in black rendered objects.
 
 ## Step 2: `Materials::Refract`
 

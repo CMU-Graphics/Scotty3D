@@ -23,24 +23,48 @@ enum class DrawStyle : uint8_t {
 	Correct,   //triangles with attributes interpolated in 3D
 };
 
+enum class BlendStyle : uint8_t {
+	Replace,   //replace color
+	Add,       //add colors
+	Over,      //blend colors
+};
+
+enum class DepthStyle : uint8_t {
+	Always,    //always take latest fragment
+	Never, 	   //never take latest fragment
+	Less,	   //take fragments closer to the camera
+};
+
 namespace Instance {
 
 class Geometry_Settings {
 public:
 	bool visible = true;
 	bool collides = true;
-	DrawStyle style = DrawStyle::Correct;
+	DrawStyle draw_style = DrawStyle::Correct;
+	BlendStyle blend_style = BlendStyle::Replace;
+	DepthStyle depth_style = DepthStyle::Less;
 
 	//- - - - - - - - - - - -
 	template< Intent I, typename F, typename T >
 	static void introspect(F&& f, T&& t) {
 		f("visible", t.visible);
 		f("collides", t.collides);
-		introspect_enum< I >(f, "style", t.style, std::vector< std::pair< const char *, DrawStyle > >{
+		introspect_enum< I >(f, "draw style", t.draw_style, std::vector< std::pair< const char *, DrawStyle > >{
 			{"Wireframe", DrawStyle::Wireframe},
 			{"Flat", DrawStyle::Flat},
 			{"Smooth", DrawStyle::Smooth},
 			{"Correct", DrawStyle::Correct}
+		});
+		introspect_enum< I >(f, "blend style", t.blend_style, std::vector< std::pair< const char *, BlendStyle > >{
+			{"Blend Replace", BlendStyle::Replace},
+			{"Blend Over", BlendStyle::Over},
+			{"Blend Add", BlendStyle::Add}
+		});
+		introspect_enum< I >(f, "depth style", t.depth_style, std::vector< std::pair< const char *, DepthStyle > >{
+			{"Depth Always", DepthStyle::Always},
+			{"Depth Never", DepthStyle::Never},
+			{"Depth Less", DepthStyle::Less}
 		});
 	}
 	static inline const char *TYPE = "Instance::Geometry_Settings";

@@ -1,5 +1,5 @@
 //Run this (javascript) file with node:
-//$ node Maekfile.js [-jN] [--] [target1] [target2] [...]
+//$ node Maekfile.js [-jN] [-v] [-q] [--] [target1] [target2] [...]
 //
 // Maekfile.js will [re-]build all the specified targets.
 // Results are re-used by content hash if they match "maek-cache.json"; delete that file to force a full rebuild.
@@ -7,6 +7,7 @@
 //Command line options:
 //  -jN      limit on parallel jobs; defaults to number of cpu cores + 1
 //  -v       verbose output; prints more info
+//  -q       quit on first error (otherwise builds as much as possible)
 //  --       optional separator between command line switches and targets (useful if you have a target named '-j1')
 //  targetN  target name. Posix-style path to a file to build, or an abstract target (word starting with ':')
 //
@@ -16,8 +17,8 @@ const maek = init_maek();
 // (it's a quirk of javascript that function definitions anywhere in scope get 'hoisted'
 //   -- you can see the definition of init_maek by scrolling down.)
 
-//-------------------------------------------------------------------
 //Read onward to discover how to configure Maek for your build!
+//======================================================================
 
 //set default targets to build (can be overridden by command line options):
 maek.TARGETS = ["Scotty3D" + (maek.OS === "windows" ? ".exe" : "")];
@@ -283,51 +284,40 @@ if (maek.OS === 'linux') {
 //make Scotty3D executable also depend on copying the correct dynamic libraries and readme file from the nest-libs package:
 Scotty3D_options.depends = [...copies];
 
-
 const Scotty3D_exe = maek.LINK(Scotty3D_objects, 'Scotty3D', Scotty3D_options);
 
-//the '[targets =] RULE(targets, prerequisites[, recipe])' rule defines a Makefile-style task
-// targets: array of targets the task produces (can include both files and ':abstract targets')
-// prerequisites: array of targets the task waits on (can include both files and ':abstract targets')
-// recipe (optional): array of commands to run (where each command is an array [exe, arg1, arg0, ...])
-//returns targets: the targets the rule produces
-maek.RULE([':test'], [Scotty3D_exe], [
-	['./' + Scotty3D_exe, '--run-tests']
-]);
-
-
-//Note that tasks that produce ':abstract targets' are never cached.
-// This is similar to how .PHONY targets behave in make.
-
-
-
-//==========================================================================
+//======================================================================
 //Now, onward to the code that makes all this work:
-//  (edit this if you need to support new compilers)
 
 function init_maek() {
+	//----------------------------------
+	//some setup
+
 	//standard libraries:
 	const path = require('path').posix; //NOTE: expect posix-style paths even on windows
-	const fsPromises = require('fs').promises;
+	const fsPromises = require('fs/promises');
 	const fs = require('fs');
+	const os = require('os');
+	const performance = require('perf_hooks').performance;
+	const child_process = require('child_process');
 
-	//make it so that all paths/commands are relative to Maekfile.js:
+	//make it so that all paths/commands are relative to this file:
 	// (regardless of where you run it from)
+	console.log(`Building in ${__dirname}.`);
 	process.chdir(__dirname);
 
-	//will fill in properties on this object with the public interface
-	// to the build system and then return it:
-	const maek = {};
+	//make it slightly more idiomatic to export:
+	const maek = module.exports;
 
 	//-----------------------------------------
 	//Constants:
 
 	//cache file location:
-	const CACHE_FILE = 'maek-cache.json';
+	maek.CACHE_FILE = 'maek-cache.json';
 
 	//current OS: (with slightly nicer naming than os.platform()
-	const OS = (() => {
-		const platform = require('os').platform();
+	maek.OS = (() => {
+		const platform = os.platform();
 		if (platform === 'win32') return 'windows';
 		else if (platform === 'darwin') return 'macos';
 		else if (platform === 'linux') return 'linux';
@@ -336,13 +326,12 @@ function init_maek() {
 			process.exit(1);
 		}
 	})();
-	maek.OS = OS;
 
 	//-----------------------------------------
 	//Command line defaults:
 
 	//maximum number of jobs to run: (change with -jN)
-	maek.JOBS = require('os').cpus().length + 1;
+	maek.JOBS = os.cpus().length + 1;
 
 	//targets to build by default: (change by passing target names)
 	maek.TARGETS = [];
@@ -358,8 +347,8 @@ function init_maek() {
 
 	const DEFAULT_OPTIONS = {
 		objPrefix: 'objs/', //prefix for object file paths (if not explicitly specified)
-		objSuffix: (OS === 'windows' ? '.obj' : '.o'), //suffix for object files
-		exeSuffix: (OS === 'windows' ? '.exe' : ''), //suffix for executable files
+		objSuffix: (maek.OS === 'windows' ? '.obj' : '.o'), //suffix for object files
+		exeSuffix: (maek.OS === 'windows' ? '.exe' : ''), //suffix for executable files
 		depends: [], //extra dependencies; generally only set locally
 		CPP: [], //the c++ compiler and any flags to start with (set below, per-OS)
 		CPPFlags: [], //extra flags for c++ compiler
@@ -367,14 +356,14 @@ function init_maek() {
 		LINKLibs: [], //extra -L and -l flags for linker
 	}
 
-	if (OS === 'windows') {
+	if (maek.OS === 'windows') {
 		DEFAULT_OPTIONS.CPP = ['cl.exe', '/nologo', '/EHsc', '/Z7', '/std:c++17', '/W4', '/WX', '/MD'];
 		//TODO: could embed manifest to set UTF8 codepage
 		DEFAULT_OPTIONS.LINK = ['link.exe', '/nologo', '/SUBSYSTEM:CONSOLE', '/DEBUG:FASTLINK', '/INCREMENTAL:NO'];
-	} else if (OS === 'linux') {
+	} else if (maek.OS === 'linux') {
 		DEFAULT_OPTIONS.CPP = ['g++', '-std=c++17', '-Wall', '-Werror', '-g'];
 		DEFAULT_OPTIONS.LINK = ['g++', '-std=c++17', '-Wall', '-Werror', '-g'];
-	} else if (OS === 'macos') {
+	} else if (maek.OS === 'macos') {
 		DEFAULT_OPTIONS.CPP = ['clang++', '-std=c++17', '-Wall', '-Werror', '-g'];
 		DEFAULT_OPTIONS.LINK = ['clang++', '-std=c++17', '-Wall', '-Werror', '-g'];
 	}
@@ -399,118 +388,32 @@ function init_maek() {
 		return combined;
 	}
 
-	//-----------------------------------------
-	//Data:
-
-	//maek.tasks is a map from targets => tasks (possibly many-to-one):
-	// a task is an async function that will make that target
-	// (it will generally 'await' other tasks in the process)
-	//
-	// task.label is a human-readable name for the task (generally along the lines of "RULE 'source' -> 'target'")
-	//
-	// if task.keyFn is defined, it is used for caching (see below).
-	// generally keyFn will return an array of the content hashes of all input and output files,
-	// along with version information and parameters for external commands called by the script.
+	//tasks is a map from targets -> tasks:
 	maek.tasks = {};
 
-	//during the build process some additional properties will be set on tasks:
-	// task.cachedKey is used for caching:
-	//  - after a task is run, the result of its keyFn is stored in cachedKey
-	//  - a task will skipped if the result of its keyFn matches the result already in cachedKey
-	//  comparisons are performed using: JSON.stringify(await task.keyFn()) === JSON.stringify(task.cachedKey)
-	//
-	// task.cachedKey values are loaded into the maek.tasks array from CACHE_FILE at the start of maek.update,
-	// and stored into CACHE_FILE at the end of maek.update.
-	//
-	// task.pending is set by updateTargets() to keep track of currently-running task updates.
-
-	//used to avoid re-hashing the same files a whole lot:
-	const hashCache = {};
-	let hashCacheHits = 0;
-
 	//-----------------------------------------
-	//Build rules add tasks to maek.tasks:
-
-	//RULE adds a generic makefile-like task:
-	// targets (array) are the things that get made
-	// prerequisites (array) are the things that must be up-to-date before the recipe is run
-	// recipe, optional (array) is a list of commands
-	maek.RULE = (targets, prerequisites, recipe = []) => {
-		if (!Array.isArray(targets)) throw new Error("RULE: targets must be an array.");
-		if (!Array.isArray(prerequisites)) throw new Error("RULE: prerequisites must be an array.");
-		if (!Array.isArray(recipe)) throw new Error("RULE: recipe must be an array.");
-
-		const task = async () => {
-			await updateTargets(prerequisites, `${task.label}`);
-			let step = 1;
-			for (const command of recipe) {
-				await runCommand(command, `${task.label} (${step}/${recipe.length})`);
-				step += 1;
-			}
-			for (const target of targets) {
-				delete hashCache[target];
-			}
-		};
-
-		if (!targets.some(target => target[0] === ':')) { //(don't cache RULE's with abstract targets)
-			task.keyFn = async () => {
-				await updateTargets(prerequisites, `${task.label} (keyFn)`); //prerequisites need to be ready before they can be hashed!
-				return [
-					...recipe,
-					...(await hashFiles([...targets, ...prerequisites]))
-				];
-			};
-		}
-		task.label = `RULE ${targets[0]}`;
-
-		for (const target of targets) {
-			maek.tasks[target] = task;
-		}
-	};
-
-	//CHECK adds a task that checks targets exist (after prerequisites have been created):
-	// targets (array) are the things that get checked
-	// prerequisites (array) are the things that must be up-to-date before the check is done
-	// message (string) is printed if targets don't exist
-	maek.CHECK = (targets, prerequisites, message = []) => {
-		if (!Array.isArray(targets)) throw new Error("CHECK: targets must be an array.");
-		if (!Array.isArray(prerequisites)) throw new Error("CHECK: prerequisites must be an array.");
-		if (typeof message !== "string") throw new Error("CHECK: message must be a string.");
-
-		const task = async () => {
-			await updateTargets(prerequisites, `${task.label}`);
-			const checks = targets.map(file => fsPromises.access(file, fs.constants.R_OK).catch((e) => { throw new BuildError(`missing '${file}':\n${message}`); }));
-			await Promise.all(checks);
-		};
-
-		task.label = `CHECK ${targets[0]}`;
-
-		for (const target of targets) {
-			maek.tasks[target] = task;
-		}
-	};
+	//RULES.
+	// helper functions that specify tasks:
 
 	//COPY adds a task that copies a file:
 	maek.COPY = (srcFile, dstFile) => {
 		if (typeof srcFile !== "string") throw new Error("COPY: from should be a single file.");
 		if (typeof dstFile !== "string") throw new Error("COPY: to should be a single file.");
-
 		const task = async () => {
-			await updateTargets([srcFile], `${task.label}`);
 			try {
 				await fsPromises.mkdir(path.dirname(dstFile), { recursive: true });
 				await fsPromises.copyFile(srcFile, dstFile);
 			} catch (e) {
-				throw new BuildError(`Failed to copy '${srcFile}' to '${dstFile}':${e}`);
+				throw new BuildError(`Failed to copy '${srcFile}' to '${dstFile}': ${e}`);
 			}
 		};
-
+		task.depends = [srcFile];
 		task.label = `COPY ${dstFile}`;
-
 		maek.tasks[dstFile] = task;
 
 		return dstFile;
 	};
+
 
 	//maek.CPP makes an object from a c++ source file:
 	// cppFile is the source file name
@@ -530,15 +433,12 @@ function init_maek() {
 		//computed dependencies go in a '.d' file stored next to the object file:
 		const depsFile = objFileBase + '.d';
 
-		//explicit dependencies: (implicit dependencies will be computed later)
-		const depends = [cppFile, ...options.depends];
-
 		let cc, command;
 		cc = [...options.CPP, ...options.CPPFlags];
-		if (OS === 'linux') {
+		if (maek.OS === 'linux') {
 			//TODO: check on linux
 			command = [...cc, '-MD', '-MT', 'x ', '-MF', depsFile, '-c', '-o', objFile, cppFile];
-		} else if (OS === 'macos') {
+		} else if (maek.OS === 'macos') {
 			//TODO: check on macos
 			command = [...cc, '-MD', '-MT', 'x ', '-MF', depsFile, '-c', '-o', objFile, cppFile];
 		} else { //windows
@@ -546,30 +446,17 @@ function init_maek() {
 		}
 
 		//will be used by loadDeps to trim explicit dependencies:
-		const inDepends = {};
-		for (const d of depends) {
-			inDepends[d] = true;
-		}
 		async function loadDeps() {
-			let text;
-			try {
-				text = await fsPromises.readFile(depsFile, { encoding: 'utf8' });
-			} catch (e) {
-				if (e.code === 'ENOENT') {
-					return [];
-				} else {
-					throw e; //FLAGRANT ERROR
-				}
-			}
+			const text = await fsPromises.readFile(depsFile, { encoding: 'utf8' });
 
-			if (OS === 'windows') {
+			if (maek.OS === 'windows') {
 				//parse JSON-encoded dependency info from /sourceDependencies:
 				const winpath = require('path').win32;
-				let paths = JSON.parse(text).Data.Includes;
+				const parsed = JSON.parse(text);
+				let paths = [...parsed.Data.Includes, parsed.Data.Source];
 				paths = paths.map(path => winpath.relative('', path).split('\\').join('/'));
 				paths = paths.sort();
-				const extraDepends = paths.filter(target => !(target in inDepends));
-				return extraDepends;
+				return paths;
 			} else {
 				//parse the makefile-style "targets : prerequisites" line from the file into a list of tokens:
 				let tokens = text
@@ -582,49 +469,40 @@ function init_maek() {
 				console.assert(tokens[0] === 'x');
 				console.assert(tokens[1] === ':');
 				tokens = tokens.slice(2); //remove the 'x :'
+				//tokens = tokens.map(path => path.relative('', path)); //hmmm does this do anything worthwhile?
 				tokens = tokens.sort(); //sort for consistency
 
 				//NOTE: might want to do some path normalization here!
-				const extraDepends = tokens.filter(target => !(target in inDepends));
-				return extraDepends;
+				return tokens;
 			}
 		}
 
 		//The actual build task:
 		const task = async () => {
-			//first, wait for any explicit prerequisites to build:
-			await updateTargets(depends, `${task.label}`);
 			//make object file:
-			delete hashCache[objFile];
-			delete hashCache[depsFile];
 			await fsPromises.mkdir(path.dirname(objFile), { recursive: true });
 			await fsPromises.mkdir(path.dirname(depsFile), { recursive: true });
-			await runCommand(command, `${task.label}: compile + prerequisites`);
-			//read extra dependencies and make sure they aren't targets of other rules:
-			const extraDepends = await loadDeps();
-			assertNontargets(extraDepends, `${task.label}`);
-			//NOTE: if dynamic prerequisites are targets of other tasks there is a
-			// problem whereby Maek can't know proper rule sequencing until it
-			// has already run a rule.
+			await run(command, `${task.label}: compile + prerequisites`,
+				async () => {
+					return {
+						read:[...await loadDeps()],
+						written:[objFile, depsFile]
+					};
+				}
+			);
 		};
 
-		task.keyFn = async () => {
-			await updateTargets(depends, `${task.label} (keyFn)`);
-			const extraDepends = await loadDeps();
-			assertNontargets(extraDepends, `${task.label}`);
-			return [
-				command,
-				...(await hashFiles([await findExe(command), objFile, depsFile, ...depends, ...extraDepends]))
-			];
-		};
+		task.depends = [cppFile, ...options.depends];
 
 		task.label = `CPP ${objFile}`;
 
+		if (objFile in maek.tasks) {
+			throw new Error(`Task ${task.label} purports to create ${objFile}, but ${maek.tasks[objFile].label} already creates that file.`);
+		}
 		maek.tasks[objFile] = task;
 
 		return objFile;
 	};
-
 
 	//maek.LINK links an executable file from a collection of object files:
 	// objFiles is an array of object file names
@@ -636,42 +514,37 @@ function init_maek() {
 
 		let link, linkCommand;
 		link = [...options.LINK];
-		if (OS === 'linux') {
+		if (maek.OS === 'linux') {
 			linkCommand = [...link, '-o', exeFile, ...objFiles, ...options.LINKLibs];
-		} else if (OS === 'macos') {
+		} else if (maek.OS === 'macos') {
 			linkCommand = [...link, '-o', exeFile, ...objFiles, ...options.LINKLibs];
 		} else {
 			linkCommand = [...link, `/out:${exeFile}`, ...objFiles, ...options.LINKLibs];
 		}
-		const depends = [...objFiles, ...options.depends];
 
 		const task = async () => {
-			//first, wait for all requested object files to build:
-			await updateTargets(depends, `${task.label}`);
-
-			//then link:
-			delete hashCache[exeFile];
 			await fsPromises.mkdir(path.dirname(exeFile), { recursive: true });
-			await runCommand(linkCommand, `${task.label}: link`);
+			await run(linkCommand, `${task.label}: link`,
+				async () => {
+					return {
+						read:[...objFiles],
+						written:[exeFile]
+					};
+				}
+			);
 		};
 
-		task.keyFn = async () => {
-			await updateTargets(depends, `${task.label} (keyFn)`);
-			return [
-				linkCommand,
-				...(await hashFiles([await findExe(linkCommand), exeFile, ...depends]))
-			];
-		};
-
+		task.depends = [...objFiles, ...options.depends];
 		task.label = `LINK ${exeFile}`;
 
+		if (exeFile in maek.tasks) {
+			throw new Error(`Task ${task.label} purports to create ${exeFile}, but ${maek.tasks[exeFile].label} already creates that file.`);
+		}
 		maek.tasks[exeFile] = task;
 
 		return exeFile;
 	};
 
-	//---------------------------------
-	//helper functions used by the build rules:
 
 	//says something went wrong in building -- should fail loudly:
 	class BuildError extends Error {
@@ -680,141 +553,188 @@ function init_maek() {
 		}
 	}
 
-	//says something went wrong elsewhere and this job is getting cleaned up -- should fail quietly:
-	class Cancelled extends Error {
-		constructor() {
-			super("Cancelled all tasks.");
+	//cache stores the hashes of files involved in run()'d commands:
+	let cache = {};
+
+	function loadCache() {
+		try {
+			const loaded = JSON.parse(fs.readFileSync(maek.CACHE_FILE, { encoding: 'utf8' }));
+			let assigned = 0;
+			let removed = 0;
+			for (const command of Object.keys(loaded)) {
+				//cache will have a 'files' and a 'hashes' line
+				if ('files' in loaded[command] && 'hashes' in loaded[command]) {
+					cache[command] = {
+						files:loaded[command].files,
+						hashes:loaded[command].hashes
+					};
+					assigned += 1;
+				} else {
+					removed += 1;
+				}
+			}
+			if (maek.VERBOSE) console.log(` -- Loaded cache from '${maek.CACHE_FILE}'; had ${assigned} valid entries and ${removed} invalid ones.`);
+		} catch (e) {
+			if (maek.VERBOSE) console.log(` --  No cache loaded; starting fresh.`);
+			if (e.code !== 'ENOENT') {
+				console.warn(`Cache loading failed for unexpected reason:`, e);
+			}
 		}
 	}
 
-	//when set, stop build (by, e.g., failing any remaining job() invocations):
-	let CANCEL_ALL_TASKS = false;
+	function saveCache() {
+		if (maek.VERBOSE) console.log(` -- Writing cache with ${Object.keys(cache).length} entries to '${maek.CACHE_FILE}'...`);
+		fs.writeFileSync(maek.CACHE_FILE, JSON.stringify(cache), { encoding: 'utf8' });
+	}
 
-	//updateTargets takes a list of targets and updates them as needed.
-	async function updateTargets(targets, from) {
-		const pending = [];
-		for (const target of targets) {
-			//if target has an associated task, wait on that task:
-			if (target in maek.tasks) {
-				const task = maek.tasks[target];
-				// launch task if not already pending:
-				if (!('pending' in task)) {
-					task.from = from;
-					task.pending = (async () => {
-						try {
-							//check for cache hit:
-							if ('cachedKey' in task && 'keyFn' in task) {
-								const key = await task.keyFn();
-								if (JSON.stringify(key) === JSON.stringify(task.cachedKey)) {
-									if (maek.VERBOSE) console.log(`${task.label}: already in cache.`);
-									return;
-								} else {
-									const a = JSON.stringify(key);
-									const b = JSON.stringify(task.cachedKey);
-									for (let i = 0; i < a.length; ++i) {
-										if (a[i] !== b[i]) {
-											const begin = Math.max(0, i - 20);
-											const end = i + 20;
-											if (maek.VERBOSE) console.log(`${task.label}: key mis-match new[${begin}:${end}] = ${a.substr(begin, end - begin)} vs old[${begin}:${end}] = ${b.substr(begin, end - begin)}`);
-											break;
-										}
-									}
-								}
-							}
-							//on cache miss, run task:
-							await task();
-							//and update cache:
-							if ('keyFn' in task) {
-								task.cachedKey = await task.keyFn();
-							}
-						} catch (e) {
-							if (e instanceof BuildError) {
-								console.error(`!!! FAILED [${task.label}] ${e.message}`);
-								task.failed = true;
-								//if -q flag is set, immediately cancel all jobs:
-								if (maek.QUIT_EAGERLY) {
-									CANCEL_ALL_TASKS = true; //set flag so obs cancel themselves
-								}
-							} else if (maek.QUIT_EAGERLY && e instanceof Cancelled) {
-								//if this failed because a component job was cancelled, make a note:
-								task.failed = true;
-								if (maek.VERBOSE) console.error(`CANCELED [${task.label}]`);
-							} else {
-								//don't expect any other exceptions, but if they do arise, re-throw 'em:
-								throw e;
-							}
-						}
-					})();
-				}
-				pending.push(task.pending);
-				//otherwise, if target is abstract, complain because it isn't known:
-			} else if (target[0] === ':') {
-				throw new BuildError(`Target '${target}' (requested by ${from}) is abstract but doesn't have a task.`);
-				//otherwise, target is a file, so check that it exists:
+	let runTime = 0.0;
+
+	//runs a shell command (presented as an array)
+	// 'message' will be displayed above the command
+	// 'cacheInfoFn', if provided, will be called after function is run to determine which files to hash when caching the result
+	async function run(command, message, cacheInfoFn) {
+
+		//cache key for the command -- encoded command name:
+		const cacheKey = JSON.stringify(command);
+
+		//executable for the command:
+		const exe = await findExe(command);
+
+		//if no cache info function, remove any existing cache entry:
+		if (!cacheInfoFn) {
+			delete cache[cacheKey];
+		}
+
+		//check for existing cache entry:
+		let extra = ''; //extra message
+		if (cacheKey in cache) {
+			const cached = cache[cacheKey].hashes;
+			const current = await hashFiles([exe, ...cache[cacheKey].files]);
+			if (JSON.stringify(current) === JSON.stringify(cached)) {
+				if (maek.VERBOSE) console.log(`\x1b[33m${message} [cached]\x1b[0m`);
+				return;
 			} else {
-				pending.push(
-					fsPromises.access(target, fs.constants.R_OK).catch((e) => {
-						throw new BuildError(`Target '${target}' (requested by ${from}) doesn't exist and doesn't have a task to make it.`);
-					})
-				);
+				if (maek.VERBOSE) extra = ` \x1b[33m[cache miss!]\x1b[0m`;
 			}
 		}
 
-		//resolve all the build/check tasks before returning:
-		await Promise.all(pending);
 
-		//if the CANCEL_ALL_TASKS flag is set, don't report further errors, just abort:
-		if (CANCEL_ALL_TASKS) throw new Cancelled();
+		if (typeof message !== 'undefined') {
+			console.log(`\x1b[90m${message}\x1b[0m${extra}`);
+		}
 
-		//check for any build failures:
-		for (const target of targets) {
-			if (target in maek.tasks) {
-				if (maek.tasks[target].failed) {
-					throw new BuildError(`for lack of ${target}`);
+		//print a command in a way that can be copied to a shell to run:
+		let prettyCommand = '';
+		for (const token of command) {
+			if (prettyCommand !== '') prettyCommand += ' ';
+			if (/[ \t\n!"'$&()*,;<>?[\\\]^`{|}~]/.test(token)
+				|| token[0] === '='
+				|| token[0] === '#') {
+				//special characters => need to quote:
+				prettyCommand += "'" + token.replace(/'/g, "'\\''") + "'";
+			} else {
+				prettyCommand += token;
+			}
+		}
+		console.log('   ' + prettyCommand);
+
+		//package as a promise and await it finishing:
+		const before = performance.now();
+		await new Promise((resolve, reject) => {
+			const proc = child_process.spawn(command[0], command.slice(1), {
+				shell: false,
+				stdio: ['ignore', 'inherit', 'inherit']
+			});
+			proc.on('exit', (code, signal) => {
+				if (code !== 0) {
+					process.stderr.write(`\n`);
+					reject(new BuildError(`exit ${code} from:\n    \x1b[31m${prettyCommand}\x1b[0m\n`));
+				} else {
+					resolve();
 				}
-			}
-		}
-	}
-
-	//'job' says the contained function is an async job that should count against the JOBS limit:
-	// returns a promise that resolves to the result of jobFn() (or rejects if jobFn() throws)
-	// will always wait until at least the next tick to run jobFn()
-	function job(jobFn) {
-		//keep count of active jobs and list of pending jobs:
-		if (!('active' in job)) job.active = 0;
-		if (!('pending' in job)) job.pending = [];
-
-		//helper that runs a job on the pending queue:
-		async function schedule() {
-			if (job.active < maek.JOBS && job.pending.length) {
-				job.active += 1;
-				//DEBUG: console.log(`[${job.active}/${JOBS} active, ${job.pending.length} pending]`);
-				const next = job.pending.shift();
-				try {
-					if (CANCEL_ALL_TASKS) throw new Cancelled();
-					next.resolve(await next.jobFn());
-				} catch (e) {
-					next.reject(e);
-				}
-				job.active -= 1;
-				process.nextTick(schedule);
-			}
-		}
-
-		//make sure to check for executable jobs next tick:
-		process.nextTick(schedule);
-
-		//throw job onto pending queue:
-		return new Promise((resolve, reject) => {
-			job.pending.push({ jobFn, resolve, reject });
+			});
+			proc.on('error', (err) => {
+				reject(new BuildError(`${err.message} from:\n    ${prettyCommand}`));
+			});
 		});
+		runTime += performance.now() - before;
+
+		//store result in cache:
+		if (cacheInfoFn) {
+			const {read, written} = await cacheInfoFn();
+
+			//if hashed one of the written files before, can't rely on it:
+			for (const file of written) {
+				delete hashCache[file];
+			}
+
+			//update cache with file content hashes:
+			const files = [...read, ...written];
+			cache[cacheKey] = {
+				files:files,
+				hashes:await hashFiles([exe, ...files])
+			};
+		}
+
 	}
 
-	//findExe looks up a command in the PATH (so, e.g., one can hash compiler binaries)
+	let hashCacheHits = 0;
+	let hashCache = {};
+	let hashLoadTime = 0.0;
+	let hashComputeTime = 0.0;
+
+	//hash a list of files and return a list of strings describing said hashes (or 'x' on missing file):
+	async function hashFiles(files) {
+		const crypto = require('crypto');
+
+		//helper that will hash a single file: (non-existent files get special hash 'x')
+		async function hashFile(file) {
+			if (file in hashCache) {
+				hashCacheHits += 1;
+				return hashCache[file];
+			}
+
+			//would likely be more efficient to use a pipe with large files,
+			//but this code is a bit more readable:
+			const hash = await new Promise((resolve, reject) => {
+				const beforeLoad = performance.now();
+				fs.readFile(file, (err, data) => {
+					hashLoadTime += performance.now() - beforeLoad;
+					if (err) {
+						//if failed to read file, report hash as 'x':
+						if (err.code != "ENOENT") {
+							console.warn(`Failed to hash ${file} because of unexpected error ${err}`); //DEBUG
+						}
+						resolve(`x`);
+					} else {
+						const beforeHash = performance.now();
+						//otherwise, report base64-encoded md5sum of file data:
+						const hash = crypto.createHash('md5');
+						hash.update(data);
+						resolve(`${hash.digest('base64')}`);
+						hashComputeTime += performance.now() - beforeHash;
+					}
+				});
+			});
+
+			hashCache[file] = hash;
+			return hash;
+		}
+
+		//get all hashes:
+		const hashes = [];
+		for (let file of files) {
+			hashes.push(await hashFile(file));
+		}
+		return hashes;
+	}
+
+	//find an executable in the system path
+	// (used by run to figure out what to hash)
 	async function findExe(command) {
 		const osPath = require('path');
 		let PATH;
-		if (OS === 'windows') {
+		if (maek.OS === 'windows') {
 			PATH = process.env.PATH.split(';');
 		} else {
 			PATH = process.env.PATH.split(':');
@@ -833,176 +753,189 @@ function init_maek() {
 		return "?";
 	}
 
-	//runCommand runs a command:
-	async function runCommand(command, message) {
-		await job(async () => {
-			if (typeof message !== 'undefined') {
-				console.log('\x1b[90m' + message + '\x1b[0m');
-			}
-
-			//print a command in a way that can be copied to a shell to run:
-			let prettyCommand = '';
-			for (const token of command) {
-				if (prettyCommand !== '') prettyCommand += ' ';
-				if (/[ \t\n!"'$&()*,;<>?[\\\]^`{|}~]/.test(token)
-					|| token[0] === '='
-					|| token[0] === '#') {
-					//special characters => need to quote:
-					prettyCommand += "'" + token.replace(/'/g, "'\\''") + "'";
-				} else {
-					prettyCommand += token;
-				}
-			}
-			console.log('   ' + prettyCommand);
-
-			//actually run the command:
-			const child_process = require('child_process');
-
-			//package as a promise and await it finishing:
-			await new Promise((resolve, reject) => {
-				const proc = child_process.spawn(command[0], command.slice(1), {
-					shell: false,
-					stdio: ['ignore', 'inherit', 'inherit']
-				});
-				proc.on('exit', (code, signal) => {
-					if (code !== 0) {
-						process.stderr.write(`\n`);
-						reject(new BuildError(`exit ${code} from:\n    \x1b[31m${prettyCommand}\x1b[0m\n`));
-					} else {
-						resolve();
-					}
-				});
-				proc.on('error', (err) => {
-					reject(new BuildError(`${err.message} from:\n    ${prettyCommand}`));
-				});
-			});
-		});
-	}
-
-	//assertNontargets makes sure none of the mentioned prerequisites are targets of tasks:
-	function assertNontargets(prerequisites, ruleName) {
-		let errorFiles = [];
-		for (const target of prerequisites) {
-			if ('target' in maek.tasks) {
-				errorFiles.push(target);
-			}
-		}
-		if (errorFiles.length) {
-			throw new BuildError(`the following *generated* files are required but not mentioned as dependancies:\n  ${errorFiles.join('\n  ')}`);
-		}
-	}
-
-	//return a ['file:base64hash', 'file2:whateverHash', 'file3:etcstuff'] array,
-	// representing the contents of a list of targets (with ':abstract' targets removed)
-	async function hashFiles(targets) {
-		const crypto = require('crypto');
-
-		const files = targets.filter(target => target[0] !== ':');
-
-		//helper that will hash a single file: (non-existent files get special hash 'x')
-		async function hashFile(file) {
-			if (file in hashCache) {
-				hashCacheHits += 1;
-				return hashCache[file];
-			}
-
-			//would likely be more efficient to use a pipe with large files,
-			//but this code is a bit more readable:
-			const hash = await new Promise((resolve, reject) => {
-				fs.readFile(file, (err, data) => {
-					if (err) {
-						//if failed to read file, report hash as 'x':
-						if (err.code != "ENOENT") {
-							console.warn(`Failed to hash ${file} because of unexpected error ${err}`); //DEBUG
-						}
-						resolve(`${file}:x`);
-					} else {
-						//otherwise, report base64-encoded md5sum of file data:
-						const hash = crypto.createHash('md5');
-						hash.update(data);
-						resolve(`${file}:${hash.digest('base64')}`);
-					}
-				});
-			});
-
-			hashCache[file] = hash;
-			return hash;
-		}
-
-		//get all hashes:
-		//work in serial to avoid running out of file descriptors:
-		const hashes = [];
-		for (let file of files) {
-			hashes.push(await hashFile(file));
-		}
-		return hashes;
-	}
-
-	//---------------------------------
-	//Public Interface:
+	//---------------------------------------
+	//'update' actually runs tasks to make targets:
 
 	maek.update = async (targets) => {
-		const performance = require('perf_hooks').performance;
 		const before = performance.now();
-		console.log(` -- Maek v0.1 on ${OS} with ${maek.JOBS} max jobs updating '${targets.join("', '")}'...`);
+		console.log(` -- Maek v0.2 on ${maek.OS} with ${maek.JOBS} max jobs updating '${targets.join("', '")}'...`);
 
-		//clean up any stale cachedKey values:
-		for (const target of Object.keys(maek.tasks)) {
-			delete maek.tasks[target].cachedKey;
+		loadCache();
+		process.on('SIGINT', () => {
+			console.log(`\x1b[91m!!! FAILED: interrupted\x1b[0m`);
+			saveCache();
+			process.exit(1);
+		}); //allow saving cache on abort
+
+		const tasks = maek.tasks;
+
+		//clear temporary per-task data:
+		for (const target in tasks) {
+			delete tasks[target].neededBy; //which tasks need this task
+			delete tasks[target].finished; //is this task finished?
+			delete tasks[target].failed; //has this task failed?
 		}
-		//load cachedKey values from cache file:
-		try {
-			const cache = JSON.parse(fs.readFileSync(CACHE_FILE, { encoding: 'utf8' }));
-			let assigned = 0;
-			let removed = 0;
-			for (const target of Object.keys(cache)) {
-				if (target in maek.tasks) {
-					maek.tasks[target].cachedKey = cache[target];
-					assigned += 1;
+
+
+		//list of all tasks to run:
+		const pending = [];
+
+		//add to list of tasks to run and make neededBy array:
+		function need(target, from) {
+			if (!(target in tasks)) {
+				//no task for the target?
+				if (target[0] === ':') {
+					//if it's abstract, that's an error:
+					throw new BuildError(`Target '${target}' (requested by ${from}) is abstract but doesn't have a task.`);
+				}
+				//otherwise, it's a plain file: add a task that checks it exists:
+				const task = async () => {
+					try {
+						await fsPromises.access(target, fs.constants.R_OK);
+					} catch (e) {
+						throw new BuildError(`Target '${target}' (requested by ${from}) doesn't exist and doesn't have a task to make it.`);
+					}
+				};
+				task.depends = [];
+				task.label = `EXISTS '${target}'`;
+				tasks[target] = task;
+			}
+			if ('neededBy' in tasks[target]) return;
+			pending.push(tasks[target]);
+			tasks[target].neededBy = [];
+			for (let depend of tasks[target].depends) {
+				need(depend, `'${target}'`);
+				tasks[depend].neededBy.push(tasks[target]);
+			}
+		}
+
+		//every requested target is needed:
+		for (const target of targets) {
+			need(target, 'user');
+		}
+
+		//----------------------------------
+		//now run up to JOBS tasks at once:
+
+		let ready = []; //tasks ready to run
+		let running = []; //tasks currently running
+		let CANCEL_ALL_TASKS = false; //skip remaining tasks?
+
+		async function launch(task) {
+			running.push(task);
+			let failedDepends = [];
+			for (const depend of task.depends) {
+				if (tasks[depend].failed) {
+					failedDepends.push(depend);
 				} else {
-					removed += 1;
+					console.assert(tasks[depend].finished, "all depends should be failed or finished");
 				}
 			}
-			if (maek.VERBOSE) console.log(` -- Loaded cache from '${CACHE_FILE}'; assigned ${assigned} targets and removed ${removed} stale entries.`);
-		} catch (e) {
-			if (maek.VERBOSE) console.log(` --  No cache loaded; starting fresh.`);
-			if (e.code !== 'ENOENT') {
-				console.warn(`By the way, the reason the loading failed was the following unexpected error:`, e);
+			if (failedDepends.length) {
+				task.failed = true;
+				if (maek.VERBOSE) console.error(`!!! SKIPPED [${task.label}] because target(s) ${failedDepends.join(', ')} failed.`);
+			}
+			try {
+				if (!task.failed) {
+					await task();
+					task.finished = true;
+				}
+			} catch (e) {
+				if (e instanceof BuildError) {
+					console.error(`\x1b[91m!!! FAILED [${task.label}] ${e.message}\x1b[0m`);
+					task.failed = true;
+					//if -q flag is set, immediately cancel all jobs:
+					if (maek.QUIT_EAGERLY) {
+						CANCEL_ALL_TASKS = true; //set flag so obs cancel themselves
+					}
+				} else {
+					//don't expect any other exceptions, but if they do arise, re-throw 'em:
+					throw e;
+				}
+			}
+			//check all neededBy for potential readiness:
+			for (const needed of task.neededBy) {
+				let allDone = true;
+				for (const depend of needed.depends) {
+					if (!(tasks[depend].finished || tasks[depend].failed)) {
+						allDone = false;
+					}
+				}
+				if (allDone) {
+					ready.push(needed);
+				}
+			}
+			//remove task from 'running' list:
+			let i = running.indexOf(task);
+			console.assert(i !== -1, "running tasks must exist within running list");
+			running.splice(i,1);
+		}
+
+		//ready up anything that can be:
+		for (const task of pending) {
+			if (task.depends.length === 0) {
+				ready.push(task);
 			}
 		}
 
-		//actually do the build:
+		//launch tasks until no more can be launched:
+		await new Promise((resolve,reject) => {
+			function pollTasks() {
+				//if can run something now, do so:
+				while (running.length < maek.JOBS && !CANCEL_ALL_TASKS && ready.length > 0) {
+					launch(ready.shift());
+				}
+				//if can run something eventually, keep waiting:
+				if (running.length > 0 || (!CANCEL_ALL_TASKS && ready.length > 0)) {
+					setTimeout(pollTasks, 10);
+				} else {
+					resolve(); //otherwise, finish
+				}
+			}
+			setImmediate(pollTasks);
+		});
+
+		//confirm that nothing was left hanging (dependency loop!):
 		let failed = false;
-		try {
-			await updateTargets(targets, 'user');
-			const after = performance.now();
+		let skipped = [];
+		for (const task of pending) {
+			if (!(task.finished || task.failed)) {
+				skipped.push(task.label);
+			}
+			if (!task.finished) {
+				failed = true;
+			}
+		}
+
+		const after = performance.now();
+		if (!failed) {
 			console.log(` -- SUCCESS: Target(s) '${targets.join("', '")}' brought up to date in ${((after - before) / 1000.0).toFixed(3)} seconds.`);
-		} catch (e) {
-			if (e instanceof BuildError) {
-				console.error(` -- FAILED: ${e.message}`);
-				process.exitCode = 1;
-			} else if (e instanceof Cancelled) {
-				console.error(` -- CANCELLED`);
-				process.exitCode = 1;
+		} else {
+			if (skipped.length) {
+				if (CANCEL_ALL_TASKS) {
+					console.log(`!!! SKIPPED ${skipped.length} tasks because of failure above.`);
+				} else {
+					console.log(`\x1b[91m!!! FAILED: tasks ${skipped.join(', ')} were never run (circular dependancy).\x1b[0m`);
+				}
 			} else {
-				throw e;
+				console.log(`\x1b[91m!!! FAILED: see error(s) above.\x1b[0m`);
 			}
 		}
 
-		//store cachedKey values:
-		const cache = {};
-		let stored = 0;
-		for (const target of Object.keys(maek.tasks)) {
-			if ('cachedKey' in maek.tasks[target]) {
-				cache[target] = maek.tasks[target].cachedKey;
-				stored += 1;
-			}
-		}
-		if (maek.VERBOSE) console.log(` -- Writing cache with ${stored} entries to '${CACHE_FILE}'...`);
-		fs.writeFileSync(CACHE_FILE, JSON.stringify(cache), { encoding: 'utf8' });
+		//store cache to disk:
+		saveCache();
 
-		if (maek.VERBOSE) console.log(` -- hashCache ended up with ${Object.keys(hashCache).length} items and handled ${hashCacheHits} hits.`);
+		if (maek.VERBOSE) {
+			function t(ms) { return (ms / 1000.0).toFixed(3); }
+			console.log(`\x1b[35m -- Performance metrics:\x1b[0m`);
+			console.log(`\x1b[35m  . hashCache ended up with ${Object.keys(hashCache).length} items and handled ${hashCacheHits} hits.\x1b[0m`);
+			console.log(`\x1b[35m  . hashFiles spent ${t(hashLoadTime)} seconds loading and ${t(hashComputeTime)} hashing.\x1b[0m`);
+			console.log(`\x1b[35m  . run spent ${t(runTime)} seconds running commands.\x1b[0m`);
+		}
+
+		return !failed;
 	};
+
 
 	//automatically call 'update' once the main body of the script has finished running:
 	process.nextTick(() => {
@@ -1013,12 +946,10 @@ function init_maek() {
 			if (arg === '--') { //-- target target ...
 				//the rest of the command line is targets:
 				targets.push(...process.argv.slice(argi + 1));
-				console.log(`Added targets ${process.argv.slice(argi + 1)}.`);
 				break;
-			} else if (/^-j[\d+]$/.test(arg)) { //-jN
+			} else if (/^-j\d+$/.test(arg)) { //-jN
 				//set max jobs
 				maek.JOBS = parseInt(arg.substr(2));
-				console.log(`Set JOBS to ${maek.JOBS}.`);
 			} else if (arg === '-v') {
 				//set verbose output
 				maek.VERBOSE = true;
@@ -1040,7 +971,9 @@ function init_maek() {
 			console.warn("No targets specified on command line and no default targets.");
 		}
 
-		maek.update(maek.TARGETS);
+		maek.update(maek.TARGETS).then((success) => {
+			process.exitCode = (success ? 0 : 1);
+		});
 	});
 
 	return maek;

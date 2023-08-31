@@ -861,17 +861,75 @@ void Manager::ui_properties(View_3D& gui_cam) {
 		I old = *inst;
 		bool changed = Checkbox("Visible", &inst->settings.visible);
 
-		int style = int(inst->settings.style);
-		RadioButton("Wireframe", &style, int(DrawStyle::Wireframe));
-		RadioButton("Flat", &style, int(DrawStyle::Flat));
-		RadioButton("Smooth", &style, int(DrawStyle::Smooth));
-		RadioButton("Correct", &style, int(DrawStyle::Correct));
-
-		if (style != int(inst->settings.style)) {
-			changed = true;
-			inst->settings.style = DrawStyle(style);
+		// Draw style updates
+		int draw_style = int(inst->settings.draw_style);
+		const char* label = nullptr;
+		switch (draw_style) {
+			case int(DrawStyle::Wireframe): label = "Wireframe"; break;
+			case int(DrawStyle::Flat): label = "Flat"; break;
+			case int(DrawStyle::Smooth): label = "Smooth"; break;
+			case int(DrawStyle::Correct): label = "Correct"; break;
+			default: die("Unknown shape type");
 		}
 
+		if (BeginCombo("Draw Style", label)) {
+			if (Selectable("Wireframe")) draw_style = int(DrawStyle::Wireframe);
+			if (Selectable("Flat")) draw_style = int(DrawStyle::Flat);
+			if (Selectable("Smooth")) draw_style = int(DrawStyle::Smooth);
+			if (Selectable("Correct")) draw_style = int(DrawStyle::Correct);
+			EndCombo();
+		}
+
+		if (draw_style != int(inst->settings.draw_style)) {
+			changed = true;
+			inst->settings.draw_style = DrawStyle(draw_style);
+		}
+
+		// Blend style updates
+		int blend_style = int(inst->settings.blend_style);
+		label = nullptr;
+		switch (blend_style) {
+			case int(BlendStyle::Replace): label = "Blend Replace"; break;
+			case int(BlendStyle::Add): label = "Blend Add"; break;
+			case int(BlendStyle::Over): label = "Blend Over"; break;
+			default: die("Unknown shape type");
+		}
+
+		if (BeginCombo("Blend Style", label)) {
+			if (Selectable("Blend Replace")) blend_style = int(BlendStyle::Replace);
+			if (Selectable("Blend Add")) blend_style = int(BlendStyle::Add);
+			if (Selectable("Blend Over")) blend_style = int(BlendStyle::Over);
+			EndCombo();
+		}
+
+		if (blend_style != int(inst->settings.blend_style)) {
+			changed = true;
+			inst->settings.blend_style = BlendStyle(blend_style);
+		}
+
+		// Depth style updates
+		int depth_style = int(inst->settings.depth_style);
+		label = nullptr;
+		switch (depth_style) {
+			case int(DepthStyle::Always): label = "Depth Always"; break;
+			case int(DepthStyle::Never): label = "Depth Never"; break;
+			case int(DepthStyle::Less): label = "Depth Less"; break;
+			default: die("Unknown shape type");
+		}
+
+		if (BeginCombo("Depth Style", label)) {
+			if (Selectable("Depth Always")) depth_style = int(DepthStyle::Always);
+			if (Selectable("Depth Never")) depth_style = int(DepthStyle::Never);
+			if (Selectable("Depth Less")) depth_style = int(DepthStyle::Less);
+			EndCombo();
+		}
+
+		if (depth_style != int(inst->settings.depth_style)) {
+			changed = true;
+			inst->settings.depth_style = DepthStyle(depth_style);
+		}
+
+		// do update if any of the styles changed
 		if (changed) undo.update<I>(inst, old);
 	};
 	auto edit_light_settings = [&](auto& inst) {
@@ -1847,7 +1905,7 @@ std::weak_ptr<Transform> Manager::render_instances(Mat4 view, bool gui) {
 		opt.id = next_id;
 		opt.modelview = view * model;
 		if constexpr (std::is_same< decltype(inst->settings),Instance::Geometry_Settings >::value) {
-			opt.wireframe = inst->settings.style == DrawStyle::Wireframe;
+			opt.wireframe = inst->settings.draw_style == DrawStyle::Wireframe;
 		} else {
 			opt.wireframe = inst->settings.wireframe;
 		}

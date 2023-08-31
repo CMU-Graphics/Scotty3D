@@ -93,7 +93,6 @@ Once you've successfully implemented triangle intersection, you will be able to 
 A few final notes and thoughts:
 - While you are working with `src/parhtracer/tri_mesh.cpp`, you can choose to implement `Triangle::bbox` as well (pretty straightforward to do), which is needed for task 3.
 - If the denominator ( $(\textbf{e}_1 \times \textbf{d}) \cdot \textbf{e}_2$ ) is zero, what does that mean about the relationship of the ray and the triangle? Can a triangle with this area be hit by a ray? Given $u$ and $v$, how do you know if the ray hits the triangle? Don't forget that the intersection point on the ray should be within the ray's `dist_bounds`.
-- **Don't** use `abs()`. This is the (C) integer-only absolute value function. You want the C++ `std::abs()` which has a floating-point overload; or the C `fabsf()` function.
 - Please use the $t$ value that is computed via the algorithm. Recomputing the point of intersection and then the distance may need to small floating point errors that cause significant errors when performing global illumination.
 - We've provided test cases in `tests/test.a3.task2.triangle.hit.cpp` to construct a triangle and ray, and see whether the ray intersects the triangle by comparing the resulting trace informations.
 

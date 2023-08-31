@@ -18,12 +18,14 @@ enum class Shape : uint8_t {
 	cone,
 	capsule,
 	arrow,
-	scale
+	scale,
+	pentagon
 };
 
 Indexed_Mesh cube_mesh(float radius);
 Indexed_Mesh square_mesh(float radius);
 Indexed_Mesh quad_mesh(float x, float y);
+Indexed_Mesh pentagon_mesh(float radius);
 Indexed_Mesh cyl_mesh(float radius, float height, uint32_t sides = 12, bool cap = true);
 Indexed_Mesh cyl_mesh_disjoint(float radius, float height, uint32_t sides = 12);
 Indexed_Mesh torus_mesh(float iradius, float oradius, uint32_t segments = 48, uint32_t sides = 24);
@@ -56,6 +58,7 @@ Indexed_Mesh dedup(Data&& d);
 // https://wiki.unity3d.com/index.php/ProceduralPrimitives
 Data cube(float r);
 Data quad(float x, float y);
+Data pentagon(float r);
 Data ico_sphere(float radius, uint32_t level);
 Data uv_hemisphere(float radius);
 Data cone(float bradius, float tradius, float height, uint32_t sides, bool caps);

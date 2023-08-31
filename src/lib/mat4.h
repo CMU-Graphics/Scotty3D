@@ -16,6 +16,8 @@ struct Mat4 {
 	/// Zero matrix
 	static const Mat4 Zero;
 
+	/// Return skew-symmetrix matrix for a vector
+	static Mat4 skew_symmetric(Vec3 v);
 	/// Return transposed matrix
 	static Mat4 transpose(const Mat4& m);
 	/// Return inverse matrix (will be NaN if m is not invertible)
@@ -417,6 +419,15 @@ inline Mat4 Mat4::euler(Vec3 angles) {
 	       Mat4::angle_axis(angles.x, Vec3{1.0f, 0.0f, 0.0f});
 }
 
+inline Mat4 Mat4::skew_symmetric(Vec3 v) {
+	Mat4 r =  Mat4{Vec4{0.0f, -v.z, v.y, 0.0f}, 
+				   Vec4{v.z, 0.0f, -v.x, 0.0f},             
+				   Vec4{-v.y, v.x, 0.0f, 0.0f}, 
+				   Vec4{0.0f, 0.0f, 0.0f, 1.0f}};
+	return r;
+}
+
+// TODO: potentially incorrect?
 inline Mat4 Mat4::angle_axis(float t, Vec3 axis) {
 	Mat4 ret;
 	float c = std::cos(Radians(t));

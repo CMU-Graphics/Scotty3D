@@ -80,6 +80,8 @@ Scotty3D$ ./Scotty3D --run-tests
 ```
 Note that you _should_ read `Maekfile.js`. about the available command line options and how to configure your own build. All the code has been nicely documented to help you understand the building process and reinforce your learning.
 
+When using with `--run-tests` option, you may realize that the program is running every test file under tests directory. If you wish to specify which tests to run, you can specify the substring your desired tests cases include. For example, running `./Scotty3D --run-tests "A0"` runs all test cases with substring "A0" in its test function name.
+
 Below is a non-exhaustive list of common build issues along with their suggested solutions. Let us know if you encounter a problem that is not addressed here.
 
 ### macOS

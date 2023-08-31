@@ -8,7 +8,7 @@
 #include <algorithm>
 #include <iostream>
 
-using ScreenPipeline = Pipeline< PrimitiveType::Triangles, Programs::Lambertian, Pipeline_Blend_Replace | Pipeline_Depth_Less | Pipeline_Interp_Screen >;
+using ScreenPipeline = Pipeline< PrimitiveType::Triangles, Programs::Lambertian, Pipeline_Blend_Replace | Pipeline_Depth_Less | Pipeline_Interp_Smooth >;
 using SPClippedVertex = ScreenPipeline::ClippedVertex;
 using SPFragment = ScreenPipeline::Fragment;
 
@@ -258,7 +258,7 @@ Test test_a1_task5_screen_simple_attribs("a1.task5.screen.simple.attribs", []() 
 		  SPClippedVertex{ Vec3{ 3.0f, 0.0f, 0.5f }, 1.0f, { 2.0f } },
 		  SPClippedVertex{ Vec3{ 3.0f, 1.0f, 0.5f }, 1.0f, { 4.0f } } },
 		{ SPFragment{ Vec3{ 1.5f, 0.5f, 0.5f }, {1.0f * 0.75f + 2.0f * 0.125f + 4.0f * 0.125f}, { attrib0_deriv, Vec2{0.0f} } },
-		  SPFragment{ Vec3{ 2.5f, 0.5f, 0.5f }, {1.0f * 0.25f + 2.0f * 0.375f + 4.0f * 0.375f}, { attrib0_deriv, Vec2{0.0f} } } }
+		  SPFragment{ Vec3{ 2.5f, 0.5f, 0.5f }, {1.0f * 0.25f + 2.0f * 0.375f + 4.0f * 0.375f}, { attrib0_deriv, Vec2{0.0f} } }}
 	);
 });
 
@@ -269,7 +269,7 @@ Test test_a1_task5_screen_simple_depth("a1.task5.screen.simple.depth", []() {
 		  SPClippedVertex{ Vec3{ 3.0f, 0.0f, 0.4f }, 1.0f, { 3.0f } },
 		  SPClippedVertex{ Vec3{ 3.0f, 1.0f, 0.8f }, 1.0f, { 3.0f } } },
 		{ SPFragment{ Vec3{ 1.5f, 0.5f, 0.1f * 0.75f + 0.4f * 0.125f + 0.8f * 0.125f }, {3.0f}, { Vec2{0.0f} } }, 
-		  SPFragment{ Vec3{ 2.5f, 0.5f, 0.1f * 0.25f + 0.4f * 0.375f + 0.8f * 0.375f }, {3.0f}, { Vec2{0.0f} } } }
+		  SPFragment{ Vec3{ 2.5f, 0.5f, 0.1f * 0.25f + 0.4f * 0.375f + 0.8f * 0.375f }, {3.0f}, { Vec2{0.0f} } }}
 	);
 });
 
@@ -292,7 +292,7 @@ Test test_a1_task5_correct_simple_attribs("a1.task5.correct.simple.attribs", [](
 		  CPClippedVertex{ Vec3{ 3.0f, 0.0f, 0.5f }, 1.0f, { 2.0f } },
 		  CPClippedVertex{ Vec3{ 3.0f, 1.0f, 0.5f }, 1.0f, { 4.0f } } },
 		{ CPFragment{ Vec3{ 1.5f, 0.5f, 0.5f }, {1.0f * 0.75f + 2.0f * 0.125f + 4.0f * 0.125f}, { attrib0_deriv, Vec2{0.0f} } },
-		  CPFragment{ Vec3{ 2.5f, 0.5f, 0.5f }, {1.0f * 0.25f + 2.0f * 0.375f + 4.0f * 0.375f}, { attrib0_deriv, Vec2{0.0f} } } }
+		  CPFragment{ Vec3{ 2.5f, 0.5f, 0.5f }, {1.0f * 0.25f + 2.0f * 0.375f + 4.0f * 0.375f}, { attrib0_deriv, Vec2{0.0f} } }}
 	);
 });
 
@@ -303,7 +303,7 @@ Test test_a1_task5_correct_simple_depth("a1.task5.correct.simple.depth", []() {
 		  CPClippedVertex{ Vec3{ 3.0f, 0.0f, 0.4f }, 1.0f, { 3.0f } },
 		  CPClippedVertex{ Vec3{ 3.0f, 1.0f, 0.8f }, 1.0f, { 3.0f } } },
 		{ CPFragment{ Vec3{ 1.5f, 0.5f, 0.1f * 0.75f + 0.4f * 0.125f + 0.8f * 0.125f }, {3.0f}, { Vec2{0.0f} } }, 
-		  CPFragment{ Vec3{ 2.5f, 0.5f, 0.1f * 0.25f + 0.4f * 0.375f + 0.8f * 0.375f }, {3.0f}, { Vec2{0.0f} } } }
+		  CPFragment{ Vec3{ 2.5f, 0.5f, 0.1f * 0.25f + 0.4f * 0.375f + 0.8f * 0.375f }, {3.0f}, { Vec2{0.0f} } }}
 	);
 });
 
@@ -320,7 +320,7 @@ Test test_a1_task5_correct_persp("a1.task5.correct.persp", []() {
 		  CPClippedVertex{ Vec3{ 3.0f, 0.0f, 0.5f }, 2.0f, { 2.0f } },
 		  CPClippedVertex{ Vec3{ 3.0f, 1.0f, 0.5f }, 2.0f, { 4.0f } } },
 		{ CPFragment{ Vec3{ 1.5f, 0.5f, 0.5f }, {1.8f}, { attrib0_deriv, Vec2{0.0f} } },
-		  CPFragment{ Vec3{ 2.5f, 0.5f, 0.5f }, {2.714285f}, { attrib0_deriv, Vec2{0.0f} } } }
+		  CPFragment{ Vec3{ 2.5f, 0.5f, 0.5f }, {2.714285f}, { attrib0_deriv, Vec2{0.0f} } }}
 	);
 });
 

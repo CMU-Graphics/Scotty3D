@@ -330,16 +330,26 @@ namespace s3ds {
 	};
 	static_assert(sizeof(Camera_Instance) == 4*4, "Camera_Instance is packed.");
 
-	enum Flags : uint8_t {
+	enum Flags : uint32_t {
 		FlagsVisible   = 0x01,
 		FlagsSimHere   = 0x04, //only makes sense for physics objects
 
 		//draw style for geometry uses bits 0x02 and 0x08 (...because of how things got allocated...)
-		FlagsStyleMask = 0x0a,
-		FlagsStyleWireframe = 0x02,
-		FlagsStyleFlat      = 0x08,
-		FlagsStyleSmooth    = 0x0a,
-		FlagsStyleCorrect   = 0x00,
+		FlagsDrawStyleMask = 0x0a,
+		FlagsDrawStyleWireframe = 0x02,
+		FlagsDrawStyleFlat      = 0x08,
+		FlagsDrawStyleSmooth    = 0x0a,
+		FlagsDrawStyleCorrect   = 0x00,
+
+		FlagsBlendStyleMask = 0x00a,
+		FlagsBlendStyleReplace  = 0x002,
+		FlagsBlendStyleAdd      = 0x008,
+		FlagsBlendStyleOver     = 0x00a,
+
+		FlagsDepthStyleMask = 0x000a,
+		FlagsDepthStyleAlways   = 0x0002,
+		FlagsDepthStyleNever    = 0x0008,
+		FlagsDepthStyleLess     = 0x000a,
 	};
 
 	constexpr char Mesh_Instances_fourcc[4] = {'I','m','e','0'};
@@ -348,9 +358,9 @@ namespace s3ds {
 		uint32_t transform; //index in transforms list
 		uint32_t item; //index in meshes
 		uint32_t material; //index in materials
-		uint8_t flags; //see flags enum above
+		uint32_t flags; //see flags enum above
 	} END_PACK;
-	static_assert(sizeof(Mesh_Instance) == 5*4+1, "Mesh_Instance is packed.");
+	static_assert(sizeof(Mesh_Instance) == 6*4, "Mesh_Instance is packed.");
 
 	constexpr char Skinned_Mesh_Instances_fourcc[4] = {'I','s','k','0'};
 	using Skinned_Mesh_Instance = Mesh_Instance; //only difference is that 'item' references skinned_meshes
@@ -1065,12 +1075,24 @@ Scene Scene::load(std::istream& from) {
 		}
 	}
 
-	auto flags_to_style = [&](std::string const &what, uint8_t flags) -> DrawStyle {
-		if      ((flags & s3ds::FlagsStyleMask) == s3ds::FlagsStyleWireframe) return DrawStyle::Wireframe;
-		else if ((flags & s3ds::FlagsStyleMask) == s3ds::FlagsStyleFlat     ) return DrawStyle::Flat;
-		else if ((flags & s3ds::FlagsStyleMask) == s3ds::FlagsStyleSmooth   ) return DrawStyle::Smooth;
-		else if ((flags & s3ds::FlagsStyleMask) == s3ds::FlagsStyleCorrect  ) return DrawStyle::Correct;
+	auto flags_to_drawstyle = [&](std::string const &what, uint32_t flags) -> DrawStyle {
+		if      ((flags & s3ds::FlagsDrawStyleMask) == s3ds::FlagsDrawStyleWireframe) return DrawStyle::Wireframe;
+		else if ((flags & s3ds::FlagsDrawStyleMask) == s3ds::FlagsDrawStyleFlat     ) return DrawStyle::Flat;
+		else if ((flags & s3ds::FlagsDrawStyleMask) == s3ds::FlagsDrawStyleSmooth   ) return DrawStyle::Smooth;
+		else if ((flags & s3ds::FlagsDrawStyleMask) == s3ds::FlagsDrawStyleCorrect  ) return DrawStyle::Correct;
 		else throw std::runtime_error(file_info() + what + " with unknown draw style.");
+	};
+	auto flags_to_blendstyle = [&](std::string const &what, uint32_t flags) -> BlendStyle {
+		if      ((flags & s3ds::FlagsBlendStyleMask) == s3ds::FlagsBlendStyleReplace) return BlendStyle::Replace;
+		else if ((flags & s3ds::FlagsBlendStyleMask) == s3ds::FlagsBlendStyleAdd    ) return BlendStyle::Add;
+		else if ((flags & s3ds::FlagsBlendStyleMask) == s3ds::FlagsBlendStyleOver   ) return BlendStyle::Over;
+		else throw std::runtime_error(file_info() + what + " with unknown blend style.");
+	};
+	auto flags_to_depthstyle = [&](std::string const &what, uint32_t flags) -> DepthStyle {
+		if      ((flags & s3ds::FlagsDepthStyleMask) == s3ds::FlagsDepthStyleAlways ) return DepthStyle::Always;
+		else if ((flags & s3ds::FlagsDepthStyleMask) == s3ds::FlagsDepthStyleNever  ) return DepthStyle::Never;
+		else if ((flags & s3ds::FlagsDepthStyleMask) == s3ds::FlagsDepthStyleLess   ) return DepthStyle::Less;
+		else throw std::runtime_error(file_info() + what + " with unknown depth style.");
 	};
 
 	{ //mesh
@@ -1099,7 +1121,9 @@ Scene Scene::load(std::istream& from) {
 				instance->material = index_to_material[loaded.material];
 			}
 			instance->settings.visible = ((loaded.flags & s3ds::FlagsVisible) != 0);
-			instance->settings.style = flags_to_style("Mesh_Instance", loaded.flags);
+			instance->settings.draw_style = flags_to_drawstyle("Mesh_Instance", loaded.flags);
+			instance->settings.blend_style = flags_to_blendstyle("Mesh_Instance", loaded.flags);
+			instance->settings.depth_style = flags_to_depthstyle("Mesh_Instance", loaded.flags);
 
 			scene.instances.meshes.emplace(name, instance);
 		}
@@ -1127,7 +1151,9 @@ Scene Scene::load(std::istream& from) {
 				instance->material = index_to_material[loaded.material];
 			}
 			instance->settings.visible = ((loaded.flags & s3ds::FlagsVisible) != 0);
-			instance->settings.style = flags_to_style("Skinned_Mesh_Instance", loaded.flags);
+			instance->settings.draw_style = flags_to_drawstyle("Skinned_Mesh_Instance", loaded.flags);
+			instance->settings.blend_style = flags_to_blendstyle("Skinned_Mesh_Instance", loaded.flags);
+			instance->settings.depth_style = flags_to_depthstyle("Skinned_Mesh_Instance", loaded.flags);
 
 			scene.instances.skinned_meshes.emplace(name, instance);
 		}
@@ -1155,7 +1181,9 @@ Scene Scene::load(std::istream& from) {
 				instance->material = index_to_material[loaded.material];
 			}
 			instance->settings.visible = ((loaded.flags & s3ds::FlagsVisible) != 0);
-			instance->settings.style = flags_to_style("Shape_Instance", loaded.flags);
+			instance->settings.draw_style = flags_to_drawstyle("Shape_Instance", loaded.flags);
+			instance->settings.blend_style = flags_to_blendstyle("Shape_Instance", loaded.flags);
+			instance->settings.depth_style = flags_to_depthstyle("Shape_Instance", loaded.flags);
 
 			scene.instances.shapes.emplace(name, instance);
 		}
@@ -1187,7 +1215,7 @@ Scene Scene::load(std::istream& from) {
 				instance->particles = index_to_particles[loaded.particles];
 			}
 			instance->settings.visible = ((loaded.flags & s3ds::FlagsVisible) != 0);
-			instance->settings.wireframe = ((loaded.flags & s3ds::FlagsStyleMask) == s3ds::FlagsStyleWireframe);
+			instance->settings.wireframe = ((loaded.flags & s3ds::FlagsDrawStyleMask) == s3ds::FlagsDrawStyleWireframe);
 			instance->settings.simulate_here = ((loaded.flags & s3ds::FlagsSimHere) != 0);
 
 			scene.instances.particles.emplace(name, instance);
@@ -1806,11 +1834,21 @@ void Scene::save(std::ostream& to) const {
 		uint8_t flags = 0;
 		if (settings.visible) flags |= s3ds::FlagsVisible;
 
-		if      (settings.style == DrawStyle::Wireframe) flags |= s3ds::FlagsStyleWireframe;
-		else if (settings.style == DrawStyle::Flat) flags |= s3ds::FlagsStyleFlat;
-		else if (settings.style == DrawStyle::Smooth) flags |= s3ds::FlagsStyleSmooth;
-		else if (settings.style == DrawStyle::Correct) flags |= s3ds::FlagsStyleCorrect;
-		else warn("unknown DrawStyle %d", int(settings.style));
+		if      (settings.draw_style == DrawStyle::Wireframe) flags |= s3ds::FlagsDrawStyleWireframe;
+		else if (settings.draw_style == DrawStyle::Flat)      flags |= s3ds::FlagsDrawStyleFlat;
+		else if (settings.draw_style == DrawStyle::Smooth)    flags |= s3ds::FlagsDrawStyleSmooth;
+		else if (settings.draw_style == DrawStyle::Correct)   flags |= s3ds::FlagsDrawStyleCorrect;
+		else warn("unknown DrawStyle %d", int(settings.draw_style));
+
+		if      (settings.blend_style == BlendStyle::Replace) flags |= s3ds::FlagsBlendStyleReplace;
+		else if (settings.blend_style == BlendStyle::Add)     flags |= s3ds::FlagsBlendStyleAdd;
+		else if (settings.blend_style == BlendStyle::Over)    flags |= s3ds::FlagsBlendStyleOver;
+		else warn("unknown BlendStyle %d", int(settings.blend_style));
+
+		if      (settings.depth_style == DepthStyle::Always)  flags |= s3ds::FlagsDepthStyleAlways;
+		else if (settings.depth_style == DepthStyle::Never)   flags |= s3ds::FlagsDepthStyleNever;
+		else if (settings.depth_style == DepthStyle::Less)    flags |= s3ds::FlagsDepthStyleLess;
+		else warn("unknown DepthStyle %d", int(settings.depth_style));
 
 		return flags;
 	};

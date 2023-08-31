@@ -79,7 +79,9 @@
 				"material":"lam_white",
 				"visible":true,
 				"collides":true,
-				"style":"Wireframe"
+				"draw style":"Wireframe",
+				"blend style":"Blend Replace",
+				"depth style":"Depth Less"
 			},
 			"Mesh Instance":{
 				"transform":"Transform",
@@ -87,7 +89,9 @@
 				"material":"lam_white",
 				"visible":true,
 				"collides":true,
-				"style":"Flat"
+				"draw style":"Flat",
+				"blend style":"Blend Replace",
+				"depth style":"Depth Less"
 			},
 			"Mesh Instance 1":{
 				"transform":"Transform 1",
@@ -95,7 +99,9 @@
 				"material":"lam_white",
 				"visible":true,
 				"collides":true,
-				"style":"Smooth"
+				"draw style":"Smooth",
+				"blend style":"Blend Replace",
+				"depth style":"Depth Less"
 			},
 			"Mesh Instance 2":{
 				"transform":"Transform 2",
@@ -103,7 +109,9 @@
 				"material":"lam_white",
 				"visible":true,
 				"collides":true,
-				"style":"Correct"
+				"draw style":"Correct",
+				"blend style":"Blend Replace",
+				"depth style":"Depth Less"
 			}
 		},
 		"skinned_meshes":{},

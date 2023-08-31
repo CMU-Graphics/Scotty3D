@@ -1,6 +1,20 @@
 #include "test.h"
 #include "geometry/util.h"
+#include "pathtracer/aggregate.h"
 #include "pathtracer/tri_mesh.h"
+
+Test test_a3_task3_bvh_hit_empty("a3.task3.bvh.hit.empty", []() {
+	PT::Aggregate scene;
+
+	Ray ray(Vec3(), Vec3(0, 0, 1));
+
+	PT::Trace ret = scene.hit(ray);
+	PT::Trace exp(false, Vec3(), Vec3(), Vec3(), Vec2{});
+
+	if (auto diff = Test::differs(ret, exp)) {
+		throw Test::error("Trace does not match expected: " + diff.value());
+	}
+});
 
 Test test_a3_task3_bvh_hit_simple_triangle("a3.task3.bvh.hit.simple.triangle", []() {
 	std::vector<Indexed_Mesh::Vert> verts;

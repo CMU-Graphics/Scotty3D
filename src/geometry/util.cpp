@@ -1,4 +1,3 @@
-
 #include "util.h"
 #include "../scene/shape.h"
 
@@ -52,6 +51,11 @@ Indexed_Mesh square_mesh(float r) {
 Indexed_Mesh quad_mesh(float x, float y) {
 	Gen::Data square = Gen::quad(x, y);
 	return Indexed_Mesh(std::move(square.verts), std::move(square.elems));
+}
+
+Indexed_Mesh pentagon_mesh(float r) {
+	Gen::Data pentagon = Gen::pentagon(r);
+	return Indexed_Mesh(std::move(pentagon.verts), std::move(pentagon.elems));
 }
 
 Indexed_Mesh sphere_mesh(float r, uint32_t subdivisions) {
@@ -172,23 +176,43 @@ LData circle(Spectrum color, float r, uint32_t sides) {
 
 Data quad(float x, float y) {
 	return {{{Vec3{-x, 0.0f, -y}, Vec3{0.0f, 1.0f, 0.0f}, Vec2{0.0f, 0.0f}, 0},
-	         {Vec3{-x, 0.0f, y}, Vec3{0.0f, 1.0f, 0.0f}, Vec2{0.0f, 1.0f}, 0},
-	         {Vec3{x, 0.0f, -y}, Vec3{0.0f, 1.0f, 0.0f}, Vec2{1.0f, 0.0f}, 0},
-	         {Vec3{x, 0.0f, y}, Vec3{0.0f, 1.0f, 0.0f}, Vec2{1.0f, 1.0f}, 0}},
+	         {Vec3{-x, 0.0f, y}, Vec3{0.0f, 1.0f, 0.0f}, Vec2{0.0f, 1.0f}, 1},
+	         {Vec3{x, 0.0f, -y}, Vec3{0.0f, 1.0f, 0.0f}, Vec2{1.0f, 0.0f}, 2},
+	         {Vec3{x, 0.0f, y}, Vec3{0.0f, 1.0f, 0.0f}, Vec2{1.0f, 1.0f}, 3}},
 	        {0, 1, 2, 2, 1, 3}};
 }
 
 Data cube(float r) {
 	return {{{Vec3{-r, -r, -r}, Vec3{-r, -r, -r}.unit(), Vec2{0.0f, 0.0f}, 0},
-	         {Vec3{r, -r, -r}, Vec3{r, -r, -r}.unit(), Vec2{1.0f, 0.0f}, 0},
-	         {Vec3{r, r, -r}, Vec3{r, r, -r}.unit(), Vec2{1.0f, 1.0f}, 0},
-	         {Vec3{-r, r, -r}, Vec3{-r, r, -r}.unit(), Vec2{0.0f, 1.0f}, 0},
-	         {Vec3{-r, -r, r}, Vec3{-r, -r, r}.unit(), Vec2{0.0f, 0.0f}, 0},
-	         {Vec3{r, -r, r}, Vec3{r, -r, r}.unit(), Vec2{1.0f,0.0f}, 0},
-	         {Vec3{r, r, r}, Vec3{r, r, r}.unit(), Vec2{1.0f,1.0f}, 0},
-	         {Vec3{-r, r, r}, Vec3{-r, r, r}.unit(), Vec2{0.0f,1.0f}, 0}},
+	         {Vec3{r, -r, -r}, Vec3{r, -r, -r}.unit(), Vec2{1.0f, 0.0f}, 1},
+	         {Vec3{r, r, -r}, Vec3{r, r, -r}.unit(), Vec2{1.0f, 1.0f}, 2},
+	         {Vec3{-r, r, -r}, Vec3{-r, r, -r}.unit(), Vec2{0.0f, 1.0f}, 3},
+	         {Vec3{-r, -r, r}, Vec3{-r, -r, r}.unit(), Vec2{0.0f, 0.0f}, 4},
+	         {Vec3{r, -r, r}, Vec3{r, -r, r}.unit(), Vec2{1.0f,0.0f}, 5},
+	         {Vec3{r, r, r}, Vec3{r, r, r}.unit(), Vec2{1.0f,1.0f}, 6},
+	         {Vec3{-r, r, r}, Vec3{-r, r, r}.unit(), Vec2{0.0f,1.0f}, 7}},
 	        {0, 1, 3, 3, 1, 2, 1, 5, 2, 2, 5, 6, 5, 4, 6, 6, 4, 7,
 	         4, 0, 7, 7, 0, 3, 3, 2, 7, 7, 2, 6, 4, 5, 0, 0, 5, 1}};
+}
+
+// A0T3: Pentagon
+// TODO: You have located the source of this problem. Remember your error 
+//       message and fix the following function to generate a proper pentagon.
+//       Note that the first vector of our indexed mesh constructor specifies 
+//       the vertices this mesh contains. The second vector specifies faces to 
+//       be constructed with these vertices, where every three vertex ID's form
+//       a triangular face.
+// Hint: You need not understand what halfedge meshes are or what exactly how 
+//       the helper functions work for this task. Try drawing these vertices 
+//       and faces on paper to see where the problem might lie.
+Data pentagon(float r) {
+	return {{{Vec3{r * std::cos(0.f * 2.f * PI_F / 5), 0.0f, r * std::sin(0.f * 2.f * PI_F / 5)}, Vec3{0.0f, 1.0f, 0.0f}, Vec2{0.0f, 0.0f}, 0},
+	         {Vec3{r * std::cos(1.f * 2.f * PI_F / 5), 0.0f, r * std::sin(1.f * 2.f * PI_F / 5)}, Vec3{0.0f, 1.0f, 0.0f}, Vec2{0.0f, 1.0f}, 1},
+	         {Vec3{r * std::cos(2.f * 2.f * PI_F / 5), 0.0f, r * std::sin(2.f * 2.f * PI_F / 5)}, Vec3{0.0f, 1.0f, 0.0f}, Vec2{1.0f, 0.0f}, 2},
+	         {Vec3{r * std::cos(3.f * 2.f * PI_F / 5), 0.0f, r * std::sin(3.f * 2.f * PI_F / 5)}, Vec3{0.0f, 1.0f, 0.0f}, Vec2{1.0f, 1.0f}, 3},
+	         {Vec3{r * std::cos(4.f * 2.f * PI_F / 5), 0.0f, r * std::sin(4.f * 2.f * PI_F / 5)}, Vec3{0.0f, 1.0f, 0.0f}, Vec2{1.0f, 1.0f}, 4},
+	         {Vec3{r * std::cos(5.f * 2.f * PI_F / 5), 0.0f, r * std::sin(5.f * 2.f * PI_F / 5)}, Vec3{0.0f, 1.0f, 0.0f}, Vec2{1.0f, 1.0f}, 5}},
+	        {0, 1, 2, 0, 2, 3, 0, 3, 4}};
 }
 
 // https://wiki.unity3d.com/index.php/ProceduralPrimitives
@@ -308,7 +332,7 @@ Data cone(float bradius, float tradius, float height, uint32_t sides, bool caps)
 
 	std::vector<Indexed_Mesh::Vert> verts;
 	for (size_t j = 0; j < vertices.size(); j++) {
-		verts.push_back({vertices[j], normals[j], Vec2{}, 0});
+		verts.push_back({vertices[j], normals[j], Vec2{}, static_cast<uint32_t>(j)});
 	}
 	return {verts, triangles};
 }
@@ -376,7 +400,7 @@ Data torus(float iradius, float oradius, uint32_t segments, uint32_t sides) {
 
 	std::vector<Indexed_Mesh::Vert> verts;
 	for (size_t j = 0; j < vertices.size(); j++) {
-		verts.push_back({vertices[j], normals[j], Vec2{}, 0});
+		verts.push_back({vertices[j], normals[j], Vec2{}, static_cast<uint32_t>(j)});
 	}
 	return {verts, triangles};
 }
@@ -439,13 +463,12 @@ Data uv_hemisphere(float radius) {
 
 	std::vector<Indexed_Mesh::Vert> verts;
 	for (size_t j = 0; j < vertices.size(); j++) {
-		verts.push_back({vertices[j], normals[j], Vec2{}, 0});
+		verts.push_back({vertices[j], normals[j], Vec2{}, static_cast<uint32_t>(j)});
 	}
 	triangles.resize(i);
 	return {verts, triangles};
 }
 
-// TODO: FIX ZIG ZAG https://mft-dev.dk/uv-mapping-sphere/
 Data ico_sphere(float radius, uint32_t level) {
 	struct TriIdx {
 		uint32_t v1, v2, v3;
@@ -525,13 +548,6 @@ Data ico_sphere(float radius, uint32_t level) {
 		faces = faces2;
 	}
 
-	std::vector<Indexed_Mesh::Index> triangles;
-	for (size_t i = 0; i < faces.size(); i++) {
-		triangles.push_back(faces[i].v1);
-		triangles.push_back(faces[i].v2);
-		triangles.push_back(faces[i].v3);
-	}
-
 	std::vector<Vec3> normals(vertices.size());
 	for (size_t i = 0; i < normals.size(); i++) normals[i] = vertices[i].unit();
 
@@ -541,6 +557,133 @@ Data ico_sphere(float radius, uint32_t level) {
 		uvs[i] = Shapes::Sphere::uv(dir);
 	}
 
+	// Try to fix UVs, following https://mft-dev.dk/uv-mapping-sphere/
+	// Detect triangles with wrong winding order
+	std::vector<uint32_t> winding_indices;
+	for(size_t i = 0; i < faces.size(); i++) {
+		uint32_t v1 = faces[i].v1;
+		uint32_t v2 = faces[i].v2;
+		uint32_t v3 = faces[i].v3;
+		Vec3 tex_v1 = Vec3(uvs[v1].x, uvs[v1].y, 0.0f);
+		Vec3 tex_v2 = Vec3(uvs[v2].x, uvs[v2].y, 0.0f);
+		Vec3 tex_v3 = Vec3(uvs[v3].x, uvs[v3].y, 0.0f);
+		Vec3 tex_normal = cross(tex_v2 - tex_v1, tex_v3 - tex_v1);
+		if(tex_normal.z > 0) {
+			winding_indices.push_back(static_cast<uint32_t>(i));
+		}
+	}
+
+	// Fix these vertices
+	auto fix_zig_zag = [&](std::vector<Vec3>& vertices, std::vector<Vec3>& normals, std::vector<Vec2>& uvs,
+					   std::unordered_map<uint32_t, uint32_t>& visited, size_t& vertex_index, uint32_t& vertex) -> void {
+		if(uvs[vertex].x < 0.25f) {
+			uint32_t temp_vertex = vertex;
+			if(!visited.count(vertex)) {
+				// Create a copy of the vertex but with uv changed
+				Vec3 vertex_copy = vertices[vertex];
+				Vec3 normal_copy = normals[vertex];
+				Vec2 uv_copy = uvs[vertex];
+				uv_copy.x += 1;
+				// Add to the list of vertices
+				vertices.push_back(vertex_copy);
+				normals.push_back(normal_copy);
+				uvs.push_back(uv_copy);
+				// Update faces
+				vertex_index++;
+				visited.insert({vertex, static_cast<uint32_t>(vertex_index)});
+				temp_vertex = static_cast<uint32_t>(vertex_index);
+			}
+			else {
+				temp_vertex = visited.at(vertex);
+			}
+			vertex = temp_vertex;
+		}
+	};
+	size_t vertex_index = vertices.size() - 1;
+	std::unordered_map<uint32_t, uint32_t> visited;
+	for(auto& index : winding_indices) {
+		uint32_t v1 = faces[index].v1;
+		uint32_t v2 = faces[index].v2;
+		uint32_t v3 = faces[index].v3;
+		fix_zig_zag(vertices, normals, uvs, visited, vertex_index, v1);
+		fix_zig_zag(vertices, normals, uvs, visited, vertex_index, v2);
+		fix_zig_zag(vertices, normals, uvs, visited, vertex_index, v3);
+		faces[index].v1 = v1;
+		faces[index].v2 = v2;
+		faces[index].v3 = v3;
+	}
+
+	// Fix top cap
+	auto fix_cap = [&](std::vector<Vec3>& vertices, std::vector<Vec3>& normals, std::vector<Vec2>& uvs, 
+					   std::vector<TriIdx> &faces, size_t& vertex_index, size_t index, uint32_t cap_index) -> void {
+		if(faces[index].v1 == cap_index){
+			// Create a copy of the vertex but with uv changed
+			Vec3 vertex_copy = vertices[cap_index];
+			Vec3 normal_copy = normals[cap_index];
+			Vec2 uv_copy = uvs[cap_index];
+			uv_copy.x = (uvs[faces[index].v2].x + uvs[faces[index].v3].x) / 2.0f;
+			// Add to the list of vertices
+			vertices.push_back(vertex_copy);
+			normals.push_back(normal_copy);
+			uvs.push_back(uv_copy);
+			// Update faces
+			vertex_index++;
+			faces[index].v1 = static_cast<uint32_t>(vertex_index);
+		} else if(faces[index].v2 == cap_index){
+			// Create a copy of the vertex but with uv changed
+			Vec3 vertex_copy = vertices[cap_index];
+			Vec3 normal_copy = normals[cap_index];
+			Vec2 uv_copy = uvs[cap_index];
+			uv_copy.x = (uvs[faces[index].v1].x + uvs[faces[index].v3].x) / 2.0f;
+			// Add to the list of vertices
+			vertices.push_back(vertex_copy);
+			normals.push_back(normal_copy);
+			uvs.push_back(uv_copy);
+			// Update faces
+			vertex_index++;
+			faces[index].v2 = static_cast<uint32_t>(vertex_index);
+		} else if(faces[index].v3 == cap_index){
+			// Create a copy of the vertex but with uv changed
+			Vec3 vertex_copy = vertices[cap_index];
+			Vec3 normal_copy = normals[cap_index];
+			Vec2 uv_copy = uvs[cap_index];
+			uv_copy.x = (uvs[faces[index].v1].x + uvs[faces[index].v2].x) / 2.0f;
+			// Add to the list of vertices
+			vertices.push_back(vertex_copy);
+			normals.push_back(normal_copy);
+			uvs.push_back(uv_copy);
+			// Update faces
+			vertex_index++;
+			faces[index].v3 = static_cast<uint32_t>(vertex_index);
+		}
+	};
+	std::vector<uint32_t> north_indices = {};
+	std::vector<uint32_t> south_indices = {};
+	for(size_t i = 0; i < vertices.size(); i++) {
+		if(std::abs(vertices[i].y - 1) < 0.001f) {
+			north_indices.push_back(static_cast<uint32_t>(i));
+		}
+		else if (std::abs(vertices[i].y + 1) < 0.001f) {
+			south_indices.push_back(static_cast<uint32_t>(i));
+		}
+	}
+	vertex_index = vertices.size() - 1;
+	for(size_t i = 0; i < faces.size(); i++) {
+		for(size_t j = 0; j < north_indices.size(); j++) {
+			fix_cap(vertices, normals, uvs, faces, vertex_index, i, north_indices[j]);
+		}
+		for(size_t j = 0; j < south_indices.size(); j++) {
+			fix_cap(vertices, normals, uvs, faces, vertex_index, i, south_indices[j]);
+		} 
+	}
+
+	// Construct the indexed mesh
+	std::vector<Indexed_Mesh::Index> triangles;
+	for (size_t i = 0; i < faces.size(); i++) {
+		triangles.push_back(faces[i].v1);
+		triangles.push_back(faces[i].v2);
+		triangles.push_back(faces[i].v3);
+	}
 	std::vector<Indexed_Mesh::Vert> verts;
 	for (size_t i = 0; i < vertices.size(); i++) {
 		verts.push_back({vertices[i], normals[i], uvs[i], 0});

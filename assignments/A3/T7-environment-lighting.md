@@ -20,7 +20,7 @@ First, check out the interface and implementation of `Environment_Lights::Sphere
 
 Implement `Sphere::Uniform::sample` in `src/pathtracer/samplers.cpp`.
 
-Now make an implementation of `Sphere::Image::sample` and `Sphere::Image::pdf` that call `Sphere::Uniform::sample` and `Sphere::Uniform::pdf` (this is just a placeholder so you can test your uniform sampling).
+In order to test uniform sampling, make sure that the variable `IMPORTANCE_SAMPLING` at the top of `src/pathtracer/samplers.cpp` is set to false.
 
 This should be sufficient to get environment maps working in the renderer (albeit in a high-variance / slow-convergence way).
 
@@ -72,14 +72,15 @@ Altogether, the final Jacobian is $\frac{wh}{2\pi^2 \sin(\theta)}$.
 
 ### Tips
 
-- When computing areas corresponding to a pixel, use the value of theta at the pixel centers.
-- Compute the PDF and CDF in the constructor of `Samplers::Sphere::Image`, storing them values in fields `_pdf` and `_cdf`. See `src/pathtracer/sampler.h`.
-- `Spectrum::luma()` returns the luminance (brightness) of a Spectrum. The weight assigned to a pixel should be proportional both its luminance and the solid angle it subtends.
+- When computing areas corresponding to a pixel, use the value of angles at the pixel centers.
+- Compute the PDF and CDF in the constructor of `Samplers::Sphere::Image` and store their values in fields `_pdf` and `_cdf` respectively. See `src/pathtracer/sampler.h`. Make sure you normalize these values.
+- `Spectrum::luma()` returns the luminance (brightness) of a Spectrum. The weight assigned to a pixel should be proportional to both its luminance and the solid angle it subtends.
 - For inversion sampling, use `std::upper_bound`: it's a binary search. Read about it [here](https://en.cppreference.com/w/cpp/algorithm/upper_bound).
 - If you didn't use the ray log to debug area light sampling, start using it now to visualize what directions are being sampled from the environment map.
 - `src/scene/shapes.h`/`.cpp` declare/define `Sphere::uv` which converts from directions to lat/lon space (not spherical coordinates!).
 - You may want to read the [PBR section](https://www.pbr-book.org/3ed-2018/Light_Transport_I_Surface_Reflection/Sampling_Light_Sources#sec:mc-infinite-area-lights) on this topic as it helps explain all the derivations for importance sampling more in-depth.
 - The test cases we are releasing for this task are very sparse and not very informative for the most part. We encourage you to run the pathtracer in the GUI or headless to test your code instead.
+- Make sure you set the variable `SAMPLE_AREA_LIGHTS` to be true when you are working on Step 2: Importance sampling.
 ---
 
 ## Reference Results

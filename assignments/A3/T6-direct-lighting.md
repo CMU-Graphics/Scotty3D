@@ -47,6 +47,7 @@ The direct lighting procedure should now follow these steps:
 ## Tips
 
 - The converged output of all scenes should **not** change with the addition of task 6. If it does, you've done something wrong.
+- When computing the BSDF attenuation, you should take into account that you are using only **one** direction that you randomly chose out of two sampling strategies.
 - We do not provide much in the way of reference images: make your own scene demonstrating what situations area light sampling is or isn't well suited for. 
 - Use the ray log to visually debug what proportion of your shadow rays are being directed at lights and where they are going.
 - Similar to task 4, we won't be releasing any test cases for lighting. Instead, we encourage you to run the pathtracer in the GUI or headless to test your code.

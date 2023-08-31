@@ -18,6 +18,7 @@ The starter code constructs a valid BVH, but it is a trivial BVH with a single n
 
 Finally, note that the BVH visualizer will start drawing from `BVH::root_idx`, so be sure to set this to the proper index (probably `0` or `nodes.size() - 1`, depending on your implementation) when you build the BVH.
 
+**NOTE (Please read)**: Implementing BVH will make your renderer much faster, but it is not required to finish the assignment. When you go to Render mode and click Open Render Window, there is a checkbox to not use BVH (or pass `--no_bvh` if rendering from the command line). Uncheck that and you will be able to test the rest of the tasks in A3.5.
 ---
 
 ## Step 0: Bounding Box Calculation & Intersection
@@ -54,7 +55,6 @@ Implement the ray-BVH intersection routine `Trace BVH<Primitive>::hit(const Ray&
 <p align="center"><img src="figures/ray_bvh_pseudocode.png"></p>
 
 **Note:** 
-- Implementing BVH will make your renderer much faster, but it is not required to finish the assignment. When you go to Render mode and click Open Render Window, there is a checkbox to not use BVH (or pass `--no_bvh` if rendering from the command line). Uncheck that and you will be able to test the rest of the tasks in A3.5.
 - We've provided test cases in `tests/test.a3.task3.bvh.hit.cpp` to construct a mesh that uses `bvh::hit` and see whether the ray intersects the mesh by comparing the resulting trace informations.
 ---
 

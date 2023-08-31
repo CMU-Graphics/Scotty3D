@@ -299,50 +299,39 @@ bool Animate::apply_transform(Widgets& widgets, Mat4 const &local_to_world) {
 		Quat rot = widgets.apply_action(at).rotation;
 
 		//rotation from bone's children -> world space:
-		Mat4 bone_to_world = old_pose[selected_bone];
-		bone_to_world[0][3] = 0.0f; bone_to_world[1][3] = 0.0f; bone_to_world[2][3] = 0.0f;
+		auto bone_to_world = local_to_world * old_pose[selected_bone];
+		bone_to_world[0][3] = 0.0f;
+		bone_to_world[1][3] = 0.0f;
+		bone_to_world[2][3] = 0.0f;
 		bone_to_world[3] = Vec4(0.0f, 0.0f, 0.0f, 1.0f);
 
 		//rotation from world space to bone's parent:
 		Mat4 world_to_parent;
 		if (old_bone.parent < old_mesh.skeleton.bones.size()) {
-			Mat4 parent_to_world = old_pose[old_bone.parent];
-			parent_to_world[0][3] = 0.0f; parent_to_world[1][3] = 0.0f; parent_to_world[2][3] = 0.0f;
-			parent_to_world[3] = Vec4(0.0f, 0.0f, 0.0f, 1.0f);
-
+			Mat4 parent_to_world = local_to_world * old_pose[old_bone.parent];
 			world_to_parent = Mat4::transpose(parent_to_world);
 		} else {
-			world_to_parent = Mat4::I;
+			world_to_parent = Mat4::transpose(local_to_world);
 		}
-
-		// rot = Quat(); //DEBUG!
+		world_to_parent[0][3] = 0.0f;
+		world_to_parent[1][3] = 0.0f;
+		world_to_parent[2][3] = 0.0f;
+		world_to_parent[3] = Vec4(0.0f, 0.0f, 0.0f, 1.0f);
 
 		//thus, the new rotation we'd like for bone's children is:
 		Mat4 new_rot = world_to_parent * rot.to_mat() * bone_to_world;
 
-		// This is the correct way, but to correctly fix this, we need to change the rotation rings to also reflect these local rotation axes
-		//    For now, we will rotate by the global axes
+		Vec3 x, y, z;
+		bone.compute_rotation_axes(&x, &y, &z);
+
+		Mat4 bone_to_rotation_axes(Vec4(x, 0.0f), Vec4(y, 0.0f), Vec4(z, 0.0f),
+		                           Vec4(0.0f, 0.0f, 0.0f, 1.0f));
+		auto rotation_axes_to_bone = Mat4::transpose(bone_to_rotation_axes);
 
 		//convert into euler angles w.r.t. bone's local rotation axes:
-		// Vec3 x,y,z;
-		// old_bone.compute_rotation_axes(&x, &y, &z);
-		// Mat4 new_rot_local = Mat4(
-		// 	Vec4(x, 0.0f),
-		// 	Vec4(y, 0.0f),
-		// 	Vec4(z, 0.0f),
-		// 	Vec4(0.0f, 0.0f, 0.0f, 1.0f)
-		// ) * new_rot;
-		// temp fix
-		Mat4 new_rot_local = Mat4(
-			Vec4(1.0f, 0.0f, 0.0f, 0.0f),
-			Vec4(0.0f, 1.0f, 0.0f, 0.0f),
-			Vec4(0.0f, 0.0f, 1.0f, 0.0f),
-			Vec4(0.0f, 0.0f, 0.0f, 1.0f)
-		) * new_rot;
+		Mat4 new_rot_local =
+		    rotation_axes_to_bone * new_rot * bone_to_rotation_axes;
 
-		// std::cout << "x: " << x << ", y: " << y << ", z: " << z << std::endl; //DEBUG
-		// std::cout << "old pose: " << old_bone.pose << ", new rot (local): " << new_rot_local << ", euler: " << new_rot_local.to_euler() << std::endl; //DEBUG
-		// std::cout << "rot: " << new_rot << std::endl; //DEBUG
 		Vec3 new_euler = new_rot_local.to_euler();
 		if(new_euler.valid()) {
 			bone.pose = new_euler;

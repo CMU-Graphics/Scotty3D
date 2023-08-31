@@ -8,6 +8,7 @@ When discussing skeletal animation we have a whole family of different transform
 - Bone space has its origin at the base point of the bone and its axes rotated by the bone (and its parents) rotations. There are two different bone spaces we will talk about:
 	- **Bind Space** is the bone space in the bind pose (the pose where all joints are not rotated). The transformations, $B_j$, from bone space to local space for all bones $j$ is computed by `Skeleton::bind_pose()` (which you will implement).
 	- **Pose Space** is the bone space in the current pose (the pose where each bone and its children are rotated by `Bone::pose` around `Bone::compute_rotation_axes`). The transformations, $P_j$, from pose space to local space for all bones $j$ are computed by `Skeleton::current_pose()` (which you will also implement).
+- We define $\hat{X}_{a \gets b}$ as the transformation that represents moving from bone $b$'s space to bone $a$'s space, with $\emptyset$ representing the skeleton local space (this usually requires a translation from the root to skeleton).
 
 *NOTE:* I mention world space above because it is one of the coordinate systems in Scotty3D. But for all of the implementation details of this assignment, you'll be working in local space and/or the bone spaces. Indeed, it is not possible from within `Skeleton` to determine $L$, since `Skeleton`s don't know what instance they are being accessed through.
 
