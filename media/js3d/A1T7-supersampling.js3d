@@ -1,0 +1,76 @@
+{"scene":{
+	"FORMAT":"js3d-v1",
+	"transforms":{
+		"Transform":{
+			"parent":null,
+			"translation":[0,0,0],
+			"rotation":[0,0,0,1],
+			"scale":[1,1,1]
+		},
+		"Transform 1":{
+			"parent":null,
+			"translation":[0,2,0],
+			"rotation":[-0.5000061988830566,-0.4999938011169434,-0.500005841255188,0.499994158744812],
+			"scale":[1,1,1]
+		}
+	},
+	"cameras":{
+		"Camera":{
+			"vertical_fov":60,
+			"aspect_ratio":1.777780055999756,
+			"near_plane":0.1000000014901161,
+			"film.width":300,
+			"film.height":150,
+			"film.samples":256,
+			"film.max_ray_depth":8,
+			"film.sample_pattern":"Grid (8x8)"
+		}
+	},
+	"meshes":{
+		"Mesh":{ "FORMAT":"s3d-hm-1","halfedge_nexts":"uint32:AgAAAAUAAAAEAAAAAQAAAAAAAAADAAAA","halfedge_corner_uvs":"vec2:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAIA/AAAAAAAAAAAAAIA/AAAAAAAAAAAAAAAA","halfedge_corner_normals":"vec3:AAAAAAAAgD8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAgD8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAgD8AAAAAAAAAAAAAAAAAAAAA","bone_weight_bones":"uint32:","bone_weight_weights":"float:","vertex_halfedges":"uint32:AAAAAAIAAAAEAAAA","vertex_positions":"vec3:AACAvwAAAAAAAIC/AACAvwAAAAAAAIA/AACAPwAAAAAAAAAA","vertex_bone_weight_ends":"uint32:AAAAAAAAAAAAAAAA","edge_sharps":"bool:EA","face_halfedges":"uint32:AAAAAAUAAAA","face_boundaries":"bool:YA"}
+	},
+	"skinned_meshes":{},
+	"shapes":{},
+	"particles":{},
+	"textures":{
+		"Texture":{
+			"type":"Constant",
+			"color":[0,1,0],
+			"scale":1
+		}
+	},
+	"materials":{
+		"Material":{
+			"type":"Lambertian",
+			"albedo":"Texture"
+		}
+	},
+	"delta_lights":{},
+	"env_lights":{},
+	"instances":{
+		"cameras":{
+			"Camera Instance":{
+				"transform":"Transform 1",
+				"camera":"Camera"
+			}
+		},
+		"meshes":{
+			"Mesh Instance":{
+				"transform":"Transform",
+				"mesh":"Mesh",
+				"material":"Material",
+				"visible":true,
+				"collides":true,
+				"draw style":"Correct",
+				"blend style":"Blend Replace",
+				"depth style":"Depth Less"
+			}
+		},
+		"skinned_meshes":{},
+		"shapes":{},
+		"particles":{},
+		"delta_lights":{},
+		"env_lights":{}
+	}
+},"animator":{"FORMAT":"js3d-v1",
+"splines":{}}}
