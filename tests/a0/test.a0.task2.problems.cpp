@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <numeric>
+#include <vector>
 
 // A0T2: Problem 1
 // TODO: Uncomment the function below by removing the surrounding /* and */, and run in test mode.

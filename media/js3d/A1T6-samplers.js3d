@@ -4,19 +4,37 @@
 		"Transform":{
 			"parent":null,
 			"translation":[0,0,-2],
-			"rotation":[0,0,0,1],
+			"rotation":[-0.7071069478988647,-6.43440841940901e-07,-0.7071066498756409,6.434411261579953e-07],
 			"scale":[1,1,1]
 		},
 		"Transform 1":{
 			"parent":null,
 			"translation":[0,0,0],
-			"rotation":[0,0,0,1],
+			"rotation":[-0.7071069478988647,-6.43440841940901e-07,-0.7071066498756409,6.434411261579953e-07],
+			"scale":[1,1,1]
+		},
+		"Transform 10":{
+			"parent":null,
+			"translation":[4,0,-2],
+			"rotation":[-0.7071068286895752,-6.434408987843199e-07,-0.7071067094802856,6.434410124711576e-07],
+			"scale":[1,1,1]
+		},
+		"Transform 11":{
+			"parent":null,
+			"translation":[2,0,0],
+			"rotation":[0.7071068286895752,-6.434408987843199e-07,0.7071067094802856,6.434410124711576e-07],
+			"scale":[1,1,1]
+		},
+		"Transform 12":{
+			"parent":null,
+			"translation":[4,0,0],
+			"rotation":[0.7071068286895752,-6.434408987843199e-07,0.7071067094802856,6.434410124711576e-07],
 			"scale":[1,1,1]
 		},
 		"Transform 2":{
 			"parent":null,
 			"translation":[0,0,2],
-			"rotation":[0,0,0,1],
+			"rotation":[0.7071068286895752,-6.434408987843199e-07,0.7071067094802856,6.434410124711576e-07],
 			"scale":[1,1,1]
 		},
 		"Transform 3":{
@@ -40,13 +58,19 @@
 		"Transform 6":{
 			"parent":null,
 			"translation":[2,0,2],
-			"rotation":[0,0,0,1],
+			"rotation":[0.7071068286895752,-6.434408987843199e-07,0.7071067094802856,6.434410124711576e-07],
 			"scale":[1,1,1]
 		},
 		"Transform 7":{
 			"parent":null,
 			"translation":[4,0,2],
-			"rotation":[0,0,0,1],
+			"rotation":[0.7071068286895752,-6.434408987843199e-07,0.7071067094802856,6.434410124711576e-07],
+			"scale":[1,1,1]
+		},
+		"Transform 9":{
+			"parent":null,
+			"translation":[2,0,-2],
+			"rotation":[0.7071068286895752,-6.434408987843199e-07,0.7071067094802856,6.434410124711576e-07],
 			"scale":[1,1,1]
 		}
 	},
@@ -75,9 +99,18 @@
 	"meshes":{
 		"Mesh":{ "FORMAT":"s3d-hm-1","halfedge_nexts":"uint32:AgAAAAUAAAAEAAAABgAAAAAAAAAJAAAACAAAAAEAAAADAAAABwAAAA","halfedge_corner_uvs":"vec2:AAAAAAAAAAAAAAAAAAAAAAAAgD8AAAAAAAAAAAAAgD8AAAAAAACAPwAAAAAAAAAAAACAPwAAAAAAAAAAAAAAAAAAgD8AAIA/AAAAAAAAAAA","halfedge_corner_normals":"vec3:AAAAAAAAgD8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAgD8AAAAAAAAAAAAAgD8AAAAAAAAAAAAAgD8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAgD8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAgD8AAAAAAAAAAAAAAAAAAAAA","bone_weight_bones":"uint32:","bone_weight_weights":"float:","vertex_halfedges":"uint32:AAAAAAIAAAAEAAAACAAAAA","vertex_positions":"vec3:AACAvwAAAAAAAIC/AACAvwAAAAAAAIA/AACAPwAAAAAAAIC/AACAPwAAAAAAAIA/","vertex_bone_weight_ends":"uint32:AAAAAAAAAAAAAAAAAAAAAA","edge_sharps":"bool:BA","face_halfedges":"uint32:AAAAAAMAAAAFAAAA","face_boundaries":"bool:MA"},
 		"Mesh 1":{ "FORMAT":"s3d-hm-1","halfedge_nexts":"uint32:","halfedge_corner_uvs":"vec2:","halfedge_corner_normals":"vec3:","bone_weight_bones":"uint32:","bone_weight_weights":"float:","vertex_halfedges":"uint32:","vertex_positions":"vec3:","vertex_bone_weight_ends":"uint32:","edge_sharps":"bool:","face_halfedges":"uint32:","face_boundaries":"bool:"},
+		"Mesh 10":{ "FORMAT":"s3d-hm-1","halfedge_nexts":"uint32:AgAAAAUAAAAEAAAABgAAAAAAAAAJAAAACAAAAAEAAAADAAAABwAAAA","halfedge_corner_uvs":"vec2:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAIA/AACAPwAAAAAAAIA/AAAAAAAAAAAAAAAAAAAAAAAAgD8AAAAAAAAAAAAAgD8AAIA/AAAAAAAAAAA","halfedge_corner_normals":"vec3:AAAAAAAAgD8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAgD8AAAAAAAAAAAAAgD8AAAAAAAAAAAAAgD8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAgD8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAgD8AAAAAAAAAAAAAAAAAAAAA","bone_weight_bones":"uint32:","bone_weight_weights":"float:","vertex_halfedges":"uint32:AAAAAAIAAAAEAAAACAAAAA","vertex_positions":"vec3:AACAvwAAAAAAAIC/AACAvwAAAAAAAIA/AACAPwAAAAAAAIC/AACAPwAAAAAAAIA/","vertex_bone_weight_ends":"uint32:AAAAAAAAAAAAAAAAAAAAAA","edge_sharps":"bool:BA","face_halfedges":"uint32:AAAAAAMAAAAFAAAA","face_boundaries":"bool:MA"},
+		"Mesh 11":{ "FORMAT":"s3d-hm-1","halfedge_nexts":"uint32:AgAAAAUAAAAEAAAABgAAAAAAAAAJAAAACAAAAAEAAAADAAAABwAAAA","halfedge_corner_uvs":"vec2:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAIA/AACAPwAAAAAAAIA/AAAAAAAAAAAAAAAAAAAAAAAAgD8AAAAAAAAAAAAAgD8AAIA/AAAAAAAAAAA","halfedge_corner_normals":"vec3:AAAAAAAAgD8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAgD8AAAAAAAAAAAAAgD8AAAAAAAAAAAAAgD8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAgD8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAgD8AAAAAAAAAAAAAAAAAAAAA","bone_weight_bones":"uint32:","bone_weight_weights":"float:","vertex_halfedges":"uint32:AAAAAAIAAAAEAAAACAAAAA","vertex_positions":"vec3:AACAvwAAAAAAAIC/AACAvwAAAAAAAIA/AACAPwAAAAAAAIC/AACAPwAAAAAAAIA/","vertex_bone_weight_ends":"uint32:AAAAAAAAAAAAAAAAAAAAAA","edge_sharps":"bool:BA","face_halfedges":"uint32:AAAAAAMAAAAFAAAA","face_boundaries":"bool:MA"},
+		"Mesh 12":{ "FORMAT":"s3d-hm-1","halfedge_nexts":"uint32:AgAAAAUAAAAEAAAABgAAAAAAAAAJAAAACAAAAAEAAAADAAAABwAAAA","halfedge_corner_uvs":"vec2:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAIA/AACAPwAAAAAAAIA/AAAAAAAAAAAAAAAAAAAAAAAAgD8AAAAAAAAAAAAAgD8AAIA/AAAAAAAAAAA","halfedge_corner_normals":"vec3:AAAAAAAAgD8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAgD8AAAAAAAAAAAAAgD8AAAAAAAAAAAAAgD8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAgD8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAgD8AAAAAAAAAAAAAAAAAAAAA","bone_weight_bones":"uint32:","bone_weight_weights":"float:","vertex_halfedges":"uint32:AAAAAAIAAAAEAAAACAAAAA","vertex_positions":"vec3:AACAvwAAAAAAAIC/AACAvwAAAAAAAIA/AACAPwAAAAAAAIC/AACAPwAAAAAAAIA/","vertex_bone_weight_ends":"uint32:AAAAAAAAAAAAAAAAAAAAAA","edge_sharps":"bool:BA","face_halfedges":"uint32:AAAAAAMAAAAFAAAA","face_boundaries":"bool:MA"},
+		"Mesh 13":{ "FORMAT":"s3d-hm-1","halfedge_nexts":"uint32:AgAAAAUAAAAEAAAABgAAAAAAAAAJAAAACAAAAAEAAAADAAAABwAAAA","halfedge_corner_uvs":"vec2:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAIA/AACAPwAAAAAAAIA/AAAAAAAAAAAAAAAAAAAAAAAAgD8AAAAAAAAAAAAAgD8AAIA/AAAAAAAAAAA","halfedge_corner_normals":"vec3:AAAAAAAAgD8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAgD8AAAAAAAAAAAAAgD8AAAAAAAAAAAAAgD8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAgD8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAgD8AAAAAAAAAAAAAAAAAAAAA","bone_weight_bones":"uint32:","bone_weight_weights":"float:","vertex_halfedges":"uint32:AAAAAAIAAAAEAAAACAAAAA","vertex_positions":"vec3:AACAvwAAAAAAAIC/AACAvwAAAAAAAIA/AACAPwAAAAAAAIC/AACAPwAAAAAAAIA/","vertex_bone_weight_ends":"uint32:AAAAAAAAAAAAAAAAAAAAAA","edge_sharps":"bool:BA","face_halfedges":"uint32:AAAAAAMAAAAFAAAA","face_boundaries":"bool:MA"},
 		"Mesh 2":{ "FORMAT":"s3d-hm-1","halfedge_nexts":"uint32:","halfedge_corner_uvs":"vec2:","halfedge_corner_normals":"vec3:","bone_weight_bones":"uint32:","bone_weight_weights":"float:","vertex_halfedges":"uint32:","vertex_positions":"vec3:","vertex_bone_weight_ends":"uint32:","edge_sharps":"bool:","face_halfedges":"uint32:","face_boundaries":"bool:"},
 		"Mesh 3":{ "FORMAT":"s3d-hm-1","halfedge_nexts":"uint32:","halfedge_corner_uvs":"vec2:","halfedge_corner_normals":"vec3:","bone_weight_bones":"uint32:","bone_weight_weights":"float:","vertex_halfedges":"uint32:","vertex_positions":"vec3:","vertex_bone_weight_ends":"uint32:","edge_sharps":"bool:","face_halfedges":"uint32:","face_boundaries":"bool:"},
-		"Mesh 4":{ "FORMAT":"s3d-hm-1","halfedge_nexts":"uint32:","halfedge_corner_uvs":"vec2:","halfedge_corner_normals":"vec3:","bone_weight_bones":"uint32:","bone_weight_weights":"float:","vertex_halfedges":"uint32:","vertex_positions":"vec3:","vertex_bone_weight_ends":"uint32:","edge_sharps":"bool:","face_halfedges":"uint32:","face_boundaries":"bool:"}
+		"Mesh 4":{ "FORMAT":"s3d-hm-1","halfedge_nexts":"uint32:","halfedge_corner_uvs":"vec2:","halfedge_corner_normals":"vec3:","bone_weight_bones":"uint32:","bone_weight_weights":"float:","vertex_halfedges":"uint32:","vertex_positions":"vec3:","vertex_bone_weight_ends":"uint32:","edge_sharps":"bool:","face_halfedges":"uint32:","face_boundaries":"bool:"},
+		"Mesh 5":{ "FORMAT":"s3d-hm-1","halfedge_nexts":"uint32:AgAAAAUAAAAEAAAABgAAAAAAAAAJAAAACAAAAAEAAAADAAAABwAAAA","halfedge_corner_uvs":"vec2:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAIA/AACAPwAAAAAAAIA/AAAAAAAAAAAAAAAAAAAAAAAAgD8AAAAAAAAAAAAAgD8AAIA/AAAAAAAAAAA","halfedge_corner_normals":"vec3:AAAAAAAAgD8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAgD8AAAAAAAAAAAAAgD8AAAAAAAAAAAAAgD8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAgD8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAgD8AAAAAAAAAAAAAAAAAAAAA","bone_weight_bones":"uint32:","bone_weight_weights":"float:","vertex_halfedges":"uint32:AAAAAAIAAAAEAAAACAAAAA","vertex_positions":"vec3:AACAvwAAAAAAAIC/AACAvwAAAAAAAIA/AACAPwAAAAAAAIC/AACAPwAAAAAAAIA/","vertex_bone_weight_ends":"uint32:AAAAAAAAAAAAAAAAAAAAAA","edge_sharps":"bool:BA","face_halfedges":"uint32:AAAAAAMAAAAFAAAA","face_boundaries":"bool:MA"},
+		"Mesh 6":{ "FORMAT":"s3d-hm-1","halfedge_nexts":"uint32:AgAAAAUAAAAEAAAABgAAAAAAAAAJAAAACAAAAAEAAAADAAAABwAAAA","halfedge_corner_uvs":"vec2:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAIA/AACAPwAAAAAAAIA/AAAAAAAAAAAAAAAAAAAAAAAAgD8AAAAAAAAAAAAAgD8AAIA/AAAAAAAAAAA","halfedge_corner_normals":"vec3:AAAAAAAAgD8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAgD8AAAAAAAAAAAAAgD8AAAAAAAAAAAAAgD8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAgD8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAgD8AAAAAAAAAAAAAAAAAAAAA","bone_weight_bones":"uint32:","bone_weight_weights":"float:","vertex_halfedges":"uint32:AAAAAAIAAAAEAAAACAAAAA","vertex_positions":"vec3:AACAvwAAAAAAAIC/AACAvwAAAAAAAIA/AACAPwAAAAAAAIC/AACAPwAAAAAAAIA/","vertex_bone_weight_ends":"uint32:AAAAAAAAAAAAAAAAAAAAAA","edge_sharps":"bool:BA","face_halfedges":"uint32:AAAAAAMAAAAFAAAA","face_boundaries":"bool:MA"},
+		"Mesh 7":{ "FORMAT":"s3d-hm-1","halfedge_nexts":"uint32:AgAAAAUAAAAEAAAABgAAAAAAAAAJAAAACAAAAAEAAAADAAAABwAAAA","halfedge_corner_uvs":"vec2:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAIA/AACAPwAAAAAAAIA/AAAAAAAAAAAAAAAAAAAAAAAAgD8AAAAAAAAAAAAAgD8AAIA/AAAAAAAAAAA","halfedge_corner_normals":"vec3:AAAAAAAAgD8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAgD8AAAAAAAAAAAAAgD8AAAAAAAAAAAAAgD8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAgD8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAgD8AAAAAAAAAAAAAAAAAAAAA","bone_weight_bones":"uint32:","bone_weight_weights":"float:","vertex_halfedges":"uint32:AAAAAAIAAAAEAAAACAAAAA","vertex_positions":"vec3:AACAvwAAAAAAAIC/AACAvwAAAAAAAIA/AACAPwAAAAAAAIC/AACAPwAAAAAAAIA/","vertex_bone_weight_ends":"uint32:AAAAAAAAAAAAAAAAAAAAAA","edge_sharps":"bool:BA","face_halfedges":"uint32:AAAAAAMAAAAFAAAA","face_boundaries":"bool:MA"},
+		"Mesh 8":{ "FORMAT":"s3d-hm-1","halfedge_nexts":"uint32:AgAAAAUAAAAEAAAABgAAAAAAAAAJAAAACAAAAAEAAAADAAAABwAAAA","halfedge_corner_uvs":"vec2:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAIA/AACAPwAAAAAAAIA/AAAAAAAAAAAAAAAAAAAAAAAAgD8AAAAAAAAAAAAAgD8AAIA/AAAAAAAAAAA","halfedge_corner_normals":"vec3:AAAAAAAAgD8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAgD8AAAAAAAAAAAAAgD8AAAAAAAAAAAAAgD8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAgD8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAgD8AAAAAAAAAAAAAAAAAAAAA","bone_weight_bones":"uint32:","bone_weight_weights":"float:","vertex_halfedges":"uint32:AAAAAAIAAAAEAAAACAAAAA","vertex_positions":"vec3:AACAvwAAAAAAAIC/AACAvwAAAAAAAIA/AACAPwAAAAAAAIC/AACAPwAAAAAAAIA/","vertex_bone_weight_ends":"uint32:AAAAAAAAAAAAAAAAAAAAAA","edge_sharps":"bool:BA","face_halfedges":"uint32:AAAAAAMAAAAFAAAA","face_boundaries":"bool:MA"},
+		"Mesh 9":{ "FORMAT":"s3d-hm-1","halfedge_nexts":"uint32:AgAAAAUAAAAEAAAABgAAAAAAAAAJAAAACAAAAAEAAAADAAAABwAAAA","halfedge_corner_uvs":"vec2:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAIA/AACAPwAAAAAAAIA/AAAAAAAAAAAAAAAAAAAAAAAAgD8AAAAAAAAAAAAAgD8AAIA/AAAAAAAAAAA","halfedge_corner_normals":"vec3:AAAAAAAAgD8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAgD8AAAAAAAAAAAAAgD8AAAAAAAAAAAAAgD8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAgD8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAgD8AAAAAAAAAAAAAAAAAAAAA","bone_weight_bones":"uint32:","bone_weight_weights":"float:","vertex_halfedges":"uint32:AAAAAAIAAAAEAAAACAAAAA","vertex_positions":"vec3:AACAvwAAAAAAAIC/AACAvwAAAAAAAIA/AACAPwAAAAAAAIC/AACAPwAAAAAAAIA/","vertex_bone_weight_ends":"uint32:AAAAAAAAAAAAAAAAAAAAAA","edge_sharps":"bool:BA","face_halfedges":"uint32:AAAAAAMAAAAFAAAA","face_boundaries":"bool:MA"}
 	},
 	"skinned_meshes":{},
 	"shapes":{},
@@ -151,9 +184,9 @@
 			}
 		},
 		"meshes":{
-			"Bilinear Plane":{
+			"Bilinear Plane closest":{
 				"transform":"Transform 1",
-				"mesh":"Mesh",
+				"mesh":"Mesh 10",
 				"material":"Bilinear Material",
 				"visible":true,
 				"collides":true,
@@ -161,10 +194,20 @@
 				"blend style":"Blend Replace",
 				"depth style":"Depth Less"
 			},
-			"Mesh Instance":{
-				"transform":"Transform 6",
-				"mesh":"Mesh",
-				"material":"Trilinear Material",
+			"Bilinear Plane farthest":{
+				"transform":"Transform 12",
+				"mesh":"Mesh 8",
+				"material":"Bilinear Material",
+				"visible":true,
+				"collides":true,
+				"draw style":"Correct",
+				"blend style":"Blend Replace",
+				"depth style":"Depth Less"
+			},
+			"Bilinear plane middle":{
+				"transform":"Transform 11",
+				"mesh":"Mesh 7",
+				"material":"Bilinear Material",
 				"visible":true,
 				"collides":true,
 				"draw style":"Correct",
@@ -172,8 +215,8 @@
 				"depth style":"Depth Less"
 			},
 			"Mesh Instance 1":{
-				"transform":"Transform 7",
-				"mesh":"Mesh",
+				"transform":"Transform 2",
+				"mesh":"Mesh 11",
 				"material":"Trilinear Material",
 				"visible":true,
 				"collides":true,
@@ -181,9 +224,9 @@
 				"blend style":"Blend Replace",
 				"depth style":"Depth Less"
 			},
-			"Nearest Plane":{
+			"Nearest Plane closest":{
 				"transform":"Transform",
-				"mesh":"Mesh",
+				"mesh":"Mesh 9",
 				"material":"Nearest Material",
 				"visible":true,
 				"collides":true,
@@ -191,9 +234,39 @@
 				"blend style":"Blend Replace",
 				"depth style":"Depth Less"
 			},
-			"Trilinear Plane":{
-				"transform":"Transform 2",
-				"mesh":"Mesh",
+			"Nearest Plane farthest":{
+				"transform":"Transform 10",
+				"mesh":"Mesh 6",
+				"material":"Nearest Material",
+				"visible":true,
+				"collides":true,
+				"draw style":"Correct",
+				"blend style":"Blend Replace",
+				"depth style":"Depth Less"
+			},
+			"Nearest Plane middle":{
+				"transform":"Transform 9",
+				"mesh":"Mesh 5",
+				"material":"Nearest Material",
+				"visible":true,
+				"collides":true,
+				"draw style":"Correct",
+				"blend style":"Blend Replace",
+				"depth style":"Depth Less"
+			},
+			"Trilinear Plane farthest":{
+				"transform":"Transform 7",
+				"mesh":"Mesh 13",
+				"material":"Trilinear Material",
+				"visible":true,
+				"collides":true,
+				"draw style":"Correct",
+				"blend style":"Blend Replace",
+				"depth style":"Depth Less"
+			},
+			"Trilinear Plane middle":{
+				"transform":"Transform 6",
+				"mesh":"Mesh 12",
 				"material":"Trilinear Material",
 				"visible":true,
 				"collides":true,

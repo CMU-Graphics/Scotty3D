@@ -333,7 +333,9 @@ void Pipeline<p, P, flags>::clip_triangle(
  * 
  * 	  since 45 degree lines breaks this rule, our rule in general is to rasterize the line as if its
  *    endpoints va and vb were at va + (e, e^2) and vb + (e, e^2) where no smaller nonzero e produces 
- *    a different rasterization result.
+ *    a different rasterization result. 
+ *    We will not explicitly check for 45 degree lines along the diamond edges (this will be extra credit),
+ *    but you should be able to handle 45 degree lines in every other case (such as starting from pixel centers)
  *
  * for each such diamond, pass Fragment frag to emit_fragment, with:
  *  - frag.fb_position.xy set to the center (x+0.5,y+0.5)

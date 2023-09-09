@@ -1,0 +1,128 @@
+{"scene":{
+	"FORMAT":"js3d-v1",
+	"transforms":{
+		"Transform":{
+			"parent":null,
+			"translation":[1.25,0.09999999403953552,0],
+			"rotation":[0,0,0,1],
+			"scale":[1,1,1]
+		},
+		"Transform 1":{
+			"parent":null,
+			"translation":[0,0,0],
+			"rotation":[0,0,0,1],
+			"scale":[1,1,1]
+		},
+		"Transform 2":{
+			"parent":null,
+			"translation":[1.36192798614502,2.998870134353638,0.09237547218799591],
+			"rotation":[-0.7021517753601074,0.002485430566594005,0.002451042411848903,0.7120187282562256],
+			"scale":[1,1,1]
+		},
+		"Transform 3":{
+			"parent":null,
+			"translation":[2.5,0.2000000029802322,0],
+			"rotation":[0,0,0,1],
+			"scale":[1,1,1]
+		}
+	},
+	"cameras":{
+		"Camera":{
+			"vertical_fov":60,
+			"aspect_ratio":1.777780055999756,
+			"near_plane":0.1000000014901161,
+			"film.width":1280,
+			"film.height":720,
+			"film.samples":256,
+			"film.max_ray_depth":1,
+			"film.sample_pattern":"Center"
+		}
+	},
+	"meshes":{
+		"Mesh":{ "FORMAT":"s3d-hm-1","halfedge_nexts":"uint32:AgAAAAUAAAAEAAAABgAAAAAAAAAJAAAACAAAAAEAAAADAAAABwAAAA","halfedge_corner_uvs":"vec2:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAIA/AACAPwAAAAAAAIA/AAAAAAAAAAAAAAAAAAAAAAAAgD8AAAAAAAAAAAAAgD8AAIA/AAAAAAAAAAA","halfedge_corner_normals":"vec3:AAAAAAAAgD8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAgD8AAAAAAAAAAAAAgD8AAAAAAAAAAAAAgD8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAgD8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAgD8AAAAAAAAAAAAAAAAAAAAA","bone_weight_bones":"uint32:","bone_weight_weights":"float:","vertex_halfedges":"uint32:AAAAAAIAAAAEAAAACAAAAA","vertex_positions":"vec3:AACAvwAAAAAAAIC/AACAvwAAAAAAAIA/AACAPwAAAAAAAIC/AACAPwAAAAAAAIA/","vertex_bone_weight_ends":"uint32:AAAAAAAAAAAAAAAAAAAAAA","edge_sharps":"bool:BA","face_halfedges":"uint32:AAAAAAMAAAAFAAAA","face_boundaries":"bool:MA"},
+		"Mesh 1":{ "FORMAT":"s3d-hm-1","halfedge_nexts":"uint32:AgAAAAUAAAAEAAAABgAAAAAAAAAJAAAACAAAAAEAAAADAAAABwAAAA","halfedge_corner_uvs":"vec2:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAIA/AACAPwAAAAAAAIA/AAAAAAAAAAAAAAAAAAAAAAAAgD8AAAAAAAAAAAAAgD8AAIA/AAAAAAAAAAA","halfedge_corner_normals":"vec3:AAAAAAAAgD8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAgD8AAAAAAAAAAAAAgD8AAAAAAAAAAAAAgD8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAgD8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAgD8AAAAAAAAAAAAAAAAAAAAA","bone_weight_bones":"uint32:","bone_weight_weights":"float:","vertex_halfedges":"uint32:AAAAAAIAAAAEAAAACAAAAA","vertex_positions":"vec3:AACAvwAAAAAAAIC/AACAvwAAAAAAAIA/AACAPwAAAAAAAIC/AACAPwAAAAAAAIA/","vertex_bone_weight_ends":"uint32:AAAAAAAAAAAAAAAAAAAAAA","edge_sharps":"bool:BA","face_halfedges":"uint32:AAAAAAMAAAAFAAAA","face_boundaries":"bool:MA"},
+		"Mesh 2":{ "FORMAT":"s3d-hm-1","halfedge_nexts":"uint32:AgAAAAUAAAAEAAAABgAAAAAAAAAJAAAACAAAAAEAAAADAAAABwAAAA","halfedge_corner_uvs":"vec2:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAIA/AACAPwAAAAAAAIA/AAAAAAAAAAAAAAAAAAAAAAAAgD8AAAAAAAAAAAAAgD8AAIA/AAAAAAAAAAA","halfedge_corner_normals":"vec3:AAAAAAAAgD8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAgD8AAAAAAAAAAAAAgD8AAAAAAAAAAAAAgD8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAgD8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAgD8AAAAAAAAAAAAAAAAAAAAA","bone_weight_bones":"uint32:","bone_weight_weights":"float:","vertex_halfedges":"uint32:AAAAAAIAAAAEAAAACAAAAA","vertex_positions":"vec3:AACAvwAAAAAAAIC/AACAvwAAAAAAAIA/AACAPwAAAAAAAIC/AACAPwAAAAAAAIA/","vertex_bone_weight_ends":"uint32:AAAAAAAAAAAAAAAAAAAAAA","edge_sharps":"bool:BA","face_halfedges":"uint32:AAAAAAMAAAAFAAAA","face_boundaries":"bool:MA"}
+	},
+	"skinned_meshes":{},
+	"shapes":{},
+	"particles":{},
+	"textures":{
+		"Texture":{
+			"type":"Constant",
+			"color":[1,0,0],
+			"scale":1
+		},
+		"Texture 1":{
+			"type":"Constant",
+			"color":[0,0,1],
+			"scale":1
+		},
+		"Texture 2":{
+			"type":"Constant",
+			"color":[0,1,0],
+			"scale":1
+		}
+	},
+	"materials":{
+		"Material":{
+			"type":"Lambertian",
+			"albedo":"Texture"
+		},
+		"Material 1":{
+			"type":"Lambertian",
+			"albedo":"Texture 1"
+		},
+		"Material 2":{
+			"type":"Lambertian",
+			"albedo":"Texture 2"
+		}
+	},
+	"delta_lights":{},
+	"env_lights":{},
+	"instances":{
+		"cameras":{
+			"Camera Instance":{
+				"transform":"Transform 2",
+				"camera":"Camera"
+			}
+		},
+		"meshes":{
+			"Mesh Instance":{
+				"transform":"Transform 3",
+				"mesh":"Mesh",
+				"material":"Material 1",
+				"visible":true,
+				"collides":true,
+				"draw style":"Flat",
+				"blend style":"Blend Replace",
+				"depth style":"Depth Always"
+			},
+			"Mesh Instance 1":{
+				"transform":"Transform 1",
+				"mesh":"Mesh 1",
+				"material":"Material",
+				"visible":true,
+				"collides":true,
+				"draw style":"Flat",
+				"blend style":"Blend Replace",
+				"depth style":"Depth Always"
+			},
+			"Mesh Instance 2":{
+				"transform":"Transform",
+				"mesh":"Mesh 2",
+				"material":"Material 2",
+				"visible":true,
+				"collides":true,
+				"draw style":"Flat",
+				"blend style":"Blend Replace",
+				"depth style":"Depth Always"
+			}
+		},
+		"skinned_meshes":{},
+		"shapes":{},
+		"particles":{},
+		"delta_lights":{},
+		"env_lights":{}
+	}
+},"animator":{"FORMAT":"js3d-v1",
+"splines":{}}}
