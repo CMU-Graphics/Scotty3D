@@ -360,16 +360,38 @@ void Pipeline<p, P, flags>::rasterize_line(
 	// TODO: Check out the block comment above this function for more information on how to fill in
 	// this function!
 	// The OpenGL specification section 3.5 may also come in handy.
-
-	{ // As a placeholder, draw a point in the middle of the line:
+	bool steep = false;
+	int x0 = (int)va.fb_position.x, x1 = (int)vb.fb_position.x;
+	int y0 = (int)va.fb_position.y, y1 = (int)vb.fb_position.y;
+	float z0 = va.fb_position.z, z1 = vb.fb_position.z;
+	if(std::abs(x0 - x1) < std::abs(y0 - y1))
+	{
+		std::swap(x0, y0), std::swap(x1, y1);
+		steep = true;
+	}
+	if(x0 > x1) std::swap(x0, x1), std::swap(y0, y1), std::swap(z0, z1);
+	int dy = y1 - y0, dx = x1 - x0, y = y0;
+	int derr = 2 * std::abs(dy), err = 0, yincr = y1 > y0 ? 1 : -1;
+	Fragment cur;
+	cur.attributes = va.attributes;
+	cur.derivatives.fill(Vec2(0.0f, 0.0f));
+	for(int x = x0; x <= x1; ++x)
+	{
+		cur.fb_position.z = z0 + (z1 - z0) * (x - x0) / (float)(x1 - x0);
+		if(steep) cur.fb_position.x = y + .5f, cur.fb_position.y = x + .5f;
+		else cur.fb_position.x = x + .5f, cur.fb_position.y = y + .5f;
+		emit_fragment(cur);
+		err += derr;
+		if(err >= dx) err -= 2 * dx, y += yincr;
+	}
+	/*{ // As a placeholder, draw a point in the middle of the line:
 		//(remove this code once you have a real implementation)
 		Fragment mid;
 		mid.fb_position = (va.fb_position + vb.fb_position) / 2.0f;
 		mid.attributes = va.attributes;
 		mid.derivatives.fill(Vec2(0.0f, 0.0f));
 		emit_fragment(mid);
-	}
-
+	}*/
 }
 
 /*
