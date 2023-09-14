@@ -381,7 +381,7 @@ void Pipeline<p, P, flags>::rasterize_line(
  * - frag.fb_position.z = linearly interpolated fb_position.z from a,b,c (NOTE: does not depend on Interp mode!)
  * - frag.attributes = depends on Interp_* flag in flags:
  *   - if Interp_Flat: copy from va.attributes
- *   - if Interp_Screen: interpolate as if (a,b,c) is a 2D triangle flat on the screen
+ *   - if Interp_Smooth: interpolate as if (a,b,c) is a 2D triangle flat on the screen
  *   - if Interp_Correct: use perspective-correct interpolation
  * - frag.derivatives = derivatives w.r.t. fb_position.x and fb_position.y of the first frag.derivatives.size() attributes.
  *
