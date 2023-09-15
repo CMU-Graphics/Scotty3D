@@ -221,9 +221,59 @@ std::optional<Halfedge_Mesh::VertexRef> Halfedge_Mesh::bisect_edge(EdgeRef e) {
  */
 std::optional<Halfedge_Mesh::VertexRef> Halfedge_Mesh::split_edge(EdgeRef e) {
 	// A2L2 (REQUIRED): split_edge
+	auto h0 = e->halfedge, h1 = e->halfedge->twin;
+	auto v0 = h0->vertex, v1 = h1->vertex;
+	auto h2 = h0->next, h3 = h1->next;
+	auto f0 = h0->face, f1 = h1->face;
+	f0->halfedge = h0, f1->halfedge = h1;
+
+	//create midpoint. next, twin, vertex, edge, face
+	auto vm = emplace_vertex();
+	auto em = emplace_edge();
+	auto hm0 = emplace_halfedge();
+	auto hm1 = emplace_halfedge();
+	vm->halfedge = hm0, em->halfedge = hm0;
+	vm->position = (v0->position + v1->position) / 2.f;
+	h0->next = hm0, h0->twin = hm1;
+	h1->next = hm1, h1->twin = hm0, h1->edge = em;
+	hm0->set_tnvef(h1, h2, vm, em, f0);
+	hm1->set_tnvef(h0, h3, vm, h0->edge, f1);
+	interpolate_data({v0, v1}, vm);
+	interpolate_data({h0, h2}, hm0);
+	interpolate_data({h1, h3}, hm1);
+	em->sharp = e->sharp;
 	
-	(void)e; //this line avoids 'unused parameter' warnings. You can delete it as you fill in the function.
-    return std::nullopt;
+	if(!f0->boundary)
+	{
+		auto h4 = h2->next;
+		auto h00 = emplace_halfedge();
+		auto h01 = emplace_halfedge();
+		auto e00 = emplace_edge();
+		auto f00 = emplace_face();
+		e00->halfedge = f00->halfedge = h01;
+		h00->set_tnvef(h01, h4, vm, e00, f0);
+		h01->set_tnvef(h00, hm0, h4->vertex, e00, f00);
+		h2->next = h01, h0->next = h00;
+		hm0->face = h2->face = f00;
+		interpolate_data({hm0}, h00);
+		interpolate_data({h4}, h01);
+	}
+	if(!f1->boundary)
+	{
+		auto h5 = h3->next;
+		auto h10 = emplace_halfedge();
+		auto h11 = emplace_halfedge();
+		auto e10 = emplace_edge();
+		auto f10 = emplace_face();
+		e10->halfedge = f10->halfedge = h11;
+		h10->set_tnvef(h11, h5, vm, e10, f1);
+		h11->set_tnvef(h10, hm1, h5->vertex, e10, f10);
+		h3->next = h11, h1->next = h10;
+		hm1->face = h3->face = f10;
+		interpolate_data({hm1}, h10);
+		interpolate_data({h5}, h11);
+	}
+    return vm;
 }
 
 
@@ -331,8 +381,21 @@ std::optional<Halfedge_Mesh::FaceRef> Halfedge_Mesh::extrude_face(FaceRef f) {
  */
 std::optional<Halfedge_Mesh::EdgeRef> Halfedge_Mesh::flip_edge(EdgeRef e) {
 	//A2L1: Flip Edge
-	
-    return std::nullopt;
+	if(e->on_boundary()) return std::nullopt;
+	auto h0 = e->halfedge, h1 = e->halfedge->twin;
+	auto h2 = h0->next, h3 = h1->next;
+	auto h4 = h2->next, h5 = h3->next;
+	auto v0 = h0->vertex, v1 = h1->vertex;
+	auto h6 = get_prev(v0->halfedge, h0), h7 = get_prev(v1->halfedge, h1);
+	h6->next = h3, h7->next = h2;
+	if(v0->halfedge == h0) v0->halfedge = h3;
+	if(v1->halfedge == h1) v1->halfedge = h2;
+	h0->set_tnvef(h1, h4, h5->vertex, e, h0->face);
+	h1->set_tnvef(h0, h5, h4->vertex, e, h1->face);
+	h2->next = h1, h3->next = h0;
+	h2->face = h1->face, h3->face = h0->face;
+	h0->face->halfedge = h0, h1->face->halfedge = h1;
+    return e;
 }
 
 
@@ -389,7 +452,7 @@ std::optional<Halfedge_Mesh::FaceRef> Halfedge_Mesh::dissolve_edge(EdgeRef e) {
  */
 std::optional<Halfedge_Mesh::VertexRef> Halfedge_Mesh::collapse_edge(EdgeRef e) {
 	//A2L3: Collapse Edge
-
+	
 	//Reminder: use interpolate_data() to merge corner_uv / corner_normal data on halfedges
 	// (also works for bone_weights data on vertices!)
 	

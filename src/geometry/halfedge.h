@@ -143,6 +143,15 @@ public:
 	//set vertex positions for a face created by extruding a face
 	void extrude_positions(FaceRef face, Vec3 move, float shrink);
 
+	//--- useful getters ---
+
+	//get prev halfedge form st (s.t. st->next = nd)
+	HalfedgeRef get_prev(HalfedgeRef st, HalfedgeRef nd)
+	{
+		while(st->twin->next != nd) st = st->twin->next;
+		return st->twin;
+	}
+
 	//////////////////////////////////////////////////////////////////////////////////////////
 	// Global Edit Operations | src/geometry/halfedge-global.cpp
 	//////////////////////////////////////////////////////////////////////////////////////////
