@@ -1,1 +1,50 @@
 # Scotty3D
+
+Current progress (Star means optional. One of A2Go* must be chosen):
+
+- Assignment 1: Rasterizer
+    - [x] A1T1: Scene Functions
+    - [ ] A1T2: Lines
+    - [ ] A1T3: Flat Triangles
+    - [ ] A1T4: Depth Testing and Blending
+    - [ ] A1T5: Triangles with Interpolation
+    - [ ] A1T6: Mip-Mapping
+    - [ ] A1T7: Supersampling
+- Assignment 2: Mesh Editing
+    - [x] A2L1: flip edge
+    - [x] A2L2: split edge
+    - [ ] A2L3: collapse edge
+	- [x] A2L4, A2L4h: extrude face
+    - [ ] *A2Lx1: dissolve vertex
+    - [ ] *A2Lx2: dissolve edge
+    - [ ] *A2Lx3: collapse face
+    - [ ] *A2Lx4: inset vertex
+    - [ ] *A2Lx5, A2Lx5h: bevel vertex
+    - [ ] *A2Lx6, A2Lx6h: bevel edge
+    - [ ] *A2Lx7: make boundary
+    - [ ] *A2Lx8: weld edges
+    - [x] A2G1: triangulation
+	- [x] A2G2: linear subdivision positions
+	- [x] A2G3: Catmull-Clark subdivision positions
+	- [ ] *A2Go1 Loop subdivision
+	- [ ] *A2Go2 isotropic remeshing
+	- [ ] *A2Go3 simplification
+- Assignment 3: Path Tracing
+    - [ ] A3T1: Camera Rays
+	- [ ] A3T2: Intersection Tests
+	- [ ] A3T3: BVH
+	- [ ] A3T4: Path Tracing
+	- [ ] A3T5: Materials
+	- [ ] A3T6: Direct Lighting
+	- [ ] A3T7: Environment Lighting
+- Assignment 4: Animation
+    - [ ] A4T1: Spline Interpolation
+        - [ ] A4T1a: Hermite Curve over the Unit Interval
+        - [ ] A4T1b: Evaluation of a Catmull-Rom spline
+	- [ ] A4T2: Skeleton Kinematics
+        - [ ] A4T2a: Forward Kinematics
+        - [ ] A4T2b: Inverse Kinematics
+	- [ ] A4T3: Linear Blend Skinning
+        - [ ] Bone Weights
+        - [ ] Skinning
+	- [ ] A4T4: Particle Simulation

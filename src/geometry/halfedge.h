@@ -386,6 +386,7 @@ public:
 	    for (VertexRef v = vertices.begin(); v != vertices.end(); ++v) {
 	        //do something for every vertex
 	    }
+		
 	*/
 
 	//--- misc stats ---

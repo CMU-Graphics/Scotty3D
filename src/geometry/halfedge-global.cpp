@@ -13,7 +13,31 @@
  */
 void Halfedge_Mesh::triangulate() {
 	//A2G1: triangulation
-	
+	for(FaceRef f = faces.begin(); f != faces.end(); ++f)
+	{
+		if(f->boundary) continue;
+		auto h_lst = f->halfedge;
+		auto h = h_lst->next;
+		uint32_t num = f->degree() - 3;
+		while(num--)
+		{
+			auto f_n = emplace_face();
+			auto e_n = emplace_edge();
+			auto h_n = emplace_halfedge();
+			auto h_n1 = emplace_halfedge();
+			h->face = h_lst->face = f_n;
+			f_n->halfedge = e_n->halfedge = h_n;
+			h_n->set_tnvef(h_n1, h_lst, h->next->vertex, e_n, f_n);
+			h_n1->set_tnvef(h_n, h->next, h_lst->vertex, e_n, f);
+			interpolate_data({h_lst}, h_n1);
+			interpolate_data({h->next}, h_n);
+			h->next = h_n;
+			h = h_n1->next;
+			h_lst = h_n1;
+		}
+		h->next->next = h_lst;
+		f->halfedge = h;
+	}
 }
 
 /*
@@ -31,20 +55,16 @@ void Halfedge_Mesh::linear_subdivide() {
 	//A2G2: linear subdivision
 
 	// For every vertex, assign its current position to vertex_positions[v]:
-
-	//(TODO)
-
+	for(auto v = vertices.begin(); v != vertices.end(); ++v)
+		vertex_positions[v] = v->position;
     // For every edge, assign the midpoint of its adjacent vertices to edge_vertex_positions[e]:
 	// (you may wish to investigate the helper functions of Halfedge_Mesh::Edge)
-
-	//(TODO)
-
+	for(auto e = edges.begin(); e != edges.end(); ++e)
+		edge_vertex_positions[e] = e->center();
     // For every *non-boundary* face, assign the centroid (i.e., arithmetic mean) to face_vertex_positions[f]:
 	// (you may wish to investigate the helper functions of Halfedge_Mesh::Face)
-
-	//(TODO)
-
-
+	for(auto f = faces.begin(); f != faces.end(); ++f)
+		if(!f->boundary) face_vertex_positions[f] = f->center();
 	//use the helper function to actually perform the subdivision:
 	catmark_subdivide_helper(vertex_positions, edge_vertex_positions, face_vertex_positions);
 }
@@ -72,12 +92,53 @@ void Halfedge_Mesh::catmark_subdivide() {
 	// https://en.wikipedia.org/wiki/Catmull%E2%80%93Clark_subdivision_surface
 
 	// Faces
-
+	for(auto f = faces.begin(); f != faces.end(); ++f)
+		if(!f->boundary) face_vertex_positions[f] = f->center();
 	// Edges
-
+	for(auto e = edges.begin(); e != edges.end(); ++e)
+	{
+		if(e->on_boundary()) edge_vertex_positions[e] = e->center();
+		else {
+			auto a = face_vertex_positions[e->halfedge->face];
+			auto b = face_vertex_positions[e->halfedge->twin->face];
+			edge_vertex_positions[e] = e->center() / 2.f + (a + b) / 4.f;
+		}
+	}
 	// Vertices
-
-	
+	for(auto v = vertices.begin(); v != vertices.end(); ++v)
+	{
+		if(!v->on_boundary())
+		{
+			float n = static_cast<float>(v->degree());
+			Vec3 Q, R, S = v->position;
+			auto h = v->halfedge;
+			do {
+				Q += face_vertex_positions[h->face];
+				R += h->edge->center();
+				h = h->twin->next;
+			} while(h != v->halfedge);
+			Q /= n, R /= n;
+			vertex_positions[v] = (Q + 2.f * R + (n - 3.f) * S) / n;
+		}
+		else
+		{
+			// rules for boundaries:
+			// https://graphics.pixar.com/library/SEC/supplemental.pdf
+			// Figure 4
+			float n = 0;
+			Vec3 R, S = v->position;
+			auto h = v->halfedge;
+			do {
+				if(h->edge->on_boundary()) {
+					R += h->twin->vertex->position;
+					n += 1.f;
+				}
+				h = h->twin->next;
+			} while(h != v->halfedge);
+			R /= n;
+			vertex_positions[v] = 0.75f * S + 0.25 * R;
+		}
+	}
 	//Now, use the provided helper function to actually perform the subdivision:
 	catmark_subdivide_helper(vertex_positions, edge_vertex_positions, face_vertex_positions);
 

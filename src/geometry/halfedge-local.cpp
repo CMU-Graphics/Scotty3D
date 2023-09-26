@@ -227,7 +227,7 @@ std::optional<Halfedge_Mesh::VertexRef> Halfedge_Mesh::split_edge(EdgeRef e) {
 	auto f0 = h0->face, f1 = h1->face;
 	f0->halfedge = h0, f1->halfedge = h1;
 
-	//create midpoint. next, twin, vertex, edge, face
+	//create midpoint
 	auto vm = emplace_vertex();
 	auto em = emplace_edge();
 	auto hm0 = emplace_halfedge();
@@ -363,9 +363,54 @@ std::optional<Halfedge_Mesh::FaceRef> Halfedge_Mesh::extrude_face(FaceRef f) {
 	//A2L4: Extrude Face
 	// Reminder: This function does not update the vertex positions.
 	// Remember to also fill in extrude_helper (A2L4h)
+	uint32_t deg = f->degree();
+	std::vector<HalfedgeRef> h_out;
+	{
+		auto h = f->halfedge;
+		do h_out.emplace_back(h), h = h->next;
+		while(h != f->halfedge);
+	}
+	std::vector<HalfedgeRef> h_new(4 * deg);
+	std::vector<EdgeRef> e_new(2 * deg);
+	std::vector<VertexRef> v_new(deg);
+	std::vector<FaceRef> f_new(deg);
 
-	(void)f;
-    return std::nullopt;
+	for(uint32_t i = 0; i < deg; ++i)
+	{
+		for(uint32_t j = 0; j < 4; ++j)
+			h_new[i * 4 + j] = emplace_halfedge();
+		e_new[2 * i] = emplace_edge();
+		e_new[2 * i + 1] = emplace_edge();
+		v_new[i] = emplace_vertex();
+		f_new[i] = emplace_face();
+	}
+
+	for(uint32_t cur = 0; cur < deg; ++cur)
+	{
+		uint32_t prv = (cur + deg - 1) % deg;
+		uint32_t nxt = (cur + 1) % deg;
+		e_new[2 * cur]->halfedge = h_new[4 * cur];
+		e_new[2 * cur + 1]->halfedge = h_new[4 * cur + 2];
+		v_new[cur]->halfedge = h_new[4 * cur + 1];
+		f_new[cur]->halfedge = h_new[4 * cur + 1];
+		h_new[4 * cur]->set_tnvef(h_new[4 * cur + 1], h_new[4 * nxt], 
+			v_new[prv], e_new[2 * cur], f);
+		h_new[4 * cur + 1]->set_tnvef(h_new[4 * cur], h_new[4 * prv + 2],
+			v_new[cur], e_new[2 * cur], f_new[cur]);
+		h_new[4 * cur + 2]->set_tnvef(h_new[4 * cur + 3], h_out[nxt],
+			v_new[cur], e_new[2 * cur + 1], f_new[nxt]);
+		h_new[4 * cur + 3]->set_tnvef(h_new[4 * cur + 2], h_new[4 * cur + 1],
+			h_out[nxt]->vertex, e_new[2 * cur + 1], f_new[cur]);
+		h_out[cur]->next = h_new[4 * cur + 3], h_out[cur]->face = f_new[cur];
+		v_new[cur]->position = h_out[nxt]->vertex->position;
+		interpolate_data({h_out[cur]}, h_new[4 * cur]);
+		interpolate_data({h_out[nxt]}, h_new[4 * cur + 1]);
+		interpolate_data({h_out[nxt]}, h_new[4 * cur + 2]);
+		interpolate_data({h_out[nxt]}, h_new[4 * cur + 3]);
+		interpolate_data({h_out[nxt]->vertex}, v_new[cur]);
+	}
+	f->halfedge = h_new[0];
+	return f;
 }
 
 /*
@@ -455,8 +500,8 @@ std::optional<Halfedge_Mesh::VertexRef> Halfedge_Mesh::collapse_edge(EdgeRef e) 
 	
 	//Reminder: use interpolate_data() to merge corner_uv / corner_normal data on halfedges
 	// (also works for bone_weights data on vertices!)
-	
-    return std::nullopt;
+
+	return std::nullopt;
 }
 
 /*
@@ -484,7 +529,7 @@ std::optional<Halfedge_Mesh::VertexRef> Halfedge_Mesh::collapse_face(FaceRef f) 
  */
 std::optional<Halfedge_Mesh::EdgeRef> Halfedge_Mesh::weld_edges(EdgeRef e, EdgeRef e2) {
 	//A2Lx8: Weld Edges
-
+	
 	//Reminder: use interpolate_data() to merge bone_weights data on vertices!
 
     return std::nullopt;
@@ -547,6 +592,22 @@ void Halfedge_Mesh::extrude_positions(FaceRef face, Vec3 move, float shrink) {
 	// use mesh navigation to get starting positions from the surrounding faces,
 	// compute the centroid from these positions + use to shrink,
 	// offset by move
-	
+	uint32_t deg = face->degree();
+	Vec3 center = Vec3();
+	auto h_in = face->halfedge;
+	do {
+		auto h_out = h_in->twin->next->next;
+		auto v_out = h_out->vertex;
+		center += v_out->position;
+		h_in = h_in->next;
+	} while(h_in != face->halfedge);
+	center /= static_cast<float>(deg);
+	do {
+		auto h_out = h_in->twin->next->next;
+		auto v_out = h_out->vertex;
+		auto v_in = h_in->vertex;
+		v_in->position = v_out->position + move + shrink * (center - v_out->position);
+		h_in = h_in->next;
+	} while(h_in != face->halfedge);
 }
 
