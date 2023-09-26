@@ -966,8 +966,13 @@ std::string Model::ui_sidebar(Scene& scene, Undo& undo, Widgets& widgets, View_3
 				overloaded{
 					[&](Halfedge_Mesh::VertexRef vert) {
 						Text("Halfedge: %u", vert->halfedge->id);
+						Text("Position: {%0.3f, %0.3f, %0.3f}", vert->position.x, vert->position.y,
+						     vert->position.z);
 					},
-					[&](Halfedge_Mesh::EdgeRef edge) { Text("Halfedge: %u", edge->halfedge->id); },
+					[&](Halfedge_Mesh::EdgeRef edge) { 
+						Text("Halfedge: %u", edge->halfedge->id); 
+						Text("Sharp: %s", edge->sharp ? "true" : "false");
+					},
 					[&](Halfedge_Mesh::FaceRef face) { Text("Halfedge: %u", face->halfedge->id); },
 					[&](Halfedge_Mesh::HalfedgeRef halfedge) {
 						Text("Vertex: %u", halfedge->vertex->id);
@@ -975,6 +980,9 @@ std::string Model::ui_sidebar(Scene& scene, Undo& undo, Widgets& widgets, View_3
 						Text("Face: %u", halfedge->face->id);
 						Text("Twin: %u", halfedge->twin->id);
 						Text("Next: %u", halfedge->next->id);
+						Text("Normal: {%0.3f, %0.3f, %0.3f}", halfedge->corner_normal.x, halfedge->corner_normal.y,
+						     halfedge->corner_normal.z);
+						Text("UV: {%0.3f, %0.3f}", halfedge->corner_uv.x, halfedge->corner_uv.y);
 					}},
 				*sel);
 		}

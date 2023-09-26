@@ -1,5 +1,6 @@
 #include "test.h"
 
+#include <iostream>
 #include "rasterizer/programs.h"
 
 //build a testing mipmap where (r,g) have sample texcoord and (b) has level index:
@@ -274,6 +275,7 @@ Test test_a1_task6_lod_simple("a1.task6.lod.simple", []() {
 		float lod = out_color.b;
 
 		if (!(min_lod <= lod && lod <= max_lod)) {
+			std::cout << "Note: LOD requires Trilinear to be complete\n";
 			std::string params;
 			params += "case '" + desc + "':\n";
 			params += "  du/dx, du/dy: " + to_string(du) + "\n";

@@ -2,6 +2,7 @@
 #include "../scene/shape.h"
 
 #include <map>
+#include <set>
 
 namespace Util {
 
@@ -560,7 +561,7 @@ Data ico_sphere(float radius, uint32_t level) {
 	// Try to fix UVs, following https://mft-dev.dk/uv-mapping-sphere/
 	// Detect triangles with wrong winding order
 	std::vector<uint32_t> winding_indices;
-	for(size_t i = 0; i < faces.size(); i++) {
+	for (size_t i = 0; i < faces.size(); i++) {
 		uint32_t v1 = faces[i].v1;
 		uint32_t v2 = faces[i].v2;
 		uint32_t v3 = faces[i].v3;
@@ -568,17 +569,18 @@ Data ico_sphere(float radius, uint32_t level) {
 		Vec3 tex_v2 = Vec3(uvs[v2].x, uvs[v2].y, 0.0f);
 		Vec3 tex_v3 = Vec3(uvs[v3].x, uvs[v3].y, 0.0f);
 		Vec3 tex_normal = cross(tex_v2 - tex_v1, tex_v3 - tex_v1);
-		if(tex_normal.z > 0) {
+		if (tex_normal.z > 0) {
 			winding_indices.push_back(static_cast<uint32_t>(i));
 		}
 	}
-
 	// Fix these vertices
-	auto fix_zig_zag = [&](std::vector<Vec3>& vertices, std::vector<Vec3>& normals, std::vector<Vec2>& uvs,
-					   std::unordered_map<uint32_t, uint32_t>& visited, size_t& vertex_index, uint32_t& vertex) -> void {
-		if(uvs[vertex].x < 0.25f) {
+	auto fix_zig_zag = [&](std::vector<Vec3>& vertices, std::vector<Vec3>& normals,
+	                       std::vector<Vec2>& uvs, std::unordered_map<uint32_t, uint32_t>& visited,
+	                       std::set<uint32_t>& cap_vertices, size_t& vertex_index,
+	                       uint32_t& vertex) -> void {
+		if (uvs[vertex].x < 0.25f) {
 			uint32_t temp_vertex = vertex;
-			if(!visited.count(vertex)) {
+			if (!visited.count(vertex)) {
 				// Create a copy of the vertex but with uv changed
 				Vec3 vertex_copy = vertices[vertex];
 				Vec3 normal_copy = normals[vertex];
@@ -590,91 +592,112 @@ Data ico_sphere(float radius, uint32_t level) {
 				uvs.push_back(uv_copy);
 				// Update faces
 				vertex_index++;
+				if (std::abs(vertex_copy.y - 1) < 0.001f || std::abs(vertex_copy.y + 1) < 0.001f) {
+					cap_vertices.insert(static_cast<uint32_t>(vertex_index));
+				}
 				visited.insert({vertex, static_cast<uint32_t>(vertex_index)});
 				temp_vertex = static_cast<uint32_t>(vertex_index);
-			}
-			else {
+			} else {
 				temp_vertex = visited.at(vertex);
 			}
 			vertex = temp_vertex;
 		}
 	};
+	std::set<uint32_t> cap_vertices;
 	size_t vertex_index = vertices.size() - 1;
 	std::unordered_map<uint32_t, uint32_t> visited;
-	for(auto& index : winding_indices) {
+	for (auto& index : winding_indices) {
 		uint32_t v1 = faces[index].v1;
 		uint32_t v2 = faces[index].v2;
 		uint32_t v3 = faces[index].v3;
-		fix_zig_zag(vertices, normals, uvs, visited, vertex_index, v1);
-		fix_zig_zag(vertices, normals, uvs, visited, vertex_index, v2);
-		fix_zig_zag(vertices, normals, uvs, visited, vertex_index, v3);
+		fix_zig_zag(vertices, normals, uvs, visited, cap_vertices, vertex_index, v1);
+		fix_zig_zag(vertices, normals, uvs, visited, cap_vertices, vertex_index, v2);
+		fix_zig_zag(vertices, normals, uvs, visited, cap_vertices, vertex_index, v3);
 		faces[index].v1 = v1;
 		faces[index].v2 = v2;
 		faces[index].v3 = v3;
 	}
 
 	// Fix top cap
-	auto fix_cap = [&](std::vector<Vec3>& vertices, std::vector<Vec3>& normals, std::vector<Vec2>& uvs, 
-					   std::vector<TriIdx> &faces, size_t& vertex_index, size_t index, uint32_t cap_index) -> void {
-		if(faces[index].v1 == cap_index){
-			// Create a copy of the vertex but with uv changed
-			Vec3 vertex_copy = vertices[cap_index];
-			Vec3 normal_copy = normals[cap_index];
-			Vec2 uv_copy = uvs[cap_index];
-			uv_copy.x = (uvs[faces[index].v2].x + uvs[faces[index].v3].x) / 2.0f;
-			// Add to the list of vertices
-			vertices.push_back(vertex_copy);
-			normals.push_back(normal_copy);
-			uvs.push_back(uv_copy);
-			// Update faces
-			vertex_index++;
-			faces[index].v1 = static_cast<uint32_t>(vertex_index);
-		} else if(faces[index].v2 == cap_index){
-			// Create a copy of the vertex but with uv changed
-			Vec3 vertex_copy = vertices[cap_index];
-			Vec3 normal_copy = normals[cap_index];
-			Vec2 uv_copy = uvs[cap_index];
-			uv_copy.x = (uvs[faces[index].v1].x + uvs[faces[index].v3].x) / 2.0f;
-			// Add to the list of vertices
-			vertices.push_back(vertex_copy);
-			normals.push_back(normal_copy);
-			uvs.push_back(uv_copy);
-			// Update faces
-			vertex_index++;
-			faces[index].v2 = static_cast<uint32_t>(vertex_index);
-		} else if(faces[index].v3 == cap_index){
-			// Create a copy of the vertex but with uv changed
-			Vec3 vertex_copy = vertices[cap_index];
-			Vec3 normal_copy = normals[cap_index];
-			Vec2 uv_copy = uvs[cap_index];
-			uv_copy.x = (uvs[faces[index].v1].x + uvs[faces[index].v2].x) / 2.0f;
-			// Add to the list of vertices
-			vertices.push_back(vertex_copy);
-			normals.push_back(normal_copy);
-			uvs.push_back(uv_copy);
-			// Update faces
-			vertex_index++;
-			faces[index].v3 = static_cast<uint32_t>(vertex_index);
+	auto fix_cap = [&](std::vector<Vec3>& vertices, std::vector<Vec3>& normals,
+	                   std::vector<Vec2>& uvs, std::vector<TriIdx>& faces, size_t& vertex_index,
+	                   bool& create_new_vertex, size_t index, uint32_t cap_index) -> void {
+		if (create_new_vertex) {
+			if (faces[index].v1 == cap_index) {
+				// Create a copy of the vertex but with uv changed
+				Vec3 vertex_copy = vertices[cap_index];
+				Vec3 normal_copy = normals[cap_index];
+				Vec2 uv_copy = uvs[cap_index];
+				uv_copy.x = (uvs[faces[index].v2].x + uvs[faces[index].v3].x) / 2.0f;
+				// Add to the list of vertices
+				vertices.push_back(vertex_copy);
+				normals.push_back(normal_copy);
+				uvs.push_back(uv_copy);
+				// Update faces
+				vertex_index++;
+				faces[index].v1 = static_cast<uint32_t>(vertex_index);
+			} else if (faces[index].v2 == cap_index) {
+				// Create a copy of the vertex but with uv changed
+				Vec3 vertex_copy = vertices[cap_index];
+				Vec3 normal_copy = normals[cap_index];
+				Vec2 uv_copy = uvs[cap_index];
+				uv_copy.x = (uvs[faces[index].v1].x + uvs[faces[index].v3].x) / 2.0f;
+				// Add to the list of vertices
+				vertices.push_back(vertex_copy);
+				normals.push_back(normal_copy);
+				uvs.push_back(uv_copy);
+				// Update faces
+				vertex_index++;
+				faces[index].v2 = static_cast<uint32_t>(vertex_index);
+			} else if (faces[index].v3 == cap_index) {
+				// Create a copy of the vertex but with uv changed
+				Vec3 vertex_copy = vertices[cap_index];
+				Vec3 normal_copy = normals[cap_index];
+				Vec2 uv_copy = uvs[cap_index];
+				uv_copy.x = (uvs[faces[index].v1].x + uvs[faces[index].v2].x) / 2.0f;
+				// Add to the list of vertices
+				vertices.push_back(vertex_copy);
+				normals.push_back(normal_copy);
+				uvs.push_back(uv_copy);
+				// Update faces
+				vertex_index++;
+				faces[index].v3 = static_cast<uint32_t>(vertex_index);
+			}
+		} else {
+			if (faces[index].v1 == cap_index) {
+				uvs[cap_index].x = (uvs[faces[index].v2].x + uvs[faces[index].v3].x) / 2.0f;
+				create_new_vertex = true;
+			} else if (faces[index].v2 == cap_index) {
+				uvs[cap_index].x = (uvs[faces[index].v1].x + uvs[faces[index].v3].x) / 2.0f;
+				create_new_vertex = true;
+			} else if (faces[index].v3 == cap_index) {
+				uvs[cap_index].x = (uvs[faces[index].v1].x + uvs[faces[index].v2].x) / 2.0f;
+				create_new_vertex = true;
+			}
 		}
 	};
 	std::vector<uint32_t> north_indices = {};
 	std::vector<uint32_t> south_indices = {};
-	for(size_t i = 0; i < vertices.size(); i++) {
-		if(std::abs(vertices[i].y - 1) < 0.001f) {
+	for (size_t i = 0; i < vertices.size(); i++) {
+		if (std::abs(vertices[i].y - 1) < 0.001f && !cap_vertices.count(static_cast<uint32_t>(i))) {
 			north_indices.push_back(static_cast<uint32_t>(i));
-		}
-		else if (std::abs(vertices[i].y + 1) < 0.001f) {
+		} else if (std::abs(vertices[i].y + 1) < 0.001f &&
+		           !cap_vertices.count(static_cast<uint32_t>(i))) {
 			south_indices.push_back(static_cast<uint32_t>(i));
 		}
 	}
 	vertex_index = vertices.size() - 1;
-	for(size_t i = 0; i < faces.size(); i++) {
-		for(size_t j = 0; j < north_indices.size(); j++) {
-			fix_cap(vertices, normals, uvs, faces, vertex_index, i, north_indices[j]);
+	bool create_north_vertex = false;
+	bool create_south_vertex = false;
+	for (size_t i = 0; i < faces.size(); i++) {
+		for (size_t j = 0; j < north_indices.size(); j++) {
+			fix_cap(vertices, normals, uvs, faces, vertex_index, create_north_vertex, i,
+			        north_indices[j]);
 		}
-		for(size_t j = 0; j < south_indices.size(); j++) {
-			fix_cap(vertices, normals, uvs, faces, vertex_index, i, south_indices[j]);
-		} 
+		for (size_t j = 0; j < south_indices.size(); j++) {
+			fix_cap(vertices, normals, uvs, faces, vertex_index, create_south_vertex, i,
+			        south_indices[j]);
+		}
 	}
 
 	// Construct the indexed mesh
@@ -686,7 +709,7 @@ Data ico_sphere(float radius, uint32_t level) {
 	}
 	std::vector<Indexed_Mesh::Vert> verts;
 	for (size_t i = 0; i < vertices.size(); i++) {
-		verts.push_back({vertices[i], normals[i], uvs[i], 0});
+		verts.push_back({vertices[i], normals[i], uvs[i], static_cast<uint32_t>(i)});
 	}
 	return {verts, triangles};
 }

@@ -119,6 +119,7 @@ static void check_rasterize_triangles(std::string const &desc, std::initializer_
 				//check derivatives match in sign:
 				std::function< bool(Vec2, Vec2) > derivatives_same_sign = [](Vec2 a, Vec2 b) { return (a.x > 0.0f) == (b.x > 0.0f) && (a.y > 0.0f) == (b.y > 0.0f); };
 				if (!std::equal(g.derivatives.begin(), g.derivatives.end(), e.derivatives.begin(), e.derivatives.end(), derivatives_same_sign)) continue;
+				else {std::cout << "DERIVATIVES SIGNS DID NOT MATCH\n";}
 			} else {
 				static_assert(check_derivatives == CheckDerivatives, "Recognized check mode.");
 				//check derivatives (approximately) match:
