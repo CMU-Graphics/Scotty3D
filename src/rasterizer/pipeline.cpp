@@ -1,4 +1,4 @@
-// clang format off
+// clang-format off
 #include "pipeline.h"
 
 #include <iostream>

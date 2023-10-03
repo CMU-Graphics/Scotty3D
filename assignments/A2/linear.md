@@ -18,9 +18,9 @@ The high-level procedure is outlined in greater detail in `student/meshedit.cpp`
 
 For global linear or Catmull-Clark subdivision, the strategy for assigning new vertex positions may at first appear a bit strange: in addition to updating positions at vertices, we will also calculate vertex positions associated with the _edges_ and _faces_ of the original mesh. Storing new vertex positions on edges and faces will make it extremely convenient to generate the polygons in our new mesh, since we can still use the halfedge data structure to decide which four positions get connected up to form a quadrilateral. In particular, each quad in the new mesh will consist of:
 
-*   one new vertex associated with a face from the original mesh,
-*   two new vertices associated with edges from the original mesh, and
-*   one vertex from the original mesh.
+*   One new vertex associated with a face from the original mesh,
+*   Two new vertices associated with edges from the original mesh, and
+*   One vertex from the original mesh.
 
 For linear subdivision, the rules for computing new vertex positions are very simple:
 
@@ -38,9 +38,9 @@ Steps $2$ and $3$ are already implemented by `Halfedge_Mesh::subdivide` in `geom
 
 Recall that in linear and Catmull-Clark subdivision _all polygons are subdivided simultaneously_. In other words, if we focus on the whole mesh (rather than a single polygon), then we are globally
 
-*   creating one new vertex for each edge,
-*   creating one new vertex for each face, and
-*   keeping all the vertices of the original mesh.
+*   Creating one new vertex for each edge,
+*   Creating one new vertex for each face, and
+*   Keeping all the vertices of the original mesh.
 
 These vertices are then connected up to form quadrilaterals (_n_ quadrilaterals for each _n_-gon in the input mesh). Rather than directly modifying the halfedge connectivity, these new quads will be collected in a much simpler mesh data structure: a list of polygons. Note that with this subdivision scheme, _every_ polygon in the output mesh will be a quadrilateral, even if the input contains triangles, pentagons, etc.
 

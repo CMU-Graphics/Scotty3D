@@ -11,7 +11,7 @@ A `Halfedge_Mesh` wrangles four mesh element types: `Vertices`, `Edges`, `Faces`
 
 As a pointer-based structure, `Halfedge_Mesh` operations will often require the allocation and deallocation of new elements. Rather than using the C++ `new` and `delete` operators directly, `Halfedge_Mesh` instead provides `emplace_*` and `erase_*` functions to allocate and free (respectively) mesh elements. This allows the mesh to track all of the elements that belong to it in `std::list`s (called `vertices`, `edges`, `faces`, and `halfedges`).
 
-The functions also maintain a unique-within-the-mesh `id` value for mesh elements, which can be useful for debugging (printing `v->id` for debug messages is a lot more readable than `&*v`). As an additional feature, the high-order bit of the `id` is set by the `erase_*` functions. So if you start seeing very very large id values, probably you have a use-after-free bug.
+The functions also maintain a unique-within-the-mesh `id` value for mesh elements, which can be useful for debugging (printing `v->id` for debug messages is a lot more readable than `&*v`). As an additional feature, the high-order bit of the `id` is set by the `erase_*` functions. So if you start seeing very very large id values, you probably have a use-after-free bug.
 
 ## Mesh Connectivity
 

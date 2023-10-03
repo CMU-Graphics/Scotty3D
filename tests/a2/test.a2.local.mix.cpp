@@ -44,9 +44,7 @@ Test test_a2_local_mix("a2.local.mix", []() {
     };
 
 	for (uint32_t i = 0; i < operations; i++) {
-
 		int32_t op = rng.integer(0, 11);
-
 		switch (op) {
 		case 0: {
 			auto e = edge();
