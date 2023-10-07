@@ -30,8 +30,8 @@ Current progress (Star means optional. One of A2Go* must be chosen):
 	- [ ] *A2Go2 isotropic remeshing
 	- [ ] *A2Go3 simplification
 - Assignment 3: Path Tracing
-    - [ ] A3T1: Camera Rays
-	- [ ] A3T2: Intersection Tests
+    - [x] A3T1: Camera Rays
+	- [x] A3T2: Intersection Tests
 	- [ ] A3T3: BVH
 	- [ ] A3T4: Path Tracing
 	- [ ] A3T5: Materials

@@ -37,7 +37,26 @@ PT::Trace Sphere::hit(Ray ray) const {
     ret.position = Vec3{}; // where was the intersection?
     ret.normal = Vec3{};   // what was the surface normal at the intersection?
 	ret.uv = Vec2{}; 	   // what was the uv coordinates at the intersection? (you may find Sphere::uv to be useful)
-    return ret;
+
+	float b = 2 * dot(ray.point, ray.dir);
+	float delta = b * b - 4 * ray.dir.norm_squared() * (ray.point.norm_squared() - radius * radius);
+	if(delta < 0) return ret;
+
+	float t1 = (-b - sqrt(delta)) / (2 * ray.dir.norm_squared());
+	float t2 = (-b + sqrt(delta)) / (2 * ray.dir.norm_squared());
+	float t;
+	if(t1 < ray.dist_bounds.x || t1 > ray.dist_bounds.y)
+	{
+		if(t2 < ray.dist_bounds.x || t2 > ray.dist_bounds.y) return ret;
+		else t = t2;
+	}
+	else t = t1;
+	ret.hit = true;
+	ret.distance = t;
+	ret.position = ray.at(t);
+	ret.normal = ret.position.unit();
+	ret.uv = uv(ret.normal);
+	return ret;
 }
 
 Vec3 Sphere::sample(RNG &rng, Vec3 from) const {

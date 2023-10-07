@@ -26,9 +26,6 @@ Trace Triangle::hit(const Ray& ray) const {
     Tri_Mesh_Vert v_0 = vertex_list[v0];
     Tri_Mesh_Vert v_1 = vertex_list[v1];
     Tri_Mesh_Vert v_2 = vertex_list[v2];
-    (void)v_0;
-    (void)v_1;
-    (void)v_2;
 
     // TODO (PathTracer): Task 2
     // Intersect the ray with the triangle defined by the three vertices.
@@ -42,6 +39,23 @@ Trace Triangle::hit(const Ray& ray) const {
                            // (this should be interpolated between the three vertex normals)
 	ret.uv = Vec2{};	   // What was the uv associated with the point of intersection?
 						   // (this should be interpolated between the three vertex uvs)
+
+	Vec3 s = ray.point - v_0.position;
+	Vec3 e1 = v_1.position - v_0.position;
+	Vec3 e2 = v_2.position - v_0.position;
+
+	float det = dot(cross(e1, ray.dir), e2);
+	if(det == 0.f) return ret;
+	float u = -dot(cross(s, e2), ray.dir) / det;
+	float v = dot(cross(e1, ray.dir), s) / det;
+	float t = -dot(cross(s, e2), e1) / det;
+	if(u < 0.f || u > 1.f || v < 0.f || v > 1.f || u + v > 1.f) return ret;
+	if(t < ray.dist_bounds.x || t > ray.dist_bounds.y) return ret;
+	ret.hit = true;
+	ret.distance = t;
+	ret.position = ray.at(t);
+	ret.normal = (1 - u - v) * v_0.normal + u * v_1.normal + v * v_2.normal;
+	ret.uv = (1 - u - v) * v_0.uv + u * v_1.uv + v * v_2.uv;
     return ret;
 }
 
