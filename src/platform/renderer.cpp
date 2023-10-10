@@ -17,7 +17,7 @@ Renderer::Renderer(Vec2 dim)
 	  line_shader(GL::Shaders::line_v, GL::Shaders::line_f),
 	  inst_shader(GL::Shaders::inst_v, GL::Shaders::mesh_f),
 	  dome_shader(GL::Shaders::dome_v, GL::Shaders::dome_f),
-	  _sphere(Util::sphere_mesh(1.0f, 3).to_gl()),
+	  _sphere(Util::closed_sphere_mesh(1.0f, 3).to_gl()),
 	  _cyl(Util::cyl_mesh(1.0f, 1.0f, 64, false).to_gl()), _hemi(Util::hemi_mesh(1.0f).to_gl()),
 	  samples(DEFAULT_SAMPLES), window_dim(dim),
 	  id_buffer(new GLubyte[static_cast<int32_t>(dim.x) * static_cast<int32_t>(dim.y) * 4]) {

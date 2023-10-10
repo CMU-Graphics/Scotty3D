@@ -7,7 +7,7 @@
 Test test_a2_local_mix("a2.local.mix", []() {
 	RNG rng(2266524198);
 
-	Halfedge_Mesh mesh = Halfedge_Mesh::from_indexed_mesh(Util::sphere_mesh(1.0f, 2));
+	Halfedge_Mesh mesh = Halfedge_Mesh::from_indexed_mesh(Util::closed_sphere_mesh(1.0f, 2));
 
 	constexpr uint32_t operations = 10;
 

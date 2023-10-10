@@ -49,7 +49,7 @@ float Sphere::pdf(Ray ray, Mat4 pdf_T, Mat4 pdf_iT) const {
 }
 
 Indexed_Mesh Sphere::to_mesh() const {
-	return Util::sphere_mesh(radius, 2);
+	return Util::closed_sphere_mesh(radius, 2);
 }
 
 } // namespace Shapes

@@ -86,7 +86,7 @@ static void expect_remesh(Halfedge_Mesh& mesh, float fcurve, float fdefect, floa
 
 // isotropic remeshing on a good ball
 Test test_a2_go2_remesh_basic_ball_good("a2.go2.remesh.basic.ball.good", []() {
-	Halfedge_Mesh ball = Halfedge_Mesh::from_indexed_mesh(Util::sphere_mesh(1.0f, 1));
+	Halfedge_Mesh ball = Halfedge_Mesh::from_indexed_mesh(Util::closed_sphere_mesh(1.0f, 1));
 	Halfedge_Mesh remesh = ball.copy();
 
 	expect_remesh(ball, 1.0f, 1.0f, 1.0f, 1.0f);
@@ -99,7 +99,7 @@ Test test_a2_go2_remesh_basic_ball_good("a2.go2.remesh.basic.ball.good", []() {
 
 // isotropic remeshing on a zero(?) radius ball
 Test test_a2_go2_remesh_basic_zero("a2.go2.remesh.basic.zero", []() {
-	Halfedge_Mesh ball = Halfedge_Mesh::from_indexed_mesh(Util::sphere_mesh(1.0f, 0));
+	Halfedge_Mesh ball = Halfedge_Mesh::from_indexed_mesh(Util::closed_sphere_mesh(1.0f, 0));
 	Halfedge_Mesh remesh = ball.copy();
 
 	ball.isotropic_remesh({0, 1.2f, 0.8f, 5, 0.2f});

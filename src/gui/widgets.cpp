@@ -1123,7 +1123,8 @@ std::optional<Halfedge_Mesh> Halfedge_Mesh_Controls::create_shape() {
 	case Util::Shape::cylinder: label = "Cylinder"; break;
 	case Util::Shape::torus: label = "Torus"; break;
 	case Util::Shape::cone: label = "Cone"; break;
-	case Util::Shape::sphere: label = "Sphere"; break;
+	case Util::Shape::closed_sphere: label = "Closed Sphere"; break;
+	case Util::Shape::texture_sphere: label = "Texture Sphere"; break;
 	default: die("Unknown shape type");
 	}
 	if (BeginCombo("##create-combo", label)) {
@@ -1133,7 +1134,8 @@ std::optional<Halfedge_Mesh> Halfedge_Mesh_Controls::create_shape() {
 		if (Selectable("Cylinder")) type = Util::Shape::cylinder;
 		if (Selectable("Torus")) type = Util::Shape::torus;
 		if (Selectable("Cone")) type = Util::Shape::cone;
-		if (Selectable("Sphere")) type = Util::Shape::sphere;
+		if (Selectable("Closed Sphere")) type = Util::Shape::closed_sphere;
+		if (Selectable("Texture Sphere")) type = Util::Shape::texture_sphere;
 		EndCombo();
 	}
 
@@ -1151,8 +1153,10 @@ std::optional<Halfedge_Mesh> Halfedge_Mesh_Controls::create_shape() {
 			return Halfedge_Mesh::from_indexed_mesh(Util::torus_mesh(torus_inner_radius, torus_outer_radius, torus_sides, torus_rings));
 		case Util::Shape::cone:
 			return Halfedge_Mesh::from_indexed_mesh(Util::cone_mesh(cone_bottom_radius, cone_top_radius, cone_height, cone_sides));
-		case Util::Shape::sphere:
-			return Halfedge_Mesh::from_indexed_mesh(Util::sphere_mesh(sphere_radius, sphere_subdivisions));
+		case Util::Shape::closed_sphere:
+			return Halfedge_Mesh::from_indexed_mesh(Util::closed_sphere_mesh(sphere_radius, sphere_subdivisions));
+		case Util::Shape::texture_sphere:
+			return Halfedge_Mesh::from_indexed_mesh(Util::texture_sphere_mesh(sphere_radius, sphere_subdivisions));
 		default:
 			die("Unknown shape type");
 		}
@@ -1182,7 +1186,11 @@ std::optional<Halfedge_Mesh> Halfedge_Mesh_Controls::create_shape() {
 		SliderFloat("Height##cone", &cone_height, 0.01f, 10.0f, "%.2f");
 		SliderUInt32("Sides##cone", &cone_sides, 3, 100);
 	} break;
-	case Util::Shape::sphere: {
+	case Util::Shape::closed_sphere: {
+		SliderFloat("Radius##sphere", &sphere_radius, 0.01f, 10.0f, "%.2f");
+		SliderUInt32("Subdivisions##sphere", &sphere_subdivisions, 0, 10);
+	} break;
+	case Util::Shape::texture_sphere: {
 		SliderFloat("Radius##sphere", &sphere_radius, 0.01f, 10.0f, "%.2f");
 		SliderUInt32("Subdivisions##sphere", &sphere_subdivisions, 0, 10);
 	} break;

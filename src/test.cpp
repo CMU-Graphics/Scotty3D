@@ -163,8 +163,8 @@ static std::pair<float, float> time_op(T& _small, T& _large, const std::function
 }
 
 void Test::check_constant_time(std::function<void(Halfedge_Mesh&)> op) {
-	static Halfedge_Mesh _small = Halfedge_Mesh::from_indexed_mesh(Util::sphere_mesh(1.0f, 0));
-	static Halfedge_Mesh _large = Halfedge_Mesh::from_indexed_mesh(Util::sphere_mesh(1.0f, 4));
+	static Halfedge_Mesh _small = Halfedge_Mesh::from_indexed_mesh(Util::closed_sphere_mesh(1.0f, 0));
+	static Halfedge_Mesh _large = Halfedge_Mesh::from_indexed_mesh(Util::closed_sphere_mesh(1.0f, 4));
 
 	auto [small_time, large_time] = time_op(_small, _large, op);
 
@@ -176,8 +176,8 @@ void Test::check_constant_time(std::function<void(Halfedge_Mesh&)> op) {
 }
 
 void Test::check_linear_time(std::function<void(Halfedge_Mesh&)> op) {
-	static Halfedge_Mesh _small = Halfedge_Mesh::from_indexed_mesh(Util::sphere_mesh(1.0f, 1));
-	static Halfedge_Mesh _large = Halfedge_Mesh::from_indexed_mesh(Util::sphere_mesh(1.0f, 4));
+	static Halfedge_Mesh _small = Halfedge_Mesh::from_indexed_mesh(Util::closed_sphere_mesh(1.0f, 1));
+	static Halfedge_Mesh _large = Halfedge_Mesh::from_indexed_mesh(Util::closed_sphere_mesh(1.0f, 4));
 
 	auto [small_time, large_time] = time_op(_small, _large, op);
 
@@ -194,8 +194,8 @@ void Test::check_linear_time(std::function<void(Halfedge_Mesh&)> op) {
 }
 
 void Test::check_loglinear_time(std::function<void(Indexed_Mesh&)> op) {
-	static Indexed_Mesh _small = Util::sphere_mesh(1.0f, 1);
-	static Indexed_Mesh _large = Util::sphere_mesh(1.0f, 4);
+	static Indexed_Mesh _small = Util::closed_sphere_mesh(1.0f, 1);
+	static Indexed_Mesh _large = Util::closed_sphere_mesh(1.0f, 4);
 
 	auto [small_time, large_time] = time_op(_small, _large, op);
 
@@ -213,8 +213,8 @@ void Test::check_loglinear_time(std::function<void(Indexed_Mesh&)> op) {
 }
 
 void Test::check_log_time(std::function<void(PT::Tri_Mesh&)> op) {
-	static PT::Tri_Mesh _small = PT::Tri_Mesh(Util::sphere_mesh(1.0f, 1), true);
-	static PT::Tri_Mesh _large = PT::Tri_Mesh(Util::sphere_mesh(1.0f, 4), true);
+	static PT::Tri_Mesh _small = PT::Tri_Mesh(Util::closed_sphere_mesh(1.0f, 1), true);
+	static PT::Tri_Mesh _large = PT::Tri_Mesh(Util::closed_sphere_mesh(1.0f, 4), true);
 
 	auto [small_time, large_time] = time_op(_small, _large, op);
 

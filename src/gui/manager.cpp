@@ -21,9 +21,9 @@ Manager::Manager(Scene& scene, Undo& undo, Animator& animator, Vec2 dim)
 	: scene(scene), undo(undo), animator(animator), window_dim(dim), animate(*this),
 	  baseplane(1.0f) {
 
-	point_light_mesh = Util::sphere_mesh(0.05f, 1).to_gl();
+	point_light_mesh = Util::closed_sphere_mesh(0.05f, 1).to_gl();
 	directional_light_mesh = Util::arrow_mesh(0.03f, 0.075f, 1.0f).to_gl();
-	spot_light_origin_mesh = Util::sphere_mesh(0.1f, 1).to_gl();
+	spot_light_origin_mesh = Util::closed_sphere_mesh(0.1f, 1).to_gl();
 	particle_system_mesh = Util::arrow_mesh(0.03f, 0.075f, 1.0f).to_gl();
 
 	const int32_t R = 25;

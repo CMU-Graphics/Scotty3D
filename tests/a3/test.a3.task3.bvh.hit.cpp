@@ -37,7 +37,7 @@ Test test_a3_task3_bvh_hit_simple_triangle("a3.task3.bvh.hit.simple.triangle", [
 });
 
 Test test_a3_task3_bvh_hit_simple_sphere("a3.task3.bvh.hit.simple.sphere", []() {
-	PT::Tri_Mesh mesh = PT::Tri_Mesh(Util::sphere_mesh(1.0f, 1), true);
+	PT::Tri_Mesh mesh = PT::Tri_Mesh(Util::closed_sphere_mesh(1.0f, 1), true);
 
 	Ray ray(Vec3(0, 0, -2), Vec3(0, 0, 1));
 

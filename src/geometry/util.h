@@ -13,7 +13,8 @@ enum class Shape : uint8_t {
 	square,
 	cylinder,
 	torus,
-	sphere,
+	closed_sphere,
+	texture_sphere,
 	hemisphere,
 	cone,
 	capsule,
@@ -29,7 +30,8 @@ Indexed_Mesh pentagon_mesh(float radius);
 Indexed_Mesh cyl_mesh(float radius, float height, uint32_t sides = 12, bool cap = true);
 Indexed_Mesh cyl_mesh_disjoint(float radius, float height, uint32_t sides = 12);
 Indexed_Mesh torus_mesh(float iradius, float oradius, uint32_t segments = 48, uint32_t sides = 24);
-Indexed_Mesh sphere_mesh(float r, uint32_t subdivsions);
+Indexed_Mesh texture_sphere_mesh(float r, uint32_t subdivsions);
+Indexed_Mesh closed_sphere_mesh(float r, uint32_t subdivsions);
 Indexed_Mesh hemi_mesh(float r);
 Indexed_Mesh cone_mesh(float bradius, float tradius, float height, uint32_t sides = 12,
                        bool cap = true);
@@ -59,7 +61,8 @@ Indexed_Mesh dedup(Data&& d);
 Data cube(float r);
 Data quad(float x, float y);
 Data pentagon(float r);
-Data ico_sphere(float radius, uint32_t level);
+Data texture_ico_sphere(float radius, uint32_t level);
+Data closed_ico_sphere(float radius, uint32_t level);
 Data uv_hemisphere(float radius);
 Data cone(float bradius, float tradius, float height, uint32_t sides, bool caps);
 Data torus(float iradius, float oradius, uint32_t segments, uint32_t sides);

@@ -27,7 +27,7 @@ BASIC CASE:
 Simplify a ball a little
 */
 Test test_a2_go3_simplify_basic_ball_10("a2.go3.simplify.basic.ball.10", []() {
-	Halfedge_Mesh ball = Halfedge_Mesh::from_indexed_mesh(Util::sphere_mesh(1.0f, 2));
+	Halfedge_Mesh ball = Halfedge_Mesh::from_indexed_mesh(Util::closed_sphere_mesh(1.0f, 2));
 	Halfedge_Mesh orig = ball.copy();
 
 	expect_simplify(ball, 0.9f);
@@ -44,7 +44,7 @@ BASIC CASE:
 Simplify a ball a bit
 */
 Test test_a2_go3_simplify_basic_ball_50("a2.go3.simplify.basic.ball.50", []() {
-	Halfedge_Mesh ball = Halfedge_Mesh::from_indexed_mesh(Util::sphere_mesh(1.0f, 2));
+	Halfedge_Mesh ball = Halfedge_Mesh::from_indexed_mesh(Util::closed_sphere_mesh(1.0f, 2));
 	Halfedge_Mesh orig = ball.copy();
 
 	expect_simplify(ball, 0.5f);
@@ -61,7 +61,7 @@ BASIC CASE:
 Simplify a ball a lot
 */
 Test test_a2_go3_simplify_basic_ball_90("a2.go3.simplify.basic.ball.90", []() {
-	Halfedge_Mesh ball = Halfedge_Mesh::from_indexed_mesh(Util::sphere_mesh(1.0f, 2));
+	Halfedge_Mesh ball = Halfedge_Mesh::from_indexed_mesh(Util::closed_sphere_mesh(1.0f, 2));
 	Halfedge_Mesh orig = ball.copy();
 
 	expect_simplify(ball, 0.1f);
