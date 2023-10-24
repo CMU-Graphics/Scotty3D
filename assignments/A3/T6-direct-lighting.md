@@ -42,6 +42,8 @@ The direct lighting procedure should now follow these steps:
 
 - Add estimate of incoming light scaled by BSDF attenuation. Given a sample, we don't know whether it came from the BSDF or the light, so you should use `Material::evaluate`, `Material::pdf`, and `Pathtracer::area_lights_pdf` to compute the proper weighting. What is the PDF of our sample, given it comes from the combined distribution?
 
+Once you have finished making modifications to `sample_direct_lighting_task6`, you'll need to change the `SAMPLE_AREA_LIGHTS` global variable to be true in order to test your changes.
+
 ---
 
 ## Tips

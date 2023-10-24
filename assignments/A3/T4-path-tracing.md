@@ -1,6 +1,6 @@
 # `A3T4` Path Tracing
 
-Up to this point, your renderer has only computed object visibility using ray tracing. Now, we will simulate the complicated paths that light can take throughout the scene, bouncing off many surfaces before eventually reaching the camera. Simulating this multi-bounce light is referred to as _global illumination_, and it is critical for producing realistic images, especially when specular surfaces are present. Note that all functions in `src/scene/material.cpp` are in **local space** to the surface with respect to the ray intersection point, while functions in `src/pathtracer/pathtracer.cpp` are generally in **world space**. Keep in mind that in Scotty3D's coordinate system, x is horizontal, y is vertical (the 'up' direction), and z is depth.
+Up to this point, your renderer has only computed object visibility using ray tracing. Now, we will simulate the complicated paths that light can take throughout the scene, bouncing off many surfaces before eventually reaching the camera. Simulating this multi-bounce light is referred to as _global illumination_, and it is critical for producing realistic images, especially when specular surfaces are present. Note that all functions in `src/scene/material.cpp` are in **local space** to the surface with respect to the ray intersection point, while functions in `src/pathtracer/pathtracer.cpp` are generally in **world space**. Keep in mind that in Scotty3D's coordinate system, $x$ is horizontal, $y$ is vertical (the 'up' direction), and $z$ is depth.
 
 ---
 
@@ -8,13 +8,13 @@ Up to this point, your renderer has only computed object visibility using ray tr
 
 `Pathtracer::trace` is the function responsible for coordinating the path tracing procedure. We've given you code to intersect a ray with the scene and collect information about the surface intersection necessary for computing the lighting at that point. You should read this function and understand where/why functions of the `bsdf` are called and how the parameters are set up. **You do not need to modify anything here, just understand the procedure.**
 
-## Step 1: `Lambertian`
+## Step 1: `Lambertian` Material
 
 Implement `Lambertian::scatter`, `Lambertian::evaluate`, and `Lambertian::pdf`. Note that their interfaces are defined in `src/scene/material.h`. Task 5 will further discuss sampling BSDFs, so reading ahead may help your understanding.
 
 - `Lambertian::albedo` is a texture giving the ratio of incoming light to reflected light, also known as the base color of the Lambertian material. Call `albedo.lock()->evaluate(uv)` to get the albedo at the current point. Note that an albedo of $1$ should correspond to perfect energy conservation. (I.e., this value has _not_ been pre-divided by $\pi$.)
 - `Lambertian::scatter` returns a `Scatter` object, with `direction` and `attenuation` components. You can use a `Samplers::Hemisphere::Cosine sampler` to randomly sample a direction from a cosine-weighted hemisphere distribution and you can compute the attenuation component via `Lambertian::evaluate`.
-- `Lambertian::evaluate` computes the ratio of outgoing to incoming radiance given a pair of directions. Traditionally, BSDFs are specified as the ratio of outgoing radiance to incoming _irradiance_, which necessitates the extra `cos(theta)` factor in the rendering equation. In Scotty3D, however, we expect the BSDF to operate only on radiance, so you must scale the evaluation accordingly.
+- `Lambertian::evaluate` computes the ratio of outgoing to incoming radiance given a pair of directions. Traditionally, BSDFs are specified as the ratio of outgoing radiance to incoming _irradiance_, which necessitates the extra `cos(theta)` factor in the rendering equation. In Scotty3D, however, we expect the BSDF to operate only on radiance, so you must scale the evaluation accordingly. See [the wikipedia page](https://en.wikipedia.org/wiki/Bidirectional_reflectance_distribution_function) for a visualization of the formula.
 - `Lambertian::pdf` computes the PDF for sampling some incoming direction given some outgoing direction. However, the Lambertian BSDF in particular does not depend on the outgoing direction. Since we sampled the incoming direction from a cosine-weighted hemisphere distribution, what is its PDF?
 
 Notes: 
@@ -36,6 +36,8 @@ NOTE: you may wish to add some ray logging to help debug. See, for example, the 
 ## Step 3: `Pathtracer::sample_direct_lighting_task4`
 
 Finally, you will estimate light that hit our shading point after being emitted from a light source without any bounces in between. For now, you should use the same sampling procedure as `Pathtracer::sample_indirect_lighting`, except for using the _direct_ component of incoming light. Note that since we are only interested in light emitted from the first intersection, we can trace a ray with `depth = 0`.
+
+Once you have finished making modifications to these three steps, you'll need to change the `RENDER_NORMAL` global variable to be false in order to test your changes.
 
 Note: separately sampling direct lighting might seem silly, as we could have just gotten both direct and indirect lighting from tracing a single BSDF sample. However, separating the components will allow us to improve our direct light sampling algorithm in task 6.
 

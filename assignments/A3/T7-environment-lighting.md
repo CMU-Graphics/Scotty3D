@@ -8,25 +8,23 @@ The intensity of incoming light from each direction is defined by a texture map 
 
 In this task you will get `Environment_Lights::Sphere` working by implementing `Samplers::Sphere::Uniform` and `Samplers::Sphere::Image` in `src/pathtracer/samplers.cpp`. You'll start with uniform sampling to get things working, and then move onto a more advanced implementation that uses **importance sampling** to significantly reduce variance in rendered images.
 
-Note that for the purposes of this task, (0,0) is actually the **bottom left** of the HDR image, not the **top left**. Think about how this will affect your calculation of the $\theta$ value for a pixel.
+Note that for the purposes of this task, $(0,0)$ is actually the **bottom left** of the HDR image, not the **top left** (as opposed to what the image above suggests).  Think about how this will affect your calculation of the $\theta$ value for a pixel.
 
 ---
 
 ## Step 0: Know your customers
 
-First, check out the interface and implementation of `Environment_Lights::Sphere` in `src/scene/env_light.h`/`.cpp`. Particularly, path attention to how it initializes and uses its member `importance` to sample directions from an `HDR_Image`, which it also passes to the constructor of `importance`. (The `HDR_Image` interface may be found in `util/hdr_image.h`.)
+First, check out the interface and implementation of `Environment_Lights::Sphere` in `src/scene/env_light.h`/`.cpp`. Particularly, pay attention to how it initializes and uses its member `importance` to sample directions from an `HDR_Image`, which it also passes to the constructor of `importance`. (The `HDR_Image` interface may be found in `util/hdr_image.h`.)
 
 ## Step 1: Uniformly sampling the environment map
 
 Implement `Sphere::Uniform::sample` in `src/pathtracer/samplers.cpp`.
 
-In order to test uniform sampling, make sure that the variable `IMPORTANCE_SAMPLING` at the top of `src/pathtracer/samplers.cpp` is set to false.
-
 This should be sufficient to get environment maps working in the renderer (albeit in a high-variance / slow-convergence way).
 
 Since high dynamic range environment maps can be large files, we have not included them in the Scotty3D repository. You can download a set of sample environment maps [here](http://15462.courses.cs.cmu.edu/fall2015content/misc/asst3_images/asst3_exr_archive.zip) or -- for more interesting environment maps -- check out [poly haven](https://polyhaven.com/hdris).
 
-To use a particular environment map with your scene, select `layout` -> `Create Object` -> `Environment Light Instance`, then set the underlying `Light` type to `Sphere`, add a new `Texture`, set the texture type to `Image` and, finally, press `Change` and select your file. Make sure that you have the variable `SAMPLE_AREA_LIGHTS` set to be false to ensure that you're not importance sampling.
+In order to test uniform sampling, make sure that the variable `IMPORTANCE_SAMPLING` at the top of `src/pathtracer/samplers.cpp` is set to false. To use a particular environment map with your scene, select `layout` -> `Create Object` -> `Environment Light Instance`, then set the underlying `Light` type to `Sphere`, add a new `Texture`, set the texture type to `Image` and, finally, press `Change` and select your file.
 
 ## Step 2: Importance sampling the environment map
 
@@ -68,19 +66,20 @@ if we want our new distribution to still integrate to 1, we must divide by $\sin
 
 Altogether, the final Jacobian is $\frac{wh}{2\pi^2 \sin(\theta)}$.
 
+In order to test importance sampling, make sure that the variable `IMPORTANCE_SAMPLING` at the top of `src/pathtracer/samplers.cpp` is set to true.
+
 ---
 
 ### Tips
 
 - When computing areas corresponding to a pixel, use the value of angles at the pixel centers.
-- Compute the PDF and CDF in the constructor of `Samplers::Sphere::Image` and store their values in fields `_pdf` and `_cdf` respectively. See `src/pathtracer/sampler.h`. Make sure you normalize these values.
+- Compute the PDF and CDF in the constructor of `Samplers::Sphere::Image` and store their values in fields `_pdf` and `_cdf` respectively. See `src/pathtracer/sampler.h`. Make sure you normalize these values at some point in your calculations.
 - `Spectrum::luma()` returns the luminance (brightness) of a Spectrum. The weight assigned to a pixel should be proportional to both its luminance and the solid angle it subtends.
-- For inversion sampling, use `std::upper_bound`: it's a binary search. Read about it [here](https://en.cppreference.com/w/cpp/algorithm/upper_bound).
+- For inversion sampling, use [`std::upper_bound`](https://en.cppreference.com/w/cpp/algorithm/upper_bound): it's a standard library function for binary search.
 - If you didn't use the ray log to debug area light sampling, start using it now to visualize what directions are being sampled from the environment map.
 - `src/scene/shapes.h`/`.cpp` declare/define `Sphere::uv` which converts from directions to lat/lon space (not spherical coordinates!).
 - You may want to read the [PBR section](https://www.pbr-book.org/3ed-2018/Light_Transport_I_Surface_Reflection/Sampling_Light_Sources#sec:mc-infinite-area-lights) on this topic as it helps explain all the derivations for importance sampling more in-depth.
 - The test cases we are releasing for this task are very sparse and not very informative for the most part. We encourage you to run the pathtracer in the GUI or headless to test your code instead.
-- Make sure you set the variable `SAMPLE_AREA_LIGHTS` to be true when you are working on Step 2: Importance sampling.
 ---
 
 ## Reference Results

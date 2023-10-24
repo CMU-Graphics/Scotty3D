@@ -108,7 +108,7 @@ std::pair<Spectrum, Spectrum> Pathtracer::trace(RNG &rng, const Ray& ray) {
 	Mat4 world_to_object = object_to_world.T();
 	Vec3 out_dir = world_to_object.rotate(ray.point - result.position).unit();
 
-	// TODO: do we want to add ray differentials to track UV derivatives for texture sampling?
+	// TODO DEV: do we want to add ray differentials to track UV derivatives for texture sampling?
 	// https://pbr-book.org/3ed-2018/Geometry_and_Transformations/Rays#RayDifferentials
 	Shading_Info info = {*bsdf,         world_to_object, object_to_world, result.position, out_dir,
 	                     result.normal, result.uv, ray.depth};
