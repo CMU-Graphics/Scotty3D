@@ -279,7 +279,7 @@ struct RasterJob {
 		auto add_sphere = [&]() -> Mesh* {
 			if (!sphere_mesh) {
 				meshes.emplace_back();
-				meshes.back().source = Halfedge_Mesh::from_indexed_mesh(Util::sphere_mesh(1.0f, 2));
+				meshes.back().source = Halfedge_Mesh::from_indexed_mesh(Util::closed_sphere_mesh(1.0f, 2));
 				sphere_mesh = &meshes.back();
 			}
 			return sphere_mesh;

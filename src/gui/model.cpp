@@ -13,7 +13,7 @@
 namespace Gui {
 
 Model::Model()
-	: vert_mesh(Util::sphere_mesh(0.05f, 1).to_gl()),
+	: vert_mesh(Util::closed_sphere_mesh(0.05f, 1).to_gl()),
 	  edge_mesh(Util::cyl_mesh_disjoint(0.05f, 1.0f).to_gl()),
 	  halfedge_mesh(Util::arrow_mesh(0.05f, 0.1f, 1.0f).to_gl()) {
 }
