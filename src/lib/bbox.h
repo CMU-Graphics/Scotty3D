@@ -12,6 +12,8 @@
 #include "vec2.h"
 #include "vec3.h"
 
+#include "./test.h"
+
 struct BBox {
 
 	/// Default min is max float value, default max is negative max float value
@@ -84,8 +86,24 @@ struct BBox {
 		// Implement ray - bounding box intersection test
 		// If the ray intersected the bounding box within the range given by
 		// [times.x,times.y], update times with the new intersection times.
-
-		return false;
+		Vec3 d = ray.dir;
+		for(uint32_t i = 0; i < 3; ++i)
+			if(d[i] == -0.f) d[i] = 0.f;
+		Vec3 t[2] = {}; //t[0]: min, t[1]: max
+		for(uint32_t i = 0; i < 3; ++i)
+		{
+			bool idx = (d[i] < 0);
+			t[idx][i] = (min[i] - ray.point[i]) / d[i];
+			t[idx ^ 1][i] = (max[i] - ray.point[i]) / d[i];
+		}
+		float tmin = std::max({t[0].x, t[0].y, t[0].z});
+		float tmax = std::min({t[1].x, t[1].y, t[1].z});
+		if(tmin > tmax) return false;
+		if(tmin < times.x || tmin > times.y || tmax < times.x || tmax > times.y)
+			return false;
+		times.x = std::max(times.x, tmin);
+		times.y = std::min(times.y, tmax);
+		return true;
 	}
 
 	/// Get the eight corner points of the bounding box

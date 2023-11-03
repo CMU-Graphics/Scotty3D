@@ -14,8 +14,17 @@ BBox Triangle::bbox() const {
 
     // Beware of flat/zero-volume boxes! You may need to
     // account for that here, or later on in BBox::hit.
-
+	float eps = 1e-5f;
     BBox box;
+	Vec3 pos[3] = {vertex_list[v0].position, vertex_list[v1].position, vertex_list[v2].position};
+	for(uint32_t i = 0; i < 3; ++i)
+	{
+		box.min = hmin(box.min, pos[i]);
+		box.max = hmax(box.max, pos[i]);
+	}
+	for(uint32_t i = 0; i < 3; ++i)
+		if(std::abs(box.min.data[i] - box.max.data[i]) < eps)
+			box.min.data[i] -= eps, box.max.data[i] += eps;
     return box;
 }
 

@@ -6,6 +6,8 @@
 
 #include <stack>
 
+#include "./test.h"
+
 namespace PT {
 
 struct BVHBuildData {
@@ -32,8 +34,80 @@ void BVH<Primitive>::build(std::vector<Primitive>&& prims, size_t max_leaf_size)
     // Construct a BVH from the given vector of primitives and maximum leaf
     // size configuration.
 
-	//TODO
+	const size_t BUCKETS_NUM = 8;
+	std::stack<size_t> nodes_stack;
+	BBox scene_box;
+	for(auto& prim : primitives) scene_box.enclose(prim.bbox());
+	root_idx = new_node(scene_box, 0, primitives.size());
+	nodes_stack.push(root_idx);
 
+	while(!nodes_stack.empty())
+	{
+		size_t idx = nodes_stack.top();
+		auto& node = nodes[idx];
+		nodes_stack.pop();
+
+		if(node.size <= max_leaf_size) continue;
+
+		size_t node_end = node.start + node.size;
+		int32_t best_axis = -1;
+		float best_coord = -1;
+		float best_score = std::numeric_limits<float>::max();
+
+		for(int32_t axis = 0; axis < 3; ++axis)
+		{
+			std::array<SAHBucketData, BUCKETS_NUM> buckets{};
+			float length = node.bbox.max[axis] - node.bbox.min[axis];
+
+			for(size_t i = node.start; i < node_end; ++i)
+			{
+				size_t bucket_idx = static_cast<size_t>((primitives[i].bbox().center()[axis]
+				- node.bbox.min[axis]) * BUCKETS_NUM / length);
+				bucket_idx = std::min(bucket_idx, BUCKETS_NUM - 1);
+				buckets[bucket_idx].bb.enclose(primitives[i].bbox());
+				++buckets[bucket_idx].num_prims;
+			}
+			
+			BBox box_l, box_r;
+			size_t size_l = 0, size_r = 0;
+
+			for(int32_t i = 0; i < BUCKETS_NUM - 1; ++i)
+			{
+				box_l.enclose(buckets[i].bb);
+				size_l += buckets[i].num_prims;
+				box_r.reset(), size_r = 0;
+				for(int32_t j = i + 1; j < BUCKETS_NUM; ++j)
+				{
+					box_r.enclose(buckets[j].bb);
+					size_r += buckets[j].num_prims;
+				}
+				float cur_score = box_l.surface_area() * size_l + box_r.surface_area() * size_r;
+				if(cur_score >= best_score) continue;
+				best_axis = axis, best_score = cur_score;
+				best_coord = node.bbox.min[axis] + length / BUCKETS_NUM * (i + 1.f);
+			}
+		}
+
+		BBox box_l, box_r;
+		size_t part_idx = std::partition(
+			primitives.begin() + node.start, 
+			primitives.begin() + node_end, 
+			[axis = best_axis, coord = best_coord](const Primitive& p) {
+				return p.bbox().center()[axis] < coord;
+			}
+			) - primitives.begin();
+		if(part_idx == node.start || part_idx == node_end) continue;
+
+		for(size_t i = node.start; i < part_idx; ++i)
+			box_l.enclose(primitives[i].bbox());
+		for(size_t i = part_idx; i < node_end; ++i)
+			box_r.enclose(primitives[i].bbox());
+
+		nodes[idx].l = new_node(box_l, node.start, part_idx - node.start);
+		nodes[idx].r = new_node(box_r, part_idx, node_end - part_idx);
+		nodes_stack.push(nodes[idx].l);
+		nodes_stack.push(nodes[idx].r);
+	}
 }
 
 template<typename Primitive> Trace BVH<Primitive>::hit(const Ray& ray) const {
@@ -46,12 +120,43 @@ template<typename Primitive> Trace BVH<Primitive>::hit(const Ray& ray) const {
     // The starter code simply iterates through all the primitives.
     // Again, remember you can use hit() on any Primitive value.
 
-	//TODO: replace this code with a more efficient traversal:
     Trace ret;
-    for(const Primitive& prim : primitives) {
-        Trace hit = prim.hit(ray);
-        ret = Trace::min(ret, hit);
-    }
+	if(nodes.empty()) return ret;
+
+	std::stack<size_t> stk;
+	stk.push(root_idx);
+
+	while(!stk.empty()) {
+		size_t idx = stk.top();
+		const auto& node = nodes[idx];
+		stk.pop();
+
+		Vec2 times(0.f, FLT_MAX);
+		bool is_hit = node.bbox.hit(ray, times);
+
+		if(!is_hit || (ret.hit && ret.distance <= times.x)) continue;
+
+		if(node.is_leaf()) {
+			for(size_t i = node.start; i < node.start + node.size; ++i) {
+				Trace hit = primitives[i].hit(ray);
+				ret = Trace::min(ret, hit);
+			}
+		} else {
+			Vec2 times_l(0.f, FLT_MAX);
+			Vec2 times_r(0.f, FLT_MAX);
+			bool is_hit_l = nodes[node.l].bbox.hit(ray, times_l);
+			bool is_hit_r = nodes[node.r].bbox.hit(ray, times_r);
+
+			if(is_hit_l && is_hit_r) {
+				if(times_l.x < times_r.x)
+					stk.push(node.l), stk.push(node.r);
+				else stk.push(node.r), stk.push(node.l);
+			}
+			else if(is_hit_l) { stk.push(node.l); }
+			else if(is_hit_r) { stk.push(node.r); }
+		}
+	}
+
     return ret;
 }
 
