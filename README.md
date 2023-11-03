@@ -32,7 +32,7 @@ Current progress (Star means optional. One of A2Go* must be chosen):
 - Assignment 3: Path Tracing
     - [x] A3T1: Camera Rays
 	- [x] A3T2: Intersection Tests
-	- [ ] A3T3: BVH
+	- [x] A3T3: BVH
 	- [ ] A3T4: Path Tracing
 	- [ ] A3T5: Materials
 	- [ ] A3T6: Direct Lighting
