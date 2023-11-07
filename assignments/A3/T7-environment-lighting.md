@@ -36,7 +36,7 @@ A pixel with coordinate $\theta = \theta_0$ subtends an area $\sin\theta d\theta
 
 **Summing the flux for all pixels, then normalizing each such that they sum to one, yields a discrete probability distribution over the pixels where the probability one is chosen is proportional to its flux.**
 
-The question is now how to efficiently get samples from this discrete distribution. To do so, we recommend treating the distribution as a single vector representing the whole image (row-major). In this form, it is easy to compute its CDF: the CDF for each pixel is the sum of the PDFs of all pixels before it. Once you have a CDF, you can use inversion sampling to pick out a particular index and convert it to a pixel and a 3D direction.
+The question is now how to efficiently get samples from this discrete distribution. To do so, we recommend treating the distribution as a single vector representing the whole image (row-major). In this form, it is easy to compute its CDF: the CDF for each pixel is the sum of the PDFs of all pixels before (and including) it. Once you have a CDF, you can use inversion sampling to pick out a particular index and convert it to a pixel and a 3D direction.
 
 The bulk of the importance sampling algorithm will be found as `Samplers::Sphere::Image` in `src/pathtracer/samplers.cpp`. You will need to implement the constructor, the inversion sampling function, and the PDF function, which returns the value of your PDF at a particular direction.
 
@@ -66,7 +66,7 @@ if we want our new distribution to still integrate to 1, we must divide by $\sin
 
 Altogether, the final Jacobian is $\frac{wh}{2\pi^2 \sin(\theta)}$.
 
-In order to test importance sampling, make sure that the variable `IMPORTANCE_SAMPLING` at the top of `src/pathtracer/samplers.cpp` is set to true.
+In order to test importance sampling, make sure that the variable `IMPORTANCE_SAMPLING` at the top of `src/pathtracer/samplers.cpp` is set to `true`. You should also set `SAMPLE_AREA_LIGHTS` in `src/pathtracer/pathtracer.cpp` to `true`.
 
 ---
 
@@ -77,12 +77,15 @@ In order to test importance sampling, make sure that the variable `IMPORTANCE_SA
 - `Spectrum::luma()` returns the luminance (brightness) of a Spectrum. The weight assigned to a pixel should be proportional to both its luminance and the solid angle it subtends.
 - For inversion sampling, use [`std::upper_bound`](https://en.cppreference.com/w/cpp/algorithm/upper_bound): it's a standard library function for binary search.
 - If you didn't use the ray log to debug area light sampling, start using it now to visualize what directions are being sampled from the environment map.
-- `src/scene/shapes.h`/`.cpp` declare/define `Sphere::uv` which converts from directions to lat/lon space (not spherical coordinates!).
+- The HDR images (files with extension `.exr`) can be viewed and inspected using HDR image viewers such as [HDRView](https://github.com/wkjarosz/hdrview). Note that pixel values in EXR files are represented using floating point numbers and can exceed 1. The luminance of the pixels may provide some insights into the correctness of your ray logging.
+- `src/scene/shapes.h`/`.cpp` declare/define `Sphere::uv` which converts from directions to latitude/longitude space (not spherical coordinates!).
 - You may want to read the [PBR section](https://www.pbr-book.org/3ed-2018/Light_Transport_I_Surface_Reflection/Sampling_Light_Sources#sec:mc-infinite-area-lights) on this topic as it helps explain all the derivations for importance sampling more in-depth.
 - The test cases we are releasing for this task are very sparse and not very informative for the most part. We encourage you to run the pathtracer in the GUI or headless to test your code instead.
 ---
 
 ## Reference Results
+
+The reference images here are rendered with only the environmental lighting (i.e. without the area light).
 
 ![ennis](figures/T7.doge.png)
 ![uffiz](figures/T7.ennis.png)

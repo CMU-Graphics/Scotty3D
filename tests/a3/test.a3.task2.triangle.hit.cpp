@@ -18,7 +18,7 @@ Test test_a3_task2_triangle_hit_simple("a3.task2.triangle.hit.simple", []() {
 	// Construct a ray starting at Vec3(0, 0, -1) in the direction of Vec3(0, 0, 1)
 	Ray ray = Ray(Vec3(0, 0, -1), Vec3(0, 0, 1));
 
-	// Expects we hit at Vec3(0, 0, 0) with a normal of Vec3(0, 1, 0) and no uv
+	// Expects we hit at Vec3(0, 0, 0) with a normal of Vec3(1, 0, 0) and no uv
 	PT::Trace exp = PT::Trace(true, Vec3(0, 0, -1), Vec3(0, 0, 0), Vec3(1, 0, 0), Vec2{});
 
 	PT::Trace ret =
