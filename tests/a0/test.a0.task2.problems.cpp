@@ -44,7 +44,6 @@ Test test_a0_task2_problems_numerical("a0.task2.problems.numerical", []() {
     auto helper = [&](int x, int y) { return x < (y / factor); };
 
     int j = 0;
-    int mod_size = (int)modifiers.size();
     for (auto& v : target) {
         for (auto& i : v) {
             int y = j >= int(modifiers.size()) ? 0 : modifiers.at(j);
