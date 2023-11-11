@@ -4,6 +4,7 @@
 
 #include <string>
 #include <vector>
+#include <cstdint>
 
 namespace sejp { struct value; }
 struct Spectrum;
