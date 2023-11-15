@@ -2,13 +2,13 @@
 
 The final task of this assignment will be to implement a new type of light source: an infinite environment light. An environment light is a light that supplies incident radiance (really, the light intensity $\frac{d\Phi}{d\Omega}$) from all directions on the sphere. Rather than using a predefined collection of explicit lights, an environment light is a capture of the actual incoming light from some real-world scene; rendering using environment lighting can be quite striking.
 
-The intensity of incoming light from each direction is defined by a texture map parameterized by phi and theta, as shown below.
+The intensity of incoming light from each direction is defined by a texture map parameterized by $\phi$ and $\theta$, as shown below.
 
 ![envmap_figure](figures/envmap_figure.jpg)
 
 In this task you will get `Environment_Lights::Sphere` working by implementing `Samplers::Sphere::Uniform` and `Samplers::Sphere::Image` in `src/pathtracer/samplers.cpp`. You'll start with uniform sampling to get things working, and then move onto a more advanced implementation that uses **importance sampling** to significantly reduce variance in rendered images.
 
-Note that for the purposes of this task, $(0,0)$ is actually the **bottom left** of the HDR image, not the **top left** (as opposed to what the image above suggests).  Think about how this will affect your calculation of the $\theta$ value for a pixel.
+Note that for the purposes of this task, $(0,0)$ is the **bottom left** of the HDR image, not the **top left**.  Think about how this will affect your calculation of the $\theta$ value for a pixel.
 
 ---
 
@@ -22,7 +22,7 @@ Implement `Sphere::Uniform::sample` in `src/pathtracer/samplers.cpp`.
 
 This should be sufficient to get environment maps working in the renderer (albeit in a high-variance / slow-convergence way).
 
-Since high dynamic range environment maps can be large files, we have not included them in the Scotty3D repository. You can download a set of sample environment maps [here](http://15462.courses.cs.cmu.edu/fall2015content/misc/asst3_images/asst3_exr_archive.zip) or -- for more interesting environment maps -- check out [poly haven](https://polyhaven.com/hdris).
+Since high dynamic range environment maps can be large files, we have not included them in the Scotty3D repository. You can download a set of sample environment maps [here](http://15462.courses.cs.cmu.edu/fall2015content/misc/asst3_images/asst3_exr_archive.zip) or – for more interesting environment maps – check out [Poly Haven](https://polyhaven.com/hdris).
 
 In order to test uniform sampling, make sure that the variable `IMPORTANCE_SAMPLING` at the top of `src/pathtracer/samplers.cpp` is set to false. To use a particular environment map with your scene, select `layout` -> `Create Object` -> `Environment Light Instance`, then set the underlying `Light` type to `Sphere`, add a new `Texture`, set the texture type to `Image` and, finally, press `Change` and select your file.
 
@@ -46,7 +46,7 @@ Or, to say that more verbosely: the PDF value that corresponds to a pixel in the
 multiplied by the Jacobian below before being returned by
 `Samplers::Sphere::Image::pdf`.
 
-<p align="center"><img src="figures/env_light_sampling_jacobian_diagram.png"></p>
+<p align="center"><img src="figures/env_light_sampling_jacobian_diagram.jpg"></p>
 
 The Jacobian for transforming the PDF from the HDR map sampling distribution to
 the unit sphere sampling distribution can be thought of as two separate
