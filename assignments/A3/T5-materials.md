@@ -55,7 +55,7 @@ Your implementation should assume that rays always travel from or to a _vacuum_ 
 - If the outgoing ray is **entering** the surface, then it was previously travelling in a vacuum i.e. the incoming ray was travelling in a vacuum.
 - If the outgoing ray is **leaving** the surface, then it is entering a vacuum.
 
-These two cases are illustrated by the figure below. Observe that whether the outgoing ray enters the surface depends on the sign of $(\omega_t \cdot \hat{n})$. Feel free to use this quantity directly, or further simplify it using the fact that $\hat{n}=(0, 1, 0)$ in our case. Also, note that the surface normal $\hat n$ always points into the vacuum.
+These two cases are illustrated by the figure below, where the white region is the vacuum and the gray region is the material. Observe that whether the outgoing ray enters the surface depends on the sign of $\omega_t \cdot \hat{n}$. Feel free to use this quantity directly, or further simplify it using the fact that $\hat{n}=(0, 1, 0)$ in our case. Also, note that the surface normal $\hat n$ always points into the vacuum.
 
 <p align="center"><img src="figures\refract.svg" style="height:500px"></p>
 
@@ -67,7 +67,7 @@ $$\sin(\theta_i) = \frac{\eta_t\sin(\theta_t)}{\eta_i}\overset{?}{>} 1$$
 
 Although we described the BRDF for perfect specular reflection in class, we did not discuss the distribution function for transmitted light. Unlike reflection, refraction "spreads" or "condenses" a differential beam of light. Hence, a refraction event should change the radiance along a ray.
 
-After using Snell's Law to find the direction of refracted rays, compute the BSDF attenuation using the distribution function found in Pharr, Jakob, and and Humphries's book [Physically Based Rendering](http://www.pbr-book.org/3ed-2018/Reflection_Models/Specular_Reflection_and_Transmission.html). Since this material is pure refraction, we won't need to weight the attenuation on the Fresnel coefficient.
+After using Snell's Law to find the direction of refracted rays, compute the BSDF attenuation using the distribution function found in Pharr, Jakob, and and Humphries's book [Physically Based Rendering](http://www.pbr-book.org/3ed-2018/Reflection_Models/Specular_Reflection_and_Transmission.html). Since this material is pure refraction, we won't need to weight the attenuation on the Fresnel coefficient. However, do note that the derivations in the book attempts to find $\theta_t$ given $\theta_i$, which is the contrary of our derivations. When applying the equations and figures from the book, you should swap the subscripts $i$ and $t$ accordingly.
 
 
 ## Step 3: `Materials::Glass`
@@ -100,6 +100,7 @@ Therefore, for a dielectric material, the fraction of reflected light will be gi
 ## Tips
 
 - Check your sphere intersection code, as you may have bugs there that were not exposed by rendering Lambertian spheres in Task 4.
+- When calculating the direction of the incoming ray, keep in mind that the normal always points into the vacuum.
 - Check the behavior of your refract function when `index_of_refraction = 1.f`. This should not change the transmitted direction, hence make the glass sphere transparent.
 - Test reflection and refraction separately, i.e. ignore the Fresnel coefficient and only refract or reflect. Once you've verified that those are correct, then go ahead and reintroduce the Fresnel coefficient and split rays between reflection  and refraction.
 - We've provided some **very** basic test cases in `test.a3.task5.bsdf.*.cpp`. Similar to Task 4, we highly recommend testing via the GUI as you're able to get visual feedback on what is happening with these different materials.

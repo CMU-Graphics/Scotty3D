@@ -8,7 +8,7 @@ The intensity of incoming light from each direction is defined by a texture map 
 
 In this task you will get `Environment_Lights::Sphere` working by implementing `Samplers::Sphere::Uniform` and `Samplers::Sphere::Image` in `src/pathtracer/samplers.cpp`. You'll start with uniform sampling to get things working, and then move onto a more advanced implementation that uses **importance sampling** to significantly reduce variance in rendered images.
 
-Note that for the purposes of this task, $(0,0)$ is the **bottom left** of the HDR image, not the **top left**.  Think about how this will affect your calculation of the $\theta$ value for a pixel.
+Note that in Scotty3D, $(x,y) = (0,0)$ is the **bottom left** of the HDR image instead of the **top left**. However, when mapped to the $(\phi,\theta)$-space, it becomes $(\phi, \theta) = (0, \pi)$. Think about how this will affect your calculation of the $\theta$ value for a pixel.
 
 ---
 
@@ -40,7 +40,7 @@ The question is now how to efficiently get samples from this discrete distributi
 
 The bulk of the importance sampling algorithm will be found as `Samplers::Sphere::Image` in `src/pathtracer/samplers.cpp`. You will need to implement the constructor, the inversion sampling function, and the PDF function, which returns the value of your PDF at a particular direction.
 
-Be sure your `Samplers::Sphere::Image::pdf()` function takes into account the fact that different elements of your computed `pdf_` take up different areas on the surface of the sphere (so need to be weighted differently).
+Be sure your `Samplers::Sphere::Image::pdf()` function takes into account the fact that different elements of your computed `pdf_` take up different areas on the surface of the sphere (so need to be weighted differently). The closer a pixel to the top edge or the bottom edge of the image, the less area it takes up on the sphere. 
 
 Or, to say that more verbosely: the PDF value that corresponds to a pixel in the HDR map should be
 multiplied by the Jacobian below before being returned by
@@ -64,7 +64,7 @@ sphere to the unit sphere, we need to go from integrating over $(d\phi, d\theta)
 solid angle $(d\omega)$. Since we know that $d\omega = \sin(\theta) d\phi d\theta$,
 if we want our new distribution to still integrate to 1, we must divide by $\sin(\theta)$, our second Jacobian.
 
-Altogether, the final Jacobian is $\frac{wh}{2\pi^2 \sin(\theta)}$.
+Altogether, the final Jacobian is $\frac{wh}{2\pi^2 \sin(\theta)}$. This explains why the pixel areas on the sphere becomes smaller and smaller as it approaches the two poles of the sphere — we know that $\sin\theta \to 0$ as $\theta \to 0$ or $\theta \to \pi$.
 
 In order to test importance sampling, make sure that the variable `IMPORTANCE_SAMPLING` at the top of `src/pathtracer/samplers.cpp` is set to `true`. You should also set `SAMPLE_AREA_LIGHTS` in `src/pathtracer/pathtracer.cpp` to `true`.
 
@@ -72,7 +72,7 @@ In order to test importance sampling, make sure that the variable `IMPORTANCE_SA
 
 ### Tips
 
-- When computing areas corresponding to a pixel, use the value of angles at the pixel centers.
+- When computing areas corresponding to a pixel, use the value of angles at the pixel centers. You should also take into account that the $y$-axis and the $\theta$-axis are oriented differently.
 - Compute the PDF and CDF in the constructor of `Samplers::Sphere::Image` and store their values in fields `_pdf` and `_cdf` respectively. See `src/pathtracer/sampler.h`. Make sure you normalize these values at some point in your calculations.
 - `Spectrum::luma()` returns the luminance (brightness) of a Spectrum. The weight assigned to a pixel should be proportional to both its luminance and the solid angle it subtends.
 - For inversion sampling, use [`std::upper_bound`](https://en.cppreference.com/w/cpp/algorithm/upper_bound): it's a standard library function for binary search.
