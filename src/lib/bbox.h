@@ -84,6 +84,7 @@ struct BBox {
 		// Implement ray - bounding box intersection test
 		// If the ray intersected the bounding box within the range given by
 		// [times.x,times.y], update times with the new intersection times.
+		// This means at least one of tmin and tmax must be within the range
 
 		return false;
 	}

@@ -29,7 +29,7 @@ $$\hat{w}\_{ij} \equiv \frac{\mathrm{max}(0, r-d_{ij})}{r}$$
 
 Normalize such that the sum of the weights for any given vertex is one:
 
-$$w_{ij} \equiv \frac{\hat{w}_{ij}}{\sum_j \hat{w}_{ij}}$$
+$$w\_{ij} \equiv \frac{\hat{w}\_{ij}}{\sum\_j \hat{w}\_{ij}}$$
 
 (In case all weights are zero, do not store any weights for the vertex, and just transform it by the identity in `skin`.)
 
