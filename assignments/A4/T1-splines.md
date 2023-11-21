@@ -14,13 +14,14 @@ $$p(t) = h_{00}(t)p_{0} + h_{10}(t)m_{0} + h_{01}(t)p_{1} + h_{11}(t)m_{1}$$
 
 where $p_0$, $p_1$ are endpoint positions, $m_0$, $m_1$ are endpoint tangents, and $h_{ij}$ are the Hermite bases
 
-$$h_{00}(t) = 2t^3 - 3t^2 + 1$$
-
-$$h_{10}(t) = t^3 - 2t^2 + t$$
-
-$$h_{01}(t) = -2t^3 + 3t^2$$
-
-$$h_{11}(t) = t^3 - t^2$$
+$$
+\begin{align*}
+h_{00}(t) &= 2t^3 - 3t^2 + 1 \\
+h_{10}(t) &= t^3 - 2t^2 + t \\ 
+h_{01}(t) &= -2t^3 + 3t^2 \\
+h_{11}(t) &= t^3 - t^2
+\end{align*}
+$$
 
 Your first task is to implement the method `Spline::cubic_unit_spline()`, which evaluates a spline defined over the time interval $[0, 1]$ given a pair of endpoints and tangents at endpoints.
 

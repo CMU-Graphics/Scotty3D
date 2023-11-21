@@ -10,7 +10,9 @@ When discussing skeletal animation we have a whole family of different transform
 	- **Pose Space** is the bone space in the current pose (the pose where each bone and its children are rotated by `Bone::pose` around `Bone::compute_rotation_axes`). The transformations, $P_j$, from pose space to local space for all bones $j$ are computed by `Skeleton::current_pose()` (which you will also implement).
 - We define $\hat{X}_{a \gets b}$ as the transformation that represents moving from bone $b$'s space to bone $a$'s space, with $\emptyset$ representing the skeleton local space (this usually requires a translation from the root to skeleton).
 
-*NOTE:* I mention world space above because it is one of the coordinate systems in Scotty3D. But for all of the implementation details of this assignment, you'll be working in local space and/or the bone spaces. Indeed, it is not possible from within `Skeleton` to determine $L$, since `Skeleton`s don't know what instance they are being accessed through.
+**NOTE:** I mention world space above because it is one of the coordinate systems in Scotty3D. But for all of the implementation details of this assignment, you'll be working in local space and/or the bone spaces. Indeed, it is not possible from within `Skeleton` to determine $L$, since `Skeleton`s don't know what instance they are being accessed through.
+
+**Note:** The [most recent slides](http://15462.courses.cs.cmu.edu/fall2023/lecture/lecture-15) have very good visuals to help understand each of the different spaces.
 
 ## `A4T2a` Forward Kinematics
 
@@ -39,15 +41,15 @@ The previous part detailed what would happen if we were in **current pose** as t
 
 - For bone $b$ with parent $\text{par}(b)$: 
 
-$$\hat{X}_{\text{par}(b) \gets b} \equiv T_{e_{\text{par}(b)}}$$
+$$\hat{X}\_{\text{par}(b) \gets b} \equiv T\_{e\_{\text{par}(b)}}$$
 
 - For bone $b$ without parent: 
 
-$$\hat{X}_{\emptyset \gets b} \equiv T_{r}$$
+$$\hat{X}\_{\emptyset \gets b} \equiv T\_{r}$$
 
 - And, recursively: 
 
-$$\hat{X}_{\emptyset \gets b} \equiv \hat{X}_{\emptyset \gets \text{par}(b)} \times \hat{X}_{\text{par}(b) \gets b}$$
+$$\hat{X}\_{\emptyset \gets b} \equiv \hat{X}\_{\emptyset \gets \text{par}(b)} \times \hat{X}\_{\text{par}(b) \gets b}$$
 
 
 Implementation notes:
@@ -164,14 +166,14 @@ $$= (p_i(q) - h) \cdot
 X_{b \gets i} \times 
 [ e_i ~ 1 ]^T) $$
 
-$$= (p_i(q) - h) \cdot (
-\underbrace{X_{\emptyset \gets \text{par}(b)} \times 
-T_{e_{\text{par}(b)}} \times 
-R_{rz_b @ z_b}}_{\textrm{linear xform}}
+$$= (p\_i(q) - h) \cdot (
+\underbrace{X\_{\emptyset \gets \text{par}(b)} \times 
+T\_{e\_{\text{par}(b)}} \times 
+R\_{rz\_b @ z\_b}}\_{\textrm{linear xform}}
 \times
-\underbrace{\frac{\partial}{\partial ry_b} R_{ry_b @ y_b}}_{\textrm{rotation}}
+\underbrace{\frac{\partial}{\partial ry\_b} R\_{ry\_b @ y\_b}}\_{\textrm{rotation}}
 \times
-\underbrace{R_{rx_b @ x_b} \times X_{b \gets i} \times [ e_i ~ 1 ]^T}_{\textrm{some point}}
+\underbrace{R\_{rx\_b @ x\_b} \times X\_{b \gets i} \times [ e\_i ~ 1 ]^T}\_{\textrm{some point}}
 )$$
 
 In other words, your code needs only to find partial derivative of a rotation relative to its angle, and project this partial derivative to skeleton-local space.
@@ -184,7 +186,7 @@ If we look at how to use this tidbit, we see that first, we'll need to transform
 
 Do note that you'll need to do this for each axis for every bone chain on every enabled handle.
 
-For a more in-depth derivation of the process of computing this derivative (and a look into other inverse kinematics algorithms), please check out [this presentation](https://web.archive.org/web/20190501035728/https://autorob.org/lectures/autorob_11_ik_jacobian.pdf). (Pages 45-56 in particular)
+For a more in-depth derivation of the process of computing this derivative (and a look into other inverse kinematics algorithms), please check out [these slides](http://15462.courses.cs.cmu.edu/fall2023/lecture/lecture-15/slide_046). 
 
 ### Using your IK!
 Once you have IK implemented, you should be able to create a series of joints, and get a particular joint to move to the desired final position you have selected.

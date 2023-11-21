@@ -86,6 +86,7 @@ struct BBox {
 		// Implement ray - bounding box intersection test
 		// If the ray intersected the bounding box within the range given by
 		// [times.x,times.y], update times with the new intersection times.
+		// This means at least one of tmin and tmax must be within the range
 		Vec3 d = ray.dir;
 		for(uint32_t i = 0; i < 3; ++i)
 			if(d[i] == -0.f) d[i] = 0.f;
