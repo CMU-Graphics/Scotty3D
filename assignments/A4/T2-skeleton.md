@@ -41,15 +41,15 @@ The previous part detailed what would happen if we were in **current pose** as t
 
 - For bone $b$ with parent $\text{par}(b)$: 
 
-$$\hat{X}\_{\text{par}(b) \gets b} \equiv T\_{e\_{\text{par}(b)}}$$
+$$\hat{X}_ {\text{par}(b) \gets b} \equiv T_ {e_ {\text{par}(b)}}$$
 
 - For bone $b$ without parent: 
 
-$$\hat{X}\_{\emptyset \gets b} \equiv T\_{r}$$
+$$\hat{X}_ {\emptyset \gets b} \equiv T_ {r}$$
 
 - And, recursively: 
 
-$$\hat{X}\_{\emptyset \gets b} \equiv \hat{X}\_{\emptyset \gets \text{par}(b)} \times \hat{X}\_{\text{par}(b) \gets b}$$
+$$\hat{X}_ {\emptyset \gets b} \equiv \hat{X}_ {\emptyset \gets \text{par}(b)} \times \hat{X}_ {\text{par}(b) \gets b}$$
 
 
 Implementation notes:
@@ -166,17 +166,21 @@ $$= (p_i(q) - h) \cdot
 X_{b \gets i} \times 
 [ e_i ~ 1 ]^T) $$
 
-$$= (p\_i(q) - h) \cdot (
-\underbrace{X\_{\emptyset \gets \text{par}(b)} \times 
-T\_{e\_{\text{par}(b)}} \times 
-R\_{rz\_b @ z\_b}}\_{\textrm{linear xform}}
+$$= (p_ i(q) - h) \cdot (
+\underbrace{X_ {\emptyset \gets \text{par}(b)} \times 
+T_ {e_ {\text{par}(b)}} \times 
+R_ {rz_ b @ z_ b}}_ {\textrm{linear xform}}
 \times
-\underbrace{\frac{\partial}{\partial ry\_b} R\_{ry\_b @ y\_b}}\_{\textrm{rotation}}
+\underbrace{\frac{\partial}{\partial ry_ b} R_ {ry_ b @ y_ b}}_ {\textrm{rotation}}
 \times
-\underbrace{R\_{rx\_b @ x\_b} \times X\_{b \gets i} \times [ e\_i ~ 1 ]^T}\_{\textrm{some point}}
+\underbrace{R_ {rx_ b @ x_ b} \times X_ {b \gets i} \times [ e_ i ~ 1 ]^T}_ {\textrm{some point}}
 )$$
 
 In other words, your code needs only to find partial derivative of a rotation relative to its angle, and project this partial derivative to skeleton-local space.
+
+<p align="center">
+  <img src="T2/inverse_kinematic_diagram.svg" style="height:600px">
+</p>
 
 Here's a useful bit of geometric reasoning (since it's a little difficult to compute the partial derivative in bone-local space): if you transform the axis of rotation and the base point of the bone into **skeleton-local** space, then you can use the fact that the derivative (w.r.t. $\theta$) of the rotation by $\theta$ around axis $x$ and center $r$ of point $p$ is a vector perpendicular $x$ with length $|r-p|$ (this is applicable to any axes):
 

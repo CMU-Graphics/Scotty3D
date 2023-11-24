@@ -37,6 +37,10 @@ Notice that this function is templated on a type `T`. In C++, a templated class 
 
 In general we will want smooth splines between a long sequence of points. You will now implement the method `Spline::at()` which evaluates a general Catmull-Rom spline at the specified time in a sequence of points (called "knots"). Since you already have code to interpolate a pair of endpoints and tangents (`cubic_unit_spline` from the previous part), the only task remaining is to find the interval closest to the query time, and evaluate its endpoints and tangents.
 
+<p align="center">
+    <img src="T1/Catmull-Rom.svg" style="height:600px">
+</p>
+
 The basic idea behind Catmull-Rom is that for a given time $t$, we first find the knots at times
 
 $$t_0 < t_1 \leq t < t_2 < t_3$$
@@ -49,10 +53,6 @@ $$m_1 = \frac{p_3 - p_1}{t_3 - t_1}$$
 
 In other words, a reasonable guess for the tangent is given by the difference between neighboring points. (See the [Wikipedia](https://en.wikipedia.org/wiki/Cubic_Hermite_spline#Interpolation_on_an_arbitrary_interval) and our [course slides](http://15462.courses.cs.cmu.edu/spring2021/lecture/anim/slide_044) for more details.)
 
-<p align="center">
-    <img src="T1/spline_diagram.jpg" style="height:240px">
-</p>
-
 This scheme works great if we have two well-defined knots on either side of the query time $t$. But what happens if we get a query time near the beginning or end of the spline? Or what if the spline contains fewer than four knots? We still have to somehow come up with a reasonable definition for the positions and tangents of the curve at these times. For this assignment, your Catmull-Rom spline interpolation should satisfy the following properties:
 
 * If there are no knots at all in the spline, interpolation should return the default value for the interpolated type. This value can be computed by simply calling the constructor for the type: `T()`. For instance, if the spline is interpolating `Vec3` objects, then the default value will be $(0, 0, 0)$.
@@ -60,10 +60,14 @@ This scheme works great if we have two well-defined knots on either side of the 
 * If the query time is less than or equal to the initial knot, return the initial knot's value.
 * If the query time is greater than or equal to the final knot, return the final knot's value.
 
+<p align="center">
+    <img src="T1/Catmull-Rom_mirroring.svg" style="height:600px">
+</p>
+
 Once we have two or more knots, interpolation can be handled using general-purpose code. In particular, we can adopt the following "mirroring" strategy to obtain the four knots used in our computation:
 
 * Any query time between the first and last knot will have at least one knot "to the left" ( $k_1$ ) and one "to the right" ( $k_2$ ).
-* Suppose we don't have a knot "two to the left" ( $k_0$ ). Then we will define a "virtual" knot $k_0 \equiv k_1 - (k_2 - k_1)$. In other words, we will "mirror" the difference we observe between $k_1$ and $k_2$ to the other side of $k_1$.
+* Suppose we don't have a knot "two to the left" ( $k_0$ ). Then we will define a "virtual" knot $k_0 \equiv k_1 - (k_2 - k_1)$. In other words, we will "mirror" the difference we observe between $k_1$ and $k_2$ to the other side of $k_1$. The knot values should be mirrored in the same way. This is illustrated in the figure above.
 * Likewise, if we don't have a knot "two to the right" ( $k_3$ ), then we will "mirror" the difference to get a "virtual" knot ( $k_3 = k_2 + (k_2 - k_1)$ ).
 * At this point, we have four valid knot values (whether "real" or "virtual"), and can compute our tangents and positions as usual.
 * These values are then handed off to our subroutine that computes cubic interpolation over the unit interval.
@@ -74,7 +78,7 @@ Once we have two or more knots, interpolation can be handled using general-purpo
 
 An important thing to keep in mind is that `Spline::cubic_unit_spline()` assumes that the time value $t$ is between $0$ and $1$, whereas the distance between two knots on our Catmull-Rom spline can be arbitrary. Therefore, when calling this subroutine you will have to normalize $t$ such that it is between $0$ and $1$, i.e., you will have to divide by the length of the current interval over which you are interpolating. You should think very carefully about how this normalization affects the value computed by the subroutine, in comparison to the values we want to return. A transformation is necessary for the tangents that you feed in to specify the unit spline. Refer to the wikipedia or course slides for more information if you're stuck.
 
-Internally, a `Spline` object stores its data in an standard library `map<float, T>` that maps knot times to knot values. A nice thing about a `map` is that it automatically keeps knots in sorted order. Therefore, we can quickly access a knot close to a given time using the method [`map::upper_bound`](https://en.cppreference.com/w/cpp/container/map/upper_bound), which returns an iterator to knot with the smallest time greater than the given query time.
+Internally, a `Spline` object stores its data in an standard library `map<float, T>` that maps knot times to knot values. A nice thing about a `map` is that it automatically keeps knots in sorted order. Therefore, we can quickly access a knot close to a given time using the method [`map::upper_bound`](https://en.cppreference.com/w/cpp/container/map/upper_bound), which returns an iterator to the knot with the smallest time greater than the given query time.
 
 ## Using the splines
 
