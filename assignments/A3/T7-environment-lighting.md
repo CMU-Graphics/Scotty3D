@@ -10,6 +10,7 @@ In this task you will get `Environment_Lights::Sphere` working by implementing `
 
 Note that in Scotty3D, $(x,y) = (0,0)$ is the **bottom left** of the HDR image instead of the **top left**. However, when mapped to the $(\phi,\theta)$-space, it becomes $(\phi, \theta) = (0, \pi)$. Think about how this will affect your calculation of the $\theta$ value for a pixel.
 
+We have provided a scene where all you need to do is load in whichever environment map you wish to use in `A3-cow-env-empty.js3d`. This can be done by clicking on the dropdown for `Env_light_transform`, selecting `Env Light Instance`, selecting the `Light` tab, and changing the environment light image.
 ---
 
 ## Step 0: Know your customers

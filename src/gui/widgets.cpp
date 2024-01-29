@@ -14,6 +14,7 @@
 #include "../platform/platform.h"
 #include "../platform/renderer.h"
 #include "../rasterizer/rasterizer.h"
+#include "../pathtracer/aperture_shape.h"
 
 static bool postfix(const std::string& path, const std::string& type) {
 	if (path.length() >= type.length())
@@ -510,7 +511,8 @@ void Widget_Camera::ui(Undo& undo, const std::string& name, std::weak_ptr<Camera
 	bool update = false;
 
 	// Don't ask
-	bool any_activated = ar_activated || fov_activated || near_activated || ray_depth_activated;
+	bool any_activated = ar_activated || fov_activated || near_activated || 
+			aperture_activated || focal_dist_activated || ray_depth_activated;
 	auto slider = [&](bool changed, bool& activated) {
 		if (IsItemActivated()) {
 			activated = true;
@@ -558,6 +560,27 @@ void Widget_Camera::ui(Undo& undo, const std::string& name, std::weak_ptr<Camera
 	                   ImGuiSliderFlags_Logarithmic),
 	       near_activated);
 
+	const char* label_aperture = nullptr;
+	ApertureShape const *aperture_shape = ApertureShape::from_id(camera.aperture_shape);
+	if (aperture_shape != nullptr) {
+		label_aperture = aperture_shape->name.c_str();
+	}
+	if (BeginCombo("Aperture Shape", label_aperture)) {
+		for (ApertureShape const &as : ApertureShape::all_shapes()) {
+			if(Selectable(as.name.c_str())) {
+				label = as.name.c_str();
+				cache = camera;
+				camera.aperture_shape = as.id;
+				update = cache != camera;
+				break;
+			}
+		}
+		EndCombo();
+	}
+
+	slider(SliderFloat("Aperture Size", &camera.aperture_size, 0.f, 0.2f, "%.2f"), aperture_activated);
+	slider(SliderFloat("Focal Distance", &camera.focal_dist, 0.2f, 10.f, "%.2f"), focal_dist_activated);
+
 	slider(SliderUInt32("Ray Depth", &camera.film.max_ray_depth, 1, 20), ray_depth_activated);
 
 	InputUInt32("Film Width", &camera.film.width);
@@ -586,6 +609,8 @@ void Widget_Camera::ui(Undo& undo, const std::string& name, std::weak_ptr<Camera
 	camera.aspect_ratio = std::clamp(camera.aspect_ratio, 0.1f, 10.0f);
 	camera.vertical_fov = std::clamp(camera.vertical_fov, 10.0f, 160.0f);
 	camera.near_plane = std::clamp(camera.near_plane, 0.001f, 1.0f);
+	camera.aperture_size = std::clamp(camera.aperture_size, 0.0f, 1.0f);
+	camera.focal_dist = std::clamp(camera.focal_dist, 0.01f, 100.0f);
 
 	if (update) undo.update_cached<Camera>(name, apply_to, cache);
 }

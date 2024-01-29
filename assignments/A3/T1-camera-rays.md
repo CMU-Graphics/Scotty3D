@@ -48,6 +48,29 @@ We've already supplied some camera ray logging code, enabled by setting `LOG_CAM
 
 ## Extra Credit
 
+### Defous Blur (2 points) and Bokeh (1 point)
+
+`Camera` also includes the members `aperture_size` and `focal_dist`. **Aperture_size** is the size (or diameter) of the opening in the lens by which light enters the camera.  **Focal distance** represents the distance between the camera aperture and the plane that is perfectly in focus.  These parameters can be used to simulate the effects of de-focus blur and bokeh found in real cameras.
+
+To use the focal distance parameter, you simply scale up the sensor position from step $1$ (and hence ray direction) by `focal_dist` instead of leaving it on the $z = -1$ plane. You might notice that this doesn't actually change anything about your result, since this is just scaling up a vector that is later normalized. However, now aperture comes in.
+
+By default, all rays start a single point, representing a pinhole camera. But when `aperture_size` $> 0$, we want to randomly choose the ray origin from a uniform region defined by aperture shape centered at the origin and facing the camera direction $(-Z)$. For default rectangular aperture shape, our ray origin should be a uniformly random point in `aperture_size`$\times$`aperture_size` square centered at the origin and facing the camera direction $(-Z)$. Note that typically aperture of a camera is roughly circular in shape, but a square suffices for our basic purposes.
+
+Then, we can use this random point as the origin of the generated ray while keeping its sensor position fixed (consider how this changes the ray direction). Now it's as if the same image was taken from slightly off origin. This simulates real cameras with non-pinhole apertures: the final photo is equivalent to averaging images taken by pinhole cameras placed at every point in the aperture.
+
+Finally, we can see that non-zero aperture makes focal distance matter: objects on the focal plane are unaffected, since where the ray hits on the sensor is the same regardless of the ray's origin. However, rays that hit objects closer or farther than the focal distance will be able to "see" slightly different parts of the object based on the ray origin. Averaging over many rays within a pixel, this results in collecting colors from a region larger slightly than that pixel would cover given zero aperture, causing the object to become blurry. We are using a square aperture, so bokeh effects will reflect this.
+
+You can test aperture/focal distance by adjusting `aperture_size` and `focal_dist` using the camera UI and examining logging rays. Once you have implemented primitive intersections and path tracing (tasks 2/4), you will be able to properly render our depth of field scene `A3-dof.js3d`:
+
+<p align="center"><img src="images/dof_near.png" ></p>
+<p align="center"><img src="images/dof_far.png" ></p>
+
+`Camera` also includes a member `aperture_shape`. **Aperture_shape** is the shape of the opening in the lens by which light enters the camera. Once you have defocus blur implemented, you can implement `Circle::sample` and `Circle::pdf` at `samplers.cpp` to enable circular aperture simulation. You can use any circle-sampling strategy as long as it respects the intended spec and outcome. After this is done, you will be able to check the different bokehs that may appear in your render with our `A3-bokeh.js3d` (note that you must get different renders between setting you `aperture_shape` to `Rectangle` vs `Circle`):
+
+<p align="center"><img src="images/bokeh.png" ></p>
+
+With this knowledge, you should know be able to see that for our virtual cameras, we can literally use any aperture shape as long as we can come up with implementations of some sampling and pdf function that is mathematically reasonable (e.g. you can make a star-shaped aperture!). If you decide to add really cool aperture shapes, they may also be considered for extra credits if the efforts can be justified to be nontrivial.
+
 ### Low-discrepancy Sampling
 Write your own pixel sampler (replacing `Rect`) that generates samples with a more advanced distribution. Refer to [Physically Based Rendering](http://www.pbr-book.org/3ed-2018/) chapter 7. Some examples include:
   - Jittered Sampling (1 point)

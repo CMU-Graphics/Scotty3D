@@ -115,6 +115,7 @@ Image::Image(Sampler sampler_, HDR_Image const &image_) {
 }
 
 Spectrum Image::evaluate(Vec2 uv, float lod) const {
+	if (image.w == 0 && image.h == 0) return Spectrum();
 	if (sampler == Sampler::nearest) {
 		return sample_nearest(image, uv);
 	} else if (sampler == Sampler::bilinear) {

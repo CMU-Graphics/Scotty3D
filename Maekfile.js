@@ -117,6 +117,7 @@ const pathtracer_objects = [
 	maek.CPP("src/pathtracer/tri_mesh.cpp"),
 	maek.CPP("src/pathtracer/bvh.cpp"),
 	maek.CPP("src/pathtracer/samplers.cpp"),
+	maek.CPP("src/pathtracer/aperture_shape.cpp"),
 ];
 const util_objects = [
 	maek.CPP("src/util/hdr_image.cpp"),

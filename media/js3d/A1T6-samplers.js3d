@@ -45,14 +45,14 @@
 		},
 		"Transform 4":{
 			"parent":null,
-			"translation":[0,2.015316486358643,0],
+			"translation":[0,2.0153164863586426,0],
 			"rotation":[0,0,0,1],
 			"scale":[1,1,1]
 		},
 		"Transform 5":{
 			"parent":null,
-			"translation":[-2.601000070571899,1.799999952316284,0],
-			"rotation":[-0.1830127835273743,-0.6830123662948608,-0.1830126196146011,0.6830130219459534],
+			"translation":[-2.6010000705718994,1.7999999523162842,0],
+			"rotation":[-0.18301278352737427,-0.6830123662948608,-0.18301261961460114,0.6830130219459534],
 			"scale":[1,1,1]
 		},
 		"Transform 6":{
@@ -78,7 +78,10 @@
 		"Camera":{
 			"vertical_fov":60,
 			"aspect_ratio":2,
-			"near_plane":0.1000000014901161,
+			"near_plane":0.10000000149011612,
+			"aperture_shape":1,
+			"aperture_size":0,
+			"focal_dist":1,
 			"film.width":2000,
 			"film.height":1000,
 			"film.samples":256,
@@ -88,7 +91,10 @@
 		"Camera 1":{
 			"vertical_fov":60,
 			"aspect_ratio":2,
-			"near_plane":0.1000000014901161,
+			"near_plane":0.10000000149011612,
+			"aperture_shape":1,
+			"aperture_size":0,
+			"focal_dist":1,
 			"film.width":1000,
 			"film.height":500,
 			"film.samples":256,

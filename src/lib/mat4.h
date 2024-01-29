@@ -426,8 +426,6 @@ inline Mat4 Mat4::skew_symmetric(Vec3 v) {
 				   Vec4{0.0f, 0.0f, 0.0f, 1.0f}};
 	return r;
 }
-
-// TODO: potentially incorrect?
 inline Mat4 Mat4::angle_axis(float t, Vec3 axis) {
 	Mat4 ret;
 	float c = std::cos(Radians(t));

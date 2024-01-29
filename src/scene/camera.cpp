@@ -46,19 +46,19 @@ GL::Lines Camera::to_gl() const {
 
 	GL::Lines cage;
 
-	float ap = near_plane * std::tan(Radians(vertical_fov) / 2.0f);
+	// float ap = near_plane * std::tan(Radians(vertical_fov) / 2.0f);
 	float h = 2.0f * std::tan(Radians(vertical_fov) / 2.0f);
 	float w = aspect_ratio * h;
 
-	Vec3 tr = Vec3(0.5f * w, 0.5f * h, -1.0f);
-	Vec3 tl = Vec3(-0.5f * w, 0.5f * h, -1.0f);
-	Vec3 br = Vec3(0.5f * w, -0.5f * h, -1.0f);
-	Vec3 bl = Vec3(-0.5f * w, -0.5f * h, -1.0f);
+	Vec3 tr = Vec3(0.5f * w, 0.5f * h, -1.0f) * focal_dist;
+	Vec3 tl = Vec3(-0.5f * w, 0.5f * h, -1.0f) * focal_dist;
+	Vec3 br = Vec3(0.5f * w, -0.5f * h, -1.0f) * focal_dist;
+	Vec3 bl = Vec3(-0.5f * w, -0.5f * h, -1.0f) * focal_dist;
 
-	Vec3 ftr = Vec3(0.5f * ap, 0.5f * ap, -near_plane);
-	Vec3 ftl = Vec3(-0.5f * ap, 0.5f * ap, -near_plane);
-	Vec3 fbr = Vec3(0.5f * ap, -0.5f * ap, -near_plane);
-	Vec3 fbl = Vec3(-0.5f * ap, -0.5f * ap, -near_plane);
+	Vec3 ftr = Vec3(0.5f * aperture_size, 0.5f * aperture_size, -near_plane);
+	Vec3 ftl = Vec3(-0.5f * aperture_size, 0.5f * aperture_size, -near_plane);
+	Vec3 fbr = Vec3(0.5f * aperture_size, -0.5f * aperture_size, -near_plane);
+	Vec3 fbl = Vec3(-0.5f * aperture_size, -0.5f * aperture_size, -near_plane);
 
 	cage.add(ftl, ftr, Gui::Color::black);
 	cage.add(ftr, fbr, Gui::Color::black);
@@ -80,6 +80,7 @@ GL::Lines Camera::to_gl() const {
 
 bool operator!=(const Camera& a, const Camera& b) {
 	return a.vertical_fov != b.vertical_fov || a.aspect_ratio != b.aspect_ratio || a.near_plane != b.near_plane
+		   || a.aperture_shape != b.aperture_shape || a.aperture_size != b.aperture_size || a.focal_dist != b.focal_dist
 	       || a.film.width != b.film.width || a.film.height != b.film.height
 	       || a.film.samples != b.film.samples || a.film.max_ray_depth != b.film.max_ray_depth
 	       || a.film.sample_pattern != b.film.sample_pattern

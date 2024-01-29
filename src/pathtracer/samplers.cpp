@@ -20,6 +20,25 @@ float Rect::pdf(Vec2 at) const {
 	return 1.0f / (size.x * size.y);
 }
 
+Vec2 Circle::sample(RNG &rng) const {
+	//A3EC - bokeh - circle sampling
+
+    // Return a point selected uniformly at random from a circle defined by its
+	// center and radius.
+    // Useful function: rng.unit()
+
+    return Vec2{};
+}
+
+float Circle::pdf(Vec2 at) const {
+	//A3EC - bokeh - circle pdf
+
+	// Return the pdf of sampling the point 'at' for a circle defined by its
+	// center and radius.
+
+    return 1.f;
+}
+
 Vec3 Point::sample(RNG &rng) const {
 	return point;
 }

@@ -84,6 +84,8 @@ When using with `--run-tests` option, you may realize that the program is runnin
 
 Below is a non-exhaustive list of common build issues along with their suggested solutions. Let us know if you encounter a problem that is not addressed here.
 
+- When in doubt, feel free to delete `objs/` and `maek-cache.json` and rebuild with `node Maekfile.js` again to see if anything has changed.
+
 ### macOS
 > `unknown warning option '-Wno-unused-but-set-variable'`
 

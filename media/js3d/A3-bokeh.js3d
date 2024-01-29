@@ -1,0 +1,82 @@
+{"scene":{
+	"FORMAT":"js3d-v1",
+	"transforms":{
+		"Transform":{
+			"parent":null,
+			"translation":[0,0,0],
+			"rotation":[0,0,0,1],
+			"scale":[1,1,1]
+		},
+		"Transform 1":{
+			"parent":null,
+			"translation":[0,0,-7.491909027099609],
+			"rotation":[0,0,0,1],
+			"scale":[1,1,1]
+		}
+	},
+	"cameras":{
+		"Camera":{
+			"vertical_fov":60,
+			"aspect_ratio":1.7777800559997559,
+			"near_plane":0.10000000149011612,
+			"aperture_shape":2,
+			"aperture_size":0.20000000298023224,
+			"focal_dist":1,
+			"film.width":640,
+			"film.height":360,
+			"film.samples":32,
+			"film.max_ray_depth":8,
+			"film.sample_pattern":"Center"
+		}
+	},
+	"meshes":{},
+	"skinned_meshes":{},
+	"shapes":{
+		"Shape":{
+			"type":"Sphere",
+			"radius":1
+		}
+	},
+	"particles":{},
+	"textures":{
+		"Texture":{
+			"type":"Constant",
+			"color":[0.75,0.75,0.75],
+			"scale":1
+		}
+	},
+	"materials":{
+		"Material":{
+			"type":"Emissive",
+			"emissive":"Texture"
+		}
+	},
+	"delta_lights":{},
+	"env_lights":{},
+	"instances":{
+		"cameras":{
+			"Camera Instance":{
+				"transform":"Transform",
+				"camera":"Camera"
+			}
+		},
+		"meshes":{},
+		"skinned_meshes":{},
+		"shapes":{
+			"Shape Instance":{
+				"transform":"Transform 1",
+				"shape":"Shape",
+				"material":"Material",
+				"visible":true,
+				"collides":true,
+				"draw style":"Correct",
+				"blend style":"Blend Replace",
+				"depth style":"Depth Less"
+			}
+		},
+		"particles":{},
+		"delta_lights":{},
+		"env_lights":{}
+	}
+},"animator":{"FORMAT":"js3d-v1",
+"splines":{}}}

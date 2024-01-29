@@ -110,7 +110,7 @@ public:
 private:
 	Camera cache;
 	bool ar_activated = false, fov_activated = false, near_activated = false,
-		 ray_depth_activated = false;
+		 aperture_activated = false, focal_dist_activated = false, ray_depth_activated = false;
 };
 
 class Widget_Delta_Light {

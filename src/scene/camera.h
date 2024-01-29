@@ -18,6 +18,9 @@ public:
 	float vertical_fov = 60.0f;    // Vertical field of view (degrees)
 	float aspect_ratio = 1.77778f; // width / height
 	float near_plane = 0.1f;
+	uint32_t aperture_shape = 1;
+	float aperture_size = 0.0f;
+	float focal_dist = 1.f;
 
 	//'film_' parameters specify how the image is recorded/rendered:
 	struct {
@@ -34,6 +37,9 @@ public:
 		f("vertical_fov", c.vertical_fov);
 		f("aspect_ratio", c.aspect_ratio);
 		f("near_plane", c.near_plane);
+		f("aperture_shape", c.aperture_shape);
+		f("aperture_size", c.aperture_size);
+		f("focal_dist", c.focal_dist);
 		if constexpr (I != Intent::Animate) {
 			f("film.width", c.film.width);
 			f("film.height", c.film.height);

@@ -1,0 +1,206 @@
+{"scene":{
+	"FORMAT":"js3d-v1",
+	"transforms":{
+		"Camera Transform":{
+			"parent":null,
+			"translation":[0,1.5019028186798096,1.0028469562530518],
+			"rotation":[-0.10032385587692261,-0.11402396112680435,-0.010440029203891754,0.9883445501327515],
+			"scale":[1,1,1]
+		},
+		"Env Light Transform":{
+			"parent":null,
+			"translation":[0,0,0],
+			"rotation":[0,0,0,1],
+			"scale":[1,1,1]
+		},
+		"Transform Blue Cube":{
+			"parent":null,
+			"translation":[1.8799548149108887,0,-6.565309524536133],
+			"rotation":[0,0,0,1],
+			"scale":[1,1,1]
+		},
+		"Transform Green Cube":{
+			"parent":null,
+			"translation":[-0.22634518146514893,-2.3365020751953125e-05,-4.0027313232421875],
+			"rotation":[0,0,0,1],
+			"scale":[1,1,1]
+		},
+		"Transform Pink Cube":{
+			"parent":null,
+			"translation":[4.6181511878967285,-9.5367431640625e-07,-9.176312446594238],
+			"rotation":[0,0,0,1],
+			"scale":[1,1,1]
+		},
+		"Transform Red Cube":{
+			"parent":null,
+			"translation":[-1.648801565170288,2.384185791015625e-05,-1.711841344833374],
+			"rotation":[0,0,0,1],
+			"scale":[1,1,1]
+		},
+		"Transform Yellow Cube":{
+			"parent":null,
+			"translation":[8.626166343688965,-1.0013580322265625e-05,-11.797800064086914],
+			"rotation":[0,0,0,1],
+			"scale":[1,1,1]
+		}
+	},
+	"cameras":{
+		"Camera":{
+			"vertical_fov":60,
+			"aspect_ratio":1.7777800559997559,
+			"near_plane":0.10000000149011612,
+			"aperture_shape":1,
+			"aperture_size":0.20000000298023224,
+			"focal_dist":3.2100000381469727,
+			"film.width":1920,
+			"film.height":1080,
+			"film.samples":256,
+			"film.max_ray_depth":8,
+			"film.sample_pattern":"Center"
+		}
+	},
+	"meshes":{
+		"Mesh":{ "FORMAT":"s3d-hm-1","halfedge_nexts":"uint32:AgAAABMAAAAEAAAAFgAAAAYAAAAUAAAAAAAAABAAAAAKAAAAEgAAAAwAAAARAAAADgAAABUAAAAIAAAAFwAAAAkAAAAFAAAABwAAAA8AAAALAAAAAwAAAA0AAAABAAAA","halfedge_corner_uvs":"vec2:AAAAAAAAAAAAAAAAAACAPwAAgD8AAAAAAAAAAAAAgD8AAIA/AACAPwAAAAAAAIA/AAAAAAAAgD8AAAAAAACAPwAAAAAAAIA/AACAPwAAAAAAAAAAAAAAAAAAgD8AAAAAAACAPwAAAAAAAIA/AAAAAAAAgD8AAIA/AACAPwAAAAAAAAAAAAAAAAAAgD8AAIA/AACAPwAAgD8AAAAAAAAAAAAAAAAAAAAAAACAPwAAgD8AAAAAAAAAAAAAgD8AAIA/","halfedge_corner_normals":"vec3:AAAAAAAAAAAAAIC/AACAvwAAAAAAAAAAAAAAAAAAAAAAAIC/AAAAAAAAgD8AAAAAAAAAAAAAAAAAAIC/AACAPwAAAAAAAAAAAAAAAAAAAAAAAIC/AAAAAAAAgL8AAAAAAAAAAAAAAAAAAIA/AAAAAAAAgL8AAAAAAAAAAAAAAAAAAIA/AACAPwAAAAAAAAAAAAAAAAAAAAAAAIA/AAAAAAAAgD8AAAAAAAAAAAAAAAAAAIA/AACAvwAAAAAAAAAAAAAAAAAAgL8AAAAAAACAPwAAAAAAAAAAAAAAAAAAgL8AAAAAAACAvwAAAAAAAAAAAACAPwAAAAAAAAAAAAAAAAAAgD8AAAAAAAAAAAAAgD8AAAAAAACAvwAAAAAAAAAA","bone_weight_bones":"uint32:","bone_weight_weights":"float:","vertex_halfedges":"uint32:AAAAAAYAAAACAAAABAAAAAgAAAAKAAAADgAAAAwAAAA","vertex_positions":"vec3:AACAvwAAgL8AAIC/AACAPwAAgL8AAIC/AACAvwAAgD8AAIC/AACAPwAAgD8AAIC/AACAvwAAgL8AAIA/AACAPwAAgL8AAIA/AACAvwAAgD8AAIA/AACAPwAAgD8AAIA/","vertex_bone_weight_ends":"uint32:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA","edge_sharps":"bool://g","face_halfedges":"uint32:AAAAAAgAAAAHAAAABQAAAAMAAAABAAAA","face_boundaries":"bool:Ag"},
+		"Mesh 1":{ "FORMAT":"s3d-hm-1","halfedge_nexts":"uint32:AgAAABMAAAAEAAAAFgAAAAYAAAAUAAAAAAAAABAAAAAKAAAAEgAAAAwAAAARAAAADgAAABUAAAAIAAAAFwAAAAkAAAAFAAAABwAAAA8AAAALAAAAAwAAAA0AAAABAAAA","halfedge_corner_uvs":"vec2:AAAAAAAAAAAAAAAAAACAPwAAgD8AAAAAAAAAAAAAgD8AAIA/AACAPwAAAAAAAIA/AAAAAAAAgD8AAAAAAACAPwAAAAAAAIA/AACAPwAAAAAAAAAAAAAAAAAAgD8AAAAAAACAPwAAAAAAAIA/AAAAAAAAgD8AAIA/AACAPwAAAAAAAAAAAAAAAAAAgD8AAIA/AACAPwAAgD8AAAAAAAAAAAAAAAAAAAAAAACAPwAAgD8AAAAAAAAAAAAAgD8AAIA/","halfedge_corner_normals":"vec3:AAAAAAAAAAAAAIC/AACAvwAAAAAAAAAAAAAAAAAAAAAAAIC/AAAAAAAAgD8AAAAAAAAAAAAAAAAAAIC/AACAPwAAAAAAAAAAAAAAAAAAAAAAAIC/AAAAAAAAgL8AAAAAAAAAAAAAAAAAAIA/AAAAAAAAgL8AAAAAAAAAAAAAAAAAAIA/AACAPwAAAAAAAAAAAAAAAAAAAAAAAIA/AAAAAAAAgD8AAAAAAAAAAAAAAAAAAIA/AACAvwAAAAAAAAAAAAAAAAAAgL8AAAAAAACAPwAAAAAAAAAAAAAAAAAAgL8AAAAAAACAvwAAAAAAAAAAAACAPwAAAAAAAAAAAAAAAAAAgD8AAAAAAAAAAAAAgD8AAAAAAACAvwAAAAAAAAAA","bone_weight_bones":"uint32:","bone_weight_weights":"float:","vertex_halfedges":"uint32:AAAAAAYAAAACAAAABAAAAAgAAAAKAAAADgAAAAwAAAA","vertex_positions":"vec3:AACAvwAAgL8AAIC/AACAPwAAgL8AAIC/AACAvwAAgD8AAIC/AACAPwAAgD8AAIC/AACAvwAAgL8AAIA/AACAPwAAgL8AAIA/AACAvwAAgD8AAIA/AACAPwAAgD8AAIA/","vertex_bone_weight_ends":"uint32:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA","edge_sharps":"bool://g","face_halfedges":"uint32:AAAAAAgAAAAHAAAABQAAAAMAAAABAAAA","face_boundaries":"bool:Ag"},
+		"Mesh 2":{ "FORMAT":"s3d-hm-1","halfedge_nexts":"uint32:AgAAABMAAAAEAAAAFgAAAAYAAAAUAAAAAAAAABAAAAAKAAAAEgAAAAwAAAARAAAADgAAABUAAAAIAAAAFwAAAAkAAAAFAAAABwAAAA8AAAALAAAAAwAAAA0AAAABAAAA","halfedge_corner_uvs":"vec2:AAAAAAAAAAAAAAAAAACAPwAAgD8AAAAAAAAAAAAAgD8AAIA/AACAPwAAAAAAAIA/AAAAAAAAgD8AAAAAAACAPwAAAAAAAIA/AACAPwAAAAAAAAAAAAAAAAAAgD8AAAAAAACAPwAAAAAAAIA/AAAAAAAAgD8AAIA/AACAPwAAAAAAAAAAAAAAAAAAgD8AAIA/AACAPwAAgD8AAAAAAAAAAAAAAAAAAAAAAACAPwAAgD8AAAAAAAAAAAAAgD8AAIA/","halfedge_corner_normals":"vec3:AAAAAAAAAAAAAIC/AACAvwAAAAAAAAAAAAAAAAAAAAAAAIC/AAAAAAAAgD8AAAAAAAAAAAAAAAAAAIC/AACAPwAAAAAAAAAAAAAAAAAAAAAAAIC/AAAAAAAAgL8AAAAAAAAAAAAAAAAAAIA/AAAAAAAAgL8AAAAAAAAAAAAAAAAAAIA/AACAPwAAAAAAAAAAAAAAAAAAAAAAAIA/AAAAAAAAgD8AAAAAAAAAAAAAAAAAAIA/AACAvwAAAAAAAAAAAAAAAAAAgL8AAAAAAACAPwAAAAAAAAAAAAAAAAAAgL8AAAAAAACAvwAAAAAAAAAAAACAPwAAAAAAAAAAAAAAAAAAgD8AAAAAAAAAAAAAgD8AAAAAAACAvwAAAAAAAAAA","bone_weight_bones":"uint32:","bone_weight_weights":"float:","vertex_halfedges":"uint32:AAAAAAYAAAACAAAABAAAAAgAAAAKAAAADgAAAAwAAAA","vertex_positions":"vec3:AACAvwAAgL8AAIC/AACAPwAAgL8AAIC/AACAvwAAgD8AAIC/AACAPwAAgD8AAIC/AACAvwAAgL8AAIA/AACAPwAAgL8AAIA/AACAvwAAgD8AAIA/AACAPwAAgD8AAIA/","vertex_bone_weight_ends":"uint32:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA","edge_sharps":"bool://g","face_halfedges":"uint32:AAAAAAgAAAAHAAAABQAAAAMAAAABAAAA","face_boundaries":"bool:Ag"},
+		"Mesh 3":{ "FORMAT":"s3d-hm-1","halfedge_nexts":"uint32:AgAAABMAAAAEAAAAFgAAAAYAAAAUAAAAAAAAABAAAAAKAAAAEgAAAAwAAAARAAAADgAAABUAAAAIAAAAFwAAAAkAAAAFAAAABwAAAA8AAAALAAAAAwAAAA0AAAABAAAA","halfedge_corner_uvs":"vec2:AAAAAAAAAAAAAAAAAACAPwAAgD8AAAAAAAAAAAAAgD8AAIA/AACAPwAAAAAAAIA/AAAAAAAAgD8AAAAAAACAPwAAAAAAAIA/AACAPwAAAAAAAAAAAAAAAAAAgD8AAAAAAACAPwAAAAAAAIA/AAAAAAAAgD8AAIA/AACAPwAAAAAAAAAAAAAAAAAAgD8AAIA/AACAPwAAgD8AAAAAAAAAAAAAAAAAAAAAAACAPwAAgD8AAAAAAAAAAAAAgD8AAIA/","halfedge_corner_normals":"vec3:AAAAAAAAAAAAAIC/AACAvwAAAAAAAAAAAAAAAAAAAAAAAIC/AAAAAAAAgD8AAAAAAAAAAAAAAAAAAIC/AACAPwAAAAAAAAAAAAAAAAAAAAAAAIC/AAAAAAAAgL8AAAAAAAAAAAAAAAAAAIA/AAAAAAAAgL8AAAAAAAAAAAAAAAAAAIA/AACAPwAAAAAAAAAAAAAAAAAAAAAAAIA/AAAAAAAAgD8AAAAAAAAAAAAAAAAAAIA/AACAvwAAAAAAAAAAAAAAAAAAgL8AAAAAAACAPwAAAAAAAAAAAAAAAAAAgL8AAAAAAACAvwAAAAAAAAAAAACAPwAAAAAAAAAAAAAAAAAAgD8AAAAAAAAAAAAAgD8AAAAAAACAvwAAAAAAAAAA","bone_weight_bones":"uint32:","bone_weight_weights":"float:","vertex_halfedges":"uint32:AAAAAAYAAAACAAAABAAAAAgAAAAKAAAADgAAAAwAAAA","vertex_positions":"vec3:AACAvwAAgL8AAIC/AACAPwAAgL8AAIC/AACAvwAAgD8AAIC/AACAPwAAgD8AAIC/AACAvwAAgL8AAIA/AACAPwAAgL8AAIA/AACAvwAAgD8AAIA/AACAPwAAgD8AAIA/","vertex_bone_weight_ends":"uint32:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA","edge_sharps":"bool://g","face_halfedges":"uint32:AAAAAAgAAAAHAAAABQAAAAMAAAABAAAA","face_boundaries":"bool:Ag"},
+		"Mesh 4":{ "FORMAT":"s3d-hm-1","halfedge_nexts":"uint32:AgAAABMAAAAEAAAAFgAAAAYAAAAUAAAAAAAAABAAAAAKAAAAEgAAAAwAAAARAAAADgAAABUAAAAIAAAAFwAAAAkAAAAFAAAABwAAAA8AAAALAAAAAwAAAA0AAAABAAAA","halfedge_corner_uvs":"vec2:AAAAAAAAAAAAAAAAAACAPwAAgD8AAAAAAAAAAAAAgD8AAIA/AACAPwAAAAAAAIA/AAAAAAAAgD8AAAAAAACAPwAAAAAAAIA/AACAPwAAAAAAAAAAAAAAAAAAgD8AAAAAAACAPwAAAAAAAIA/AAAAAAAAgD8AAIA/AACAPwAAAAAAAAAAAAAAAAAAgD8AAIA/AACAPwAAgD8AAAAAAAAAAAAAAAAAAAAAAACAPwAAgD8AAAAAAAAAAAAAgD8AAIA/","halfedge_corner_normals":"vec3:AAAAAAAAAAAAAIC/AACAvwAAAAAAAAAAAAAAAAAAAAAAAIC/AAAAAAAAgD8AAAAAAAAAAAAAAAAAAIC/AACAPwAAAAAAAAAAAAAAAAAAAAAAAIC/AAAAAAAAgL8AAAAAAAAAAAAAAAAAAIA/AAAAAAAAgL8AAAAAAAAAAAAAAAAAAIA/AACAPwAAAAAAAAAAAAAAAAAAAAAAAIA/AAAAAAAAgD8AAAAAAAAAAAAAAAAAAIA/AACAvwAAAAAAAAAAAAAAAAAAgL8AAAAAAACAPwAAAAAAAAAAAAAAAAAAgL8AAAAAAACAvwAAAAAAAAAAAACAPwAAAAAAAAAAAAAAAAAAgD8AAAAAAAAAAAAAgD8AAAAAAACAvwAAAAAAAAAA","bone_weight_bones":"uint32:","bone_weight_weights":"float:","vertex_halfedges":"uint32:AAAAAAYAAAACAAAABAAAAAgAAAAKAAAADgAAAAwAAAA","vertex_positions":"vec3:AACAvwAAgL8AAIC/AACAPwAAgL8AAIC/AACAvwAAgD8AAIC/AACAPwAAgD8AAIC/AACAvwAAgL8AAIA/AACAPwAAgL8AAIA/AACAvwAAgD8AAIA/AACAPwAAgD8AAIA/","vertex_bone_weight_ends":"uint32:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA","edge_sharps":"bool://g","face_halfedges":"uint32:AAAAAAgAAAAHAAAABQAAAAMAAAABAAAA","face_boundaries":"bool:Ag"}
+	},
+	"skinned_meshes":{},
+	"shapes":{},
+	"particles":{},
+	"textures":{
+		"Blue":{
+			"type":"Constant",
+			"color":[0,0.3814432621002197,1],
+			"scale":1
+		},
+		"Env Light 1":{
+			"type":"Constant",
+			"color":[0.75,0.75,0.75],
+			"scale":1
+		},
+		"Green":{
+			"type":"Constant",
+			"color":[0.020618677139282227,1,0],
+			"scale":1
+		},
+		"Pink":{
+			"type":"Constant",
+			"color":[1,0,0.8659796714782715],
+			"scale":1
+		},
+		"Red":{
+			"type":"Constant",
+			"color":[1,0,0],
+			"scale":1
+		},
+		"Texture":{
+			"type":"Constant",
+			"color":[1,0.9896906614303589,0],
+			"scale":1
+		}
+	},
+	"materials":{
+		"Material Blue Cube":{
+			"type":"Lambertian",
+			"albedo":"Blue"
+		},
+		"Material Green Cube":{
+			"type":"Lambertian",
+			"albedo":"Green"
+		},
+		"Material Pink Cube":{
+			"type":"Lambertian",
+			"albedo":"Pink"
+		},
+		"Material Red Cube":{
+			"type":"Lambertian",
+			"albedo":"Red"
+		},
+		"Material Yellow Cube":{
+			"type":"Lambertian",
+			"albedo":"Texture"
+		}
+	},
+	"delta_lights":{},
+	"env_lights":{
+		"Env Light":{
+			"type":"Sphere",
+			"intensity":1,
+			"radiance":"Env Light 1"
+		}
+	},
+	"instances":{
+		"cameras":{
+			"Camera Instance":{
+				"transform":"Camera Transform",
+				"camera":"Camera"
+			}
+		},
+		"meshes":{
+			"Mesh Instance":{
+				"transform":"Transform Red Cube",
+				"mesh":"Mesh",
+				"material":"Material Red Cube",
+				"visible":true,
+				"collides":true,
+				"draw style":"Correct",
+				"blend style":"Blend Replace",
+				"depth style":"Depth Less"
+			},
+			"Mesh Instance 1":{
+				"transform":"Transform Green Cube",
+				"mesh":"Mesh 1",
+				"material":"Material Green Cube",
+				"visible":true,
+				"collides":true,
+				"draw style":"Correct",
+				"blend style":"Blend Replace",
+				"depth style":"Depth Less"
+			},
+			"Mesh Instance 2":{
+				"transform":"Transform Blue Cube",
+				"mesh":"Mesh 2",
+				"material":"Material Blue Cube",
+				"visible":true,
+				"collides":true,
+				"draw style":"Correct",
+				"blend style":"Blend Replace",
+				"depth style":"Depth Less"
+			},
+			"Mesh Instance 3":{
+				"transform":"Transform Pink Cube",
+				"mesh":"Mesh 3",
+				"material":"Material Pink Cube",
+				"visible":true,
+				"collides":true,
+				"draw style":"Correct",
+				"blend style":"Blend Replace",
+				"depth style":"Depth Less"
+			},
+			"Mesh Instance 4":{
+				"transform":"Transform Yellow Cube",
+				"mesh":"Mesh 4",
+				"material":"Material Yellow Cube",
+				"visible":true,
+				"collides":true,
+				"draw style":"Correct",
+				"blend style":"Blend Replace",
+				"depth style":"Depth Less"
+			}
+		},
+		"skinned_meshes":{},
+		"shapes":{},
+		"particles":{},
+		"delta_lights":{},
+		"env_lights":{
+			"Env Light Instance":{
+				"transform":"Env Light Transform",
+				"light":"Env Light",
+				"visible":true
+			}
+		}
+	}
+},"animator":{"FORMAT":"js3d-v1",
+"splines":{}}}

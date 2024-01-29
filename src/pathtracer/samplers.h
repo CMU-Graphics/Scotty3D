@@ -35,6 +35,18 @@ struct Rect {
 	Vec2 size;
 };
 
+// Circle sampler: uniformly sample a circle with a specified center and radius
+struct Circle {
+	Circle(Vec2 center = Vec2(0.f), float radius = 1.f) : center(center), radius(radius) {
+	}
+
+	Vec2 sample(RNG &rng) const;
+	float pdf(Vec2 at) const;
+
+	Vec2 center;
+	float radius;
+};
+
 //Triangle sampler: uniformly sample the surface of a triangle
 struct Triangle {
 	Triangle(Vec3 v0, Vec3 v1, Vec3 v2) : v0(v0), v1(v1), v2(v2) {

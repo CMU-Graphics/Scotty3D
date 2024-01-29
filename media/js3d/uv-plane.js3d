@@ -9,13 +9,13 @@
 		},
 		"Transform 1":{
 			"parent":null,
-			"translation":[-2.172810554504395,0,0],
+			"translation":[-2.1728105545043945,0,0],
 			"rotation":[0,-0.7071066498756409,0,0.7071069478988647],
 			"scale":[1,1,1]
 		},
 		"Transform 2":{
 			"parent":null,
-			"translation":[-0.9076552391052246,0.7344402670860291,0],
+			"translation":[-0.9076552391052246,0.734440267086029,0],
 			"rotation":[0,0,0,1],
 			"scale":[1,1,1]
 		}
@@ -24,7 +24,10 @@
 		"Camera":{
 			"vertical_fov":60,
 			"aspect_ratio":1,
-			"near_plane":0.1000000014901161,
+			"near_plane":0.10000000149011612,
+			"aperture_shape":1,
+			"aperture_size":0,
+			"focal_dist":1,
 			"film.width":1000,
 			"film.height":1000,
 			"film.samples":256,
