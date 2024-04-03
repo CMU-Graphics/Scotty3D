@@ -12,7 +12,7 @@ When discussing skeletal animation we have a whole family of different transform
 
 **NOTE:** I mention world space above because it is one of the coordinate systems in Scotty3D. But for all of the implementation details of this assignment, you'll be working in local space and/or the bone spaces. Indeed, it is not possible from within `Skeleton` to determine $L$, since `Skeleton`s don't know what instance they are being accessed through.
 
-**Note:** The [most recent slides](http://15462.courses.cs.cmu.edu/fall2023/lecture/lecture-15) have very good visuals to help understand each of the different spaces.
+**Note:** The [most recent slides](http://15462.courses.cs.cmu.edu/spring2024/lecture/splines) have very good visuals to help understand each of the different spaces.
 
 ## `A4T2a` Forward Kinematics
 
