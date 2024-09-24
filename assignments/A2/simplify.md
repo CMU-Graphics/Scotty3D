@@ -100,7 +100,7 @@ Vec3 b;  // computed by extracting minus the upper-right 3x1 column from the sam
 Vec3 x = A.inverse() * b; // solve Ax = b for x by hitting both sides with the inverse of A
 ```
 
-However, $A$ might not always be invertible: consider the case where the mesh is composed of points all on the same plane. In this case, you need to select an optimal point along the original edge. Please read [Garland's paper](http://reports-archive.adm.cs.cmu.edu/anon/1999/CMU-CS-99-105.pdf) on page 62 section 3.5 for more details.
+However, $A$ might not always be invertible: consider the case where the mesh is composed of points all on the same plane. In this case, you need to select an optimal point along the original edge. Please read [Garland's paper](http://reports-archive.adm.cs.cmu.edu/anon/1999/CMU-CS-99-105.pdf) section 3.5, Vertex Placement Policie, for more details.
 
 If you're a bit lost at this point, don't worry! There are a lot of details to go through, and we'll summarize everything again in the implementation section. The main idea to keep in mind right now is:
 
