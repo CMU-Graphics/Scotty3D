@@ -462,19 +462,22 @@ Renderer::Skeleton_ID_Map Renderer::skeleton(Renderer::SkeletonOpt sopt) {
 			xf = sopt.view * Mat4::translate(base);
 		}
 
+		if (sopt.posed) {
+			auto rot = Mat4::angle_axis(bone.pose.z, z) 
+			         * Mat4::angle_axis(bone.pose.y, y) 
+					 * Mat4::angle_axis(bone.pose.x, x);
+			xf = xf * rot;
+		}
+
 		MeshOpt opt;
 		opt.id = id_map.bone_ids_begin + b;
 		opt.modelview = xf * Mat4::rotate_to(z);
 		opt.color = Spectrum{0.2f, 0.2f, 1.0f};
 		capsule(opt, 0.5f * bone.radius, 0.05f * bone.radius);
 
-		if (sopt.posed) xf = xf * Mat4::angle_axis(bone.pose.z, z);
-
 		opt.modelview = xf * Mat4::rotate_to(y);
 		opt.color = Spectrum{0.2f, 1.0f, 0.2f};
 		capsule(opt, 0.5f * bone.radius, 0.05f * bone.radius);
-
-		if (sopt.posed) xf = xf * Mat4::angle_axis(bone.pose.y, y);
 
 		opt.modelview = xf * Mat4::rotate_to(x);
 		opt.color = Spectrum{1.0f, 0.2f, 0.2f};

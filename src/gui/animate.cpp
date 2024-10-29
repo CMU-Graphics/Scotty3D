@@ -67,21 +67,23 @@ bool Animate::render(Scene& scene, Widgets& widgets, Mat4 const &local_to_world,
 		//rotate a bone:
 		std::vector< Mat4 > pose = mesh->skeleton.current_pose();
 
+		const Skeleton::Bone &bone = mesh->skeleton.bones[selected_bone];
 		Vec3 wpos = local_to_world * (pose[selected_bone] * Vec3{0.0f, 0.0f, 0.0f});
 		float scale = std::min((user_cam.pos() - wpos).norm() / 5.5f, 10.0f);
 
-		widgets.active = Widget_Type::rotate;
 		// Change rotation axes to hopefully fix bone rotation
 		Vec3 x,y,z;
-		mesh->skeleton.bones[selected_bone].compute_rotation_axes(&x, &y, &z);
-		Mat4 xf;
-		if (mesh->skeleton.bones[selected_bone].parent < mesh->skeleton.bones.size()) {
-			xf = pose[mesh->skeleton.bones[selected_bone].parent] * Mat4::translate(mesh->skeleton.bones[selected_bone].extent);
+		bone.compute_rotation_axes(&x, &y, &z);
+
+		Mat4 xf = local_to_world;
+		if (bone.parent < mesh->skeleton.bones.size()) {
+			xf *= pose[bone.parent] * Mat4::translate(bone.extent);
 		} else {
-			xf = Mat4::translate(mesh->skeleton.base + mesh->skeleton.base_offset);
+			xf *= Mat4::translate(mesh->skeleton.base + mesh->skeleton.base_offset);
 		}
 
-		widgets.change_rot(xf, mesh->skeleton.bones[selected_bone].pose, x, y, z);
+		widgets.active = Widget_Type::rotate;
+		widgets.gimbal_rot(xf, bone.pose, x, y, z);
 		widgets.render(view, wpos, scale);
 
 		return true;
@@ -297,45 +299,7 @@ bool Animate::apply_transform(Widgets& widgets, Mat4 const &local_to_world) {
 
 		//rot is incremental rotation to apply in world space:
 		Quat rot = widgets.apply_action(at).rotation;
-
-		//rotation from bone's children -> world space:
-		auto bone_to_world = local_to_world * old_pose[selected_bone];
-		bone_to_world[0][3] = 0.0f;
-		bone_to_world[1][3] = 0.0f;
-		bone_to_world[2][3] = 0.0f;
-		bone_to_world[3] = Vec4(0.0f, 0.0f, 0.0f, 1.0f);
-
-		//rotation from world space to bone's parent:
-		Mat4 world_to_parent;
-		if (old_bone.parent < old_mesh.skeleton.bones.size()) {
-			Mat4 parent_to_world = local_to_world * old_pose[old_bone.parent];
-			world_to_parent = Mat4::transpose(parent_to_world);
-		} else {
-			world_to_parent = Mat4::transpose(local_to_world);
-		}
-		world_to_parent[0][3] = 0.0f;
-		world_to_parent[1][3] = 0.0f;
-		world_to_parent[2][3] = 0.0f;
-		world_to_parent[3] = Vec4(0.0f, 0.0f, 0.0f, 1.0f);
-
-		//thus, the new rotation we'd like for bone's children is:
-		Mat4 new_rot = world_to_parent * rot.to_mat() * bone_to_world;
-
-		Vec3 x, y, z;
-		bone.compute_rotation_axes(&x, &y, &z);
-
-		Mat4 bone_to_rotation_axes(Vec4(x, 0.0f), Vec4(y, 0.0f), Vec4(z, 0.0f),
-		                           Vec4(0.0f, 0.0f, 0.0f, 1.0f));
-		auto rotation_axes_to_bone = Mat4::transpose(bone_to_rotation_axes);
-
-		//convert into euler angles w.r.t. bone's local rotation axes:
-		Mat4 new_rot_local =
-		    rotation_axes_to_bone * new_rot * bone_to_rotation_axes;
-
-		Vec3 new_euler = new_rot_local.to_euler();
-		if(new_euler.valid()) {
-			bone.pose = new_euler;
-		}
+		bone.pose = old_bone.pose + rot.to_euler();
 
 		dont_clear_select = true;
 		manager.invalidate_gpu(mesh_name);
@@ -357,6 +321,7 @@ bool Animate::apply_transform(Widgets& widgets, Mat4 const &local_to_world) {
 bool Animate::select(Scene& scene, Widgets& widgets, Mat4 const &local_to_world, uint32_t id, Vec3 cam, Vec2 spos, Vec3 dir) {
 	auto mesh = skinned_mesh_select.lock();
 
+	widgets.global_rot();
 	if (widgets.want_drag()) {
 
 		if (mesh && selected_handle < mesh->skeleton.handles.size()) {
@@ -374,12 +339,27 @@ bool Animate::select(Scene& scene, Widgets& widgets, Mat4 const &local_to_world,
 			old_mesh = mesh->copy();
 
 			//figure out where drag starts:
-			//Skeleton::Bone &bone = mesh->skeleton.bones[selected_bone]; //may eventually need this
+			const Skeleton::Bone &bone = mesh->skeleton.bones[selected_bone];
 			std::vector< Mat4 > pose = mesh->skeleton.current_pose();
-			Vec3 base = local_to_world * pose[selected_bone] * Vec3{0.0f, 0.0f, 0.0f};
+			Vec3 wpos = local_to_world * pose[selected_bone] * Vec3{0.0f, 0.0f, 0.0f};
+
+			Vec3 x,y,z;
+			bone.compute_rotation_axes(&x, &y, &z);
+
+			Mat4 xf = local_to_world;
+			if (bone.parent < mesh->skeleton.bones.size()) {
+				xf *= pose[bone.parent] * Mat4::translate(bone.extent);
+			} else {
+				xf *= Mat4::translate(mesh->skeleton.base + mesh->skeleton.base_offset);
+			}
+			xf *= Mat4::axes(
+				Mat4::angle_axis(bone.pose.z, z) * Mat4::angle_axis(bone.pose.y, y) * Mat4::rotate_to(x) * Vec3{0.0f, 1.0f, 0.0f},
+				Mat4::angle_axis(bone.pose.z, z) * Mat4::rotate_to(y) * Vec3{0.0f, 1.0f, 0.0f}, 
+				Mat4::rotate_to(z) * Vec3{0.0f, 1.0f, 0.0f});
 
 			//start the drag:
-			widgets.start_drag(base, cam, spos, dir);
+			widgets.set_rot(xf);
+			widgets.start_drag(wpos, cam, spos, dir);
 		} else if (mesh && selected_base) {
 			//store old mesh:
 			old_mesh = mesh->copy();

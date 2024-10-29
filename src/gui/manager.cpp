@@ -1787,6 +1787,7 @@ bool Manager::select(uint32_t id, Vec3 cam, Vec2 spos, Vec3 dir, Modifiers mods)
 		if (dragging) {
 			assert(!selected_instance_transform.expired());
 			transform_widget.cache = *selected_instance_transform.lock();
+			widgets.global_rot();
 			widgets.start_drag(transform_widget.cache.local_to_world() * Vec3{}, cam, spos, dir);
 		} else {
 			set_select(id);
@@ -1828,6 +1829,7 @@ void Manager::render_3d(View_3D& gui_cam) {
 			auto T = selected_instance_transform.lock()->local_to_world();
 			Vec3 pos = T * Vec3{};
 			float scale = std::min((gui_cam.pos() - pos).norm() / 5.5f, 10.0f);
+			widgets.global_rot();
 			widgets.render(view, pos, scale);
 		}
 	};

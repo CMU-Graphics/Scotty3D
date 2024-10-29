@@ -64,7 +64,9 @@ public:
 
 	void action_button(Widget_Type type, const std::string& name, bool wrap = true);
 
-	void change_rot(Mat4 xf, Vec3 pose, Vec3 x, Vec3 y, Vec3 z);
+	void set_rot(Mat4 rot);
+	void global_rot();
+	void gimbal_rot(Mat4 xf, Vec3 pose, Vec3 x, Vec3 y, Vec3 z);
 
 private:
 	void generate_lines(Vec3 pos);
@@ -78,6 +80,8 @@ private:
 	bool dragging = false, drag_plane = false;
 	bool start_dragging = false;
 	bool univ_scl = false;
+	Mat4 rot = Mat4::I;
+	
 	// render data
 
 	GL::Lines lines;
@@ -86,6 +90,7 @@ private:
 		Vec3 rot;
 		Spectrum color;
 		GL::Mesh mesh;
+		float scale = 1.0f;
 	};
 	Widget_Mesh x_mov, y_mov, z_mov;
 	Widget_Mesh xy_mov, yz_mov, xz_mov;
