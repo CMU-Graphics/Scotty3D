@@ -263,6 +263,20 @@ struct Mat4 {
 		       cols[0][0] * cols[1][1] * cols[2][2] * cols[3][3];
 	}
 
+	Mat4 remove_scale() const {
+		Mat4 r = *this;
+		r[0] = r[0].unit();
+		r[1] = r[1].unit();
+		r[2] = r[2].unit();
+		return r;
+	}
+
+	Mat4 remove_translate() const {
+		Mat4 r = *this;
+		r[3] = Vec4{0.0f, 0.0f, 0.0f, 1.0f};
+		return r;
+	}
+
 	union {
 		Vec4 cols[4];
 		float data[16] = {};

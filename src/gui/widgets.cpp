@@ -60,13 +60,27 @@ Widgets::Widgets() : lines(1.0f) {
 	                      Color::yellow, Util::cube_mesh(0.15f).to_gl()};
 }
 
-void Widgets::change_rot(Mat4 xf, Vec3 pose, Vec3 x, Vec3 y, Vec3 z) {
-	x_rot.rot = (xf * Mat4::angle_axis(pose.z, z) * Mat4::angle_axis(pose.y, y) * Mat4::rotate_to(x)).to_euler();
-	y_rot.rot = (xf * Mat4::angle_axis(pose.z, z) * Mat4::rotate_to(y)).to_euler();
+void Widgets::global_rot() {
+	x_rot.rot = Vec3{0.0f, 0.0f, -90.0f};
+	y_rot.rot = Vec3{0.0f, 0.0f, 0.0f};
+	z_rot.rot = Vec3{90.0f, 0.0f, 0.0f};
+	x_rot.scale = y_rot.scale = z_rot.scale = 1.0f;
+	rot = Mat4::I;
+}
+
+void Widgets::gimbal_rot(Mat4 xf, Vec3 pose, Vec3 x, Vec3 y, Vec3 z) {
+	xf = xf.remove_translate();
 	z_rot.rot = (xf * Mat4::rotate_to(z)).to_euler();
-	// x_rot.rot = (xf * Mat4::rotate_to(x)).to_euler();
-	// y_rot.rot = (xf * Mat4::rotate_to(y)).to_euler();
-	// z_rot.rot = (xf * Mat4::rotate_to(z)).to_euler();
+	xf = xf * Mat4::angle_axis(pose.z, z);
+	y_rot.rot = (xf * Mat4::rotate_to(y)).to_euler();
+	y_rot.scale = 0.9f;
+	xf = xf * Mat4::angle_axis(pose.y, y);
+	x_rot.rot = (xf * Mat4::rotate_to(x)).to_euler();
+	x_rot.scale = 0.8f;
+}
+
+void Widgets::set_rot(Mat4 rot_) {
+	rot = rot_.remove_translate().remove_scale();
 }
 
 void Widgets::generate_lines(Vec3 pos) {
@@ -107,7 +121,7 @@ void Widgets::render(const Mat4& view, Vec3 pos, float scl) {
 	auto render = [&](Widget_Mesh& w, Vec3 pos) {
 		Renderer::MeshOpt opt;
 		opt.id = w.id;
-		opt.modelview = view * Mat4::translate(pos) * Mat4::euler(w.rot) * Mat4::scale(scale);
+		opt.modelview = view * Mat4::translate(pos) * Mat4::euler(w.rot) * Mat4::scale(scale * w.scale);
 		opt.solid_color = true;
 		opt.color = w.color;
 		r.mesh(w.mesh, opt);
@@ -269,6 +283,7 @@ void Widgets::start_drag(Vec3 pos, Vec3 cam, Vec2 spos, Vec3 dir) {
 
 	const uint8_t axis_u = static_cast<uint8_t>(axis);
 	norm[axis_u] = 1.0f;
+	norm = rot * norm;
 
 	if (active == Widget_Type::rotate) {
 
@@ -322,6 +337,7 @@ void Widgets::drag_to(Vec3 pos, Vec3 cam, Vec2 spos, Vec3 dir, bool scale_invert
 
 	const uint8_t axis_u = static_cast<uint8_t>(axis);
 	norm[axis_u] = 1.0f;
+	norm = rot * norm;
 
 	if (active == Widget_Type::bevel || active == Widget_Type::extrude ||
 	    active == Widget_Type::inset) {
@@ -333,7 +349,7 @@ void Widgets::drag_to(Vec3 pos, Vec3 cam, Vec2 spos, Vec3 dir, bool scale_invert
 		if (!to_plane(pos, cam, dir, norm, hit)) return;
 
 		Vec3 ang = (hit - pos).unit();
-		float sgn = sign(cross(drag_start, ang)[axis_u]);
+		float sgn = sign(dot(cross(drag_start, ang), norm));
 		drag_end = Vec3{};
 		drag_end[axis_u] = sgn * Degrees(std::acos(dot(drag_start, ang)));
 		if (snap != 0.0f) {
