@@ -69,11 +69,13 @@ $$y_b \equiv \mathrm{normalize}(e_b)$$
 (In case the bone's extent is zero, $y_b$ is set to $(0,1,0)$.)
 
 To define $x_b$ we start with $\hat{x}$, the axis perpendicular to $y_b$ and aligned with the skeleton's $x$ axis:
-$$\hat{x} \equiv \mathrm{normalize}((1,0,0) - ((1,0,0) \cdot y_b) y_b)$$
+$$\hat{x} \equiv \mathrm{normalize}((1,0,0) - ((1,0,0) \cdot y_b) y_b)$$.
+Essentially, here we are computing $\hat{x}$ by removing (1,0,0)'s component that is colinear with $y_b$, and then normalize.
 (In case $y_b$ is parallel to the $x$ axis, $\hat{x}$ is set to $(0,0,1)$.)
 
 The $x_b$ axis is $\hat{x}$ rotated by $\theta_b \equiv$ `bone.roll` around $y_b$:
 $$x_b \equiv \cos(\theta_b) \hat{x} - \sin(\theta_b) (\hat{x} \times y_b)$$
+When $\theta_b=0$, $x_b$ is simply $\hat{x}$.
 
 And, finally, the $z_b$ axis is set perpendicular to $x_b$ and $y_b$ to form a right-handed coordinate system:
 $$z_b \equiv x_b \times y_b$$
@@ -109,12 +111,12 @@ Note that the skeleton does not yet influence the geometry of meshes in the scen
 - `Skeleton::gradient_in_current_pose`, which returns $\nabla f$.
 - `Skeleton::solve_ik`, takes downhill steps in bone pose space to minimize $f$.
 
-Now that we have a logical way to move joints around, we can implement Inverse Kinematics (IK), which will move the joints around in order to reach a target point. There are a few different ways we can do this, but for this assignment we'll implement an iterative method called **gradient descent** in order to find the minimum of a function. For a function $f : \mathbb{R}^n \to \mathbb{R}$, we'll have the update scheme:
+Now that we have a logical way to move joints around, we can implement Inverse Kinematics (IK), which will move the joints around in order to reach a target point. There are a few different ways we can do this, but for this assignment we'll implement an iterative method called **gradient descent** in order to find the minimum of a function, which corresponds to a configuration where the joint is very close to (or exactly at) the target location. For a function $f : \mathbb{R}^n \to \mathbb{R}$, we'll have the update scheme:
 
 $$q \gets q - \tau \nabla f$$
 
-Where $\tau$ is a small timestep and $q$ holds all the `Bone::pose` coordinates.
-Specifically, we'll be using gradient descent to find the minimum of a cost function which measures the total squared distance between a set of IK handles positions $h$ and their associated bones $i$:
+Where $\tau$ is a small step size and $q$ holds all the `Bone::pose` coordinates.
+Specifically, we'll be using gradient descent to find the minimum of a cost function which measures the total squared distance between a set of IK handle positions $h$ (the target) and their associated bones $i$:
 
 $$f(q) = \sum_{(h,i)} \frac{1}{2}|p_i(q) - h|^2 $$
 
@@ -122,8 +124,8 @@ Where $p_i(q) = I_{3\times 4} \times X_{\emptyset \gets i } \times [ e_i ~ 1 ]^T
 
 
 *Implementation Notes:*
-- If your updates become unstable, use a smaller $\tau$ (timestep).
-- For even faster and better results, you can also implement a variable timestep instead of a fixed one. (One strategy: do a binary search to find a step which produces the large decrease in $f$ along $-\nabla f$.)
+- If your updates become unstable, use a smaller $\tau$ (step size).
+- For even faster and better results, you can also implement a variable step size instead of a fixed one. (One strategy: do a binary search to find a step which produces the largest decrease in $f$ along $-\nabla f$. Another strategy (backtracking line search): starting from $\tau=1$, keep halving $\tau$ until $f(q-\tau \nabla f) < f(q)$ is satisfied. Both these two strategies will gaurantee your gradient descent reach the local minimum of $f$, where $|\nabla f|$ is sufficiently small.)
 - Gradient descent should never affect `Skeleton::base_offset`.
 - Remember what coordinate frame you're in. If you calculate the gradients in the wrong coordinate frame or use the axis of rotation in the wrong coordinate frame your answers will come out very wrong!
 - Gradient descent is hard to get perfectly right because (especially with adaptive stepping!) it is a method that _really wants_ to work. Sometimes it's hard to distinguish an inefficient implementation from an incorrect one.
@@ -142,7 +144,7 @@ Any IK handle where $b$ isn't in the kinematic chain will contribute nothing to 
 $$\frac{\partial}{\partial ry_b} \frac{1}{2}|p_i(q) - h|^2
  = (p_i(q) - h) \cdot \frac{\partial}{\partial ry_b} p_i(q) $$
 
-Then expand the definition of $p_i(q)$ (we omit the $I_{3\times 4}$ as it's purpose is to transform a Vec4 to a Vec3, but to make the final equation work out, there should be a $I_{3\times 4}$ to get a dot product between two Vec3s):
+Then expand the definition of $p_i(q)$ (we omit the $I_{3\times 4}$ as its purpose is to transform a Vec4 to a Vec3, but to make the final equation work out, there should be a $I_{3\times 4}$ to get a dot product between two Vec3s):
 
 $$= (p_i(q) - h) \cdot 
 \frac{\partial}{\partial ry_b} 
@@ -182,9 +184,9 @@ In other words, your code needs only to find partial derivative of a rotation re
   <img src="T2/inverse_kinematic_diagram.svg" style="height:600px">
 </p>
 
-Here's a useful bit of geometric reasoning (since it's a little difficult to compute the partial derivative in bone-local space): if you transform the axis of rotation and the base point of the bone into **skeleton-local** space, then you can use the fact that the derivative (w.r.t. $\theta$) of the rotation by $\theta$ around axis $x$ and center $r$ of point $p$ is a vector perpendicular $x$ with length $|r-p|$ (this is applicable to any axes):
+Here's a useful bit of geometric reasoning (since it's a little difficult to compute the partial derivative in bone-local space): if you transform the axis of rotation and the base point of the bone into **skeleton-local** space, then you can use the fact that the derivative (w.r.t. $\theta$) of the rotation by $\theta$ around axis $x$ and center $r$ of point $p$ is a vector perpendicular to $x$ with length $|r-p|$ (this is applicable to any axes):
 
-$$\frac{\partial}{\partial \theta} R_{\theta @ x} (p - r) + r = x \times (p - r)$$
+$$\frac{\partial}{\partial \theta} (R_{\theta @ x} (p - r) + r) = x \times (p - r)$$
 
 If we look at how to use this tidbit, we see that first, we'll need to transform our axis $x$ to skeleton-local space via the linear xform. Next, we'll need a point to act as our center of rotation for $r$ - this will be the base point of the current bone we are on, and we'll need to also transform this to skeleton-local space via the linear xform. Finally, we need some point $p$ to do this derivative on - since we are doing this in skeleton-local space, we simply want to use the point $p_i(q)$ that we initially wanted to take the derivative of.
 
