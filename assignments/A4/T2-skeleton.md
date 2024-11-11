@@ -184,9 +184,11 @@ In other words, your code needs only to find partial derivative of a rotation re
   <img src="T2/inverse_kinematic_diagram.svg" style="height:600px">
 </p>
 
-Here's a useful bit of geometric reasoning (since it's a little difficult to compute the partial derivative in bone-local space): if you transform the axis of rotation and the base point of the bone into **skeleton-local** space, then you can use the fact that the derivative (w.r.t. $\theta$) of the rotation by $\theta$ around axis $x$ and center $r$ of point $p$ is a vector perpendicular to $x$ with length $|r-p|$ (this is applicable to any axes):
+To compute $\frac{\partial}{\partial ry_ b} R_ {ry_ b @ y_ b}$, we first [construct](https://en.wikipedia.org/wiki/Rotation_matrix#Basic_3D_rotations) $R_ {ry_ b @ y_ b}=[\cos(ry_b), \ 0, \ \sin(ry_b); 0, \ 1, \ 0; -\sin(ry_b), \ 0, \ \cos(ry_b)]$, where the semicolons separate the rows. Then we now that $\frac{\partial}{\partial ry_ b} R_ {ry_ b @ y_ b} = [-\sin(ry_b), \ 0, \ \cos(ry_b); 0, \ 0, \ 0; -\cos(ry_b), \ 0, \ -\sin(ry_b)]$.
 
-$$\frac{\partial}{\partial \theta} (R_{\theta @ x} (p - r) + r) = x \times (p - r)$$
+Alternatively, here's a useful bit of geometric reasoning: if you transform the axis of rotation and the base point of the bone into **skeleton-local** space, then you can use the fact that the derivative (w.r.t. $ry_b$) of the rotation by $ry_b$ around axis $x$ and center $r$ of point $p$ is a vector perpendicular to $x$ with length $|r-p|$ (this is applicable to any axes):
+
+$$\frac{\partial}{\partial ry_ b} p_i(q) = x \times (p - r) = X_{\emptyset \gets b} \times [0 ~ 1 ~ 0 ~ 1] \times (p_i(q) - X_{\emptyset \gets b} \times [0 ~ 0 ~ 0 ~ 1])$$
 
 If we look at how to use this tidbit, we see that first, we'll need to transform our axis $x$ to skeleton-local space via the linear xform. Next, we'll need a point to act as our center of rotation for $r$ - this will be the base point of the current bone we are on, and we'll need to also transform this to skeleton-local space via the linear xform. Finally, we need some point $p$ to do this derivative on - since we are doing this in skeleton-local space, we simply want to use the point $p_i(q)$ that we initially wanted to take the derivative of.
 
