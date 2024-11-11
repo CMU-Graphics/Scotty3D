@@ -5,7 +5,7 @@ Now that we have a skeleton set up, we need to link the skeleton to the mesh in 
 Linear blend skinning means that each vertex will be transformed to a weighted sum of its positions under various bone transformations (transformations from bind space to posed space):
 $$v_i' = (\sum_j w_{ij} P_j B_j^{-1}) v_i$$
 
-Where $P_j$ is the bone-to-pose transformation for bone $j$, $B_j$ is the bone-to-bind transformation for bone $j$, and $w_{ij}$ is the weight given to bone $j$ for vertex $i$. In other words, if a vertex is only associated with only one bone, then it will move along that bone. Otherwise, the movement along multiple bones will be linearly blended. Note that if $\sum_j w_{ij} \ne 1$, the vertex will be scaled toward/away from the origin, so you should be cognizant of this when computing weights.
+Where $P_j$ is the bone-to-pose transformation for bone $j$, $B_j$ is the bone-to-bind transformation for bone $j$, and $w_{ij}$ is the weight given to bone $j$ for vertex $i$. In other words, if a vertex is associated with only one bone, it moves exclusively with that bone. If it is associated with multiple bones, its movement is a linear blend of the transformations from each bone. Note that if $\sum_j w_{ij} \ne 1$, the vertex will be scaled toward/away from the origin, so you should be cognizant of this when computing weights.
 
 ## Bone Weights
 
