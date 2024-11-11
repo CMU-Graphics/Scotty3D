@@ -5,7 +5,7 @@ Now that we have a skeleton set up, we need to link the skeleton to the mesh in 
 Linear blend skinning means that each vertex will be transformed to a weighted sum of its positions under various bone transformations (transformations from bind space to posed space):
 $$v_i' = (\sum_j w_{ij} P_j B_j^{-1}) v_i$$
 
-Where $P_j$ is the bone-to-pose transformation for bone $j$, $B_j$ is the bone-to-bind transformation for bone $j$, and $w_{ij}$ is the weight given to bone $j$ for vertex $i$. Note that if $\sum_j w_{ij} \ne 1$, the vertex will be scaled toward/away from the origin, so you should be cognizant of this when computing weights.
+Where $P_j$ is the bone-to-pose transformation for bone $j$, $B_j$ is the bone-to-bind transformation for bone $j$, and $w_{ij}$ is the weight given to bone $j$ for vertex $i$. In other words, if a vertex is only associated with only one bone, then it will move along that bone. Otherwise, the movement along multiple bones will be linearly blended. Note that if $\sum_j w_{ij} \ne 1$, the vertex will be scaled toward/away from the origin, so you should be cognizant of this when computing weights.
 
 ## Bone Weights
 
@@ -17,7 +17,7 @@ To run the equation above you need bone weights. These are stored in the `Halfed
 
 There are many ways of computing bone weights. Your implementation should use the following method, which uses the `Bone::radius` parameter of bones to control their relative weights.
 
-Let $d_{ij}$ be the distance from vertex $i$ to the closest point on bone $j$ (i.e. the segment from $0$ to $e_j$ in bone $j$'s local space). Do note that as long as you do all the computations in the same space, it doesn't matter whether you choose to do it in bone-local space or in skeleton-local space as there are no scaling transforms being applied.
+Let $d_{ij}$ be the distance from vertex $i$ to the closest point on bone $j$. Do note that as long as you do all the computations in the same space, it doesn't matter whether you choose to do it in bone-local space or in skeleton-local space as there are no scaling transforms being applied.
 
 <p align="center">
     <img src="T3/closest_on_line_segment.png" style="height:280px">
