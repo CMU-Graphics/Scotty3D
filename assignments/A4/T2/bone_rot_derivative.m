@@ -11,7 +11,7 @@ Ry = [cos(a) 0 sin(a) 0; 0 1 0 0; -sin(a) 0 cos(a) 0; 0 0 0 1]; % bone b's rotat
 Rz = [cos(b) -sin(b) 0 0; sin(b) cos(b) 0 0; 0 0 1 0; 0 0 0 1]; % bone b's rotation matrix around z axis
 T = [1 0 0 3; 0 1 0 1; 0 0 1 0; 0 0 0 1]; % the translation from bone b's local coordinate to skeleton local coordinate 
 
-p = T * Rz * Ry * Rx * Xbi * [e; 1]; % skeleton coordinate of the point
+p = T * Rz * Ry * Rx * Xbi * [e; 1]; % skeleton local coordinate of the point
 
 % derivative computated by differentiating the rotation matrix:
 dpda1 = T * Rz * [-sin(a) 0 cos(a) 0; 0 0 0 0; -cos(a) 0 -sin(a) 0; 0 0 0 0] * Rx * Xbi * [e; 1]
