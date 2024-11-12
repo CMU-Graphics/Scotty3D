@@ -184,13 +184,17 @@ In other words, your code needs only to find partial derivative of a rotation re
   <img src="T2/inverse_kinematic_diagram.svg" style="height:600px">
 </p>
 
-To compute $\frac{\partial}{\partial ry_ b} R_ {ry_ b @ y_ b}$, we first [construct](https://en.wikipedia.org/wiki/Rotation_matrix#Basic_3D_rotations) $R_ {ry_ b @ y_ b}=[\cos(ry_b), \ 0, \ \sin(ry_b); 0, \ 1, \ 0; -\sin(ry_b), \ 0, \ \cos(ry_b)]$, where the semicolons separate the rows. Then we now that $\frac{\partial}{\partial ry_ b} R_ {ry_ b @ y_ b} = [-\sin(ry_b), \ 0, \ \cos(ry_b); 0, \ 0, \ 0; -\cos(ry_b), \ 0, \ -\sin(ry_b)]$.
+To compute $\frac{\partial}{\partial ry_ b} R_ {ry_ b @ y_ b}$, we first [construct](https://en.wikipedia.org/wiki/Rotation_matrix#Basic_3D_rotations) $R_ {ry_ b @ y_ b}=[\cos(ry_b), \ 0, \ \sin(ry_b), \ 0; \ 0, \ 1, \ 0, \ 0; \ -\sin(ry_b), \ 0, \ \cos(ry_b), \ 0; \ 0, \ 0, \ 0, \ 1]$, where the semicolons separate the rows. Then we know that $\frac{\partial}{\partial ry_ b} R_ {ry_ b @ y_ b} = [-\sin(ry_b), \ 0, \ \cos(ry_b), \ 0; \ 0, \ 0, \ 0, \ 0; \ -\cos(ry_b), \ 0, \ -\sin(ry_b), \ 0; \ 0, \ 0, \ 0, \ 0]$. Similarly, $\frac{\partial}{\partial rx_ b} R_ {rx_ b @ x_ b} = [0, \ 0, \ 0, \ 0; \ 0, \ -\sin(rx_b), \ -\cos(rx_b), \ 0; \ 0, \ \cos(rx_b), \ -\sin(rx_b), \ 0; \ 0, \ 0, \ 0, \ 0]$, and $\frac{\partial}{\partial rz_ b} R_ {rz_ b @ z_ b} = [-\sin(rz_b), \ -\cos(rz_b), \ 0, \ 0; \ \cos(rz_b), \ -\sin(rz_b), \ 0, \ 0; \ 0 , \ 0, \  0, \ 0; \ 0, \ 0, \ 0, \ 0]$.
 
 Alternatively, here's a useful bit of geometric reasoning: if you transform the axis of rotation and the base point of the bone into **skeleton-local** space, then you can use the fact that the derivative (w.r.t. $ry_b$) of the rotation by $ry_b$ around axis $x$ and center $r$ of point $p$ is a vector perpendicular to $x$ with length $|r-p|$ (this is applicable to any axes):
 
-$$\frac{\partial}{\partial ry_ b} p_i(q) = x \times (p - r) = X_{\emptyset \gets b} \times [0 ~ 1 ~ 0 ~ 1] \times (p_i(q) - X_{\emptyset \gets b} \times [0 ~ 0 ~ 0 ~ 1])$$
+$$\frac{\partial}{\partial rx_ b} p_i(q) = x \times (p - r) = X_{\emptyset \gets b} \times [1 ~ 0 ~ 0 ~ 0] \times (p_i(q) - X_{\emptyset \gets b} \times [0 ~ 0 ~ 0 ~ 1])$$
 
-If we look at how to use this tidbit, we see that first, we'll need to transform our axis $x$ to skeleton-local space via the linear xform. Next, we'll need a point to act as our center of rotation for $r$ - this will be the base point of the current bone we are on, and we'll need to also transform this to skeleton-local space via the linear xform. Finally, we need some point $p$ to do this derivative on - since we are doing this in skeleton-local space, we simply want to use the point $p_i(q)$ that we initially wanted to take the derivative of.
+$$\frac{\partial}{\partial ry_ b} p_i(q) = x \times (p - r) = X_{\emptyset \gets b} \times R_{rx_b @ x_b}^{-1} \times [0 ~ 1 ~ 0 ~ 0] \times (p_i(q) - X_{\emptyset \gets b} \times [0 ~ 0 ~ 0 ~ 1])$$
+
+$$\frac{\partial}{\partial rz_ b} p_i(q) = x \times (p - r) = X_{\emptyset \gets b} \times R_{rx_b @ x_b}^{-1} \times R_{ry_b @ y_b}^{-1} \times [0 ~ 0 ~ 1 ~ 0] \times (p_i(q) - X_{\emptyset \gets b} \times [0 ~ 0 ~ 0 ~ 1])$$
+
+Here we slightly abused the notation $\times$ to represent both matrix-matrix, matrix-vector multiplications and vector cross product. If we look at how to use this tidbit, we see that first, we'll need to transform our axis $x$ to skeleton-local space via the linear xform. Next, we'll need a point to act as our center of rotation for $r$ - this will be the base point of the current bone we are on, and we'll need to also transform this to skeleton-local space via the linear xform. Finally, we need some point $p$ to do this derivative on - since we are doing this in skeleton-local space, we simply want to use the point $p_i(q)$ that we initially wanted to take the derivative of.
 
 Do note that you'll need to do this for each axis for every bone chain on every enabled handle.
 
