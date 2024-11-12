@@ -198,7 +198,7 @@ Here we slightly abused the notation $\times$ to represent both matrix-matrix, m
 
 Do note that you'll need to do this for each axis for every bone chain on every enabled handle.
 
-For a more in-depth derivation of the process of computing this derivative (and a look into other inverse kinematics algorithms), please check out [these slides](http://15462.courses.cs.cmu.edu/fall2023/lecture/lecture-15/slide_046). 
+For a more in-depth derivation of the process of computing this derivative (and a look into other inverse kinematics algorithms), please check out [these slides](http://15462.courses.cs.cmu.edu/fall2023/lecture/lecture-15/slide_046). See [here](https://github.com/CMU-Graphics/Scotty3D/blob/main/assignments/A4/T2/bone_rot_derivative.m) for a MATLAB implementation to compare these two ways of computing the derivative w.r.t. rotation angles.
 
 ### Using your IK!
 Once you have IK implemented, you should be able to create a series of joints, and get a particular joint to move to the desired final position you have selected.
