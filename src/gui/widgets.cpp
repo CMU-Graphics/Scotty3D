@@ -170,8 +170,8 @@ Transform Widgets::apply_action(const Transform& pose) {
 		result.translation = pose.translation + drag_end - drag_start;
 	} break;
 	case Widget_Type::rotate: {
-		Quat rot = Quat::axis_angle(vaxis, drag_end[axis_u]);
-		result.rotation = rot * pose.rotation;
+		Quat _rot_ = Quat::axis_angle(vaxis, drag_end[axis_u]);
+		result.rotation = _rot_ * pose.rotation;
 	} break;
 	case Widget_Type::scale: {
 		if (univ_scl) {
@@ -179,7 +179,7 @@ Transform Widgets::apply_action(const Transform& pose) {
 		} else {
 			result.scale = Vec3{1.0f};
 			result.scale[axis_u] = drag_end[axis_u];
-			Mat4 rot = pose.rotation.to_mat();
+			Mat4 _rot_ = pose.rotation.to_mat();
 			Mat4 trans =
 				Mat4::transpose(rot) * Mat4::scale(result.scale) * rot * Mat4::scale(pose.scale);
 			result.scale = Vec3(trans[0][0], trans[1][1], trans[2][2]);
