@@ -181,7 +181,7 @@ Transform Widgets::apply_action(const Transform& pose) {
 			result.scale[axis_u] = drag_end[axis_u];
 			Mat4 _rot_ = pose.rotation.to_mat();
 			Mat4 trans =
-				Mat4::transpose(rot) * Mat4::scale(result.scale) * rot * Mat4::scale(pose.scale);
+				Mat4::transpose(_rot_) * Mat4::scale(result.scale) * _rot_ * Mat4::scale(pose.scale);
 			result.scale = Vec3(trans[0][0], trans[1][1], trans[2][2]);
 		}
 	} break;
