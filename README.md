@@ -106,6 +106,14 @@ InstalledDir: ...
 
 Your machine is missing a package. Simply install it by running `apt-get install libasound2-dev`.
 
+> `X11/Xlib.h: No such file or directory`
+
+Your machine is missing a package. Simply install it by running `apt-get install libx11-dev`.
+
+> `gtk/gtk.h: No such file or directory`
+
+Your machine is missing a package. Simply install it by running `apt-get install libgtk-3-dev`.
+
 ### Windows
 > `library machine type 'x64' conflicts with target machine type 'x86'`
 
