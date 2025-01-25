@@ -280,7 +280,10 @@ void Manager::to_s3d() {
 
     std::vector<Indexed_Mesh::Vert> verts;
     std::vector<Indexed_Mesh::Index> idxs;
+	std::vector<Indexed_Mesh::Index> n_idxs;
+	std::vector<Indexed_Mesh::Index> uv_idxs;
     std::vector<Vec3> normals;
+	std::vector<Vec2> uvs = std::vector<Vec2>{};
 
     // read in lines from file, assign verts and idxs
 	char *old_model_path = nullptr;
@@ -307,9 +310,20 @@ void Manager::to_s3d() {
             data >> x >> y >> z;
             normals.emplace_back(Vec3(x, y, z));
         }
+		else if (type == "vt") {
+    		float u, v;
+    		data >> u >> v;
+    		uvs.emplace_back(Vec2 {u, v});
+    	}
         else if (type == "f") {
             std::string token;
+
 			std::vector<uint32_t> f_idxs;
+			std::vector<uint32_t> f_uv_idxs = std::vector<uint32_t>{};
+			std::vector<uint32_t> f_n_idxs;
+
+			bool contains_uvs = false;
+			bool warned_once = false;
             while (data >> token) { // v/vt/vn pair
 				std::vector<std::string> v_data;
 				std::stringstream v_data_ss(token);
@@ -319,27 +333,53 @@ void Manager::to_s3d() {
 					v_data.push_back(substr);
 				}
 				uint32_t vi = static_cast<uint32_t>(std::stoi(v_data[0]));
-				// int vt = 0;
-				// try { 
-				// 	vt = std::stoi(v_data[1]); 
-				// } catch (std::exception e) {
-				// 	vt = 0;
-				// }
+				uint32_t vt = 0;
+				try { 
+					vt = std::stoi(v_data[1]);
+					f_uv_idxs.emplace_back(vt - 1);
+					contains_uvs = true; 
+				} catch (std::exception e) {
+					if(!warned_once) {
+						warn("Error loading imported obj uvs : %s", e.what());
+					}
+					warned_once = true;
+				}
+
 				uint32_t vn = static_cast<uint32_t>(std::stoi(v_data[2]));
+				f_n_idxs.emplace_back(vn - 1);
 				verts[vi - 1].norm = normals[vn - 1];
+				if(contains_uvs && vt + 1 < uvs.size()) {
+					verts[vi - 1].uv = uvs[vt - 1];
+				}
+
 				f_idxs.emplace_back(vi - 1);
             }
+
 			for (size_t i = 1; i + 1 < f_idxs.size(); i++) {
 				idxs.emplace_back(static_cast<Indexed_Mesh::Index>(f_idxs[0]));
 				idxs.emplace_back(static_cast<Indexed_Mesh::Index>(f_idxs[i]));
 				idxs.emplace_back(static_cast<Indexed_Mesh::Index>(f_idxs[i + 1]));
+				n_idxs.emplace_back(static_cast<Indexed_Mesh::Index>(f_n_idxs[0]));
+				n_idxs.emplace_back(static_cast<Indexed_Mesh::Index>(f_n_idxs[i]));
+				n_idxs.emplace_back(static_cast<Indexed_Mesh::Index>(f_n_idxs[i + 1]));
+				if(contains_uvs) {
+					uv_idxs.emplace_back(static_cast<Indexed_Mesh::Index>(f_uv_idxs[0]));
+					uv_idxs.emplace_back(static_cast<Indexed_Mesh::Index>(f_uv_idxs[i]));
+					uv_idxs.emplace_back(static_cast<Indexed_Mesh::Index>(f_uv_idxs[i + 1]));
+				}
 			}
         }
     }
 
     // verts and idxs -> index mesh -> halfedge mesh
     Indexed_Mesh idx_mesh(std::move(verts), std::move(idxs));
-    Halfedge_Mesh he_mesh = Halfedge_Mesh::from_indexed_mesh(idx_mesh);
+	//if(uv_idxs.size() >= idxs.size()) {
+	Halfedge_Mesh he_mesh = Halfedge_Mesh::from_indexed_mesh_with_corner_data(idx_mesh, 
+								std::move(n_idxs), std::move(uv_idxs), std::move(normals),
+								std::move(uvs));
+	//} else {
+	//	he_mesh = Halfedge_Mesh::from_indexed_mesh(idx_mesh);
+	//}
 	Halfedge_Mesh skinned_mesh_data = Halfedge_Mesh::from_indexed_mesh(idx_mesh);
 	Skinned_Mesh skinned_mesh;
 	skinned_mesh.mesh = std::move(skinned_mesh_data);

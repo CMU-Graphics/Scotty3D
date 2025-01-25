@@ -730,7 +730,13 @@ struct hash< std::pair< A, B > > {
 };
 }
 
-Halfedge_Mesh Halfedge_Mesh::from_indexed_faces(std::vector< Vec3 > const &vertices_, std::vector< std::vector< Index > > const &faces_) {
+Halfedge_Mesh Halfedge_Mesh::from_indexed_faces(std::vector< Vec3 > const &vertices_, 
+		std::vector< std::vector< Index > > const &faces_,
+		std::vector< std::vector< Index > > const &corner_normal_idxs,
+		std::vector< std::vector< Index > > const &corner_uv_idxs,
+		std::vector<Vec3> const &corner_normals_,
+		std::vector<Vec2> const &corner_uvs_)
+{
 
 	Halfedge_Mesh mesh;
 
@@ -744,8 +750,13 @@ Halfedge_Mesh Halfedge_Mesh::from_indexed_faces(std::vector< Vec3 > const &verti
 
 	std::unordered_map< std::pair< Index, Index >, HalfedgeRef > halfedges; //for quick lookup of halfedges by from/to vertex index
 
+	uint32_t num_faces = static_cast<uint32_t>(faces_.size());
+	const bool add_corner_normals = corner_normal_idxs.size() >= num_faces;
+	const bool add_corner_uvs = corner_uv_idxs.size() >= num_faces;
 	//helper to add a face (and, later, boundary):
-	auto add_loop = [&](std::vector< Index > const &loop, bool boundary) {
+	auto add_loop = [&](std::vector< Index > const &loop, bool boundary,
+					    std::vector< Index> const &n_loop = std::vector<Index>{}, 
+						std::vector< Index> const &uv_loop = std::vector<Index>{}) {
 		assert(loop.size() >= 3);
 		
 		for (uint32_t j = 0; j < loop.size(); ++j) {
@@ -791,13 +802,19 @@ Halfedge_Mesh Halfedge_Mesh::from_indexed_faces(std::vector< Vec3 > const &verti
 
 			if (i != 0) prev->next = halfedge; //set previous halfedge's next pointer
 			prev = halfedge;
+
+			if(add_corner_normals && i < n_loop.size()) halfedge->corner_normal = corner_normals_[n_loop[i]];
+			if(add_corner_uvs && i < uv_loop.size()) halfedge->corner_uv = corner_uvs_[uv_loop[i]];
 		}
+
 		prev->next = face->halfedge; //set next pointer for last halfedge to first edge
 	};
 
 	//add all faces:
-	for (auto const &loop : faces_) {
-		add_loop(loop, false);
+	for (uint32_t i = 0; i < num_faces; i++) {
+		if(add_corner_normals && add_corner_uvs) add_loop(faces_[i], false, corner_normal_idxs[i], corner_uv_idxs[i]);
+		else if(add_corner_normals) add_loop(faces_[i], false, corner_normal_idxs[i]);
+		else add_loop(faces_[i], false);
 	}
 
 	// All halfedges created so far have valid next pointers, but some may be missing twins because they are at a boundary.
@@ -845,6 +862,49 @@ Halfedge_Mesh Halfedge_Mesh::from_indexed_faces(std::vector< Vec3 > const &verti
 		std::cerr << "Halfedge_Mesh from_indexed_faces failed validation: " << error->second << std::endl;
 		assert(0);
 	}
+
+	return mesh;
+}
+
+Halfedge_Mesh Halfedge_Mesh::from_indexed_mesh_with_corner_data(
+		const Indexed_Mesh& indexed_mesh, 
+		std::vector<Index> const &corner_normal_idxs_,  
+		std::vector<Index> const &corner_uv_idxs_,  
+		std::vector<Vec3> const &normals_,  
+		std::vector<Vec2> const &uvs_)
+{ 
+
+	//extract vertex positions and face indices from indexed_mesh:
+	std::vector< Vec3 > indexed_vertices;
+	indexed_vertices.reserve(indexed_mesh.vertices().size());
+	for (auto const &v : indexed_mesh.vertices()) {
+		indexed_vertices.emplace_back(v.pos);
+	}
+
+	std::vector< std::vector< Index > > indexed_faces;
+	assert(indexed_mesh.indices().size() % 3 == 0);
+	indexed_faces.reserve(indexed_mesh.indices().size() / 3);
+	for (uint32_t i = 0; i < indexed_mesh.indices().size(); i += 3) {
+		indexed_faces.emplace_back(indexed_mesh.indices().begin() + i, indexed_mesh.indices().begin() + i + 3);
+	}
+
+	std::vector< std::vector < Index > > indexed_normals;
+	assert(corner_normal_idxs_.size() % 3 == 0);
+	indexed_normals.reserve(corner_normal_idxs_.size() / 3);
+	for (uint32_t i = 0; i < corner_normal_idxs_.size(); i += 3) {
+		indexed_normals.emplace_back(corner_normal_idxs_.begin() + i, corner_normal_idxs_.begin() + i + 3);
+	}
+
+	std::vector< std::vector < Index > > indexed_uvs;
+	assert(corner_uv_idxs_.size() % 3 == 0);
+	indexed_uvs.reserve(corner_uv_idxs_.size() / 3);
+	for (uint32_t i = 0; i < corner_uv_idxs_.size(); i += 3) {
+		indexed_uvs.emplace_back(corner_uv_idxs_.begin() + i, corner_uv_idxs_.begin() + i + 3);
+	}
+
+	//build halfedge mesh with the extracted vertex/face data:
+	Halfedge_Mesh mesh = Halfedge_Mesh::from_indexed_faces(indexed_vertices, 
+			indexed_faces, indexed_normals, indexed_uvs, normals_, uvs_);
 
 	return mesh;
 }

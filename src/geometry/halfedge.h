@@ -424,7 +424,19 @@ public:
 	// - mesh must correspond to a valid halfedge mesh (see 'validate()')
 	// - vertices and faces will match the order they appear in vertices[] and faces[], respectively
 	// - halfedges will match the order they are mentioned in faces[]
-	static Halfedge_Mesh from_indexed_faces(std::vector< Vec3 > const &vertices, std::vector< std::vector< Index > > const &faces);
+	//static Halfedge_Mesh from_indexed_faces(std::vector< Vec3 > const &vertices, std::vector< std::vector< Index > > const &faces);
+	static Halfedge_Mesh from_indexed_faces(std::vector< Vec3 > const &vertices, 
+		std::vector< std::vector< Index > > const &faces, 
+		std::vector< std::vector< Index > > const &corner_normal_idxs = std::vector< std::vector<Index>>{}, 
+		std::vector< std::vector< Index > > const &corner_uv_idxs = std::vector< std::vector<Index>>{}, 
+		std::vector<Vec3> const &normals = std::vector<Vec3>{}, 
+		std::vector<Vec2> const &uvs = std::vector<Vec2>{});
+	static Halfedge_Mesh from_indexed_mesh_with_corner_data(
+		const Indexed_Mesh& mesh,
+		std::vector<Index> const &corner_normal_idxs = std::vector<Index>{}, 
+		std::vector<Index> const &corner_uv_idxs = std::vector<Index>{}, 
+		std::vector<Vec3> const &normals = std::vector<Vec3>{}, 
+		std::vector<Vec2> const &uvs = std::vector<Vec2>{});
 	static Halfedge_Mesh from_indexed_mesh(const Indexed_Mesh& mesh);
 
 	//generate a cube:
