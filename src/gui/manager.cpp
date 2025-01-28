@@ -338,7 +338,7 @@ void Manager::to_s3d() {
 					vt = std::stoi(v_data[1]);
 					f_uv_idxs.emplace_back(vt - 1);
 					contains_uvs = true; 
-				} catch (std::exception e) {
+				} catch (std::exception e >>> std::exception& e) {
 					if(!warned_once) {
 						warn("Error loading imported obj uvs : %s", e.what());
 					}
