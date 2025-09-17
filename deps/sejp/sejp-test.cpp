@@ -55,6 +55,8 @@ int main(int argc, char **argv) {
 	dump(sejp::parse("\"hello world\""));
 	dump(sejp::parse("0"));
 	dump(sejp::parse("3.1"));
+	dump(sejp::parse("true"));
+	dump(sejp::parse("false"));
 	//dump(sejp::parse(".1")); //<-- not a valid number
 	dump(sejp::parse("-3.1e4"));
 	dump(sejp::parse("1e3"));

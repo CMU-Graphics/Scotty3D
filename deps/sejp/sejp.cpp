@@ -113,9 +113,12 @@ value parse(std::istream &from) {
 		}
 
 		double val;
-		#if defined(__APPLE__) || defined(__linux__)
-		//(until clang gets its charconv right)
-		val = std::stod(acc);
+		#ifdef __APPLE__
+		//parse in the default locale
+		// -- based on https://www.reddit.com/r/cpp/comments/2e68nd/stdstod_is_locale_dependant_but_the_docs_does_not/
+		std::istringstream iss(acc);
+		iss.imbue(std::locale("C"));
+		iss >> val;
 		#else
 		const char *begin = acc.data();
 		std::from_chars(begin, begin + acc.size(), val);
@@ -322,7 +325,7 @@ std::optional< double > const &value::as_number() const {
 
 std::optional< bool > const &value::as_bool() const {
 	static std::optional< bool > const true_value(true);
-	static std::optional< bool > const false_value(true);
+	static std::optional< bool > const false_value(false);
 	static std::optional< bool > const empty;
 	if ((index & TypeBits) == True) {
 		return true_value;
