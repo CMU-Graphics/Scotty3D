@@ -38,4 +38,4 @@ namespace sejp {
 	value load(std::string const &filename);
 	value parse(std::string const &string);
 
-} //namespace sljp
+} //namespace sejp
