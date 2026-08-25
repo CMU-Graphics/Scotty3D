@@ -9,6 +9,7 @@
 #include <map>
 #include <optional>
 #include <memory>
+#include <cstdint>
 
 namespace sejp {
 	//sejp::parsed represents the results of scanning a JSON file:

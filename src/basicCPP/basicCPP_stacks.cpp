@@ -27,6 +27,6 @@ struct Object {
  * The graph should remain unchanged.
  */
 Object *find_node(Object *root, int goal_index) {
-    Object obj = new Object;
+    Object *obj = new Object;
     return obj;
 }

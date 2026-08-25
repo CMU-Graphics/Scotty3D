@@ -6,6 +6,7 @@
  */
 #include <string>
 #include <vector>
+#include <cstdint>
 
 struct ApertureShape {
 	uint32_t id; // unique id for this aperture shape (used for loading/saving!)

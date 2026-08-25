@@ -5,6 +5,7 @@
  * fill in this function so that the vector is rotated
  */
 Vec4 rotate(Mat4 rot_matrix, Vec4 u) {
+    return {};
 }
 
 /**
@@ -19,6 +20,7 @@ Vec4 rotate(Mat4 rot_matrix, Vec4 u) {
  * Hint: wikipedia is useful!
  */
 float parallelogram_area(Vec2 side1, Vec2 side2) {
+    return 0.0f;
 }
 
 /**
@@ -40,6 +42,7 @@ float parallelogram_area(Vec2 side1, Vec2 side2) {
  * 
  */
 float parallelopiped_volume(Vec3 side1, Vec3 side2, Vec3 side3) {
+    return 0.0f;
 }
 
 /**
@@ -54,6 +57,7 @@ float parallelopiped_volume(Vec3 side1, Vec3 side2, Vec3 side3) {
  * (and the helper library function you created above)
  */
 float get_angles(Vec2 u, Vec2 v) {
+    return 0.0f;
 }
 
 
