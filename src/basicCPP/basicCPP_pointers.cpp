@@ -44,7 +44,7 @@ Node *insert_in_list(Node *start, uint32_t new_val, uint32_t place_index) {
 
 /**
  * Write a new function that deletes a node at place_index
- * return false if deletion is not possible, else return true
+ * return a nullptr if deletion is not possible, else return the starting node
  */
 Node *delete_from_list(Node *start, uint32_t delete_index) {
     Node *out = new Node;
