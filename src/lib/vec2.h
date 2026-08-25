@@ -193,6 +193,11 @@ inline float dot(Vec2 l, Vec2 r) {
 	return l.x * r.x + l.y * r.y;
 }
 
+/// 2D cross product
+inline float cross2D(Vec2 l, Vec2 r) {
+	/// add your 2D cross product here!
+}
+
 inline std::string to_string(Vec2 const &v) {
 	return "(" + std::to_string(v.x) + ", " + std::to_string(v.y) + ")";
 }

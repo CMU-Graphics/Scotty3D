@@ -65,7 +65,7 @@ $$\sin(\theta_i) = \frac{\eta_t\sin(\theta_t)}{\eta_i}\overset{?}{>} 1$$
 
 ### Distribution Function for Transmitted Light
 
-Although we described the BRDF for perfect specular reflection in class, we did not discuss the distribution function for transmitted light. Unlike reflection, refraction "spreads" or "condenses" a differential beam of light. Hence, a refraction event should change the radiance along a ray.
+We discussed the distribution function for transmitted light in class [here](http://15362.courses.cs.cmu.edu/fall2024/lecture/lecture-14/slide_039). Unlike reflection, refraction "spreads" or "condenses" a differential beam of light. Hence, a refraction event should change the radiance along a ray.
 
 After using Snell's Law to find the direction of refracted rays, compute the BSDF attenuation using the distribution function found in Pharr, Jakob, and and Humphries's book [Physically Based Rendering](http://www.pbr-book.org/3ed-2018/Reflection_Models/Specular_Reflection_and_Transmission.html). Since this material is pure refraction, we won't need to weight the attenuation on the Fresnel coefficient. However, do note that the derivations in the book attempts to find $\theta_t$ given $\theta_i$, which is the contrary of our derivations. When applying the equations and figures from the book, you should swap the subscripts $i$ and $t$ accordingly.
 

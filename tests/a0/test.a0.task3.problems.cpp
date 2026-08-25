@@ -12,7 +12,7 @@
 // Hint: there are 3 parts that need to be fixed.
 
 /*
-Test test_a0_task2_problems_print("a0.task2.problems.print", []() {
+Test test_a0_task3_problems_print("a0.task3.problems.print", []() {
     string str = "str";
     int integer = 0;
     float flt = 0.1f;
@@ -32,7 +32,7 @@ Test test_a0_task2_problems_print("a0.task2.problems.print", []() {
 //       zeroes to appear in our modified vector. Fix the problem to get 
 //       the correct filtered vector.
 
-Test test_a0_task2_problems_numerical("a0.task2.problems.numerical", []() {
+Test test_a0_task3_problems_numerical("a0.task3.problems.numerical", []() {
     std::vector<std::vector<int>> target = {{1, 2, 3}, {4, 5, 6}, {7, 8, 9}};
     std::vector<int> modifiers = {9, 8, 7, 15, 16, 17, 20, 25, 28};
 
@@ -64,7 +64,7 @@ Test test_a0_task2_problems_numerical("a0.task2.problems.numerical", []() {
 //       retrieve the correct last element of the vector.
 // Hint: Befriend C++ documentation websites
 
-Test test_a0_task2_problems_vector("a0.task2.problems.vector", []() {
+Test test_a0_task3_problems_vector("a0.task3.problems.vector", []() {
     std::vector<int> one_to_ten;
 
     for (int i = 0; i < 10; i++) {
@@ -87,7 +87,7 @@ Test test_a0_task2_problems_vector("a0.task2.problems.vector", []() {
 // TODO: We want to count how many times a number appears in all three vectors.
 //       Find the reason why the function below reports a count too high and fix it.
 
-Test test_a0_task2_problems_boolean("a0.task2.problems.boolean", []() {
+Test test_a0_task3_problems_boolean("a0.task3.problems.boolean", []() {
     std::vector<int> vec1, vec2, vec3;
 
     for (int i = 0; i < 20; i = i+1) vec1.emplace_back(i);

@@ -64,7 +64,8 @@ if (maek.OS === "windows") {
 	maek.options.CPPFlags.push(
 		"-O2", //optimize
 		`-I${NEST_LIBS}/SDL2/include/SDL2`, `-D_THREAD_SAFE`, //SDL include flags
-		"-Isrc", "-Ideps"  //include directories
+		"-Isrc", "-Ideps", //include directories
+		"-Wno-nontrivial-memcall"
 	);
 }
 
@@ -151,6 +152,12 @@ const scene_objects = [
 	maek.CPP("src/scene/camera.cpp"),
 ];
 
+const basicCPP_objects = [
+	maek.CPP("src/basicCPP/basicCPP_iterators.cpp"),
+	maek.CPP("src/basicCPP/basicCPP_math.cpp"),
+	maek.CPP("src/basicCPP/basicCPP_pointers.cpp"),
+	maek.CPP("src/basicCPP/basicCPP_stacks.cpp"),
+];
 //Some of the dependencies have special build needs:
 
 const sf_libs_options = {};
@@ -250,6 +257,7 @@ const Scotty3D_objects = [
 	...scene_objects,
 	...deps_objects,
 	...test_objects,
+	...basicCPP_objects,
 	maek.CPP("src/app.cpp"),
 	maek.CPP("src/main.cpp"),
 	maek.CPP("src/test.cpp")

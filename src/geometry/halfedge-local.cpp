@@ -42,6 +42,9 @@
  *
  * We provide this method as an example of how to make new halfedge mesh geometry.
  */
+
+
+
 std::optional<Halfedge_Mesh::FaceRef> Halfedge_Mesh::add_face(uint32_t sides, float radius) {
 	//faces with fewer than three sides are invalid, so abort the operation:
 	if (sides < 3) return std::nullopt;
@@ -205,6 +208,7 @@ std::optional<Halfedge_Mesh::VertexRef> Halfedge_Mesh::bisect_edge(EdgeRef e) {
 	// Phase 5: Return the correct iterator
 	return vm;
 }
+
 
 
 /*
