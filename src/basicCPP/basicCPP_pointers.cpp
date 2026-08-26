@@ -45,6 +45,8 @@ Node *insert_in_list(Node *start, uint32_t new_val, uint32_t place_index) {
 /**
  * Write a new function that deletes a node at place_index
  * return a nullptr if deletion is not possible, else return the starting node
+ * 
+ * We will not give you empty lists, so start is *never* nullptr.
  */
 Node *delete_from_list(Node *start, uint32_t delete_index) {
     Node *out = new Node;

@@ -5,7 +5,7 @@
 #include <numeric>
 #include <vector>
 
-// A0T2: Problem 1
+// A0T3: Problem 1
 // TODO: Uncomment the function below by removing the surrounding /* and */, and run in test mode.
 //       You will encounter compilation errors. Fix them, make sure all 
 //       compilation errors go away, and move onto the next problem.
@@ -25,7 +25,7 @@ Test test_a0_task3_problems_print("a0.task3.problems.print", []() {
 });
 */
 
-// A0T2: Problem 2
+// A0T3: Problem 2
 // TODO: We want to pass our target 2D vector through a filter called helper, 
 //       using the modifiers vector in the process. But for some reason, we 
 //       are seeing many more rejections from the filter run, causing more 
@@ -58,7 +58,7 @@ Test test_a0_task3_problems_numerical("a0.task3.problems.numerical", []() {
         throw Test::error("The vector does not match the expected result.");
 });
 
-// A0T2: Problem 3
+// A0T3: Problem 3
 // TODO: Vectors are variable length arrays of C++. What could possibly be going
 //       wrong with this simple code? Fix the code while using iterators to 
 //       retrieve the correct last element of the vector.
@@ -83,7 +83,7 @@ Test test_a0_task3_problems_vector("a0.task3.problems.vector", []() {
 	}
 });
 
-// A0T2: Problem 4
+// A0T3: Problem 4
 // TODO: We want to count how many times a number appears in all three vectors.
 //       Find the reason why the function below reports a count too high and fix it.
 
