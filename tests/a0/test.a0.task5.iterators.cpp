@@ -41,7 +41,7 @@ static void print_depths(const char* label, const std::vector<int>& v) {
     printf("]\n");
 }
 
-Test test_a0_basiccpp_iterators_sort_common_unsorted("a0.task5.basiccpp.iterators.sort.common.unsorted", []() {
+Test test_a0_iterators_sort_common_unsorted("a0.task5.iterators.sort.common.unsorted", []() {
     std::vector<Triangle> prims = make_prims({5, 3, 9, 1, 7});
 
     sort_prims(prims);
@@ -56,7 +56,7 @@ Test test_a0_basiccpp_iterators_sort_common_unsorted("a0.task5.basiccpp.iterator
     }
 });
 
-Test test_a0_basiccpp_iterators_sort_common_sorted("a0.task5.basiccpp.iterators.sort.common.sorted", []() {
+Test test_a0_iterators_sort_common_sorted("a0.task5.iterators.sort.common.sorted", []() {
     std::vector<Triangle> prims = make_prims({-2, 0, 4, 11, 42});
 
     sort_prims(prims);

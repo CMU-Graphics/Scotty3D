@@ -117,7 +117,7 @@ Test test_a0_task5_pointers_insert_common_front("a0.task5.pointers.insert.common
 
 // delete from the middle
 // 0-1-2-3-4 without index 2 is 0-1-3-4.
-Test test_a0_basiccpp_pointers_delete_common_middle("a0.basiccpp.pointers.delete.common.middle", []() {
+Test test_a0_task5_pointers_delete_common_middle("a0.task5.pointers.delete.common.middle", []() {
     Node *head = delete_from_list(build_list({0, 1, 2, 3, 4}), 2);
  
     std::vector<int> got = to_vector(head);
@@ -132,7 +132,7 @@ Test test_a0_basiccpp_pointers_delete_common_middle("a0.basiccpp.pointers.delete
 });
 
 // delete front
-Test test_a0_basiccpp_pointers_delete_common_front("a0.basiccpp.pointers.delete.common.front", []() {
+Test test_a0_task5_pointers_delete_common_front("a0.task5.pointers.delete.common.front", []() {
     Node *head = delete_from_list(build_list({0, 1, 2, 3, 4}), 0);
  
     std::vector<int> got = to_vector(head);

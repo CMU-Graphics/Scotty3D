@@ -60,7 +60,7 @@ static std::vector<int> snapshot(Object *root) {
 //        /   \
 //       1     2
 //
-Test test_a0_basiccpp_stacks_find_common_shallow("a0.task5.basiccpp.stacks.find.common.shallow", []() {
+Test test_a0_stacks_find_common_shallow("a0.task5.stacks.find.common.shallow", []() {
     Object root = make_obj(0), a = make_obj(1), b = make_obj(2);
     root.child_objs = {&a, &b};
 
@@ -75,7 +75,7 @@ Test test_a0_basiccpp_stacks_find_common_shallow("a0.task5.basiccpp.stacks.find.
 //                \
 //                 6
 //
-Test test_a0_basiccpp_stacks_find_common_deep("a0.task5.basiccpp.stacks.find.common.deep", []() {
+Test test_a0_stacks_find_common_deep("a0.task5.stacks.find.common.deep", []() {
     Object root = make_obj(0), n1 = make_obj(1), n2 = make_obj(2), n3 = make_obj(3),
            n4 = make_obj(4), n5 = make_obj(5), n6 = make_obj(6);
 

@@ -12,7 +12,7 @@ float get_angles(Vec2 u, Vec2 v);
 
 // ============================ rotate() ============================
 
-Test test_a0_basiccpp_math_rotate_common_z90("a0.task5.basiccpp.math.rotate.common.z90", []() {
+Test test_a0_math_rotate_common_z90("a0.task5.math.rotate.common.z90", []() {
     Mat4 rot_z90 = Mat4(Vec4(0.0f, 1.0f, 0.0f, 0.0f),
                         Vec4(-1.0f, 0.0f, 0.0f, 0.0f),
                         Vec4(0.0f, 0.0f, 1.0f, 0.0f),
@@ -28,7 +28,7 @@ Test test_a0_basiccpp_math_rotate_common_z90("a0.task5.basiccpp.math.rotate.comm
     }
 });
 
-Test test_a0_basiccpp_math_rotate_common_x90("a0.task5.basiccpp.math.rotate.common.x90", []() {
+Test test_a0_math_rotate_common_x90("a0.task5.math.rotate.common.x90", []() {
     Mat4 rot_x90 = Mat4(Vec4(1.0f, 0.0f, 0.0f, 0.0f),
                         Vec4(0.0f, 0.0f, 1.0f, 0.0f),
                         Vec4(0.0f, -1.0f, 0.0f, 0.0f),
@@ -48,7 +48,7 @@ Test test_a0_basiccpp_math_rotate_common_x90("a0.task5.basiccpp.math.rotate.comm
 
 // A0: parallelogram_area -- Common Case 1
 // unit square
-Test test_a0_basiccpp_math_pgram_common_unit("a0.task5.basiccpp.math.parallelogram.common.unit", []() {
+Test test_a0_math_pgram_common_unit("a0.task5.math.parallelogram.common.unit", []() {
     float got = parallelogram_area(Vec2(1.0f, 0.0f), Vec2(0.0f, 1.0f));
     float expected = 1.0f;
 
@@ -59,7 +59,7 @@ Test test_a0_basiccpp_math_pgram_common_unit("a0.task5.basiccpp.math.parallelogr
 });
 
 // slanted parallelogram
-Test test_a0_basiccpp_math_pgram_common_slanted("a0.task5.basiccpp.math.parallelogram.common.slanted", []() {
+Test test_a0_math_pgram_common_slanted("a0.task5.math.parallelogram.common.slanted", []() {
     float got = parallelogram_area(Vec2(3.0f, 1.0f), Vec2(1.0f, 4.0f));
     float expected = 11.0f;
 
@@ -72,7 +72,7 @@ Test test_a0_basiccpp_math_pgram_common_slanted("a0.task5.basiccpp.math.parallel
 // ===================== parallelopiped_volume() =====================
 
 // unit cube
-Test test_a0_basiccpp_math_ppiped_common_unit("a0.task5.basiccpp.math.parallelopiped.common.unit", []() {
+Test test_a0_math_ppiped_common_unit("a0.task5.math.parallelopiped.common.unit", []() {
     float got = parallelopiped_volume(Vec3(1.0f, 0.0f, 0.0f), Vec3(0.0f, 1.0f, 0.0f),
                                       Vec3(0.0f, 0.0f, 1.0f));
     float expected = 1.0f;
@@ -84,7 +84,7 @@ Test test_a0_basiccpp_math_ppiped_common_unit("a0.task5.basiccpp.math.parallelop
 });
 
 // sheared box
-Test test_a0_basiccpp_math_ppiped_common_sheared("a0.task5.basiccpp.math.parallelopiped.common.sheared", []() {
+Test test_a0_math_ppiped_common_sheared("a0.task5.math.parallelopiped.common.sheared", []() {
     float got = parallelopiped_volume(Vec3(2.0f, 0.0f, 0.0f), Vec3(1.0f, 3.0f, 0.0f),
                                       Vec3(0.0f, 0.0f, 4.0f));
     float expected = 24.0f;
@@ -97,7 +97,7 @@ Test test_a0_basiccpp_math_ppiped_common_sheared("a0.task5.basiccpp.math.paralle
 
 // ============================ get_angles() ============================
 
-Test test_a0_basiccpp_math_angles_common_perpendicular("a0.task5.basiccpp.math.get_angles.common.perpendicular", []() {
+Test test_a0_math_angles_common_perpendicular("a0.task5.math.get_angles.common.perpendicular", []() {
     float got = get_angles(Vec2(1.0f, 0.0f), Vec2(0.0f, 1.0f));
     float expected = PI_F / 2.0f;
 
@@ -107,7 +107,7 @@ Test test_a0_basiccpp_math_angles_common_perpendicular("a0.task5.basiccpp.math.g
     }
 });
 
-Test test_a0_basiccpp_math_angles_common_diagonal("a0.task5.basiccpp.math.get_angles.common.diagonal", []() {
+Test test_a0_math_angles_common_diagonal("a0.task5.math.get_angles.common.diagonal", []() {
     float got = get_angles(Vec2(4.0f, 0.0f), Vec2(1.0f, 1.0f));
     float expected = PI_F / 4.0f;
 
