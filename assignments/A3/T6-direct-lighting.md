@@ -66,9 +66,9 @@ Here are `A3-cbox-spheres.js3d` and `A3-cbox-lambertian-spheres.js3d` without (l
 
 ---
 
-## Extra Credit
+<!-- ## Extra Credit
 
 - Upgrade the mixture sampling procedure to use proper multiple importance sampling. This will involve always generating both a light sample and BSDF sample, then weighting their direct light contributions by the balance or power heuristic. You may also want to re-combine the direct and indirect sampling procedures. Refer to [Physically Based Rendering](http://www.pbr-book.org/3ed-2018/) chapter 14.3 for more information.
 - Currently, computing the area light PDF involves checking whether the sampled ray intersects each individual emissive triangle. Improve the brute-force approach by building and querying a BVH containing only emissive triangles. You will need a traversal algorithm that returns all triangles intersected by a ray, not just the closest. 
 - (Advanced) Implement a more powerful integration scheme such as bidirectional path tracing or photon mapping. Refer to [Physically Based Rendering](http://www.pbr-book.org/3ed-2018/) chapter 16.
-- (Advanced) Implement [specular next event estimation](http://rgl.epfl.ch/publications/Zeltner2020Specular) for the mirror and glass materials.
+- (Advanced) Implement [specular next event estimation](http://rgl.epfl.ch/publications/Zeltner2020Specular) for the mirror and glass materials. -->

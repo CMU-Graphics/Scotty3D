@@ -45,7 +45,7 @@ We've already supplied some camera ray logging code, enabled by setting `LOG_CAM
 ![logged_rays](images/ray_log.png)
 
 ---
-
+<!-- 
 ## Extra Credit
 
 ### Defous Blur (2 points) and Bokeh (1 point)
@@ -78,4 +78,4 @@ Write your own pixel sampler (replacing `Rect`) that generates samples with a mo
   - N-Rooks (Latin Hypercube) sampling (1 points)
   - Sobol sequence sampling (1 points)
   - Halton sequence sampling (2 points)
-  - Hammersley sequence sampling (2 points)
+  - Hammersley sequence sampling (2 points) -->

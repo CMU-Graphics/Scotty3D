@@ -59,7 +59,7 @@ Thankfully, runtime will scale (roughly) linearly with the number of samples. Be
 
 ---
 
-## Extra Credit
+<!-- ## Extra Credit
 
 - Instead of setting a maximum ray depth, implement un-biased Russian roulette for path termination. Though Russian roulette will increase variance, use of a good heuristic (such as overall path throughput) should improve performance enough to show better convergence in an equal-time comparison. Refer to [Physically Based Rendering](http://www.pbr-book.org/3ed-2018/) Chapter 13.7. (You may need to add a `throughput` member to `Ray` to support this change.)
-- (Advanced) Implement homogeneous volumetric scattering. Refer to [Physically Based Rendering](http://www.pbr-book.org/3ed-2018/) chapters 11 and 15.
+- (Advanced) Implement homogeneous volumetric scattering. Refer to [Physically Based Rendering](http://www.pbr-book.org/3ed-2018/) chapters 11 and 15. -->

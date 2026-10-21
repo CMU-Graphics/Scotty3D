@@ -117,5 +117,5 @@ When you are done, you will be able to render images with specular materials, li
 
 ---
 
-## Extra Credit
-- Add a more advanced parameterized BSDF, such as Blinn-Phong, GGX, or Disney. More information about evaluating and sampling each of these distributions can be found in [Physically Based Rendering](http://www.pbr-book.org/3ed-2018/) chapters 8 & 9.
+<!-- ## Extra Credit
+- Add a more advanced parameterized BSDF, such as Blinn-Phong, GGX, or Disney. More information about evaluating and sampling each of these distributions can be found in [Physically Based Rendering](http://www.pbr-book.org/3ed-2018/) chapters 8 & 9. -->
